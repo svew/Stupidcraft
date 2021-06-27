@@ -1,128 +1,73 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{6604F17A-552E-405D-B327-37C8B1648C86}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
-    <RootNamespace>TrueCraft.Launcher</RootNamespace>
-    <AssemblyName>TrueCraft.Launcher</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <Deterministic>false</Deterministic>
   </PropertyGroup>
+
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug</OutputPath>
     <DefineConstants>DEBUG;</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <ConsolePause>false</ConsolePause>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>bin\Release</OutputPath>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <ConsolePause>false</ConsolePause>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
+
+<!-- TODO Update to up-to-date Nuget Packages
   <ItemGroup>
-    <Reference Include="System" />
+    <PackageReference Include="Xwt" Version="0.2.244" />
+    <PackageReference Include="Xwt.Gtk" Version="0.2.244" />
+  </ItemGroup>
+-->
+
+  <ItemGroup>
+    <PackageReference Include="Ionic.Zip" Version="1.9.1.8" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\lib\Xwt.Gtk.dll">
+      <Link>Xwt.Gtk.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <Reference Include="Xwt">
       <HintPath>..\lib\Xwt.dll</HintPath>
     </Reference>
-    <Reference Include="Ionic.Zip.Reduced">
-      <HintPath>..\lib\Ionic.Zip.Reduced.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Program.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="LauncherWindow.cs" />
-    <Compile Include="Views\LoginView.cs" />
-    <Compile Include="Views\MainMenuView.cs" />
-    <Compile Include="Views\MultiplayerView.cs" />
-    <Compile Include="Views\OptionView.cs" />
-    <Compile Include="Views\SingleplayerView.cs" />
-    <Compile Include="Singleplayer\Worlds.cs" />
-    <Compile Include="Singleplayer\SingleplayerServer.cs" />
-  </ItemGroup>
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <ItemGroup>
-    <Content Include="..\lib\Xwt.Gtk.dll">
-      <Link>Xwt.Gtk.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\default-pack.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Content\default-pack.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <EmbeddedResource Include="Content\truecraft_logo.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\TrueCraft.API\TrueCraft.API.csproj">
-      <Project>{FEE55B54-91B0-4325-A2C3-D576C0B7A81F}</Project>
-      <Name>TrueCraft.API</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\TrueCraft\TrueCraft.csproj">
-      <Project>{C1C47EF5-2D8A-4231-AAA8-F651F52F480E}</Project>
-      <Name>TrueCraft</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\TrueCraft.Core\TrueCraft.Core.csproj">
-      <Project>{FA4BE9A3-DBF0-4380-BA2B-FFAA71C4706D}</Project>
-      <Name>TrueCraft.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\externals\fNbt\fNbt\fNbt.csproj">
-      <Project>{4488498D-976D-4DA3-BF72-109531AF0488}</Project>
-      <Name>fNbt</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\TrueCraft.Client\TrueCraft.Client.csproj">
-      <Project>{A6516869-A2FB-4E31-85C8-2285490CB32C}</Project>
-      <Name>TrueCraft.Client</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup />
-  <ItemGroup>
-    <None Include="truecraft">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="..\lib\Xwt.Gtk3.dll">
-      <Link>Xwt.Gtk3.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="..\lib\Xwt.Gtk.dll.config">
       <Link>Xwt.Gtk.dll.config</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="..\lib\Xwt.Gtk3.dll.config">
-      <Link>Xwt.Gtk3.dll.config</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="..\lib\Xwt.WPF.dll">
       <Link>Xwt.WPF.dll</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="packages.config" />
   </ItemGroup>
+
   <ItemGroup>
+    <ProjectReference Include="..\TrueCraft.API\TrueCraft.API.csproj" />
+    <ProjectReference Include="..\TrueCraft\TrueCraft.csproj" />
+    <ProjectReference Include="..\TrueCraft.Core\TrueCraft.Core.csproj" />
+    <ProjectReference Include="..\externals\fNbt\fNbt\fNbt.csproj" />
+    <ProjectReference Include="..\TrueCraft.Client\TrueCraft.Client.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Content\**\*.png" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="Content\**\*.txt" CopyToOutputDirectory="PreserveNewest" />
+    <EmbeddedResource Include="Content\truecraft_logo.png" />
     <EmbeddedResource Include="Content\truecraft-logo.png" />
     <EmbeddedResource Include="Content\default-server-icon.png" />
     <None Include="Content\truecraft_logo.svg" />
+    <None Include="truecraft" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="packages.config" />
+    <None Include="..\lib\Xwt.Gtk.dll" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Optimized Debug|AnyCPU' ">
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Optimized Debug</OutputPath>
-    <WarningLevel>4</WarningLevel>
-    <DefineConstants>DEBUG;</DefineConstants>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DebugSymbols>true</DebugSymbols>
-  </PropertyGroup>
+
 </Project>
