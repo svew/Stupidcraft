@@ -5,6 +5,9 @@
     <TargetFramework>net5.0</TargetFramework>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Deterministic>false</Deterministic>
+    <!-- Suppress missing XML comments.  There are so many they obscure other warnings. -->
+    <!-- TODO fill in missing XML comments and remove NoWarn. -->
+    <NoWarn>CS1591</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
