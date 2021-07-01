@@ -4,6 +4,7 @@ obj/
 *.userprefs
 *.suo
 *.pidb
+*.swp
 _ReSharper*/
 TestResults/
 *.mdf
