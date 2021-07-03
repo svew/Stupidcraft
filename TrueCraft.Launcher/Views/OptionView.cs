@@ -18,8 +18,8 @@ namespace TrueCraft.Launcher.Views
         public Label OptionLabel { get; set; }
         public Label ResolutionLabel { get; set; }
         public ComboBox ResolutionComboBox { get; set; }
-        public CheckBox FullscreenCheckBox { get; set; }
-        public CheckBox InvertMouseCheckBox { get; set; }
+        public CheckButton FullscreenCheckBox { get; set; }
+        public CheckButton InvertMouseCheckBox { get; set; }
         public Label TexturePackLabel { get; set; }
         public DataField<Image> TexturePackImageField { get; set; }
         public DataField<string> TexturePackTextField { get; set; }
@@ -70,12 +70,12 @@ namespace TrueCraft.Launcher.Views
             }
 
             ResolutionComboBox.SelectedIndex = resolutionIndex;
-            FullscreenCheckBox = new CheckBox
+            FullscreenCheckBox = new CheckButton
             {
                 Label = "Fullscreen mode",
                 State = (UserSettings.Local.IsFullscreen) ? CheckBoxState.On : CheckBoxState.Off
             };
-            InvertMouseCheckBox = new CheckBox
+            InvertMouseCheckBox = new CheckButton
             {
                 Label = "Inverted mouse",
                 State = (UserSettings.Local.InvertedMouse) ? CheckBoxState.On : CheckBoxState.Off

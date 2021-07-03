@@ -18,7 +18,7 @@ namespace TrueCraft.Launcher.Views
         public Button OfflineButton { get; set; }
         public Image TrueCraftLogoImage { get; set; }
         public Label ErrorLabel { get; set; }
-        public CheckBox RememberCheckBox { get; set; }
+        public CheckButton RememberCheckBox { get; set; }
 
         public LoginView(LauncherWindow window)
         {
@@ -38,7 +38,7 @@ namespace TrueCraft.Launcher.Views
             LogInButton = new Button("Log In");
             RegisterButton = new Button("Register");
             OfflineButton = new Button("Play Offline");
-            RememberCheckBox = new CheckBox("Remember Me");
+            RememberCheckBox = new CheckButton("Remember Me");
             UsernameText.Text = UserSettings.Local.Username;
             if (UserSettings.Local.AutoLogin)
             {
