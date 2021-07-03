@@ -13,7 +13,7 @@ namespace TrueCraft.Launcher.Views
         public LauncherWindow Window { get; set; }
 
         public Label MultiplayerLabel { get; set; }
-        public TextEntry ServerIPEntry { get; set; }
+        public Entry ServerIPEntry { get; set; }
         public Button ConnectButton { get; set; }
         public Button BackButton { get; set; }
         public Button AddServerButton { get; set; }
@@ -21,8 +21,8 @@ namespace TrueCraft.Launcher.Views
         public ListView ServerListView { get; set; }
         public VBox ServerCreationBox { get; set; }
         public Label NewServerLabel { get; set; }
-        public TextEntry NewServerName { get; set; }
-        public TextEntry NewServerAddress { get; set; }
+        public Entry NewServerName { get; set; }
+        public Entry NewServerAddress { get; set; }
         public Button CommitAddNewServer { get; set; }
         public Button CancelAddNewServer { get; set; }
         public ListStore ServerListStore { get; set; }
@@ -37,7 +37,7 @@ namespace TrueCraft.Launcher.Views
                 Font = Font.WithSize(16),
                 TextAlignment = Alignment.Center
             };
-            ServerIPEntry = new TextEntry()
+            ServerIPEntry = new Entry()
             {
                 PlaceholderText = "Server IP",
                 Text = UserSettings.Local.LastIP
@@ -49,8 +49,8 @@ namespace TrueCraft.Launcher.Views
             RemoveServerButton = new Button("Remove") { Sensitive = false };
             ServerCreationBox = new VBox() { Visible = false };
             NewServerLabel = new Label("Add new server:") { TextAlignment = Alignment.Center };
-            NewServerName = new TextEntry() { PlaceholderText = "Name" };
-            NewServerAddress = new TextEntry() { PlaceholderText = "Address" };
+            NewServerName = new Entry() { PlaceholderText = "Name" };
+            NewServerAddress = new Entry() { PlaceholderText = "Address" };
             CommitAddNewServer = new Button("Add server");
             CancelAddNewServer = new Button("Cancel");
 

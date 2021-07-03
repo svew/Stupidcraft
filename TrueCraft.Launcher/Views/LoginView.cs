@@ -11,7 +11,7 @@ namespace TrueCraft.Launcher.Views
     {
         public LauncherWindow Window { get; set; }
 
-        public TextEntry UsernameText { get; set; }
+        public Entry UsernameText { get; set; }
         public PasswordEntry PasswordText { get; set; }
         public Button LogInButton { get; set; }
         public Button RegisterButton { get; set; }
@@ -31,7 +31,7 @@ namespace TrueCraft.Launcher.Views
                 TextAlignment = Alignment.Center,
                 Visible = false
             };
-            UsernameText = new TextEntry();
+            UsernameText = new Entry();
             PasswordText = new PasswordEntry();
             LogInButton = new Button("Log In");
             RegisterButton = new Button("Register");

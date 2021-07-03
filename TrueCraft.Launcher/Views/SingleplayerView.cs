@@ -19,8 +19,8 @@ namespace TrueCraft.Launcher.Views
         public Button PlayButton { get; set; }
         public Button BackButton { get; set; }
         public VBox CreateWorldBox { get; set; }
-        public TextEntry NewWorldName { get; set; }
-        public TextEntry NewWorldSeed { get; set; }
+        public Entry NewWorldName { get; set; }
+        public Entry NewWorldSeed { get; set; }
         public Button NewWorldCommit { get; set; }
         public Button NewWorldCancel { get; set; }
         public ListStore WorldListStore { get; set; }
@@ -52,8 +52,8 @@ namespace TrueCraft.Launcher.Views
             PlayButton = new Button("Play") { Sensitive = false };
             BackButton = new Button("Back");
             CreateWorldBox = new VBox() { Visible = false };
-            NewWorldName = new TextEntry() { PlaceholderText = "Name" };
-            NewWorldSeed = new TextEntry() { PlaceholderText = "Seed (optional)" };
+            NewWorldName = new Entry() { PlaceholderText = "Name" };
+            NewWorldSeed = new Entry() { PlaceholderText = "Seed (optional)" };
             NewWorldCommit = new Button("Create") { Sensitive = false };
             NewWorldCancel = new Button("Cancel");
             NameField = new DataField<string>();
