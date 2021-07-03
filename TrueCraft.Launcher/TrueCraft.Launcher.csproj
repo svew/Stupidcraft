@@ -20,34 +20,10 @@
     <Optimize>true</Optimize>
   </PropertyGroup>
 
-<!-- TODO Update to up-to-date Nuget Packages
   <ItemGroup>
-    <PackageReference Include="Xwt" Version="0.2.244" />
-    <PackageReference Include="Xwt.Gtk" Version="0.2.244" />
-  </ItemGroup>
--->
-
-  <ItemGroup>
+    <PackageReference Include="GtkSharp" Version="3.24.24.34" />
     <PackageReference Include="Ionic.Zip" Version="1.9.1.8" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="..\lib\Xwt.Gtk.dll">
-      <Link>Xwt.Gtk.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <Reference Include="Xwt">
-      <HintPath>..\lib\Xwt.dll</HintPath>
-    </Reference>
-    <None Include="..\lib\Xwt.Gtk.dll.config">
-      <Link>Xwt.Gtk.dll.config</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Include="..\lib\Xwt.WPF.dll">
-      <Link>Xwt.WPF.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
   <ItemGroup>
