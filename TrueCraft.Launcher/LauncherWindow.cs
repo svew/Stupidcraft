@@ -21,7 +21,7 @@ namespace TrueCraft.Launcher
         public MultiplayerView MultiplayerView { get; set; }
         public SingleplayerView SingleplayerView { get; set; }
         public VBox InteractionBox { get; set; }
-        public ImageView TrueCraftLogoImage { get; set; }
+        public Image TrueCraftLogoImage { get; set; }
 
         public LauncherWindow()
         {
@@ -40,7 +40,7 @@ namespace TrueCraft.Launcher
             InteractionBox = new VBox();
             
             using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("TrueCraft.Launcher.Content.truecraft_logo.png"))
-                TrueCraftLogoImage = new ImageView(Image.FromStream(stream).WithBoxSize(350, 75));
+                TrueCraftLogoImage = new Image(Image.FromStream(stream).WithBoxSize(350, 75));
 
             WebScrollView.Content = WebView;
             MainContainer.PackStart(WebScrollView, true);

@@ -16,7 +16,7 @@ namespace TrueCraft.Launcher.Views
         public Button LogInButton { get; set; }
         public Button RegisterButton { get; set; }
         public Button OfflineButton { get; set; }
-        public ImageView TrueCraftLogoImage { get; set; }
+        public Image TrueCraftLogoImage { get; set; }
         public Label ErrorLabel { get; set; }
         public CheckBox RememberCheckBox { get; set; }
 
@@ -47,7 +47,7 @@ namespace TrueCraft.Launcher.Views
             }
 
             using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("TrueCraft.Launcher.Content.truecraft_logo.png"))
-                TrueCraftLogoImage = new ImageView(Image.FromStream(stream).WithBoxSize(350, 75));
+                TrueCraftLogoImage = new Image(Image.FromStream(stream).WithBoxSize(350, 75));
 
             UsernameText.PlaceholderText = "Username";
             PasswordText.PlaceholderText = "Password";
