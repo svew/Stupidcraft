@@ -12,7 +12,7 @@ namespace TrueCraft.Launcher.Views
         public LauncherWindow Window { get; set; }
 
         public Entry UsernameText { get; set; }
-        public PasswordEntry PasswordText { get; set; }
+        public Entry PasswordText { get; set; }
         public Button LogInButton { get; set; }
         public Button RegisterButton { get; set; }
         public Button OfflineButton { get; set; }
@@ -33,6 +33,8 @@ namespace TrueCraft.Launcher.Views
             };
             UsernameText = new Entry();
             PasswordText = new PasswordEntry();
+            PasswordText.SetVisibility(false);
+            PasswordText.InputPurpose = InputPurpose.Password;
             LogInButton = new Button("Log In");
             RegisterButton = new Button("Register");
             OfflineButton = new Button("Play Offline");
