@@ -2,13 +2,12 @@
 using System.IO;
 using System.Diagnostics;
 using System.Collections.Generic;
-using TrueCraft.Core;
-using Xwt;
-using Xwt.Drawing;
-using System.Threading.Tasks;
-using System.Net;
-using Ionic.Zip;
 using System.Linq;
+using System.Net;
+using System.Threading.Tasks;
+using Gtk;
+using TrueCraft.Core;
+using Ionic.Zip;
 
 namespace TrueCraft.Launcher.Views
 {

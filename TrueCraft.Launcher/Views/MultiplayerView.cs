@@ -1,10 +1,9 @@
 ﻿using System;
-using Xwt;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Xwt.Drawing;
-using System.Reflection;
 using System.Linq;
+using System.Reflection;
+using Gtk;
 using TrueCraft.Core;
 
 namespace TrueCraft.Launcher.Views

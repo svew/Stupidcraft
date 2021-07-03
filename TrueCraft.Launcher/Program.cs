@@ -1,7 +1,7 @@
 ﻿using System;
-using Xwt;
 using System.Threading;
 using System.Net;
+using Gtk;
 using TrueCraft.Core;
 
 namespace TrueCraft.Launcher
@@ -13,18 +13,11 @@ namespace TrueCraft.Launcher
         [STAThread]
         public static void Main(string[] args)
         {
-            if (RuntimeInfo.IsLinux)
-                Application.Initialize(ToolkitType.Gtk);
-            else if (RuntimeInfo.IsMacOSX)
-                Application.Initialize(ToolkitType.Gtk); // TODO: Cocoa
-            else if (RuntimeInfo.IsWindows)
-                Application.Initialize(ToolkitType.Wpf);
-            else
-                // In this case they're probably using some flavor of Unix
-                // which probably has some flavor of GTK availble
-                Application.Initialize(ToolkitType.Gtk);
+            Application.Init();
+
             UserSettings.Local = new UserSettings();
             UserSettings.Local.Load();
+
             var thread = new Thread(KeepSessionAlive);
             thread.IsBackground = true;
             thread.Priority = ThreadPriority.Lowest;

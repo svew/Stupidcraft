@@ -1,10 +1,10 @@
 ﻿using System;
-using Xwt;
-using TrueCraft.Launcher.Singleplayer;
-using System.Threading.Tasks;
 using System.Diagnostics;
-using System.Linq;
 using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using Gtk;
+using TrueCraft.Launcher.Singleplayer;
 using TrueCraft.Core;
 
 namespace TrueCraft.Launcher.Views
