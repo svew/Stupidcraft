@@ -12,7 +12,7 @@ namespace TrueCraft.Launcher
         public TrueCraftUser User { get; set; }
 
         public HBox MainContainer { get; set; }
-        public ScrollView WebScrollView { get; set; }
+        public Layout WebScrollView { get; set; }
         public WebView WebView { get; set; }
 
         public LoginView LoginView { get; set; }
@@ -31,7 +31,7 @@ namespace TrueCraft.Launcher
             this.User = new TrueCraftUser();
 
             MainContainer = new HBox();
-            WebScrollView = new ScrollView();
+            WebScrollView = new Layout();
             WebView = new WebView("https://truecraft.io/updates");
             LoginView = new LoginView(this);
             OptionView = new OptionView(this);
