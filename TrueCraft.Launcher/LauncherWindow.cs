@@ -12,7 +12,7 @@ namespace TrueCraft.Launcher
         public TrueCraftUser User { get; set; }
 
         public HBox MainContainer { get; set; }
-        public Layout WebScrollView { get; set; }
+        public ScrolledWindow WebScrollView { get; set; }
 
         // TODO Change from Label to a Web Browser
         public Label WebView { get; set; }
@@ -32,7 +32,7 @@ namespace TrueCraft.Launcher
             this.User = new TrueCraftUser();
 
             MainContainer = new HBox();
-            WebScrollView = new Layout();
+            WebScrollView = new ScrolledWindow();
             WebView = new Label("https://truecraft.io/updates");
             LoginView = new LoginView(this);
             OptionView = new OptionView(this);
