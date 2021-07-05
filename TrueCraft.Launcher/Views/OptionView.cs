@@ -24,7 +24,7 @@ namespace TrueCraft.Launcher.Views
         public DataField<Image> TexturePackImageField { get; set; }
         public DataField<string> TexturePackTextField { get; set; }
         public ListStore TexturePackStore { get; set; }
-        public ListView TexturePackListView { get; set; }
+        public TreeView TexturePackListView { get; set; }
         public Button OfficialAssetsButton { get; set; }
         public ProgressBar OfficialAssetsProgress { get; set; }
         public Button OpenFolderButton { get; set; }

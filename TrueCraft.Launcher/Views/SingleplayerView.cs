@@ -13,7 +13,7 @@ namespace TrueCraft.Launcher.Views
     {
         public LauncherWindow Window { get; set; }
         public Label SingleplayerLabel { get; set; }
-        public ListView WorldListView { get; set; }
+        public TreeView WorldListView { get; set; }
         public Button CreateWorldButton { get; set; }
         public Button DeleteWorldButton { get; set; }
         public Button PlayButton { get; set; }

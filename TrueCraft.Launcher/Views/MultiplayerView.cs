@@ -18,7 +18,7 @@ namespace TrueCraft.Launcher.Views
         public Button BackButton { get; set; }
         public Button AddServerButton { get; set; }
         public Button RemoveServerButton { get; set; }
-        public ListView ServerListView { get; set; }
+        public TreeView ServerListView { get; set; }
         public VBox ServerCreationBox { get; set; }
         public Label NewServerLabel { get; set; }
         public Entry NewServerName { get; set; }
@@ -44,7 +44,7 @@ namespace TrueCraft.Launcher.Views
             };
             ConnectButton = new Button("Connect");
             BackButton = new Button("Back");
-            ServerListView = new ListView() { MinHeight = 200, SelectionMode = SelectionMode.Single };
+            ServerListView = new TreeView() { MinHeight = 200, SelectionMode = SelectionMode.Single };
             AddServerButton = new Button("Add server");
             RemoveServerButton = new Button("Remove") { Sensitive = false };
             ServerCreationBox = new VBox() { Visible = false };
