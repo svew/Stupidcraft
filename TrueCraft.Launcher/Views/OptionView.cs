@@ -136,7 +136,7 @@ namespace TrueCraft.Launcher.Views
             BackButton.Clicked += (sender, e) =>
             {
                 Window.InteractionBox.Remove(this);
-                Window.InteractionBox.PackEnd(Window.MainMenuView);
+                Window.InteractionBox.PackEnd(Window.MainMenuView, true, false, 0);
             };
 
             OfficialAssetsButton = new Button("Download Minecraft assets") { Visible = false };
@@ -145,17 +145,17 @@ namespace TrueCraft.Launcher.Views
 
             LoadTexturePacks();
 
-            this.PackStart(OptionLabel);
-            this.PackStart(ResolutionLabel);
-            this.PackStart(ResolutionComboBox);
-            this.PackStart(FullscreenCheckBox);
-            this.PackStart(InvertMouseCheckBox);
-            this.PackStart(TexturePackLabel);
-            this.PackStart(TexturePackListView);
-            this.PackStart(OfficialAssetsProgress);
-            this.PackStart(OfficialAssetsButton);
-            this.PackStart(OpenFolderButton);
-            this.PackEnd(BackButton);
+            this.PackStart(OptionLabel, true, false, 0);
+            this.PackStart(ResolutionLabel, true, false, 0);
+            this.PackStart(ResolutionComboBox, true, false, 0);
+            this.PackStart(FullscreenCheckBox, true, false, 0);
+            this.PackStart(InvertMouseCheckBox, true, false, 0);
+            this.PackStart(TexturePackLabel, true, false, 0);
+            this.PackStart(TexturePackListView, true, false, 0);
+            this.PackStart(OfficialAssetsProgress, true, false, 0);
+            this.PackStart(OfficialAssetsButton, true, false, 0);
+            this.PackStart(OpenFolderButton, true, false, 0);
+            this.PackEnd(BackButton, true, false, 0);
         }
 
         void OfficialAssetsButton_Clicked(object sender, EventArgs e)

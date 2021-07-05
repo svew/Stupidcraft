@@ -73,7 +73,7 @@ namespace TrueCraft.Launcher.Views
             BackButton.Clicked += (sender, e) =>
             {
                 Window.InteractionBox.Remove(this);
-                Window.InteractionBox.PackEnd(Window.MainMenuView);
+                Window.InteractionBox.PackEnd(Window.MainMenuView, true, false, 0);
             };
             ConnectButton.Clicked += ConnectButton_Clicked;
             ServerListView.SelectionChanged += (sender, e) => 
@@ -140,26 +140,26 @@ namespace TrueCraft.Launcher.Views
 
             var addServerHBox = new HBox();
             AddServerButton.WidthRequest = RemoveServerButton.WidthRequest = 0.5;
-            addServerHBox.PackStart(AddServerButton, true);
-            addServerHBox.PackStart(RemoveServerButton, true);
+            addServerHBox.PackStart(AddServerButton, true, false, 0);
+            addServerHBox.PackStart(RemoveServerButton, true, false, 0);
 
             var commitHBox = new HBox();
             CancelAddNewServer.WidthRequest = CommitAddNewServer.WidthRequest = 0.5;
-            commitHBox.PackStart(CommitAddNewServer, true);
-            commitHBox.PackStart(CancelAddNewServer, true);
+            commitHBox.PackStart(CommitAddNewServer, true, false, 0);
+            commitHBox.PackStart(CancelAddNewServer, true, false, 0);
 
-            ServerCreationBox.PackStart(NewServerLabel);
-            ServerCreationBox.PackStart(NewServerName);
-            ServerCreationBox.PackStart(NewServerAddress);
-            ServerCreationBox.PackStart(commitHBox);
+            ServerCreationBox.PackStart(NewServerLabel, true, false, 0);
+            ServerCreationBox.PackStart(NewServerName, true, false, 0);
+            ServerCreationBox.PackStart(NewServerAddress, true, false, 0);
+            ServerCreationBox.PackStart(commitHBox, true, false, 0);
 
-            this.PackEnd(BackButton);
-            this.PackEnd(ConnectButton);
-            this.PackStart(MultiplayerLabel);
-            this.PackStart(ServerIPEntry);
-            this.PackStart(ServerListView);
-            this.PackStart(addServerHBox);
-            this.PackStart(ServerCreationBox);
+            this.PackEnd(BackButton, true, false, 0);
+            this.PackEnd(ConnectButton, true, false, 0);
+            this.PackStart(MultiplayerLabel, true, false, 0);
+            this.PackStart(ServerIPEntry, true, false, 0);
+            this.PackStart(ServerListView, true, false, 0);
+            this.PackStart(addServerHBox, true, false, 0);
+            this.PackStart(ServerCreationBox, true, false, 0);
         }
 
         void ConnectButton_Clicked(object sender, EventArgs e)

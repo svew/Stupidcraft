@@ -70,20 +70,20 @@ namespace TrueCraft.Launcher.Views
                 Window.User.Username = UsernameText.Text;
                 Window.User.SessionId = "-";
                 Window.InteractionBox.Remove(this);
-                Window.InteractionBox.PackEnd(Window.MainMenuView = new MainMenuView(Window));
+                Window.InteractionBox.PackEnd(Window.MainMenuView = new MainMenuView(Window), true, false, 0);
             };
             var regoffbox = new HBox();
             RegisterButton.WidthRequest = OfflineButton.WidthRequest = 0.5;
-            regoffbox.PackStart(RegisterButton, true);
-            regoffbox.PackStart(OfflineButton, true);
+            regoffbox.PackStart(RegisterButton, true, false, 0);
+            regoffbox.PackStart(OfflineButton, true, false, 0);
             LogInButton.Clicked += LogInButton_Clicked;
 
-            this.PackEnd(regoffbox);
-            this.PackEnd(LogInButton);
-            this.PackEnd(RememberCheckBox);
-            this.PackEnd(PasswordText);
-            this.PackEnd(UsernameText);
-            this.PackEnd(ErrorLabel);
+            this.PackEnd(regoffbox, true, false, 0);
+            this.PackEnd(LogInButton, true, false, 0);
+            this.PackEnd(RememberCheckBox, true, false, 0);
+            this.PackEnd(PasswordText, true, false, 0);
+            this.PackEnd(UsernameText, true, false, 0);
+            this.PackEnd(ErrorLabel, true, false, 0);
         }
 
         private void DisableForm()

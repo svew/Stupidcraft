@@ -67,7 +67,7 @@ namespace TrueCraft.Launcher.Views
             BackButton.Clicked += (sender, e) =>
             {
                 Window.InteractionBox.Remove(this);
-                Window.InteractionBox.PackEnd(Window.MainMenuView);
+                Window.InteractionBox.PackEnd(Window.MainMenuView, true, false, 0);
             };
             CreateWorldButton.Clicked += (sender, e) =>
             {
@@ -103,25 +103,25 @@ namespace TrueCraft.Launcher.Views
 
             var createDeleteHbox = new HBox();
             CreateWorldButton.WidthRequest = DeleteWorldButton.WidthRequest = 0.5;
-            createDeleteHbox.PackStart(CreateWorldButton, true);
-            createDeleteHbox.PackStart(DeleteWorldButton, true);
+            createDeleteHbox.PackStart(CreateWorldButton, true, false, 0);
+            createDeleteHbox.PackStart(DeleteWorldButton, true, false, 0);
 
-            CreateWorldBox.PackStart(NewWorldName);
-            CreateWorldBox.PackStart(NewWorldSeed);
+            CreateWorldBox.PackStart(NewWorldName, true, false, 0);
+            CreateWorldBox.PackStart(NewWorldSeed, true, false, 0);
             var newWorldHbox = new HBox();
             NewWorldCommit.WidthRequest = NewWorldCancel.WidthRequest = 0.5;
-            newWorldHbox.PackStart(NewWorldCommit, true);
-            newWorldHbox.PackStart(NewWorldCancel, true);
-            CreateWorldBox.PackStart(newWorldHbox);
+            newWorldHbox.PackStart(NewWorldCommit, true, false, 0);
+            newWorldHbox.PackStart(NewWorldCancel, true, false, 0);
+            CreateWorldBox.PackStart(newWorldHbox, true, false, 0);
 
-            this.PackStart(SingleplayerLabel);
-            this.PackStart(WorldListView);
-            this.PackStart(createDeleteHbox);
-            this.PackStart(PlayButton);
-            this.PackStart(CreateWorldBox);
-            this.PackStart(ProgressLabel);
-            this.PackStart(ProgressBar);
-            this.PackEnd(BackButton);
+            this.PackStart(SingleplayerLabel, true, false, 0);
+            this.PackStart(WorldListView, true, false, 0);
+            this.PackStart(createDeleteHbox, true, false, 0);
+            this.PackStart(PlayButton, true, false, 0);
+            this.PackStart(CreateWorldBox, true, false, 0);
+            this.PackStart(ProgressLabel, true, false, 0);
+            this.PackStart(ProgressBar, true, false, 0);
+            this.PackEnd(BackButton, true, false, 0);
         }
 
         public void PlayButton_Clicked(object sender, EventArgs e)

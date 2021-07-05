@@ -44,10 +44,10 @@ namespace TrueCraft.Launcher
                 TrueCraftLogoImage = new Image(Image.FromStream(stream).WithBoxSize(350, 75));
 
             WebScrollView.Content = WebView;
-            MainContainer.PackStart(WebScrollView, true);
-            InteractionBox.PackStart(TrueCraftLogoImage);
-            InteractionBox.PackEnd(LoginView);
-            MainContainer.PackEnd(InteractionBox);
+            MainContainer.PackStart(WebScrollView, true, false, 0);
+            InteractionBox.PackStart(TrueCraftLogoImage, true, false, 0);
+            InteractionBox.PackEnd(LoginView, true, false, 0);
+            MainContainer.PackEnd(InteractionBox, true, false, 0);
 
             this.Content = MainContainer;
         }
