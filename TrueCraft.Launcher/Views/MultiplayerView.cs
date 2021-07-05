@@ -34,8 +34,7 @@ namespace TrueCraft.Launcher.Views
 
             MultiplayerLabel = new Label("Multiplayer")
             {
-                Font = Font.WithSize(16),
-                TextAlignment = Alignment.Center
+                Justify = Justification.Center
             };
             ServerIPEntry = new Entry()
             {
@@ -49,7 +48,7 @@ namespace TrueCraft.Launcher.Views
             AddServerButton = new Button("Add server");
             RemoveServerButton = new Button("Remove") { Sensitive = false };
             ServerCreationBox = new VBox() { Visible = false };
-            NewServerLabel = new Label("Add new server:") { TextAlignment = Alignment.Center };
+            NewServerLabel = new Label("Add new server:") { Justify = Justification.Center };
             NewServerName = new Entry() { PlaceholderText = "Name" };
             NewServerAddress = new Entry() { PlaceholderText = "Address" };
             CommitAddNewServer = new Button("Add server");

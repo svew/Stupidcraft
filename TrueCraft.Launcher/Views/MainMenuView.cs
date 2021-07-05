@@ -20,7 +20,7 @@ namespace TrueCraft.Launcher.Views
 
             WelcomeText = new Label("Welcome, " + Window.User.Username)
             {
-                TextAlignment = Alignment.Center
+               Justify = Justification.Center
             };
             SingleplayerButton = new Button("Singleplayer");
             MultiplayerButton = new Button("Multiplayer");

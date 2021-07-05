@@ -43,8 +43,7 @@ namespace TrueCraft.Launcher.Views
 
             OptionLabel = new Label("Options")
             {
-                Font = Font.WithSize(16),
-                TextAlignment = Alignment.Center
+                Justify = Justification.Center
             };
 
             ResolutionLabel = new Label("Select a resolution...");

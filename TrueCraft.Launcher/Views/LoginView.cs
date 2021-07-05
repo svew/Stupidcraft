@@ -27,9 +27,9 @@ namespace TrueCraft.Launcher.Views
 
             ErrorLabel = new Label("Username or password incorrect")
             {
-                TextColor = Color.FromBytes(255, 0, 0),
-                TextAlignment = Alignment.Center,
-                Visible = false
+               // TODO TextColor = Color.FromBytes(255, 0, 0),
+               Justify = Justification.Center,
+               Visible = false
             };
             UsernameText = new Entry();
             PasswordText = new PasswordEntry();
@@ -63,7 +63,7 @@ namespace TrueCraft.Launcher.Views
             };
             RegisterButton.Clicked += (sender, e) =>
             {
-                Window.WebView.Url = "https://truecraft.io/register";
+                Window.WebView.Text = "https://truecraft.io/register";
             };
             OfflineButton.Clicked += (sender, e) =>
             {

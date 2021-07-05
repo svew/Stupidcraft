@@ -39,8 +39,7 @@ namespace TrueCraft.Launcher.Views
 
             SingleplayerLabel = new Label("Singleplayer")
             {
-                Font = Font.WithSize(16),
-                TextAlignment = Alignment.Center
+                Justify = Justification.Center
             };
             WorldListView = new ListView
             {
