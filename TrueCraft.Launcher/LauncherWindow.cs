@@ -28,8 +28,7 @@ namespace TrueCraft.Launcher
         public LauncherWindow()
         {
             this.Title = "TrueCraft Launcher";
-            this.Width = 1200;
-            this.Height = 576;
+            this.DefaultSize = new Gdk.Size(1200, 576);
             this.User = new TrueCraftUser();
 
             MainContainer = new HBox();
