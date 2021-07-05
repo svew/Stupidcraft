@@ -39,7 +39,7 @@ namespace TrueCraft.Launcher.Views
             _lastTexturePack = null;
 
             Window = window;
-            this.MinWidth = 250;
+            this.SetSizeRequest(250, -1);
 
             OptionLabel = new Label("Options")
             {

@@ -30,7 +30,7 @@ namespace TrueCraft.Launcher.Views
         public MultiplayerView(LauncherWindow window)
         {
             Window = window;
-            this.MinWidth = 250;
+            this.SetSiteRequest(250, -1);
 
             MultiplayerLabel = new Label("Multiplayer")
             {
@@ -44,7 +44,8 @@ namespace TrueCraft.Launcher.Views
             };
             ConnectButton = new Button("Connect");
             BackButton = new Button("Back");
-            ServerListView = new TreeView() { MinHeight = 200, SelectionMode = SelectionMode.Single };
+            ServerListView = new TreeView() { SelectionMode = SelectionMode.Single };
+            ServerListView.SetSizeRequest(-1, 200);
             AddServerButton = new Button("Add server");
             RemoveServerButton = new Button("Remove") { Sensitive = false };
             ServerCreationBox = new VBox() { Visible = false };

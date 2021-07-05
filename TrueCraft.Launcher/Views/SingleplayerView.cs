@@ -35,7 +35,7 @@ namespace TrueCraft.Launcher.Views
             Worlds.Local.Load();
 
             Window = window;
-            this.MinWidth = 250;
+            this.SetSizeRequest(250, -1);
 
             SingleplayerLabel = new Label("Singleplayer")
             {

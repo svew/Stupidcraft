@@ -16,7 +16,7 @@ namespace TrueCraft.Launcher.Views
         public MainMenuView(LauncherWindow window)
         {
             Window = window;
-            this.MinWidth = 250;
+            this.SetSizeRequest(250, -1);
 
             WelcomeText = new Label("Welcome, " + Window.User.Username)
             {

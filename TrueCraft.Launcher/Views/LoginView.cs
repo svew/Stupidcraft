@@ -23,7 +23,7 @@ namespace TrueCraft.Launcher.Views
         public LoginView(LauncherWindow window)
         {
             Window = window;
-            this.MinWidth = 250;
+            this.SetSizeRequest(250, 1);
 
             ErrorLabel = new Label("Username or password incorrect")
             {
