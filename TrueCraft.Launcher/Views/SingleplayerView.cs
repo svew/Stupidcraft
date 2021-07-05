@@ -27,7 +27,7 @@ namespace TrueCraft.Launcher.Views
         public Label ProgressLabel { get; set; }
         public ProgressBar ProgressBar { get; set; }
         public SingleplayerServer Server { get; set; }
-        public DataField<string> NameField { get; set; }
+        public string NameField { get; set; }
 
         public SingleplayerView(LauncherWindow window)
         {
@@ -56,7 +56,7 @@ namespace TrueCraft.Launcher.Views
             NewWorldSeed = new Entry() { PlaceholderText = "Seed (optional)" };
             NewWorldCommit = new Button("Create") { Sensitive = false };
             NewWorldCancel = new Button("Cancel");
-            NameField = new DataField<string>();
+            NameField = string.Empty;
             WorldListStore = new ListStore(NameField);
             WorldListView.DataSource = WorldListStore;
             WorldListView.HeadersVisible = false;

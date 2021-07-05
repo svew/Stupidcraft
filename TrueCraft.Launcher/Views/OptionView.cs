@@ -21,8 +21,8 @@ namespace TrueCraft.Launcher.Views
         public CheckButton FullscreenCheckBox { get; set; }
         public CheckButton InvertMouseCheckBox { get; set; }
         public Label TexturePackLabel { get; set; }
-        public DataField<Image> TexturePackImageField { get; set; }
-        public DataField<string> TexturePackTextField { get; set; }
+        public Image TexturePackImageField { get; set; }
+        public string TexturePackTextField { get; set; }
         public ListStore TexturePackStore { get; set; }
         public TreeView TexturePackListView { get; set; }
         public Button OfficialAssetsButton { get; set; }
@@ -82,8 +82,8 @@ namespace TrueCraft.Launcher.Views
             };
 
             TexturePackLabel = new Label("Select a texture pack...");
-            TexturePackImageField = new DataField<Image>();
-            TexturePackTextField = new DataField<string>();
+            TexturePackImageField = new Image();
+            TexturePackTextField = new string();
             TexturePackStore = new ListStore(TexturePackImageField, TexturePackTextField);
             TexturePackListView = new ListView
             {
