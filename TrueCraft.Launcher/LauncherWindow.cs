@@ -13,7 +13,9 @@ namespace TrueCraft.Launcher
 
         public HBox MainContainer { get; set; }
         public Layout WebScrollView { get; set; }
-        public WebView WebView { get; set; }
+
+        // TODO Change from Label to a Web Browser
+        public Label WebView { get; set; }
 
         public LoginView LoginView { get; set; }
         public MainMenuView MainMenuView { get; set; }
@@ -32,7 +34,7 @@ namespace TrueCraft.Launcher
 
             MainContainer = new HBox();
             WebScrollView = new Layout();
-            WebView = new WebView("https://truecraft.io/updates");
+            WebView = new Label("https://truecraft.io/updates");
             LoginView = new LoginView(this);
             OptionView = new OptionView(this);
             MultiplayerView = new MultiplayerView(this);
