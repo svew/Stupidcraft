@@ -292,7 +292,7 @@ namespace TrueCraft.Launcher.Views
             {
                 if (!zip.EndsWith(".zip"))
                     continue;
-                if (Path.GetFileName(zip) == "Minecraft.zip")
+                if (System.IO.Path.GetFileName(zip) == "Minecraft.zip")
                     officialPresent = true;
 
                 var texturePack = TexturePack.FromArchive(zip);
