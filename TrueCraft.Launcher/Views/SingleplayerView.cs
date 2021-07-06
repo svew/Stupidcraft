@@ -4,8 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Gtk;
-using TrueCraft.Launcher.Singleplayer;
 using TrueCraft.Core;
+using TrueCraft.Launcher.Singleplayer;
 
 namespace TrueCraft.Launcher.Views
 {
@@ -13,7 +13,10 @@ namespace TrueCraft.Launcher.Views
     {
         public LauncherWindow Window { get; set; }
         public Label SingleplayerLabel { get; set; }
-        public TreeView WorldListView { get; set; }
+
+        private TreeView _worldListView;
+        private ListStore _worldListStore;
+
         public Button CreateWorldButton { get; set; }
         public Button DeleteWorldButton { get; set; }
         public Button PlayButton { get; set; }
@@ -23,11 +26,9 @@ namespace TrueCraft.Launcher.Views
         public Entry NewWorldSeed { get; set; }
         public Button NewWorldCommit { get; set; }
         public Button NewWorldCancel { get; set; }
-        public ListStore WorldListStore { get; set; }
         public Label ProgressLabel { get; set; }
         public ProgressBar ProgressBar { get; set; }
         public SingleplayerServer Server { get; set; }
-        public string NameField { get; set; }
 
         public SingleplayerView(LauncherWindow window)
         {
@@ -41,11 +42,21 @@ namespace TrueCraft.Launcher.Views
             {
                 Justify = Justification.Center
             };
-            WorldListView = new ListView
+
+            _worldListStore = new ListStore(typeof(string));
+            _worldListView = new TreeView(_worldListStore);
+            _worldListView.SetSizeRequest(-1, 200);
+            _worldListView.HeadersVisible = false;
+            AddWorldColumns(_worldListView);
+            TreeSelection worldListSelection = _worldListView.Selection;
+            worldListSelection.Mode = SelectionMode.Single;
+            worldListSelection.Changed += (sender, e) =>
             {
-                MinHeight = 200,
-                SelectionMode = SelectionMode.Single
+               int selectedCount = worldListSelection.CountSelectedRows();
+               PlayButton.Sensitive = (selectedCount == 1);
+               DeleteWorldButton.Sensitive = (selectedCount == 1);
             };
+
             CreateWorldButton = new Button("New world");
             DeleteWorldButton = new Button("Delete") { Sensitive = false };
             PlayButton = new Button("Play") { Sensitive = false };
@@ -55,11 +66,7 @@ namespace TrueCraft.Launcher.Views
             NewWorldSeed = new Entry() { PlaceholderText = "Seed (optional)" };
             NewWorldCommit = new Button("Create") { Sensitive = false };
             NewWorldCancel = new Button("Cancel");
-            NameField = string.Empty;
-            WorldListStore = new ListStore(NameField);
-            WorldListView.DataSource = WorldListStore;
-            WorldListView.HeadersVisible = false;
-            WorldListView.Columns.Add(new ListViewColumn("Name", new TextCellView { TextField = NameField, Editable = false }));
+
             ProgressLabel = new Label("Loading world...") { Visible = false };
             ProgressBar = new ProgressBar() { Visible = false, Indeterminate = true, Fraction = 0 };
 
@@ -81,23 +88,29 @@ namespace TrueCraft.Launcher.Views
                 NewWorldCommit.Sensitive = !string.IsNullOrEmpty(NewWorldName.Text);
             };
             NewWorldCommit.Clicked += NewWorldCommit_Clicked;
-            WorldListView.SelectionChanged += (sender, e) => 
-            {
-                PlayButton.Sensitive = DeleteWorldButton.Sensitive = WorldListView.SelectedRow != -1;
-            };
+
             PlayButton.Clicked += PlayButton_Clicked;
             DeleteWorldButton.Clicked += (sender, e) => 
             {
-                var world = Worlds.Local.Saves[WorldListView.SelectedRow];
-                WorldListStore.RemoveRow(WorldListView.SelectedRow);
-                Worlds.Local.Saves = Worlds.Local.Saves.Where(s => s != world).ToArray();
-                Directory.Delete(world.BaseDirectory, true);
+                TreeIter iter;
+                ITreeModel model;
+                _worldListView.Selection.GetSelected(out model, out iter);
+
+                string worldName = (string)model.GetValue(iter, 0);
+                _worldListStore.Remove(ref iter);
+
+                // TODO: display busy cursor; surround with try/catch/finally
+                // TODO: Do world names have to be unique???
+                Worlds.Local.Saves = Worlds.Local.Saves.Where(s => s.Name != worldName).ToArray();
+
+                // TODO: actually delete the World
+                // Directory.Delete(world.BaseDirectory, true);
             };
 
             foreach (var world in Worlds.Local.Saves)
             {
-                var row = WorldListStore.AddRow();
-                WorldListStore.SetValue(row, NameField, world.Name);
+                TreeIter row = _worldListStore.Append();
+                _worldListStore.SetValue(row, 0, world.Name);
             }
 
             var createDeleteHbox = new HBox();
@@ -114,7 +127,7 @@ namespace TrueCraft.Launcher.Views
             CreateWorldBox.PackStart(newWorldHbox, true, false, 0);
 
             this.PackStart(SingleplayerLabel, true, false, 0);
-            this.PackStart(WorldListView, true, false, 0);
+            this.PackStart(_worldListView, true, false, 0);
             this.PackStart(createDeleteHbox, true, false, 0);
             this.PackStart(PlayButton, true, false, 0);
             this.PackStart(CreateWorldBox, true, false, 0);
@@ -123,11 +136,25 @@ namespace TrueCraft.Launcher.Views
             this.PackEnd(BackButton, true, false, 0);
         }
 
+        private static void AddWorldColumns(TreeView worldView)
+        {
+            CellRendererText rendererText = new CellRendererText();
+            TreeViewColumn column = new TreeViewColumn("Name", rendererText, "text", 0);
+            column.SortColumnId = 0;
+            worldView.AppendColumn(column);
+        }
+
         public void PlayButton_Clicked(object sender, EventArgs e)
         {
-            Server = new SingleplayerServer(Worlds.Local.Saves[WorldListView.SelectedRow]);
+            TreeIter iter;
+            _worldListView.Selection.GetSelected(out iter);
+            string worldName = (string)_worldListStore.GetValue(iter, 0);
+            // TODO: Do world names have to be unique?
+            TrueCraft.Core.World.World world = Worlds.Local.Saves.Where(s => s.Name != worldName).First<TrueCraft.Core.World.World>();
+            Server = new SingleplayerServer(world);
+
             PlayButton.Sensitive = BackButton.Sensitive = CreateWorldButton.Sensitive =
-                CreateWorldBox.Visible = WorldListView.Sensitive = false;
+                CreateWorldBox.Visible = _worldListView.Sensitive = false;
             ProgressBar.Visible = ProgressLabel.Visible = true;
             Task.Factory.StartNew(() =>
             {
@@ -141,7 +168,7 @@ namespace TrueCraft.Launcher.Views
                 Server.Start();
                 Application.Invoke((sender, e) =>
                 {
-                    PlayButton.Sensitive = BackButton.Sensitive = CreateWorldButton.Sensitive = WorldListView.Sensitive = true;
+                    PlayButton.Sensitive = BackButton.Sensitive = CreateWorldButton.Sensitive = _worldListView.Sensitive = true;
                     var launchParams = string.Format("{0} {1} {2}", Server.Server.EndPoint, Window.User.Username, Window.User.SessionId);
                     var process = new Process();
                     if (RuntimeInfo.IsMono)
@@ -170,7 +197,7 @@ namespace TrueCraft.Launcher.Views
                         MessageDialog.ShowError("Error loading world", "It's possible that this world is corrupted.");
                         ProgressBar.Visible = ProgressLabel.Visible = false;
                         PlayButton.Sensitive = BackButton.Sensitive = CreateWorldButton.Sensitive =
-                            WorldListView.Sensitive = true;
+                            _worldListView.Sensitive = true;
                     });
                 }
             });
@@ -180,8 +207,8 @@ namespace TrueCraft.Launcher.Views
         {
             var world = Worlds.Local.CreateNewWorld(NewWorldName.Text, NewWorldSeed.Text);
             CreateWorldBox.Visible = false;
-            var row = WorldListStore.AddRow();
-            WorldListStore.SetValue(row, NameField, world.Name);
+            TreeIter row = _worldListStore.Append();
+            _worldListStore.SetValue(row, 0, world.Name);
         }
     }
 }
