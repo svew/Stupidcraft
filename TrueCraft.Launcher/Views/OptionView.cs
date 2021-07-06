@@ -22,8 +22,11 @@ namespace TrueCraft.Launcher.Views
         public LauncherWindow Window { get; set; }
 
         public Label OptionLabel { get; set; }
+
         public Label ResolutionLabel { get; set; }
-        public ComboBox ResolutionComboBox { get; set; }
+        private ComboBox _resolutionComboBox;
+        private ListStore _resolutionList;
+
         public CheckButton FullscreenCheckBox { get; set; }
         public CheckButton InvertMouseCheckBox { get; set; }
         public Label TexturePackLabel { get; set; }
@@ -53,12 +56,13 @@ namespace TrueCraft.Launcher.Views
             };
 
             ResolutionLabel = new Label("Select a resolution...");
-            ResolutionComboBox = new ComboBox();
+            _resolutionList = new ListStore(typeof(string));
+            _resolutionComboBox = new ComboBox(_resolutionList);
 
             int resolutionIndex = -1;
             for (int i = 0; i < WindowResolution.Defaults.Length; i++)
             {
-                ResolutionComboBox.Items.Add(WindowResolution.Defaults[i].ToString());
+                _resolutionList.AppendValues(WindowResolution.Defaults[i].ToString());
 
                 if (resolutionIndex == -1)
                 {
@@ -70,11 +74,11 @@ namespace TrueCraft.Launcher.Views
 
             if (resolutionIndex == -1)
             {
-                ResolutionComboBox.Items.Add(UserSettings.Local.WindowResolution.ToString());
-                resolutionIndex = ResolutionComboBox.Items.Count - 1;
+                _resolutionList.AppendValues(UserSettings.Local.WindowResolution.ToString());
+                resolutionIndex = WindowResolution.Defaults.Length;
             }
 
-            ResolutionComboBox.SelectedIndex = resolutionIndex;
+            _resolutionComboBox.Active = resolutionIndex;
             FullscreenCheckBox = new CheckButton
             {
                 Label = "Fullscreen mode",
@@ -98,10 +102,13 @@ namespace TrueCraft.Launcher.Views
             OpenFolderButton = new Button("Open texture pack folder");
             BackButton = new Button("Back");
 
-            ResolutionComboBox.SelectionChanged += (sender, e) =>
+            _resolutionComboBox.Changed += (sender, e) =>
             {
-                UserSettings.Local.WindowResolution =
-                    WindowResolution.FromString(ResolutionComboBox.SelectedText);
+                TreeIter iter;
+                if (!_resolutionComboBox.GetActiveIter(out iter))
+                    return;
+                string resolution = (string)_resolutionList.GetValue(iter, 0);
+                UserSettings.Local.WindowResolution = WindowResolution.FromString(resolution);
                 UserSettings.Local.Save();
             };
 
@@ -155,7 +162,7 @@ namespace TrueCraft.Launcher.Views
 
             this.PackStart(OptionLabel, true, false, 0);
             this.PackStart(ResolutionLabel, true, false, 0);
-            this.PackStart(ResolutionComboBox, true, false, 0);
+            this.PackStart(_resolutionComboBox, true, false, 0);
             this.PackStart(FullscreenCheckBox, true, false, 0);
             this.PackStart(InvertMouseCheckBox, true, false, 0);
             this.PackStart(TexturePackLabel, true, false, 0);
