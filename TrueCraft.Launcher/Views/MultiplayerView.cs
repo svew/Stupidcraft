@@ -30,7 +30,7 @@ namespace TrueCraft.Launcher.Views
         public MultiplayerView(LauncherWindow window)
         {
             Window = window;
-            this.SetSiteRequest(250, -1);
+            this.SetSizeRequest(250, -1);
 
             MultiplayerLabel = new Label("Multiplayer")
             {
