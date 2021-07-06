@@ -64,11 +64,12 @@ namespace TrueCraft.Launcher.Views
             ServerListView.Columns.Add(new ListViewColumn("Name", new TextCellView { TextField = nameField }));
             ServerListView.Columns.Add(new ListViewColumn("Players", new TextCellView { TextField = playersField }));
 
-            ServerIPEntry.KeyReleased += (sender, e) => 
-            {
-                if (e.Key == Key.Return || e.Key == Key.NumPadEnter)
-                    ConnectButton_Clicked(sender, e);
-            };
+            // TODO: restore this functionality
+            //ServerIPEntry.KeyReleased += (sender, e) => 
+            //{
+            //    if (e.Key == Key.Return || e.Key == Key.NumPadEnter)
+            //        ConnectButton_Clicked(sender, e);
+            //};
             BackButton.Clicked += (sender, e) =>
             {
                 Window.InteractionBox.Remove(this);

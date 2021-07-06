@@ -32,8 +32,8 @@ namespace TrueCraft.Launcher.Views
                Visible = false
             };
             UsernameText = new Entry();
-            PasswordText = new PasswordEntry();
-            PasswordText.SetVisibility(false);
+            PasswordText = new Entry();
+            PasswordText.Visibility = false;
             PasswordText.InputPurpose = InputPurpose.Password;
             LogInButton = new Button("Log In");
             RegisterButton = new Button("Register");
@@ -42,7 +42,7 @@ namespace TrueCraft.Launcher.Views
             UsernameText.Text = UserSettings.Local.Username;
             if (UserSettings.Local.AutoLogin)
             {
-                PasswordText.Password = UserSettings.Local.Password;
+                PasswordText.Text = UserSettings.Local.Password;
                 RememberCheckBox.Active = true;
             }
 
@@ -51,16 +51,17 @@ namespace TrueCraft.Launcher.Views
 
             UsernameText.PlaceholderText = "Username";
             PasswordText.PlaceholderText = "Password";
-            PasswordText.KeyReleased += (sender, e) =>
-            {
-                if (e.Key == Key.Return || e.Key == Key.NumPadEnter)
-                    LogInButton_Clicked(sender, e);
-            };
-            UsernameText.KeyReleased += (sender, e) =>
-            {
-                if (e.Key == Key.Return || e.Key == Key.NumPadEnter)
-                    LogInButton_Clicked(sender, e);
-            };
+            // TODO: restore this functionality.
+            //PasswordText.KeyReleaseEvent += (sender, e) =>
+            //{
+            //    if (e.Key == Key.Return || e.Key == Key.NumPadEnter)
+            //        LogInButton_Clicked(sender, e);
+            //};
+            //UsernameText.KeyReleaseEvent += (sender, e) =>
+            //{
+            //    if (e.Key == Key.Return || e.Key == Key.NumPadEnter)
+            //        LogInButton_Clicked(sender, e);
+            //};
             RegisterButton.Clicked += (sender, e) =>
             {
                 Window.WebView.Text = "https://truecraft.io/register";
@@ -107,7 +108,7 @@ namespace TrueCraft.Launcher.Views
 
         private void LogInButton_Clicked(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(UsernameText.Text) || string.IsNullOrEmpty(PasswordText.Password))
+            if (string.IsNullOrEmpty(UsernameText.Text) || string.IsNullOrEmpty(PasswordText.Text))
             {
                 ErrorLabel.Text = "Username and password are required";
                 ErrorLabel.Visible = true;
@@ -125,7 +126,7 @@ namespace TrueCraft.Launcher.Views
             {
                 Request = request,
                 Username = Window.User.Username,
-                Password = PasswordText.Password
+                Password = PasswordText.Text
             });
         }
 
