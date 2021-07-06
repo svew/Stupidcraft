@@ -10,6 +10,15 @@ namespace TrueCraft.Launcher.Views
 {
     public class MultiplayerView : VBox
     {
+        private enum ServerColumns
+        {
+           Icon,
+           Name,
+           Address,
+           Players
+        }
+
+
         public LauncherWindow Window { get; set; }
 
         public Label MultiplayerLabel { get; set; }
@@ -18,14 +27,15 @@ namespace TrueCraft.Launcher.Views
         public Button BackButton { get; set; }
         public Button AddServerButton { get; set; }
         public Button RemoveServerButton { get; set; }
-        public TreeView ServerListView { get; set; }
         public VBox ServerCreationBox { get; set; }
         public Label NewServerLabel { get; set; }
         public Entry NewServerName { get; set; }
         public Entry NewServerAddress { get; set; }
         public Button CommitAddNewServer { get; set; }
         public Button CancelAddNewServer { get; set; }
-        public ListStore ServerListStore { get; set; }
+
+        private TreeView _serverListView;
+        private ListStore _serverListStore;
 
         public MultiplayerView(LauncherWindow window)
         {
@@ -43,8 +53,22 @@ namespace TrueCraft.Launcher.Views
             };
             ConnectButton = new Button("Connect");
             BackButton = new Button("Back");
-            ServerListView = new TreeView() { SelectionMode = SelectionMode.Single };
-            ServerListView.SetSizeRequest(-1, 200);
+
+            _serverListStore = new ListStore(typeof(Image), typeof(string), typeof(string));
+
+            _serverListView = new TreeView(_serverListStore);
+            _serverListView.SetSizeRequest(-1, 200);
+            _serverListView.HeadersVisible = false;
+
+            TreeSelection serverSelection = _serverListView.Selection;
+            serverSelection.Mode = SelectionMode.Single;
+            serverSelection.Changed += (sender, e) =>
+            {
+               int selectedCount = ((TreeSelection)sender).CountSelectedRows();
+               RemoveServerButton.Sensitive = (selectedCount == 1);
+               ServerIPEntry.Sensitive = (selectedCount == 0);
+            };
+
             AddServerButton = new Button("Add server");
             RemoveServerButton = new Button("Remove") { Sensitive = false };
             ServerCreationBox = new VBox() { Visible = false };
@@ -53,16 +77,6 @@ namespace TrueCraft.Launcher.Views
             NewServerAddress = new Entry() { PlaceholderText = "Address" };
             CommitAddNewServer = new Button("Add server");
             CancelAddNewServer = new Button("Cancel");
-
-            var iconField = new DataField<Image>();
-            var nameField = new DataField<string>();
-            var playersField = new DataField<string>();
-            ServerListStore = new ListStore(iconField, nameField, playersField);
-            ServerListView.DataSource = ServerListStore;
-            ServerListView.HeadersVisible = false;
-            ServerListView.Columns.Add(new ListViewColumn("Icon", new ImageCellView { ImageField = iconField }));
-            ServerListView.Columns.Add(new ListViewColumn("Name", new TextCellView { TextField = nameField }));
-            ServerListView.Columns.Add(new ListViewColumn("Players", new TextCellView { TextField = playersField }));
 
             // TODO: restore this functionality
             //ServerIPEntry.KeyReleased += (sender, e) => 
@@ -76,17 +90,12 @@ namespace TrueCraft.Launcher.Views
                 Window.InteractionBox.PackEnd(Window.MainMenuView, true, false, 0);
             };
             ConnectButton.Clicked += ConnectButton_Clicked;
-            ServerListView.SelectionChanged += (sender, e) => 
-            {
-                RemoveServerButton.Sensitive = ServerListView.SelectedRow != -1;
-                ServerIPEntry.Sensitive = ServerListView.SelectedRow == -1;
-            };
             AddServerButton.Clicked += (sender, e) => 
             {
                 AddServerButton.Sensitive = false;
                 RemoveServerButton.Sensitive = false;
                 ConnectButton.Sensitive = false;
-                ServerListView.Sensitive = false;
+                _serverListView.Sensitive = false;
                 ServerIPEntry.Sensitive = false;
                 ServerCreationBox.Visible = true;
             };
@@ -95,18 +104,26 @@ namespace TrueCraft.Launcher.Views
                 AddServerButton.Sensitive = true;
                 RemoveServerButton.Sensitive = true;
                 ConnectButton.Sensitive = true;
-                ServerListView.Sensitive = true;
+                _serverListView.Sensitive = true;
                 ServerIPEntry.Sensitive = true;
                 ServerCreationBox.Visible = false;
             };
+
             RemoveServerButton.Clicked += (sender, e) => 
             {
-                var server = UserSettings.Local.FavoriteServers[ServerListView.SelectedRow];
-                ServerListStore.RemoveRow(ServerListView.SelectedRow);
+                TreeIter iter;
+                ITreeModel model;
+                _serverListView.Selection.GetSelected(out model, out iter);
+                string serverName = (string)model.GetValue(iter, (int)ServerColumns.Name);
+                string serverAddress = (string)model.GetValue(iter, (int)ServerColumns.Address);
+                _serverListStore.Remove(ref iter);
+
+                // TODO: display busy cursor; surround with try/catch/finally
                 UserSettings.Local.FavoriteServers = UserSettings.Local.FavoriteServers.Where(
-                    s => s.Name != server.Name && s.Address != server.Address).ToArray();
+                    s => s.Name != serverName && s.Address != serverAddress).ToArray();
                 UserSettings.Local.Save();
             };
+
             CommitAddNewServer.Clicked += (sender, e) => 
             {
                 var server = new FavoriteServer
@@ -114,28 +131,34 @@ namespace TrueCraft.Launcher.Views
                     Name = NewServerName.Text,
                     Address = NewServerAddress.Text
                 };
-                var row = ServerListStore.AddRow();
+
+                TreeIter iter = _serverListStore.Append();
                 using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("TrueCraft.Launcher.Content.default-server-icon.png"))
-                    ServerListStore.SetValue(row, iconField, new Image(new Gdk.Pixbuf(stream)));
-                ServerListStore.SetValue(row, nameField, server.Name);
-                ServerListStore.SetValue(row, playersField, "TODO/50");
+                   _serverListStore.SetValue(iter, (int)ServerColumns.Icon, new Image(new Gdk.Pixbuf(stream)));
+                _serverListStore.SetValue(iter, (int)ServerColumns.Name, server.Name);
+                _serverListStore.SetValue(iter, (int)ServerColumns.Address, server.Address);
+                _serverListStore.SetValue(iter, (int)ServerColumns.Players, "TODO/50");
+
+                // TODO: display busy cursor; surround with try/catch/finally
                 UserSettings.Local.FavoriteServers = UserSettings.Local.FavoriteServers.Concat(new[] { server }).ToArray();
                 UserSettings.Local.Save();
+
                 AddServerButton.Sensitive = true;
                 RemoveServerButton.Sensitive = true;
                 ConnectButton.Sensitive = true;
-                ServerListView.Sensitive = true;
+                _serverListView.Sensitive = true;
                 ServerIPEntry.Sensitive = true;
                 ServerCreationBox.Visible = false;
             };
 
             foreach (var server in UserSettings.Local.FavoriteServers)
             {
-                var row = ServerListStore.AddRow();
+                TreeIter row = _serverListStore.Append();
                 using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("TrueCraft.Launcher.Content.default-server-icon.png"))
-                    ServerListStore.SetValue(row, iconField, new Image(new Gdk.Pixbuf(stream)));
-                ServerListStore.SetValue(row, nameField, server.Name);
-                ServerListStore.SetValue(row, playersField, "TODO/50");
+                    _serverListStore.SetValue(row, (int)ServerColumns.Icon, new Image(new Gdk.Pixbuf(stream)));
+                _serverListStore.SetValue(row, (int)ServerColumns.Name, server.Name);
+                _serverListStore.SetValue(row, (int)ServerColumns.Address, server.Address);
+                _serverListStore.SetValue(row, (int)ServerColumns.Players, "TODO/50");
             }
 
             var addServerHBox = new HBox();
@@ -157,16 +180,52 @@ namespace TrueCraft.Launcher.Views
             this.PackEnd(ConnectButton, true, false, 0);
             this.PackStart(MultiplayerLabel, true, false, 0);
             this.PackStart(ServerIPEntry, true, false, 0);
-            this.PackStart(ServerListView, true, false, 0);
+            this.PackStart(_serverListView, true, false, 0);
             this.PackStart(addServerHBox, true, false, 0);
             this.PackStart(ServerCreationBox, true, false, 0);
         }
 
+      private void AddServerColumns()
+      {
+         // Server Icon Column
+         CellRendererPixbuf imageRenderer = new CellRendererPixbuf();
+         TreeViewColumn column = new TreeViewColumn(String.Empty, imageRenderer,
+                  "icon", ServerColumns.Icon);
+         column.SortColumnId = (int)ServerColumns.Icon;
+         _serverListView.AppendColumn(column);
+
+         // Server Name column
+         CellRendererText rendererText = new CellRendererText();
+         column = new TreeViewColumn("Name", rendererText, "text", ServerColumns.Name);
+         column.SortColumnId = (int)ServerColumns.Name;
+         _serverListView.AppendColumn(column);
+
+         // Server Address Column
+         rendererText = new CellRendererText();
+         column = new TreeViewColumn("Address", rendererText, "text", ServerColumns.Address);
+         column.SortColumnId = (int)ServerColumns.Address;
+         column.Visible = false;
+         _serverListView.AppendColumn(column);
+
+         // Players Column
+         rendererText = new CellRendererText();
+         column = new TreeViewColumn("Players", rendererText, "text", ServerColumns.Players);
+         column.SortColumnId = (int)ServerColumns.Players;
+         _serverListView.AppendColumn(column);
+      }
+
         void ConnectButton_Clicked(object sender, EventArgs e)
         {
             var ip = ServerIPEntry.Text;
-            if (ServerListView.SelectedRow != -1)
-                ip = UserSettings.Local.FavoriteServers[ServerListView.SelectedRow].Address;
+            TreeSelection selection = _serverListView.Selection;
+            if (selection.CountSelectedRows() != 0)
+            {
+               TreeIter row;
+               ITreeModel model;
+               selection.GetSelected(out model, out row);
+               ip = (string)model.GetValue(row, (int)ServerColumns.Address);
+            }
+
             string TrueCraftLaunchParams = string.Format("{0} {1} {2}", ip, Window.User.Username, Window.User.SessionId);
             var process = new Process();
             if (RuntimeInfo.IsMono)
