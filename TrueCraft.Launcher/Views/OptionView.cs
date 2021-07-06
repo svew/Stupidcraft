@@ -200,7 +200,7 @@ namespace TrueCraft.Launcher.Views
                             CopyBetweenZips("particles.png", jar, zip);
 
                             zip.Save(Path.Combine(Paths.TexturePacks, "Minecraft.zip"));
-                            Application.Invoke(() =>
+                            Application.Invoke((sender, e) =>
                                 {
                                     OfficialAssetsProgress.Visible = false;
                                     var texturePack = TexturePack.FromArchive(
@@ -212,7 +212,7 @@ namespace TrueCraft.Launcher.Views
                         }
                         catch (Exception ex)
                         {
-                            Application.Invoke(() =>
+                            Application.Invoke((sender, e) =>
                                 {
                                     MessageDialog.ShowError("Error retrieving assets", ex.ToString());
                                     OfficialAssetsProgress.Visible = false;

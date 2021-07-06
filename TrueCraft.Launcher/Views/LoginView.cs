@@ -143,7 +143,7 @@ namespace TrueCraft.Launcher.Views
             }
             catch
             {
-                Application.Invoke(() =>
+                Application.Invoke((sender, e) =>
                 {
                     EnableForm();
                     ErrorLabel.Text = "Unable to log in";
@@ -165,7 +165,7 @@ namespace TrueCraft.Launcher.Views
                 if (session.Contains(":"))
                 {
                     var parts = session.Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
-                    Application.Invoke(() =>
+                    Application.Invoke((sender, e) =>
                     {
                         Window.User.Username = parts[2];
                         Window.User.SessionId = parts[3];
@@ -183,7 +183,7 @@ namespace TrueCraft.Launcher.Views
                 }
                 else
                 {
-                    Application.Invoke(() =>
+                    Application.Invoke((sender, e) =>
                     {
                         EnableForm();
                         ErrorLabel.Text = session;
@@ -194,7 +194,7 @@ namespace TrueCraft.Launcher.Views
             }
             catch
             {
-                Application.Invoke(() =>
+                Application.Invoke((sender, e) =>
                 {
                     EnableForm();
                     ErrorLabel.Text = "Unable to log in.";

@@ -132,14 +132,14 @@ namespace TrueCraft.Launcher.Views
             Task.Factory.StartNew(() =>
             {
                 Server.Initialize((value, stage) =>
-                    Application.Invoke(() =>
+                    Application.Invoke((sender, e) =>
                     {
                         ProgressBar.Indeterminate = false;
                         ProgressLabel.Text = stage;
                         ProgressBar.Fraction = value;
                     }));
                 Server.Start();
-                Application.Invoke(() =>
+                Application.Invoke((sender, e) =>
                 {
                     PlayButton.Sensitive = BackButton.Sensitive = CreateWorldButton.Sensitive = WorldListView.Sensitive = true;
                     var launchParams = string.Format("{0} {1} {2}", Server.Server.EndPoint, Window.User.Username, Window.User.SessionId);
@@ -149,7 +149,7 @@ namespace TrueCraft.Launcher.Views
                     else
                         process.StartInfo = new ProcessStartInfo("TrueCraft.Client.exe", launchParams);
                     process.EnableRaisingEvents = true;
-                    process.Exited += (s, a) => Application.Invoke(() =>
+                    process.Exited += (s, a) => Application.Invoke((s, a) =>
                     {
                         ProgressBar.Visible = ProgressLabel.Visible = false;
                         Window.Show();
