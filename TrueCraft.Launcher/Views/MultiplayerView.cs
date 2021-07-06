@@ -177,14 +177,12 @@ namespace TrueCraft.Launcher.Views
             process.Start();
             UserSettings.Local.LastIP = ServerIPEntry.Text;
             UserSettings.Local.Save();
-            Window.ShowInTaskbar = false;
-            Window.Hide();
-        }
+            Window.Visible = false;
+      }
 
         void ClientExited()
         {
-            Window.Show();
-            Window.ShowInTaskbar = true;
+            Window.Visible = true;
         }
     }
 }

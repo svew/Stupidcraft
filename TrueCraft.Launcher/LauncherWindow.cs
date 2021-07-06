@@ -54,8 +54,7 @@ namespace TrueCraft.Launcher
 
         void ClientExited()
         {
-            this.Show();
-            this.ShowInTaskbar = true;
+            this.Visible = true;
         }
     }
 }
