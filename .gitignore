@@ -11,6 +11,7 @@ TestResults/
 *.psess
 *.vsp
 packages/
+.vs/
 
 config.yaml
 
