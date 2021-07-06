@@ -224,12 +224,12 @@ namespace TrueCraft.Launcher.Views
                             CopyBetweenZips("terrain.png", jar, zip);
                             CopyBetweenZips("particles.png", jar, zip);
 
-                            zip.Save(Path.Combine(Paths.TexturePacks, "Minecraft.zip"));
+                            zip.Save(System.IO.Path.Combine(Paths.TexturePacks, "Minecraft.zip"));
                             Application.Invoke((sender, e) =>
                                 {
                                     OfficialAssetsProgress.Visible = false;
                                     var texturePack = TexturePack.FromArchive(
-                                        Path.Combine(Paths.TexturePacks, "Minecraft.zip"));
+                                        System.IO.Path.Combine(Paths.TexturePacks, "Minecraft.zip"));
                                     _texturePacks.Add(texturePack);
                                     AddTexturePackRow(texturePack);
                                 });
