@@ -13,6 +13,12 @@ namespace TrueCraft.Launcher.Views
 {
     public class OptionView : VBox
     {
+        private enum TexturePackColumns
+        {
+           Image,
+           Name
+        }
+
         public LauncherWindow Window { get; set; }
 
         public Label OptionLabel { get; set; }
@@ -21,10 +27,10 @@ namespace TrueCraft.Launcher.Views
         public CheckButton FullscreenCheckBox { get; set; }
         public CheckButton InvertMouseCheckBox { get; set; }
         public Label TexturePackLabel { get; set; }
-        public Image TexturePackImageField { get; set; }
-        public string TexturePackTextField { get; set; }
-        public ListStore TexturePackStore { get; set; }
-        public TreeView TexturePackListView { get; set; }
+
+        private ListStore _texturePackStore;
+        private TreeView _texturePackListView;
+
         public Button OfficialAssetsButton { get; set; }
         public ProgressBar OfficialAssetsProgress { get; set; }
         public Button OpenFolderButton { get; set; }
@@ -81,21 +87,16 @@ namespace TrueCraft.Launcher.Views
             };
 
             TexturePackLabel = new Label("Select a texture pack...");
-            TexturePackImageField = new Image();
-            TexturePackTextField = new string();
-            TexturePackStore = new ListStore(TexturePackImageField, TexturePackTextField);
-            TexturePackListView = new ListView
-            {
-                MinHeight = 200,
-                SelectionMode = SelectionMode.Single,
-                DataSource = TexturePackStore,
-                HeadersVisible = false
-            };
+            _texturePackStore = new ListStore(typeof(Image), typeof(string));
+            _texturePackListView = new TreeView(_texturePackStore);
+            _texturePackListView.SetSizeRequest(-1, 200);
+            _texturePackListView.HeadersVisible = false;
+            TreeSelection texturePackSelection = _texturePackListView.Selection;
+            texturePackSelection.Mode = SelectionMode.Single;
+            AddTexturePackColumns(_texturePackListView);
+
             OpenFolderButton = new Button("Open texture pack folder");
             BackButton = new Button("Back");
-
-            TexturePackListView.Columns.Add("Image", TexturePackImageField);
-            TexturePackListView.Columns.Add("Text", TexturePackTextField);
 
             ResolutionComboBox.SelectionChanged += (sender, e) =>
             {
@@ -116,11 +117,19 @@ namespace TrueCraft.Launcher.Views
                 UserSettings.Local.Save();
             };
 
-            TexturePackListView.SelectionChanged += (sender, e) =>
+            _texturePackListView.Selection.Changed += (sender, e) =>
             {
-                var texturePack = _texturePacks[TexturePackListView.SelectedRow];
+                TreeSelection selection = (TreeSelection)sender;
+                TreeIter iter;
+                ITreeModel model;
+                selection.GetSelected(out model, out iter);
+                string name = (string)model.GetValue(iter, (int)TexturePackColumns.Name);
+
+                // TODO: Are Texture Pack names sufficiently unique?
+                TexturePack texturePack = _texturePacks.Where<TexturePack>(tp => tp.Name == name).First<TexturePack>();
                 if (_lastTexturePack != texturePack)
                 {
+                    // TODO: show busy cursor; add try/catch/finally
                     UserSettings.Local.SelectedTexturePack = texturePack.Name;
                     UserSettings.Local.Save();
                 }
@@ -150,11 +159,27 @@ namespace TrueCraft.Launcher.Views
             this.PackStart(FullscreenCheckBox, true, false, 0);
             this.PackStart(InvertMouseCheckBox, true, false, 0);
             this.PackStart(TexturePackLabel, true, false, 0);
-            this.PackStart(TexturePackListView, true, false, 0);
+            this.PackStart(_texturePackListView, true, false, 0);
             this.PackStart(OfficialAssetsProgress, true, false, 0);
             this.PackStart(OfficialAssetsButton, true, false, 0);
             this.PackStart(OpenFolderButton, true, false, 0);
             this.PackEnd(BackButton, true, false, 0);
+        }
+
+        private static void AddTexturePackColumns(TreeView tv)
+        {
+           // Texture Pack Image Column
+           CellRendererPixbuf imageRenderer = new CellRendererPixbuf();
+           TreeViewColumn column = new TreeViewColumn(String.Empty, imageRenderer,
+                    "image", TexturePackColumns.Image);
+           column.SortColumnId = (int)TexturePackColumns.Image;
+           tv.AppendColumn(column);
+
+            // Texture Pack Name column
+            CellRendererText rendererText = new CellRendererText();
+            column = new TreeViewColumn("Name", rendererText, "text", TexturePackColumns.Name);
+            column.SortColumnId = (int)TexturePackColumns.Name;
+            tv.AppendColumn(column);
         }
 
         void OfficialAssetsButton_Clicked(object sender, EventArgs e)
@@ -276,10 +301,10 @@ namespace TrueCraft.Launcher.Views
 
         private void AddTexturePackRow(TexturePack pack)
         {
-            var row = TexturePackStore.AddRow();
+           TreeIter row = _texturePackStore.Append();
 
-            TexturePackStore.SetValue(row, TexturePackImageField, new Image(new Gdk.Pixbuf(pack.Image, 24, 24)));
-            TexturePackStore.SetValue(row, TexturePackTextField, pack.Name + "\r\n" + pack.Description);
+           _texturePackStore.SetValue(row, (int)TexturePackColumns.Image, new Image(new Gdk.Pixbuf(pack.Image, 24, 24)));
+           _texturePackStore.SetValue(row, (int)TexturePackColumns.Name, pack.Name + "\r\n" + pack.Description);
         }
     }
 }
