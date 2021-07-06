@@ -47,7 +47,7 @@ namespace TrueCraft.Launcher.Views
             }
 
             using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("TrueCraft.Launcher.Content.truecraft_logo.png"))
-                TrueCraftLogoImage = new Image(Image.FromStream(stream).WithBoxSize(350, 75));
+                TrueCraftLogoImage = new Image(new Gdk.Pixbuf(stream, 350, 75));
 
             UsernameText.PlaceholderText = "Username";
             PasswordText.PlaceholderText = "Password";

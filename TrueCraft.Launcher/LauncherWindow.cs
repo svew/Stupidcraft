@@ -41,7 +41,7 @@ namespace TrueCraft.Launcher
             InteractionBox = new VBox();
             
             using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("TrueCraft.Launcher.Content.truecraft_logo.png"))
-                TrueCraftLogoImage = new Image(Image.FromStream(stream).WithBoxSize(350, 75));
+                TrueCraftLogoImage = new Image(new Gdk.Pixbuf(stream, 350, 75));
 
             WebScrollView.Content = WebView;
             MainContainer.PackStart(WebScrollView, true, false, 0);

@@ -115,7 +115,7 @@ namespace TrueCraft.Launcher.Views
                 };
                 var row = ServerListStore.AddRow();
                 using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("TrueCraft.Launcher.Content.default-server-icon.png"))
-                    ServerListStore.SetValue(row, iconField, Image.FromStream(stream));
+                    ServerListStore.SetValue(row, iconField, new Image(new GdkPixbuf(stream)));
                 ServerListStore.SetValue(row, nameField, server.Name);
                 ServerListStore.SetValue(row, playersField, "TODO/50");
                 UserSettings.Local.FavoriteServers = UserSettings.Local.FavoriteServers.Concat(new[] { server }).ToArray();
@@ -132,7 +132,7 @@ namespace TrueCraft.Launcher.Views
             {
                 var row = ServerListStore.AddRow();
                 using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("TrueCraft.Launcher.Content.default-server-icon.png"))
-                    ServerListStore.SetValue(row, iconField, Image.FromStream(stream));
+                    ServerListStore.SetValue(row, iconField, new Image(new GdkPixbuf(stream)));
                 ServerListStore.SetValue(row, nameField, server.Name);
                 ServerListStore.SetValue(row, playersField, "TODO/50");
             }

@@ -278,7 +278,7 @@ namespace TrueCraft.Launcher.Views
         {
             var row = TexturePackStore.AddRow();
 
-            TexturePackStore.SetValue(row, TexturePackImageField, Image.FromStream(pack.Image).WithSize(IconSize.Medium));
+            TexturePackStore.SetValue(row, TexturePackImageField, new Image(new Gdk.Pixbuf(pack.Image, 24, 24)));
             TexturePackStore.SetValue(row, TexturePackTextField, pack.Name + "\r\n" + pack.Description);
         }
     }
