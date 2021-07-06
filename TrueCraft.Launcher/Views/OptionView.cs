@@ -27,8 +27,9 @@ namespace TrueCraft.Launcher.Views
         private ComboBox _resolutionComboBox;
         private ListStore _resolutionList;
 
-        public CheckButton FullscreenCheckBox { get; set; }
-        public CheckButton InvertMouseCheckBox { get; set; }
+        private CheckButton _fullscreenCheckBox;
+        private CheckButton _invertMouseCheckBox;
+
         public Label TexturePackLabel { get; set; }
 
         private ListStore _texturePackStore;
@@ -79,16 +80,10 @@ namespace TrueCraft.Launcher.Views
             }
 
             _resolutionComboBox.Active = resolutionIndex;
-            FullscreenCheckBox = new CheckButton
-            {
-                Label = "Fullscreen mode",
-                State = (UserSettings.Local.IsFullscreen) ? CheckBoxState.On : CheckBoxState.Off
-            };
-            InvertMouseCheckBox = new CheckButton
-            {
-                Label = "Inverted mouse",
-                State = (UserSettings.Local.InvertedMouse) ? CheckBoxState.On : CheckBoxState.Off
-            };
+            _fullscreenCheckBox = new CheckButton("Fullscreen mode");
+            _fullscreenCheckBox.Active = UserSettings.Local.IsFullscreen;
+            _invertMouseCheckBox = new CheckButton("Inverted mouse");
+            _invertMouseCheckBox.Active = UserSettings.Local.InvertedMouse;
 
             TexturePackLabel = new Label("Select a texture pack...");
             _texturePackStore = new ListStore(typeof(Image), typeof(string));
@@ -112,15 +107,17 @@ namespace TrueCraft.Launcher.Views
                 UserSettings.Local.Save();
             };
 
-            FullscreenCheckBox.Clicked += (sender, e) =>
+            _fullscreenCheckBox.Clicked += (sender, e) =>
             {
-                UserSettings.Local.IsFullscreen = !UserSettings.Local.IsFullscreen;
+                UserSettings.Local.IsFullscreen = _fullscreenCheckBox.Active;
+                // TODO: show busy cursor; add try/catch/finally
                 UserSettings.Local.Save();
             };
 
-            InvertMouseCheckBox.Clicked += (sender, e) => 
+            _invertMouseCheckBox.Clicked += (sender, e) => 
             {
-                UserSettings.Local.InvertedMouse = !UserSettings.Local.InvertedMouse;
+                UserSettings.Local.InvertedMouse = _invertMouseCheckBox.Active;
+                // TODO: show busy cursor; add try/catch/finally
                 UserSettings.Local.Save();
             };
 
@@ -163,8 +160,8 @@ namespace TrueCraft.Launcher.Views
             this.PackStart(OptionLabel, true, false, 0);
             this.PackStart(ResolutionLabel, true, false, 0);
             this.PackStart(_resolutionComboBox, true, false, 0);
-            this.PackStart(FullscreenCheckBox, true, false, 0);
-            this.PackStart(InvertMouseCheckBox, true, false, 0);
+            this.PackStart(_fullscreenCheckBox, true, false, 0);
+            this.PackStart(_invertMouseCheckBox, true, false, 0);
             this.PackStart(TexturePackLabel, true, false, 0);
             this.PackStart(_texturePackListView, true, false, 0);
             this.PackStart(OfficialAssetsProgress, true, false, 0);
