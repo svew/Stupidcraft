@@ -42,13 +42,13 @@ namespace TrueCraft.Launcher
             using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("TrueCraft.Launcher.Content.truecraft_logo.png"))
                 TrueCraftLogoImage = new Image(new Gdk.Pixbuf(stream, 350, 75));
 
-            WebScrollView.Content = WebView;
+            WebScrollView.Add(WebView);
             MainContainer.PackStart(WebScrollView, true, false, 0);
             InteractionBox.PackStart(TrueCraftLogoImage, true, false, 0);
             InteractionBox.PackEnd(LoginView, true, false, 0);
             MainContainer.PackEnd(InteractionBox, true, false, 0);
 
-            this.Content = MainContainer;
+            this.Add(MainContainer);
         }
 
         void ClientExited()
