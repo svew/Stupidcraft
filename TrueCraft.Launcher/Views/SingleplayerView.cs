@@ -188,7 +188,7 @@ namespace TrueCraft.Launcher.Views
             {
                 if (task.IsFaulted)
                 {
-                    Application.Invoke(() =>
+                    Application.Invoke((sender, e) =>
                     {
                         MessageDialog.ShowError("Error loading world", "It's possible that this world is corrupted.");
                         ProgressBar.Visible = ProgressLabel.Visible = false;
