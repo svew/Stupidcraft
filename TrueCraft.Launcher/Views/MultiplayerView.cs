@@ -238,7 +238,7 @@ namespace TrueCraft.Launcher.Views
             Window.Visible = false;
       }
 
-        void ClientExited()
+        void ClientExited(object sender, EventArgs e)
         {
             Window.Visible = true;
         }
