@@ -25,9 +25,8 @@ namespace TrueCraft.Launcher
         public VBox InteractionBox { get; set; }
         public Image TrueCraftLogoImage { get; set; }
 
-        public LauncherWindow()
+        public LauncherWindow() : base("TrueCraft Launcher")
         {
-            this.Title = "TrueCraft Launcher";
             this.DefaultSize = new Gdk.Size(1200, 576);
             this.User = new TrueCraftUser();
 
