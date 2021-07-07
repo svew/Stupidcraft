@@ -49,6 +49,7 @@ namespace TrueCraft.Launcher
             _mainContainer.PackEnd(InteractionBox, true, false, 0);
 
             this.Add(_mainContainer);
+            _mainContainer.ShowAll();
         }
 
         void ClientExited()
