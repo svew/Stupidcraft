@@ -42,7 +42,7 @@ namespace TrueCraft.Launcher.Views
                 Window.InteractionBox.Remove(this);
                 window.InteractionBox.PackEnd(Window.OptionView, true, false, 0);
             };
-            QuitButton.Clicked += (sender, e) => Application.Exit();
+            QuitButton.Clicked += (sender, e) => Application.Quit();
 
             this.PackStart(WelcomeText, true, false, 0);
             this.PackStart(SingleplayerButton, true, false, 0);
