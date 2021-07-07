@@ -178,12 +178,10 @@ namespace TrueCraft.Launcher.Views
                     {
                         ProgressBar.Visible = ProgressLabel.Visible = false;
                         Window.Show();
-                        Window.ShowInTaskbar = true;
                         Server.Stop();
                         Server.World.Save();
                     });
                     process.Start();
-                    Window.ShowInTaskbar = false;
                     Window.Hide();
                 });
             }).ContinueWith(task =>
