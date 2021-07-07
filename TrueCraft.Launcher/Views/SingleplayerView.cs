@@ -11,7 +11,7 @@ namespace TrueCraft.Launcher.Views
 {
     public class SingleplayerView : VBox
     {
-        public LauncherWindow Window { get; set; }
+        private LauncherWindow _window;
         public Label SingleplayerLabel { get; set; }
 
         private TreeView _worldListView;
@@ -35,7 +35,7 @@ namespace TrueCraft.Launcher.Views
             Worlds.Local = new Worlds();
             Worlds.Local.Load();
 
-            Window = window;
+            _window = window;
             this.SetSizeRequest(250, -1);
 
             SingleplayerLabel = new Label("Singleplayer")
@@ -73,8 +73,8 @@ namespace TrueCraft.Launcher.Views
 
             BackButton.Clicked += (sender, e) =>
             {
-                Window.InteractionBox.Remove(this);
-                Window.InteractionBox.PackEnd(Window.MainMenuView, true, false, 0);
+                _window.InteractionBox.Remove(this);
+                _window.InteractionBox.PackEnd(_window.MainMenuView, true, false, 0);
             };
             CreateWorldButton.Clicked += (sender, e) =>
             {
@@ -167,7 +167,7 @@ namespace TrueCraft.Launcher.Views
                 Application.Invoke((sender, e) =>
                 {
                     PlayButton.Sensitive = BackButton.Sensitive = CreateWorldButton.Sensitive = _worldListView.Sensitive = true;
-                    var launchParams = string.Format("{0} {1} {2}", Server.Server.EndPoint, Window.User.Username, Window.User.SessionId);
+                    var launchParams = string.Format("{0} {1} {2}", Server.Server.EndPoint, _window.User.Username, _window.User.SessionId);
                     var process = new Process();
                     if (RuntimeInfo.IsMono)
                         process.StartInfo = new ProcessStartInfo("mono", "TrueCraft.Client.exe " + launchParams);
@@ -177,12 +177,12 @@ namespace TrueCraft.Launcher.Views
                     process.Exited += (s, a) => Application.Invoke((s, a) =>
                     {
                         ProgressBar.Visible = ProgressLabel.Visible = false;
-                        Window.Show();
+                        _window.Show();
                         Server.Stop();
                         Server.World.Save();
                     });
                     process.Start();
-                    Window.Hide();
+                    _window.Hide();
                 });
             }).ContinueWith(task =>
             {
@@ -190,7 +190,17 @@ namespace TrueCraft.Launcher.Views
                 {
                     Application.Invoke((sender, e) =>
                     {
-                        MessageDialog.ShowError("Error loading world", "It's possible that this world is corrupted.");
+                       using (MessageDialog msg = new MessageDialog(_window,
+                                DialogFlags.DestroyWithParent | DialogFlags.Modal,
+                                MessageType.Error,
+                                ButtonsType.Close,
+                                "Error loading world",
+                                Array.Empty<object>()))
+                       {
+                          msg.SecondaryText = "It's possible that this world is corrupted.";
+                          msg.Run();
+                       }
+
                         ProgressBar.Visible = ProgressLabel.Visible = false;
                         PlayButton.Sensitive = BackButton.Sensitive = CreateWorldButton.Sensitive =
                             _worldListView.Sensitive = true;

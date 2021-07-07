@@ -19,7 +19,7 @@ namespace TrueCraft.Launcher.Views
            Name
         }
 
-        public LauncherWindow Window { get; set; }
+        private LauncherWindow _window;
 
         public Label OptionLabel { get; set; }
 
@@ -48,7 +48,7 @@ namespace TrueCraft.Launcher.Views
             _texturePacks = new List<TexturePack>();
             _lastTexturePack = null;
 
-            Window = window;
+            _window = window;
             this.SetSizeRequest(250, -1);
 
             OptionLabel = new Label("Options")
@@ -147,8 +147,8 @@ namespace TrueCraft.Launcher.Views
 
             BackButton.Clicked += (sender, e) =>
             {
-                Window.InteractionBox.Remove(this);
-                Window.InteractionBox.PackEnd(Window.MainMenuView, true, false, 0);
+                _window.InteractionBox.Remove(this);
+                _window.InteractionBox.PackEnd(_window.MainMenuView, true, false, 0);
             };
 
             OfficialAssetsButton = new Button("Download Minecraft assets") { Visible = false };
@@ -189,68 +189,88 @@ namespace TrueCraft.Launcher.Views
 
         void OfficialAssetsButton_Clicked(object sender, EventArgs e)
         {
-            var result = MessageDialog.AskQuestion("Download Mojang assets",
-                "This will download the official Minecraft assets from Mojang.\n\n" +
-                "By proceeding you agree to the Mojang asset guidelines:\n\n" +
-                "https://account.mojang.com/terms#brand\n\n" +
-                "Proceed?",
-                Command.Yes, Command.No);
-            if (result == Command.Yes)
-            {
-                OfficialAssetsButton.Visible = false;
-                OfficialAssetsProgress.Visible = true;
-                Task.Factory.StartNew(() =>
-                    {
-                        try
-                        {
-                            var stream = new WebClient().OpenRead("http://s3.amazonaws.com/Minecraft.Download/versions/b1.7.3/b1.7.3.jar");
-                            var ms = new MemoryStream();
-                            CopyStream(stream, ms);
-                            ms.Seek(0, SeekOrigin.Begin);
-                            stream.Dispose();
-                            var jar = ZipFile.Read(ms);
-                            var zip = new ZipFile();
-                            zip.AddEntry("pack.txt", "Minecraft textures");
+           using (MessageDialog msg = new MessageDialog(_window,
+                     DialogFlags.Modal | DialogFlags.DestroyWithParent,
+                     MessageType.Question, ButtonsType.YesNo,
+                     false,
+                     "Download Mojang assets",
+                     Array.Empty<object>()))
+           {
+              msg.SecondaryText = "This will download the official Minecraft assets from Mojang.\n\n" +
+                  "By proceeding you agree to the Mojang asset guidelines:\n\n" +
+                  "https://account.mojang.com/terms#brand\n\n" +
+                  "Proceed?";
+              msg.Response += HandleOfficialAssetsResponse;
+              msg.Run();
+           }
+        }
 
-                            string[] dirs = {
+        private void HandleOfficialAssetsResponse(object sender, ResponseArgs e)
+        {
+           if (e.ResponseId != ResponseType.Yes)
+              return;
+
+            OfficialAssetsButton.Visible = false;
+            OfficialAssetsProgress.Visible = true;
+            Task.Factory.StartNew(() =>
+            {
+                try
+                {
+                    var stream = new WebClient().OpenRead("http://s3.amazonaws.com/Minecraft.Download/versions/b1.7.3/b1.7.3.jar");
+                    var ms = new MemoryStream();
+                    CopyStream(stream, ms);
+                    ms.Seek(0, SeekOrigin.Begin);
+                    stream.Dispose();
+                    var jar = ZipFile.Read(ms);
+                    var zip = new ZipFile();
+                    zip.AddEntry("pack.txt", "Minecraft textures");
+
+                    string[] dirs = {
                                 "terrain", "gui", "armor", "art",
                                 "environment", "item", "misc", "mob"
                             };
 
-                            foreach (var entry in jar.Entries)
-                            {
-                                foreach (var c in dirs)
-                                {
-                                    if (entry.FileName.StartsWith(c + "/"))
-                                        CopyBetweenZips(entry.FileName, jar, zip);
-                                }
-                            }
-                            CopyBetweenZips("pack.png", jar, zip);
-                            CopyBetweenZips("terrain.png", jar, zip);
-                            CopyBetweenZips("particles.png", jar, zip);
-
-                            zip.Save(System.IO.Path.Combine(Paths.TexturePacks, "Minecraft.zip"));
-                            Application.Invoke((sender, e) =>
-                                {
-                                    OfficialAssetsProgress.Visible = false;
-                                    var texturePack = TexturePack.FromArchive(
-                                        System.IO.Path.Combine(Paths.TexturePacks, "Minecraft.zip"));
-                                    _texturePacks.Add(texturePack);
-                                    AddTexturePackRow(texturePack);
-                                });
-                            ms.Dispose();
-                        }
-                        catch (Exception ex)
+                    foreach (var entry in jar.Entries)
+                    {
+                        foreach (var c in dirs)
                         {
-                            Application.Invoke((sender, e) =>
-                                {
-                                    MessageDialog.ShowError("Error retrieving assets", ex.ToString());
-                                    OfficialAssetsProgress.Visible = false;
-                                    OfficialAssetsButton.Visible = true;
-                                });
+                            if (entry.FileName.StartsWith(c + "/"))
+                                CopyBetweenZips(entry.FileName, jar, zip);
                         }
+                    }
+                    CopyBetweenZips("pack.png", jar, zip);
+                    CopyBetweenZips("terrain.png", jar, zip);
+                    CopyBetweenZips("particles.png", jar, zip);
+
+                    zip.Save(System.IO.Path.Combine(Paths.TexturePacks, "Minecraft.zip"));
+                    Application.Invoke((sender, e) =>
+                    {
+                        OfficialAssetsProgress.Visible = false;
+                        var texturePack = TexturePack.FromArchive(
+                            System.IO.Path.Combine(Paths.TexturePacks, "Minecraft.zip"));
+                        _texturePacks.Add(texturePack);
+                        AddTexturePackRow(texturePack);
                     });
-            }
+                    ms.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    Application.Invoke((sender, e) =>
+                    {
+                       using (MessageDialog msg = new MessageDialog(_window,
+                                DialogFlags.DestroyWithParent | DialogFlags.Modal,
+                                MessageType.Error,
+                                ButtonsType.Close,
+                                $"Error retrieving assets:\n{ex}",
+                                Array.Empty<object>()))
+                       {
+                          msg.Run();
+                       }
+                        OfficialAssetsProgress.Visible = false;
+                        OfficialAssetsButton.Visible = true;
+                    });
+                }
+            });
         }
 
         public static void CopyBetweenZips(string name, ZipFile source, ZipFile destination)
