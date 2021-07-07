@@ -153,7 +153,8 @@ namespace TrueCraft.Launcher.Views
 
             OfficialAssetsButton = new Button("Download Minecraft assets") { Visible = false };
             OfficialAssetsButton.Clicked += OfficialAssetsButton_Clicked;
-            OfficialAssetsProgress = new ProgressBar() { Visible = false, Indeterminate = true };
+            // TODO: we have to call Pulse on the Progress Bar once in a while.
+            OfficialAssetsProgress = new ProgressBar() { Visible = false };
 
             LoadTexturePacks();
 

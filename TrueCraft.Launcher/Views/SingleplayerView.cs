@@ -68,7 +68,8 @@ namespace TrueCraft.Launcher.Views
             NewWorldCancel = new Button("Cancel");
 
             ProgressLabel = new Label("Loading world...") { Visible = false };
-            ProgressBar = new ProgressBar() { Visible = false, Indeterminate = true, Fraction = 0 };
+            // TODO: we have to call Pulse on the Progress Bar once in a while.
+            ProgressBar = new ProgressBar() { Visible = false, Fraction = 0 };
 
             BackButton.Clicked += (sender, e) =>
             {
@@ -159,7 +160,6 @@ namespace TrueCraft.Launcher.Views
                 Server.Initialize((value, stage) =>
                     Application.Invoke((sender, e) =>
                     {
-                        ProgressBar.Indeterminate = false;
                         ProgressLabel.Text = stage;
                         ProgressBar.Fraction = value;
                     }));
