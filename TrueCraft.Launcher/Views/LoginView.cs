@@ -74,7 +74,6 @@ namespace TrueCraft.Launcher.Views
                 Window.InteractionBox.PackEnd(Window.MainMenuView = new MainMenuView(Window), true, false, 0);
             };
             var regoffbox = new HBox();
-            RegisterButton.WidthRequest = OfflineButton.WidthRequest = 0.5;
             regoffbox.PackStart(RegisterButton, true, false, 0);
             regoffbox.PackStart(OfflineButton, true, false, 0);
             LogInButton.Clicked += LogInButton_Clicked;

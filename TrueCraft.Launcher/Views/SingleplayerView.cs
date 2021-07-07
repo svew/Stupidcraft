@@ -114,14 +114,12 @@ namespace TrueCraft.Launcher.Views
             }
 
             var createDeleteHbox = new HBox();
-            CreateWorldButton.WidthRequest = DeleteWorldButton.WidthRequest = 0.5;
             createDeleteHbox.PackStart(CreateWorldButton, true, false, 0);
             createDeleteHbox.PackStart(DeleteWorldButton, true, false, 0);
 
             CreateWorldBox.PackStart(NewWorldName, true, false, 0);
             CreateWorldBox.PackStart(NewWorldSeed, true, false, 0);
             var newWorldHbox = new HBox();
-            NewWorldCommit.WidthRequest = NewWorldCancel.WidthRequest = 0.5;
             newWorldHbox.PackStart(NewWorldCommit, true, false, 0);
             newWorldHbox.PackStart(NewWorldCancel, true, false, 0);
             CreateWorldBox.PackStart(newWorldHbox, true, false, 0);

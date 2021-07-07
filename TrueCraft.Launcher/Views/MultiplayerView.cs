@@ -162,12 +162,10 @@ namespace TrueCraft.Launcher.Views
             }
 
             var addServerHBox = new HBox();
-            AddServerButton.WidthRequest = RemoveServerButton.WidthRequest = 0.5;
             addServerHBox.PackStart(AddServerButton, true, false, 0);
             addServerHBox.PackStart(RemoveServerButton, true, false, 0);
 
             var commitHBox = new HBox();
-            CancelAddNewServer.WidthRequest = CommitAddNewServer.WidthRequest = 0.5;
             commitHBox.PackStart(CommitAddNewServer, true, false, 0);
             commitHBox.PackStart(CancelAddNewServer, true, false, 0);
 
