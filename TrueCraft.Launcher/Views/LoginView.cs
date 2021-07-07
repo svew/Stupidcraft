@@ -170,11 +170,11 @@ namespace TrueCraft.Launcher.Views
                         Window.User.SessionId = parts[3];
                         EnableForm();
                         Window.InteractionBox.Remove(this);
-                        Window.InteractionBox.PackEnd(Window.MainMenuView = new MainMenuView(Window));
+                        Window.InteractionBox.PackEnd(Window.MainMenuView = new MainMenuView(Window), true, false, 0);
                         UserSettings.Local.AutoLogin = RememberCheckBox.Active;
                         UserSettings.Local.Username = Window.User.Username;
                         if (UserSettings.Local.AutoLogin)
-                            UserSettings.Local.Password = PasswordText.Password;
+                            UserSettings.Local.Password = PasswordText.Text;
                         else
                             UserSettings.Local.Password = string.Empty;
                         UserSettings.Local.Save();
