@@ -24,8 +24,7 @@ namespace TrueCraft.Launcher
             Window = new LauncherWindow();
             thread.Start();
             Window.Show();
-            // TODO Check if closing the Window closes the Application
-            // Window.Closed += (sender, e) => Application.Exit();
+            Window.DeleteEvent += (sender, e) => Application.Quit();
             Application.Run();
             Window.Dispose();
             thread.Abort();
