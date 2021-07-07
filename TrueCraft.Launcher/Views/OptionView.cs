@@ -176,7 +176,7 @@ namespace TrueCraft.Launcher.Views
            // Texture Pack Image Column
            CellRendererPixbuf imageRenderer = new CellRendererPixbuf();
            TreeViewColumn column = new TreeViewColumn(String.Empty, imageRenderer,
-                    "image", TexturePackColumns.Image);
+                    Array.Empty<object>());
            column.SortColumnId = (int)TexturePackColumns.Image;
            tv.AppendColumn(column);
 
