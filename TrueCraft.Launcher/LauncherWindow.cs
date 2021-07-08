@@ -20,16 +20,16 @@ namespace TrueCraft.Launcher
         private LoginView _loginView;
         private int _indexLoginView;
 
-        private MainMenuView _mainMenuView { get; set; }
+        private MainMenuView _mainMenuView;
         private int _indexMainMenuView;
 
-        public OptionView OptionView { get; set; }
+        private OptionView _optionView;
         private int _indexOptionView;
 
-        public MultiplayerView MultiplayerView { get; set; }
+        private MultiplayerView _multiplayerView;
         private int _indexMultiplayerView;
 
-        public SingleplayerView SingleplayerView { get; set; }
+        private SingleplayerView _singleplayerView;
         private int _indexSingleplayerView;
 
         private Box _interactionBox;
@@ -49,9 +49,9 @@ namespace TrueCraft.Launcher
 
             _loginView = new LoginView(this);
             _mainMenuView = new MainMenuView(this);
-            OptionView = new OptionView(this);
-            MultiplayerView = new MultiplayerView(this);
-            SingleplayerView = new SingleplayerView(this);
+            _optionView = new OptionView(this);
+            _multiplayerView = new MultiplayerView(this);
+            _singleplayerView = new SingleplayerView(this);
 
             _notebook = new Notebook();
             _notebook.PopupDisable();
@@ -59,9 +59,9 @@ namespace TrueCraft.Launcher
             _indexLoginView = _notebook.AppendPage(_loginView, null);
             _indexMainMenuView = _notebook.AppendPage(_mainMenuView, null);
             _notebook.Page = _indexMainMenuView;
-            _indexOptionView = _notebook.AppendPage(OptionView, null);
-            _indexMultiplayerView = _notebook.AppendPage(MultiplayerView, null);
-            _indexSingleplayerView = _notebook.AppendPage(SingleplayerView, null);
+            _indexOptionView = _notebook.AppendPage(_optionView, null);
+            _indexMultiplayerView = _notebook.AppendPage(_multiplayerView, null);
+            _indexSingleplayerView = _notebook.AppendPage(_singleplayerView, null);
             
             using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("TrueCraft.Launcher.Content.truecraft_logo.png"))
                 _trueCraftLogoImage = new Image(new Gdk.Pixbuf(stream, 350, 75));
