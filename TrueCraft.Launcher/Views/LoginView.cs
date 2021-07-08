@@ -9,7 +9,7 @@ namespace TrueCraft.Launcher.Views
 {
     public class LoginView : VBox
     {
-        public LauncherWindow Window { get; set; }
+        private LauncherWindow _window;
 
         public Entry UsernameText { get; set; }
         public Entry PasswordText { get; set; }
@@ -22,7 +22,7 @@ namespace TrueCraft.Launcher.Views
 
         public LoginView(LauncherWindow window)
         {
-            Window = window;
+            _window = window;
             this.SetSizeRequest(250, -1);
 
             ErrorLabel = new Label("Username or password incorrect")
@@ -64,14 +64,13 @@ namespace TrueCraft.Launcher.Views
             //};
             RegisterButton.Clicked += (sender, e) =>
             {
-                Window.WebView.Text = "https://truecraft.io/register";
+                _window.WebView.Text = "https://truecraft.io/register";
             };
             OfflineButton.Clicked += (sender, e) =>
             {
-                Window.User.Username = UsernameText.Text;
-                Window.User.SessionId = "-";
-                Window.InteractionBox.Remove(this);
-                Window.InteractionBox.PackEnd(Window.MainMenuView = new MainMenuView(Window), true, false, 0);
+                _window.User.Username = UsernameText.Text;
+                _window.User.SessionId = "-";
+                _window.ShowMainMenuView();
             };
             var regoffbox = new HBox();
             regoffbox.PackStart(RegisterButton, true, false, 0);
@@ -116,7 +115,7 @@ namespace TrueCraft.Launcher.Views
             ErrorLabel.Visible = false;
             DisableForm();
 
-            Window.User.Username = UsernameText.Text;
+            _window.User.Username = UsernameText.Text;
             var request = WebRequest.CreateHttp(TrueCraftUser.AuthServer + "/api/login");
             request.Method = "POST";
             request.ContentType = "application/x-www-form-urlencoded";
@@ -124,7 +123,7 @@ namespace TrueCraft.Launcher.Views
             request.BeginGetRequestStream(HandleLoginRequestReady, new LogInAsyncState
             {
                 Request = request,
-                Username = Window.User.Username,
+                Username = _window.User.Username,
                 Password = PasswordText.Text
             });
         }
@@ -166,13 +165,12 @@ namespace TrueCraft.Launcher.Views
                     var parts = session.Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
                     Application.Invoke((sender, e) =>
                     {
-                        Window.User.Username = parts[2];
-                        Window.User.SessionId = parts[3];
+                        _window.User.Username = parts[2];
+                        _window.User.SessionId = parts[3];
                         EnableForm();
-                        Window.InteractionBox.Remove(this);
-                        Window.InteractionBox.PackEnd(Window.MainMenuView = new MainMenuView(Window), true, false, 0);
+                        _window.ShowMainMenuView();
                         UserSettings.Local.AutoLogin = RememberCheckBox.Active;
-                        UserSettings.Local.Username = Window.User.Username;
+                        UserSettings.Local.Username = _window.User.Username;
                         if (UserSettings.Local.AutoLogin)
                             UserSettings.Local.Password = PasswordText.Text;
                         else

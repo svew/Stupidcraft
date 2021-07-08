@@ -84,11 +84,7 @@ namespace TrueCraft.Launcher.Views
             //    if (e.Key == Key.Return || e.Key == Key.NumPadEnter)
             //        ConnectButton_Clicked(sender, e);
             //};
-            BackButton.Clicked += (sender, e) =>
-            {
-                Window.InteractionBox.Remove(this);
-                Window.InteractionBox.PackEnd(Window.MainMenuView, true, false, 0);
-            };
+            BackButton.Clicked += (sender, e) => Window.ShowMainMenuView();
             ConnectButton.Clicked += ConnectButton_Clicked;
             AddServerButton.Clicked += (sender, e) => 
             {

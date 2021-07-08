@@ -71,11 +71,7 @@ namespace TrueCraft.Launcher.Views
             // TODO: we have to call Pulse on the Progress Bar once in a while.
             ProgressBar = new ProgressBar() { Visible = false, Fraction = 0 };
 
-            BackButton.Clicked += (sender, e) =>
-            {
-                _window.InteractionBox.Remove(this);
-                _window.InteractionBox.PackEnd(_window.MainMenuView, true, false, 0);
-            };
+            BackButton.Clicked += (sender, e) => _window.ShowMainMenuView();
             CreateWorldButton.Clicked += (sender, e) =>
             {
                 CreateWorldBox.Visible = true;

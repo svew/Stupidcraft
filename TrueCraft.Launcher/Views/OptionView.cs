@@ -145,11 +145,7 @@ namespace TrueCraft.Launcher.Views
                 Process.Start(dir.FullName);
             };
 
-            BackButton.Clicked += (sender, e) =>
-            {
-                _window.InteractionBox.Remove(this);
-                _window.InteractionBox.PackEnd(_window.MainMenuView, true, false, 0);
-            };
+            BackButton.Clicked += (sender, e) => _window.ShowMainMenuView();
 
             OfficialAssetsButton = new Button("Download Minecraft assets") { Visible = false };
             OfficialAssetsButton.Clicked += OfficialAssetsButton_Clicked;
