@@ -7,7 +7,7 @@ using TrueCraft.Core;
 
 namespace TrueCraft.Launcher
 {
-    public class LauncherWindow : Window
+    public class LauncherWindow : ApplicationWindow
     {
         public TrueCraftUser User { get; set; }
 
@@ -25,8 +25,9 @@ namespace TrueCraft.Launcher
         public VBox InteractionBox { get; set; }
         private Image _trueCraftLogoImage;
 
-        public LauncherWindow() : base("TrueCraft Launcher")
+        public LauncherWindow(Application app) : base(app)
         {
+            this.Title = "TrueCraft Launcher";
             this.DefaultSize = new Gdk.Size(1200, 576);
             this.User = new TrueCraftUser();
 

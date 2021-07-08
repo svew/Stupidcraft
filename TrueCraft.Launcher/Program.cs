@@ -13,21 +13,27 @@ namespace TrueCraft.Launcher
         [STAThread]
         public static void Main(string[] args)
         {
-            Application.Init();
-
             UserSettings.Local = new UserSettings();
             UserSettings.Local.Load();
 
-            var thread = new Thread(KeepSessionAlive);
-            thread.IsBackground = true;
-            thread.Priority = ThreadPriority.Lowest;
-            Window = new LauncherWindow();
-            thread.Start();
-            Window.Show();
-            Window.DeleteEvent += (sender, e) => Application.Quit();
-            Application.Run();
-            Window.Dispose();
-            thread.Abort();
+            Application.Init();
+            using (Application app = new Application("TrueCraft.Launcher", GLib.ApplicationFlags.None))
+            {
+                app.Register(GLib.Cancellable.Current);
+
+                Window = new LauncherWindow(app);
+                app.AddWindow(Window);
+                Window.DeleteEvent += (sender, e) => Application.Quit();
+                Window.Show();
+
+                var thread = new Thread(KeepSessionAlive);
+                thread.IsBackground = true;
+                thread.Priority = ThreadPriority.Lowest;
+                thread.Start();
+
+                Application.Run();
+                Window.Dispose();
+            }
         }
 
         private static void KeepSessionAlive()
