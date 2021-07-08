@@ -145,7 +145,7 @@ namespace TrueCraft.Launcher.Views
             _worldListView.Selection.GetSelected(out iter);
             string worldName = (string)_worldListStore.GetValue(iter, 0);
             // TODO: Do world names have to be unique?
-            TrueCraft.Core.World.World world = Worlds.Local.Saves.Where(s => s.Name != worldName).First<TrueCraft.Core.World.World>();
+            TrueCraft.Core.World.World world = Worlds.Local.Saves.Where(s => s.Name == worldName).First<TrueCraft.Core.World.World>();
             Server = new SingleplayerServer(world);
 
             PlayButton.Sensitive = BackButton.Sensitive = CreateWorldButton.Sensitive =
