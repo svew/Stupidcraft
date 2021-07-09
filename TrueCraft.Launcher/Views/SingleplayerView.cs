@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Gtk;
 using TrueCraft.Core;
@@ -163,12 +164,17 @@ namespace TrueCraft.Launcher.Views
                 Application.Invoke((sender, e) =>
                 {
                     PlayButton.Sensitive = BackButton.Sensitive = CreateWorldButton.Sensitive = _worldListView.Sensitive = true;
-                    var launchParams = string.Format("{0} {1} {2}", Server.Server.EndPoint, _window.User.Username, _window.User.SessionId);
                     var process = new Process();
-                    if (RuntimeInfo.IsMono)
-                        process.StartInfo = new ProcessStartInfo("mono", "TrueCraft.Client.exe " + launchParams);
-                    else
-                        process.StartInfo = new ProcessStartInfo("TrueCraft.Client.exe", launchParams);
+
+                    string clientLocation = Assembly.GetExecutingAssembly().Location;
+                    clientLocation = System.IO.Path.GetDirectoryName(clientLocation);
+                    clientLocation = System.IO.Path.Combine(clientLocation, "TrueCraft.Client.dll");
+
+                    string launchParams = string.Format("{0} {1} {2} {3}", clientLocation, Server.Server.EndPoint, _window.User.Username, _window.User.SessionId);
+
+                    process.StartInfo = new ProcessStartInfo($"dotnet",
+                             launchParams);
+                    process.StartInfo.UseShellExecute = false;
                     process.EnableRaisingEvents = true;
                     process.Exited += (s, a) => Application.Invoke((s, a) =>
                     {
