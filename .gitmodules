@@ -1,4 +1,4 @@
 [submodule "externals/fNbt"]
 	path = externals/fNbt
-	url = https://github.com/SirCmpwn/fNbt.git
+	url = https://github.com/mrj001/fNbt.git
 	branch = master
