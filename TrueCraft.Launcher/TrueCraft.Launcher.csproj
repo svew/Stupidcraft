@@ -44,7 +44,6 @@
     <None Include="Content\truecraft_logo.svg" />
     <None Include="truecraft" CopyToOutputDirectory="PreserveNewest" />
     <None Include="packages.config" />
-    <None Include="..\lib\Xwt.Gtk.dll" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
