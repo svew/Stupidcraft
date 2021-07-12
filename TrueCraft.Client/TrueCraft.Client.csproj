@@ -40,4 +40,8 @@
     <PackageReference Include="System.Drawing.Common" Version="5.0.2" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(IsMacOS)' == 'true'">
+    <None Include="..\lib\osx-x64\libopenal32.dll*" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>
