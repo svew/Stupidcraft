@@ -63,9 +63,9 @@ namespace TrueCraft
         public IMinecraftStream MinecraftStream { get; internal set; }
         public string Username { get; internal set; }
         public bool LoggedIn { get; internal set; }
-        public IMultiplayerServer Server { get; set; }
+        public IMultiplayerServer Server { get; }
         public IWorld World { get; internal set; }
-        public IWindow Inventory { get; private set; }
+        public IWindow Inventory { get; }
         public short SelectedSlot { get; internal set; }
         public ItemStack ItemStaging { get; set; }
         public IWindow CurrentWindow { get; internal set; }
