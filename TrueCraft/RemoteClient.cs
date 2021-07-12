@@ -313,18 +313,19 @@ namespace TrueCraft
 
                 try
                 {
-                    sem.Wait(500, cancel.Token);
+                    if (!sem.Wait(5000, cancel.Token))
+                    {
+                        Server.DisconnectClient(this);
+                        return;
+                    }
                 }
                 catch (OperationCanceledException)
                 {
+                    // TODO: why is it reasonable to ignore this Exception?
                 }
                 catch (NullReferenceException)
                 {
-                }
-                catch (TimeoutException)
-                {
-                    Server.DisconnectClient(this);
-                    return;
+                    // TODO: why is it reasonable to ignore this Exception?
                 }
 
                 var packets = PacketReader.ReadPackets(this, e.Buffer, e.Offset, e.BytesTransferred);
