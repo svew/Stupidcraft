@@ -57,7 +57,6 @@ namespace TrueCraft.Client
         private IPEndPoint EndPoint { get; set; }
         private DateTime LastPhysicsUpdate { get; set; }
         private DateTime NextPhysicsUpdate { get; set; }
-        private bool MouseCaptured { get; set; }
         private GameTime GameTime { get; set; }
         private DebugInfoModule DebugInfoModule { get; set; }
 
@@ -89,7 +88,6 @@ namespace TrueCraft.Client
             LastPhysicsUpdate = DateTime.MinValue;
             NextPhysicsUpdate = DateTime.MinValue;
             PendingMainThreadActions = new ConcurrentBag<Action>();
-            MouseCaptured = true;
             Bobbing = 0;
 
             KeyboardComponent = new KeyboardHandler(this);
