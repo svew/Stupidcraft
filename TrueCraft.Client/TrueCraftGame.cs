@@ -379,6 +379,9 @@ namespace TrueCraft.Client
 
         private void UpdateCamera()
         {
+            if (Camera == null)
+                return;
+
             const double bobbingMultiplier = 0.05;
 
             var bobbing = Bobbing * 1.5;
