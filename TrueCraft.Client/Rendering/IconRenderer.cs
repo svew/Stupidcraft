@@ -31,7 +31,7 @@ namespace TrueCraft.Client.Rendering
         public static void PrepareEffects(TrueCraftGame game)
         {
             RenderEffect = new BasicEffect(game.GraphicsDevice);
-            RenderEffect.Texture = game.TextureMapper.GetTexture("terrain.png");
+            RenderEffect.Texture = game.TextureMapper?.GetTexture("terrain.png");
             RenderEffect.TextureEnabled = true;
             RenderEffect.VertexColorEnabled = true;
             RenderEffect.LightingEnabled = true;
