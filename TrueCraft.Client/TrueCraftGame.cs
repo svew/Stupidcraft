@@ -7,7 +7,6 @@ using System.Net;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using MonoGame.Utilities.Png;
 using TrueCraft.API;
 using TrueCraft.API.Logic;
 using TrueCraft.API.World;
@@ -332,7 +331,7 @@ namespace TrueCraft.Client
             if (!Directory.Exists(Path.GetDirectoryName(path)))
                 Directory.CreateDirectory(Path.GetDirectoryName(path));
             using (var stream = File.OpenWrite(path))
-                new PngWriter().Write(RenderTarget, stream);
+                RenderTarget.SaveAsPng(stream, RenderTarget.Width, RenderTarget.Height);
             ChatModule.AddMessage("Screenshot saved to " + Path.GetFileName(path));
         }
 
