@@ -26,10 +26,11 @@ namespace TrueCraft.Launcher
                 Window.DeleteEvent += (sender, e) => Application.Quit();
                 Window.Show();
 
-                var thread = new Thread(KeepSessionAlive);
-                thread.IsBackground = true;
-                thread.Priority = ThreadPriority.Lowest;
-                thread.Start();
+                // TODO: restore Keep Session Alive for multiplayer.
+                //Thread thread = new Thread(KeepSessionAlive);
+                //thread.IsBackground = true;
+                //thread.Priority = ThreadPriority.Lowest;
+                //thread.Start();
 
                 Application.Run();
                 Window.Dispose();
