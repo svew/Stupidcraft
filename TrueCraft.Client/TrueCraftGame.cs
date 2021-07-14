@@ -80,6 +80,7 @@ namespace TrueCraft.Client
             Graphics.IsFullScreen = UserSettings.Local.IsFullscreen;
             Graphics.PreferredBackBufferWidth = UserSettings.Local.WindowResolution.Width;
             Graphics.PreferredBackBufferHeight = UserSettings.Local.WindowResolution.Height;
+            Graphics.GraphicsProfile = GraphicsProfile.HiDef;
             Graphics.ApplyChanges();
             Window.ClientSizeChanged += Window_ClientSizeChanged;
             Client = client;
@@ -214,9 +215,9 @@ namespace TrueCraft.Client
                     UserSettings.Local.SelectedTexturePack)));
 
             Pixel = new FontRenderer(
-                new Font(Content, "Fonts/Pixel"),
-                new Font(Content, "Fonts/Pixel", FontStyle.Bold), null, null,
-                new Font(Content, "Fonts/Pixel", FontStyle.Italic));
+                new Font(GraphicsDevice, Content.RootDirectory, "Fonts/Pixel"),
+                new Font(GraphicsDevice, Content.RootDirectory, "Fonts/Pixel", FontStyle.Bold), null, null,
+                new Font(GraphicsDevice, Content.RootDirectory, "Fonts/Pixel", FontStyle.Italic));
 
             base.LoadContent();
         }

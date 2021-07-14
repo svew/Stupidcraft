@@ -13,6 +13,7 @@ namespace TrueCraft.Client.Rendering
     public class Font
     {
         private FontFile _definition;
+        private string _directory;
         private Texture2D[] _textures;
         private Dictionary<char, FontChar> _glyphs;
 
@@ -29,15 +30,17 @@ namespace TrueCraft.Client.Rendering
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="contentManager"></param>
+        /// <param name="graphicsDevice"></param>
+        /// <param name="directory"></param>
         /// <param name="name"></param>
         /// <param name="style"></param>
-        public Font(ContentManager contentManager, string name, FontStyle style = FontStyle.Regular)
+        public Font(GraphicsDevice graphicsDevice, string directory, string name, FontStyle style = FontStyle.Regular)
         {
+            _directory = directory;
             Name = name;
             Style = style;
 
-            LoadContent(contentManager);
+            LoadContent(graphicsDevice);
             GenerateGlyphs();
         }
 
@@ -66,11 +69,11 @@ namespace TrueCraft.Client.Rendering
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="contentManager"></param>
-        private void LoadContent(ContentManager contentManager)
+        /// <param name="graphicsDevice"></param>
+        private void LoadContent(GraphicsDevice graphicsDevice)
         {
             var definitionPath = string.Format("{0}_{1}.fnt", Name, Style);
-            using (var contents = File.OpenRead(Path.Combine(contentManager.RootDirectory, definitionPath)))
+            using (var contents = File.OpenRead(Path.Combine(_directory, definitionPath)))
                 _definition = FontLoader.Load(contents);
 
             if (_textures != null)
@@ -85,8 +88,8 @@ namespace TrueCraft.Client.Rendering
             _textures = new Texture2D[_definition.Pages.Count];
             for (int i = 0; i < _definition.Pages.Count; i++)
             {
-                var texturePath = string.Format("{0}_{1}_{2}.png", Name, Style, i);
-                _textures[i] = contentManager.Load<Texture2D>(texturePath);
+                var texturePath = Path.Combine(_directory, string.Format("{0}_{1}_{2}.png", Name, Style, i));
+                _textures[i] = Texture2D.FromFile(graphicsDevice, texturePath);
             }
         }
 
