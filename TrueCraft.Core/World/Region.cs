@@ -18,8 +18,15 @@ namespace TrueCraft.Core.World
     /// </summary>
     public class Region : IDisposable, IRegion
     {
-        // In chunks
-        public const int Width = 32, Depth = 32;
+        /// <summary>
+        /// The number of chunks within the region in the X-direction.
+        /// </summary>
+        public const int Width = 32;
+
+        /// <summary>
+        /// The number of chunks within the region in the Z-direction.
+        /// </summary>
+        public const int Depth = 32;
 
         private ConcurrentDictionary<Coordinates2D, IChunk> _Chunks { get; set; }
         /// <summary>
