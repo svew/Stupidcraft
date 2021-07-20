@@ -326,43 +326,41 @@ namespace TrueCraft.Core.World
         private Dictionary<Thread, IChunk> ChunkCache = new Dictionary<Thread, IChunk>();
         private object ChunkCacheLock = new object();
 
-        public Coordinates3D FindBlockPosition(Coordinates3D coordinates, out IChunk chunk, bool generate = true)
+        /// <summary>
+        /// Finds the Coordinates of the Block within its Chunk.
+        /// </summary>
+        /// <param name="blockCoordinates">The Coordinates of the Block.</param>
+        /// <param name="chunk">returns the Chunk containing the given Block Coordinates</param>
+        /// <param name="generate">True to generate the Chunk, if it has not yet been generated.</param>
+        /// <returns>The Local Block Coordinates within the Chunk.</returns>
+        public Coordinates3D FindBlockPosition(Coordinates3D blockCoordinates, out IChunk chunk, bool generate = true)
         {
-            if (coordinates.Y < 0 || coordinates.Y >= Chunk.Height)
+            if (blockCoordinates.Y < 0 || blockCoordinates.Y >= Chunk.Height)
                 throw new ArgumentOutOfRangeException("coordinates", "Coordinates are out of range");
 
-            int chunkX = coordinates.X / Chunk.Width;
-            int chunkZ = coordinates.Z / Chunk.Depth;
-
-            if (coordinates.X < 0)
-                chunkX = (coordinates.X + 1) / Chunk.Width - 1;
-            if (coordinates.Z < 0)
-                chunkZ = (coordinates.Z + 1) / Chunk.Depth - 1;
+            Coordinates2D globalChunk = Coordinates.BlockToGlobalChunk(blockCoordinates);
 
             if (ChunkCache.ContainsKey(Thread.CurrentThread))
             {
                 var cache = ChunkCache[Thread.CurrentThread];
-                if (cache != null && chunkX == cache.Coordinates.X && chunkZ == cache.Coordinates.Z)
+                if (cache != null && globalChunk.X == cache.Coordinates.X && globalChunk.Z == cache.Coordinates.Z)
                     chunk = cache;
                 else
                 {
-                    cache = GetChunk(new Coordinates2D(chunkX, chunkZ), generate);
+                    cache = GetChunk(globalChunk, generate);
                     lock (ChunkCacheLock)
                         ChunkCache[Thread.CurrentThread] = cache;
                 }
             }
             else
             {
-                var cache = GetChunk(new Coordinates2D(chunkX, chunkZ), generate);
+                var cache = GetChunk(globalChunk, generate);
                 lock (ChunkCacheLock)
                     ChunkCache[Thread.CurrentThread] = cache;
             }
 
-            chunk = GetChunk(new Coordinates2D(chunkX, chunkZ), generate);
-            return new Coordinates3D(
-                (coordinates.X % Chunk.Width + Chunk.Width) % Chunk.Width,
-                coordinates.Y,
-                (coordinates.Z % Chunk.Depth + Chunk.Depth) % Chunk.Depth);
+            chunk = GetChunk(globalChunk, generate);
+            return Coordinates.GlobalBlockToLocalBlock(blockCoordinates);
         }
 
         public bool IsValidPosition(Coordinates3D position)

@@ -1,3 +1,4 @@
+using System;
 using TrueCraft.API;
 using TrueCraft.Core.World;
 using NUnit.Framework;
@@ -8,6 +9,32 @@ namespace TrueCraft.Core.Test.World
     [TestFixture]
     public class CoordinatesTest
     {
+        [TestCase(0, 0, 0, 0)]      // origin maps to origin
+        [TestCase(Chunk.Width - 1, 0, Chunk.Width - 1, 0)]    // going east - last block in chunk 0, 0 maps to 15,0
+        [TestCase(Chunk.Width, 0, 0, 0)]                      // going east - first block in chunk 1,0 maps to 0, 0
+        [TestCase(0, Chunk.Depth - 1, 0, Chunk.Depth - 1)]    // going south - last block in chunk 0,0 maps to 0,15
+        [TestCase(0, Chunk.Depth, 0, 0)]                      // going south - first block in chunk 0,1 maps to 0,0
+        [TestCase(-1, 0, Chunk.Width - 1, 0)]                 // going west - first block in chunk -1,0 maps to 15,0
+        [TestCase(-Chunk.Width, 0, 0, 0)]                     // going west - last block in chunk -1,0 maps to 0, 0
+        [TestCase(-Chunk.Width - 1, 0, Chunk.Width - 1, 0)]   // going west - first block in chunk -2,0 maps to 15,0
+        [TestCase(0, -1, 0, Chunk.Depth - 1)]                 // going north - first block in chunk 0,-1 maps to 0,15
+        [TestCase(0, -Chunk.Depth, 0, 0)]                     // going north - last block in chunk 0,-1 maps to 0,0
+        [TestCase(0, -Chunk.Width -1, 0, Chunk.Width - 1)]    // going north - first block in chunk 0,-2 mapsto 0,15
+        public void GlobalBlockToLocalBlock(int globalX, int globalZ, int localX, int localZ)
+        {
+            int y = (new Random()).Next(0, Chunk.Height);
+            Coordinates3D global = new Coordinates3D(globalX, y, globalZ);
+            Coordinates3D expected = new Coordinates3D(localX, y, localZ);
+            Coordinates3D actual;
+
+            actual = Coordinates.GlobalBlockToLocalBlock(global);
+
+            Assert.IsNotNull(actual);
+            Assert.AreEqual(expected.X, actual.X);
+            Assert.AreEqual(expected.Y, actual.Y);
+            Assert.AreEqual(expected.Z, actual.Z);
+        }
+
         [TestCase(0, 0, 0, 0)]      // origin maps to origin
         [TestCase(Region.Width - 1, 0, Region.Width - 1, 0)]   // going east - last chunk in region 0, 0 maps to 31, 0
         [TestCase(Region.Width, 0, 0, 0)]                      // going east - first chunk in region 1, 0 maps to 0, 0

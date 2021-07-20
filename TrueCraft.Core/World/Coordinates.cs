@@ -9,6 +9,12 @@ namespace TrueCraft.Core.World
     /// <remarks>
     /// <para>Block Coordinates count the number of blocks away from the origin.
     /// These are the coordinates, which will be most familiar to Players.
+    /// These may also be referred to as Global Block Coordinates, if it is necessary
+    /// to distinguish them from Local Block Coordinates.
+    /// </para>
+    /// <para>
+    /// Local Block Coordinates count the number of blocks away from the north-west
+    /// corner of the containing chunk.
     /// </para>
     /// <para>Global Chunk Coordinates count the number of chunks away from the origin.
     /// These are 2-dimensional (X & Z).  They are the Block Coordinates divided by
@@ -24,6 +30,23 @@ namespace TrueCraft.Core.World
     /// </remarks>
     public static class Coordinates
     {
+        public static Coordinates3D GlobalBlockToLocalBlock(Coordinates3D globalBlock)
+        {
+            int localX, localZ;
+
+            if (globalBlock.X >= 0)
+                localX = globalBlock.X % Chunk.Width;
+            else
+                localX = Chunk.Width - 1 - (-globalBlock.X - 1) % Chunk.Width;
+
+            if (globalBlock.Z >= 0)
+                localZ = globalBlock.Z % Chunk.Depth;
+            else
+                localZ = Chunk.Depth - 1 - (-globalBlock.Z - 1) % Chunk.Depth;
+
+            return new Coordinates3D(localX, globalBlock.Y, localZ);
+        }
+
         /// <summary>
         /// Converts a Global Chunk Coordinate to Local Chunk Coordinate.
         /// </summary>
