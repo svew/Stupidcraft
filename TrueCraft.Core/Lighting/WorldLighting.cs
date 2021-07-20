@@ -204,7 +204,13 @@ namespace TrueCraft.Core.Lighting
                 byte max = 0;
                 for (int i = 0; i < Neighbors.Length; i++)
                 {
-                    if (World.IsValidPosition(coords + Neighbors[i]))
+                    Coordinates3D neighbor = coords + Neighbors[i];
+                    // NOTE: If the neighbor is in a different chunk, which is already generated,
+                    //    that chunk will be loaded and lit as well.  If a sufficient number of nearby chunks
+                    //    have been previously generated, this recursion will cause a stack overflow.
+                    //    We must neither load nor generate neighbouring chunks that are not
+                    //    already loaded.
+                    if (World.IsValidPosition(neighbor) && World.IsChunkLoaded(neighbor))
                     {
                         IChunk c;
                         var adjusted = World.FindBlockPosition(coords + Neighbors[i], out c, generate: false);

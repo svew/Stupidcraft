@@ -370,6 +370,23 @@ namespace TrueCraft.Core.World
             return position.Y >= 0 && position.Y < Chunk.Height;
         }
 
+        /// <summary>
+        /// Determines whether or not the Chunk containing the given Block Coordinates
+        /// is loaded.
+        /// </summary>
+        /// <param name="blockCoordinates">The Block Coordinates to check.</param>
+        /// <returns>True if the Chunk is loaded; false otherwise.</returns>
+        public bool IsChunkLoaded(Coordinates3D blockCoordinates)
+        {
+            Coordinates2D regionCoordinates = Coordinates.BlockToRegion(blockCoordinates);
+            if (!Regions.ContainsKey(regionCoordinates))
+                return false;
+
+            Coordinates2D local = Coordinates.BlockToLocalChunk(blockCoordinates);
+
+            return Regions[regionCoordinates].Chunks.ContainsKey(local);
+        }
+
         private Region LoadOrGenerateRegion(Coordinates2D coordinates, bool generate = true)
         {
             if (Regions.ContainsKey(coordinates))

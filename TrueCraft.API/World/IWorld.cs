@@ -39,6 +39,7 @@ namespace TrueCraft.API.World
         void SetBlockLight(Coordinates3D coordinates, byte value);
         void SetTileEntity(Coordinates3D coordinates, NbtCompound value);
         bool IsValidPosition(Coordinates3D position);
+        bool IsChunkLoaded(Coordinates3D coordinates);
         void Save();
         void Save(string path);
     }
