@@ -122,36 +122,39 @@ namespace TrueCraft.Core.World
             return chunk;
         }
 
-        public IChunk GetChunk(Coordinates2D coordinates, bool generate = true)
+        /// <summary>
+        /// Gets the specified Chunk 
+        /// </summary>
+        /// <param name="globalChunk">The Global Chunk Coordinates to retrieve</param>
+        /// <param name="generate">True to generate the Chunk if it has never been generated.</param>
+        /// <returns>A reference to the Chunk.  This may return null.</returns>
+        public IChunk GetChunk(Coordinates2D globalChunk, bool generate = true)
         {
-            int regionX = coordinates.X / Region.Width - ((coordinates.X < 0) ? 1 : 0);
-            int regionZ = coordinates.Z / Region.Depth - ((coordinates.Z < 0) ? 1 : 0);
+            Coordinates2D regionCoords = Coordinates.GlobalChunkToRegion(globalChunk);
 
-            var region = LoadOrGenerateRegion(new Coordinates2D(regionX, regionZ), generate);
+            var region = LoadOrGenerateRegion(regionCoords, generate);
             if (region == null)
                 return null;
-            return region.GetChunk(new Coordinates2D(coordinates.X - regionX * 32, coordinates.Z - regionZ * 32), generate);
+
+            Coordinates2D localChunk = Coordinates.GlobalChunkToLocalChunk(globalChunk);
+            return region.GetChunk(localChunk, generate);
         }
 
-        public void GenerateChunk(Coordinates2D coordinates)
+        /// <summary>
+        /// Sets the specified Chunk in the World.
+        /// </summary>
+        /// <param name="globalChunk">The Global Chunk Coordinates of the Chunk.</param>
+        /// <param name="chunk">The Chunk to add to the world.</param>
+        public void SetChunk(Coordinates2D globalChunk, Chunk chunk)
         {
-            int regionX = coordinates.X / Region.Width - ((coordinates.X < 0) ? 1 : 0);
-            int regionZ = coordinates.Z / Region.Depth - ((coordinates.Z < 0) ? 1 : 0);
+            Coordinates2D regionCoords = Coordinates.GlobalChunkToRegion(globalChunk);
+            Coordinates2D localChunk = Coordinates.GlobalChunkToLocalChunk(globalChunk);
 
-            var region = LoadOrGenerateRegion(new Coordinates2D(regionX, regionZ));
-            region.GenerateChunk(new Coordinates2D(coordinates.X - regionX * 32, coordinates.Z - regionZ * 32));
-        }
-
-        public void SetChunk(Coordinates2D coordinates, Chunk chunk)
-        {
-            int regionX = coordinates.X / Region.Width - ((coordinates.X < 0) ? 1 : 0);
-            int regionZ = coordinates.Z / Region.Depth - ((coordinates.Z < 0) ? 1 : 0);
-
-            var region = LoadOrGenerateRegion(new Coordinates2D(regionX, regionZ));
+            var region = LoadOrGenerateRegion(regionCoords);
             lock (region)
             {
                 chunk.IsModified = true;
-                region.SetChunk(new Coordinates2D(coordinates.X - regionX * 32, coordinates.Z - regionZ * 32), chunk);
+                region.SetChunk(localChunk, chunk);
             }
         }
 
@@ -164,15 +167,19 @@ namespace TrueCraft.Core.World
             }
         }
 
-        public void UnloadChunk(Coordinates2D coordinates)
+        /// <summary>
+        /// Unloads the specified Chunk
+        /// </summary>
+        /// <param name="globalChunk">The Global Chunk Coordinates of the Chunk to unload.</param>
+        public void UnloadChunk(Coordinates2D globalChunk)
         {
-            int regionX = coordinates.X / Region.Width - ((coordinates.X < 0) ? 1 : 0);
-            int regionZ = coordinates.Z / Region.Depth - ((coordinates.Z < 0) ? 1 : 0);
+            Coordinates2D regionCoords = Coordinates.GlobalChunkToRegion(globalChunk);
+            Coordinates2D localCoords = Coordinates.GlobalChunkToLocalChunk(globalChunk);
 
-            var regionPosition = new Coordinates2D(regionX, regionZ);
-            if (!Regions.ContainsKey(regionPosition))
+            if (!Regions.ContainsKey(regionCoords))
                 throw new ArgumentOutOfRangeException("coordinates");
-            Regions[regionPosition].UnloadChunk(new Coordinates2D(coordinates.X - regionX * 32, coordinates.Z - regionZ * 32));
+
+            Regions[regionCoords].UnloadChunk(localCoords);
         }
 
         public byte GetBlockID(Coordinates3D coordinates)
