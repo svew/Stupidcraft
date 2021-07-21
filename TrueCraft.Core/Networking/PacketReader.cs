@@ -138,12 +138,5 @@ namespace TrueCraft.Core.Networking
                 }
             }
         }
-
-        public void WritePacket(IMinecraftStream stream, IPacket packet)
-        {
-            stream.WriteUInt8(packet.ID);
-            packet.WritePacket(stream);
-            stream.BaseStream.Flush();
-        }
     }
 }
