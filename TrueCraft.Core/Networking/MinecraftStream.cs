@@ -7,60 +7,59 @@ namespace TrueCraft.Core.Networking
 {
     public class MinecraftStream : Stream, IMinecraftStream
     {
-        public Stream BaseStream { get; set; }
-        public Encoding StringEncoding { get; set; }
+        private Stream _baseStream;
+        private Encoding StringEncoding = Encoding.BigEndianUnicode;
 
         public MinecraftStream(Stream baseStream)
         {
-            BaseStream = baseStream;
-            StringEncoding = Encoding.BigEndianUnicode;
+            _baseStream = baseStream;
         }
 
-        public override bool CanRead { get { return BaseStream.CanRead; } }
+        public override bool CanRead { get { return _baseStream.CanRead; } }
 
-        public override bool CanSeek { get { return BaseStream.CanSeek; } }
+        public override bool CanSeek { get { return _baseStream.CanSeek; } }
 
-        public override bool CanWrite { get { return BaseStream.CanWrite; } }
+        public override bool CanWrite { get { return _baseStream.CanWrite; } }
 
         public override void Flush()
         {
-            BaseStream.Flush();
+            _baseStream.Flush();
         }
 
         public override long Length
         {
-            get { return BaseStream.Length; }
+            get { return _baseStream.Length; }
         }
 
         public override long Position
         {
-            get { return BaseStream.Position; }
-            set { BaseStream.Position = value; }
+            get { return _baseStream.Position; }
+            set { _baseStream.Position = value; }
         }
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            return BaseStream.Read(buffer, offset, count);
+            return _baseStream.Read(buffer, offset, count);
         }
 
         public override long Seek(long offset, SeekOrigin origin)
         {
-            return BaseStream.Seek(offset, origin);
+            return _baseStream.Seek(offset, origin);
         }
 
         public override void SetLength(long value)
         {
-            BaseStream.SetLength(value);
+            _baseStream.SetLength(value);
         }
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            BaseStream.Write(buffer, offset, count);
+            _baseStream.Write(buffer, offset, count);
         }
 
         public byte ReadUInt8()
         {
-            int value = BaseStream.ReadByte();
+            int value = _baseStream.ReadByte();
             if (value == -1)
                 throw new EndOfStreamException();
             return (byte)value;

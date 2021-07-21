@@ -5,8 +5,6 @@ namespace TrueCraft.API.Networking
 {
     public interface IMinecraftStream
     {
-        Stream BaseStream { get; }
-
         byte ReadUInt8();
         sbyte ReadInt8();
         void WriteUInt8(byte value);
