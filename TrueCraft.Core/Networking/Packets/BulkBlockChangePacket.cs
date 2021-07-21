@@ -39,6 +39,9 @@ namespace TrueCraft.Core.Networking.Packets
             for (int i = 0; i < Coordinates.Length; i++)
             {
                 var coord = Coordinates[i];
+                // TODO: BUG: << occurs before &; so coord.X & coord.Z will be recorded as zeroes.
+                //            Fix if this Packet type is ever used.
+                //            Q: What coordinate system is in use?
                 stream.WriteUInt16((ushort)((coord.X << 12 & 0xF) | (coord.Z << 8 & 0xF) | (coord.Y & 0xFF)));
             }
             stream.WriteInt8Array(BlockIDs);
