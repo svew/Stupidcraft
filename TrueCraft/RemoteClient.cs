@@ -537,9 +537,8 @@ namespace TrueCraft
             byte[] result;
             using (var ms = new MemoryStream())
             {
-                using (var deflate = new ZlibStream(new MemoryStream(chunk.Data),
-                    CompressionMode.Compress,
-                    CompressionLevel.BestSpeed))
+                using (var msOut = new MemoryStream(chunk.Data))
+                using (var deflate = new ZlibStream(msOut, CompressionMode.Compress, CompressionLevel.BestSpeed))
                     deflate.CopyTo(ms);
                 result = ms.ToArray();
             }
