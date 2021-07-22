@@ -42,7 +42,7 @@ namespace TrueCraft
             EnableLogging = server.EnableClientLogging;
             NextWindowID = 1;
             Connection = connection;
-            SocketPool = new SocketAsyncEventArgsPool(100, 200, 65536);
+            _socketPool = new SocketAsyncEventArgsPool(100, 200, 65536);
             PacketReader = packetReader;
             PacketHandlers = packetHandlers;
 
@@ -72,7 +72,7 @@ namespace TrueCraft
 
         public Socket Connection { get; private set; }
 
-        private SocketAsyncEventArgsPool SocketPool { get; set; }
+        private SocketAsyncEventArgsPool _socketPool;
 
         public IPacketReader PacketReader { get; private set; }
 
@@ -255,7 +255,7 @@ namespace TrueCraft
 
         private void StartReceive()
         {
-            SocketAsyncEventArgs args = SocketPool.Get();
+            SocketAsyncEventArgs args = _socketPool.Get();
             args.Completed += OperationCompleted;
 
             if (!Connection.ReceiveAsync(args))
@@ -271,7 +271,7 @@ namespace TrueCraft
                 case SocketAsyncOperation.Receive:
                     ProcessNetwork(e);
 
-                    SocketPool.Add(e);
+                    _socketPool.Add(e);
                     break;
                 case SocketAsyncOperation.Send:
                     IPacket packet = e.UserToken as IPacket;
@@ -533,6 +533,9 @@ namespace TrueCraft
                 if (Disposed != null)
                     Disposed(this, null);
             }
+
+            _socketPool?.Dispose();
+            _socketPool = null;
         }
     }
 }

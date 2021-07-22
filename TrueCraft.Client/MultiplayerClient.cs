@@ -71,7 +71,7 @@ namespace TrueCraft.Client
 
         private readonly PacketHandler[] PacketHandlers;
 
-        private SocketAsyncEventArgsPool SocketPool { get; set; }
+        private SocketAsyncEventArgsPool _socketPool;
 
         public MultiplayerClient(TrueCraftUser user)
         {
@@ -88,7 +88,7 @@ namespace TrueCraft.Client
             World.World.BlockRepository = repo;
             World.World.ChunkProvider = new EmptyGenerator();
             Physics = new PhysicsEngine(World.World, repo);
-            SocketPool = new SocketAsyncEventArgsPool(100, 200, 65536);
+            _socketPool = new SocketAsyncEventArgsPool(100, 200, 65536);
             connected = 0;
             Health = 20;
             var crafting = new CraftingRepository();
@@ -172,7 +172,7 @@ namespace TrueCraft.Client
 
         private void StartReceive()
         {
-            SocketAsyncEventArgs args = SocketPool.Get();
+            SocketAsyncEventArgs args = _socketPool.Get();
             args.Completed += OperationCompleted;
 
             if (!Client.Client.ReceiveAsync(args))
@@ -188,7 +188,7 @@ namespace TrueCraft.Client
                 case SocketAsyncOperation.Receive:
                     ProcessNetwork(e);
 
-                    SocketPool.Add(e);
+                    _socketPool.Add(e);
                     break;
                 case SocketAsyncOperation.Send:
                     IPacket packet = e.UserToken as IPacket;
@@ -349,6 +349,9 @@ namespace TrueCraft.Client
             {
                 Disconnect();
             }
+
+            _socketPool?.Dispose();
+            _socketPool = null;
         }
 
         ~MultiplayerClient()
