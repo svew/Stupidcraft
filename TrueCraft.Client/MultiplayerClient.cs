@@ -113,18 +113,25 @@ namespace TrueCraft.Client
 
         private void Connection_Completed(object sender, SocketAsyncEventArgs e)
         {
-            if (e.SocketError == SocketError.Success)
+            try
             {
-                Interlocked.CompareExchange(ref connected, 1, 0);
+                if (e.SocketError == SocketError.Success)
+                {
+                    Interlocked.CompareExchange(ref connected, 1, 0);
 
-                Physics.AddEntity(this);
+                    Physics.AddEntity(this);
 
-                StartReceive();
-                QueuePacket(new HandshakePacket(User.Username));
+                    StartReceive();
+                    QueuePacket(new HandshakePacket(User.Username));
+                }
+                else
+                {
+                    throw new Exception("Could not connect to server!");
+                }
             }
-            else
+            finally
             {
-                throw new Exception("Could not connect to server!");
+                e.Dispose();
             }
         }
 
