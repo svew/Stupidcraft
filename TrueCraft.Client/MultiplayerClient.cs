@@ -71,10 +71,6 @@ namespace TrueCraft.Client
 
         private readonly PacketHandler[] PacketHandlers;
 
-        private SemaphoreSlim sem = new SemaphoreSlim(1, 1);
-
-        private readonly CancellationTokenSource cancel;
-
         private SocketAsyncEventArgsPool SocketPool { get; set; }
 
         public MultiplayerClient(TrueCraftUser user)
@@ -94,7 +90,6 @@ namespace TrueCraft.Client
             Physics = new PhysicsEngine(World.World, repo);
             SocketPool = new SocketAsyncEventArgsPool(100, 200, 65536);
             connected = 0;
-            cancel = new CancellationTokenSource();
             Health = 20;
             var crafting = new CraftingRepository();
             CraftingRepository = crafting;
@@ -202,8 +197,6 @@ namespace TrueCraft.Client
                     {
                         Client.Client.Shutdown(SocketShutdown.Send);
                         Client.Close();
-
-                        cancel.Cancel();
                     }
 
                     e.SetBuffer(null, 0, 0);
@@ -213,38 +206,19 @@ namespace TrueCraft.Client
 
         private void ProcessNetwork(SocketAsyncEventArgs e)
         {
-            if (e.SocketError == SocketError.Success && e.BytesTransferred > 0)
-            {
-                SocketAsyncEventArgs newArgs = SocketPool.Get();
-                newArgs.Completed += OperationCompleted;
-
-                if (Client != null && !Client.Client.ReceiveAsync(newArgs))
-                    OperationCompleted(this, newArgs);
-
-                try
-                {
-                    sem.Wait(cancel.Token);
-                }
-                catch (OperationCanceledException)
-                {
-                    return;
-                }
-
-                var packets = PacketReader.ReadPackets(this, e.Buffer, e.Offset, e.BytesTransferred, false);
-
-                foreach (IPacket packet in packets)
-                {
-                    if (PacketHandlers[packet.ID] != null)
-                        PacketHandlers[packet.ID](packet, this);
-                }
-                
-                if (sem != null)
-                    sem.Release();
-            }
-            else
+            if (e.SocketError != SocketError.Success || e.BytesTransferred == 0)
             {
                 Disconnect();
+                return;
             }
+
+            var packets = PacketReader.ReadPackets(this, e.Buffer, e.Offset, e.BytesTransferred, false);
+
+            foreach (IPacket packet in packets)
+                if (PacketHandlers[packet.ID] != null)
+                    PacketHandlers[packet.ID](packet, this);
+
+            StartReceive();
         }
 
         protected internal void OnChatMessage(ChatMessageEventArgs e)
@@ -374,11 +348,7 @@ namespace TrueCraft.Client
             if (disposing)
             {
                 Disconnect();
-
-                sem.Dispose();
             }
-
-            sem = null;
         }
 
         ~MultiplayerClient()

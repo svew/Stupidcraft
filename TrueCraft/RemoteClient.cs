@@ -46,8 +46,6 @@ namespace TrueCraft
             PacketReader = packetReader;
             PacketHandlers = packetHandlers;
 
-            cancel = new CancellationTokenSource();
-
             StartReceive();
         }
 
@@ -74,8 +72,6 @@ namespace TrueCraft
 
         public Socket Connection { get; private set; }
 
-        private SemaphoreSlim sem = new SemaphoreSlim(1, 1);
-
         private SocketAsyncEventArgsPool SocketPool { get; set; }
 
         public IPacketReader PacketReader { get; private set; }
@@ -85,8 +81,6 @@ namespace TrueCraft
         private IEntity _Entity;
 
         private long disconnected;
-
-        private readonly CancellationTokenSource cancel;
 
         public bool Disconnected
         {
@@ -303,73 +297,48 @@ namespace TrueCraft
             if (Connection == null || !Connection.Connected)
                 return;
 
-            if (e.SocketError == SocketError.Success && e.BytesTransferred > 0)
-            {
-                SocketAsyncEventArgs newArgs = SocketPool.Get();
-                newArgs.Completed += OperationCompleted;
-
-                if (!Connection.ReceiveAsync(newArgs))
-                    OperationCompleted(this, newArgs);
-
-                try
-                {
-                    if (!sem.Wait(5000, cancel.Token))
-                    {
-                        Server.DisconnectClient(this);
-                        return;
-                    }
-                }
-                catch (OperationCanceledException)
-                {
-                    // TODO: why is it reasonable to ignore this Exception?
-                }
-                catch (NullReferenceException)
-                {
-                    // TODO: why is it reasonable to ignore this Exception?
-                }
-
-                var packets = PacketReader.ReadPackets(this, e.Buffer, e.Offset, e.BytesTransferred);
-                try
-                {
-                    foreach (IPacket packet in packets)
-                    {
-                        if (PacketHandlers[packet.ID] != null)
-                        {
-                            try
-                            {
-                                PacketHandlers[packet.ID](packet, this, Server);
-                            }
-                            catch (PlayerDisconnectException)
-                            {
-                                Server.DisconnectClient(this);
-                            }
-                            catch (Exception ex)
-                            {
-                                Server.Log(LogCategory.Debug, "Disconnecting client due to exception in network worker");
-                                Server.Log(LogCategory.Debug, ex.ToString());
-
-                                Server.DisconnectClient(this);
-                            }
-                        }
-                        else
-                        {
-                            Log("Unhandled packet {0}", packet.GetType().Name);
-                        }
-                    }
-                }
-                catch (NotSupportedException)
-                {
-                    Server.Log(LogCategory.Debug, "Disconnecting client due to unsupported packet received.");
-                    return;
-                }
-
-                if (sem != null)
-                    sem.Release();
-            }
-            else
+            if (e.SocketError != SocketError.Success || e.BytesTransferred == 0)
             {
                 Server.DisconnectClient(this);
+                return;
             }
+
+            var packets = PacketReader.ReadPackets(this, e.Buffer, e.Offset, e.BytesTransferred);
+            try
+            {
+                foreach (IPacket packet in packets)
+                {
+                    if (PacketHandlers[packet.ID] != null)
+                    {
+                        try
+                        {
+                            PacketHandlers[packet.ID](packet, this, Server);
+                        }
+                        catch (PlayerDisconnectException)
+                        {
+                            Server.DisconnectClient(this);
+                        }
+                        catch (Exception ex)
+                        {
+                            Server.Log(LogCategory.Debug, "Disconnecting client due to exception in network worker");
+                            Server.Log(LogCategory.Debug, ex.ToString());
+
+                            Server.DisconnectClient(this);
+                        }
+                    }
+                    else
+                    {
+                        Log("Unhandled packet {0}", packet.GetType().Name);
+                    }
+                }
+            }
+            catch (NotSupportedException)
+            {
+                Server.Log(LogCategory.Debug, "Disconnecting client due to unsupported packet received.");
+                return;
+            }
+
+            StartReceive();
         }
 
         public void Disconnect()
@@ -378,8 +347,6 @@ namespace TrueCraft
                 return;
 
             Disconnected = true;
-
-            cancel.Cancel();
 
             Connection.Shutdown(SocketShutdown.Send);
 
@@ -563,11 +530,8 @@ namespace TrueCraft
 
                 Disconnect();
 
-                sem.Dispose();
-
                 if (Disposed != null)
                     Disposed(this, null);
-                sem = null;
             }
         }
     }
