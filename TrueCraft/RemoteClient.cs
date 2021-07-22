@@ -41,7 +41,7 @@ namespace TrueCraft
             Disconnected = false;
             EnableLogging = server.EnableClientLogging;
             NextWindowID = 1;
-            Connection = connection;
+            _connection = connection;
             _socketPool = new SocketAsyncEventArgsPool(100, 200, 65536);
             PacketReader = packetReader;
             PacketHandlers = packetHandlers;
@@ -70,7 +70,10 @@ namespace TrueCraft
         public bool EnableLogging { get; set; }
         public DateTime ExpectedDigComplete { get; set; }
 
-        public Socket Connection { get; private set; }
+        // Set to true when this object has been disposed.
+        private bool _thisDisposed = false;
+
+        private Socket _connection;
 
         private SocketAsyncEventArgsPool _socketPool;
 
@@ -229,7 +232,7 @@ namespace TrueCraft
 
         public void QueuePacket(IPacket packet)
         {
-            if (Disconnected || (Connection != null && !Connection.Connected))
+            if (Disconnected || (_connection != null && !_connection.Connected))
                 return;
 
             using (MemoryStream writeStream = new MemoryStream())
@@ -247,9 +250,9 @@ namespace TrueCraft
                 args.Completed += OperationCompleted;
                 args.SetBuffer(buffer, 0, buffer.Length);
 
-                if (Connection != null)
+                if (_connection != null)
                 {
-                    if (!Connection.SendAsync(args))
+                    if (!_connection.SendAsync(args))
                         OperationCompleted(this, args);
                 }
             }
@@ -260,12 +263,14 @@ namespace TrueCraft
             SocketAsyncEventArgs args = _socketPool.Get();
             args.Completed += OperationCompleted;
 
-            if (!Connection.ReceiveAsync(args))
+            if (!_connection.ReceiveAsync(args))
                 OperationCompleted(this, args);
         }
 
         private void OperationCompleted(object sender, SocketAsyncEventArgs e)
         {
+            if (_thisDisposed) return;
+
             e.Completed -= OperationCompleted;
 
             switch (e.LastOperation)
@@ -273,7 +278,7 @@ namespace TrueCraft
                 case SocketAsyncOperation.Receive:
                     ProcessNetwork(e);
 
-                    _socketPool.Add(e);
+                    _socketPool?.Add(e);
                     break;
                 case SocketAsyncOperation.Send:
                     IPacket packet = e.UserToken as IPacket;
@@ -284,19 +289,19 @@ namespace TrueCraft
                     e.SetBuffer(null, 0, 0);
                     break;
                 case SocketAsyncOperation.Disconnect:
-                    Connection.Close();
+                    _connection.Close();
 
                     break;
             }
 
-            if (Connection != null)
-                if (!Connection.Connected && !Disconnected)
+            if (_connection != null)
+                if (!_connection.Connected && !Disconnected)
                     Server.DisconnectClient(this);
         }
 
         private void ProcessNetwork(SocketAsyncEventArgs e)
         {
-            if (Connection == null || !Connection.Connected)
+            if (_connection == null || !_connection.Connected)
                 return;
 
             if (e.SocketError != SocketError.Success || e.BytesTransferred == 0)
@@ -350,11 +355,11 @@ namespace TrueCraft
 
             Disconnected = true;
 
-            Connection.Shutdown(SocketShutdown.Send);
+            _connection.Shutdown(SocketShutdown.Send);
 
             SocketAsyncEventArgs args = new SocketAsyncEventArgs();
             args.Completed += OperationCompleted;
-            Connection.DisconnectAsync(args);
+            _connection.DisconnectAsync(args);
         }
 
         public void SendMessage(string message)
@@ -528,10 +533,13 @@ namespace TrueCraft
         public void Dispose()
         {
             Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         protected virtual void Dispose(bool disposing)
         {
+            _thisDisposed = true;
+
             if (disposing)
             {
                 IPacketSegmentProcessor processor;
@@ -546,6 +554,8 @@ namespace TrueCraft
 
             _socketPool?.Dispose();
             _socketPool = null;
+            _connection?.Dispose();
+            _connection = null;
         }
     }
 }

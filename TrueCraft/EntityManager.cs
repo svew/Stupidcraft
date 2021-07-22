@@ -86,7 +86,7 @@ namespace TrueCraft
                     break;
             }
         }
-
+        
         internal void UpdateClientEntities(RemoteClient client)
         {
             var entity = client.Entity;
