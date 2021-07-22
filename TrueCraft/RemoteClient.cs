@@ -30,7 +30,7 @@ namespace TrueCraft
     {
         public RemoteClient(IMultiplayerServer server, IPacketReader packetReader, PacketHandler[] packetHandlers, Socket connection)
         {
-            LoadedChunks = new HashSet<Coordinates2D>();
+            _loadedChunks = new HashSet<Coordinates2D>();
             Server = server;
             Inventory = new InventoryWindow(server.CraftingRepository);
             InventoryWindow.WindowChange += HandleWindowChange;
@@ -139,7 +139,9 @@ namespace TrueCraft
         }
 
         internal int ChunkRadius { get; set; }
-        internal HashSet<Coordinates2D> LoadedChunks { get; set; }
+
+        private readonly object _loadedChunkLock = new object();
+        private HashSet<Coordinates2D> _loadedChunks;
 
         public bool DataAvailable
         {
@@ -387,23 +389,24 @@ namespace TrueCraft
 
         internal void UpdateChunks(bool block = false)
         {
-            var newChunks = new HashSet<Coordinates2D>();
             var toLoad = new List<Tuple<Coordinates2D, IChunk>>();
+            int cr = ChunkRadius;
+            Coordinates2D entityChunk = Coordinates.BlockToGlobalChunk(Entity.Position);
+
             Profiler.Start("client.new-chunks");
-            for (int x = -ChunkRadius; x < ChunkRadius; x++)
-            {
-                for (int z = -ChunkRadius; z < ChunkRadius; z++)
+            lock(_loadedChunkLock)
+                for (int x = -cr; x < cr; x++)
                 {
-                    var coords = new Coordinates2D(
-                        ((int)Entity.Position.X >> 4) + x,
-                        ((int)Entity.Position.Z >> 4) + z);
-                    newChunks.Add(coords);
-                    if (!LoadedChunks.Contains(coords))
-                        toLoad.Add(new Tuple<Coordinates2D, IChunk>(
-                            coords, World.GetChunk(coords, generate: block)));
+                    for (int z = -cr; z < cr; z++)
+                    {
+                        var coords = new Coordinates2D(entityChunk.X + x, entityChunk.Z + z);
+                        if (!_loadedChunks.Contains(coords))
+                            toLoad.Add(new Tuple<Coordinates2D, IChunk>(
+                                coords, World.GetChunk(coords, generate: block)));
+                    }
                 }
-            }
             Profiler.Done();
+
             var encode = new Action(() =>
             {
                 Profiler.Start("client.encode-chunks");
@@ -422,9 +425,14 @@ namespace TrueCraft
                 encode();
             else
                 Task.Factory.StartNew(encode);
+
             Profiler.Start("client.old-chunks");
-            LoadedChunks.IntersectWith(newChunks);
+            List<Coordinates2D> unload = new List<Coordinates2D>(2 * cr + 1);
+            lock(_loadedChunkLock)
+                unload.AddRange(_loadedChunks.Where((a) => Math.Abs(a.X - entityChunk.X) > cr || Math.Abs(a.Z - entityChunk.Z) > cr));
+            unload.ForEach((a) => UnloadChunk(a));
             Profiler.Done();
+
             Profiler.Start("client.update-entities");
             ((EntityManager)Server.GetEntityManagerForWorld(World)).UpdateClientEntities(this);
             Profiler.Done();
@@ -432,21 +440,22 @@ namespace TrueCraft
 
         internal void UnloadAllChunks()
         {
-            while (LoadedChunks.Any())
-            {
-                UnloadChunk(LoadedChunks.First());
-            }
+            lock(_loadedChunkLock)
+                while (_loadedChunks.Any())
+                    UnloadChunk(_loadedChunks.First());
         }
 
         internal void LoadChunk(IChunk chunk)
         {
             QueuePacket(new ChunkPreamblePacket(chunk.Coordinates.X, chunk.Coordinates.Z));
             QueuePacket(CreatePacket(chunk));
+            lock(_loadedChunkLock)
+                _loadedChunks.Add(chunk.Coordinates);
+
             Server.Scheduler.ScheduleEvent("client.finalize-chunks", this,
                 TimeSpan.Zero, server =>
                 {
                     return;
-                    LoadedChunks.Add(chunk.Coordinates);
                     foreach (var kvp in chunk.TileEntities)
                     {
                         var coords = kvp.Key;
@@ -467,7 +476,8 @@ namespace TrueCraft
         internal void UnloadChunk(Coordinates2D position)
         {
             QueuePacket(new ChunkPreamblePacket(position.X, position.Z, false));
-            LoadedChunks.Remove(position);
+            lock(_loadedChunkLock)
+                _loadedChunks.Remove(position);
         }
 
         void HandleWindowChange(object sender, WindowChangeEventArgs e)
