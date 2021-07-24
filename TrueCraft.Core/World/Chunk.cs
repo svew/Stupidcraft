@@ -37,10 +37,13 @@ namespace TrueCraft.Core.World
         public byte[] Biomes { get; set; }
         public int[] HeightMap { get; set; }
         public int MaxHeight { get; private set; }
+
         [TagName("xPos")]
-        public int X { get; set; }
+        public int X { get; private set; }
+
         [TagName("zPos")]
-        public int Z { get; set; }
+        public int Z { get; private set; }
+
         [NbtIgnore]
         private bool _LightPopulated;
         public bool LightPopulated
@@ -55,18 +58,13 @@ namespace TrueCraft.Core.World
                 IsModified = true;
             }
         }
-        public Dictionary<Coordinates3D, NbtCompound> TileEntities { get; set; }
+        public Dictionary<LocalVoxelCoordinates, NbtCompound> TileEntities { get; }
 
-        public Coordinates2D Coordinates
+        public GlobalChunkCoordinates Coordinates
         {
             get
             {
-                return new Coordinates2D(X, Z);
-            }
-            set
-            {
-                X = value.X;
-                Z = value.Z;
+                return new GlobalChunkCoordinates(X, Z);
             }
         }
 
@@ -81,7 +79,7 @@ namespace TrueCraft.Core.World
         {
             Biomes = new byte[Width * Depth];
             HeightMap = new int[Width * Depth];
-            TileEntities = new Dictionary<Coordinates3D, NbtCompound>();
+            TileEntities = new Dictionary<LocalVoxelCoordinates, NbtCompound>();
             TerrainPopulated = false;
             LightPopulated = false;
             MaxHeight = 0;
@@ -93,31 +91,31 @@ namespace TrueCraft.Core.World
             SkyLight = new NibbleSlice(Data, size + halfSize * 2, halfSize);
         }
 
-        public Chunk(Coordinates2D coordinates) : this()
+        public Chunk(GlobalChunkCoordinates coordinates) : this()
         {
             X = coordinates.X;
             Z = coordinates.Z;
         }
 
-        public byte GetBlockID(Coordinates3D coordinates)
+        public byte GetBlockID(LocalVoxelCoordinates coordinates)
         {
             int index = coordinates.Y + (coordinates.Z * Height) + (coordinates.X * Height * Width);
             return Data[index];
         }
 
-        public byte GetMetadata(Coordinates3D coordinates)
+        public byte GetMetadata(LocalVoxelCoordinates coordinates)
         {
             int index = coordinates.Y + (coordinates.Z * Height) + (coordinates.X * Height * Width);
             return Metadata[index];
         }
 
-        public byte GetSkyLight(Coordinates3D coordinates)
+        public byte GetSkyLight(LocalVoxelCoordinates coordinates)
         {
             int index = coordinates.Y + (coordinates.Z * Height) + (coordinates.X * Height * Width);
             return SkyLight[index];
         }
 
-        public byte GetBlockLight(Coordinates3D coordinates)
+        public byte GetBlockLight(LocalVoxelCoordinates coordinates)
         {
             int index = coordinates.Y + (coordinates.Z * Height) + (coordinates.X * Height * Width);
             return BlockLight[index];
@@ -127,11 +125,11 @@ namespace TrueCraft.Core.World
         /// Sets the block ID at specific coordinates relative to this chunk.
         /// Warning: The parent world's BlockChanged event handler does not get called.
         /// </summary>
-        public void SetBlockID(Coordinates3D coordinates, byte value)
+        public void SetBlockID(LocalVoxelCoordinates coordinates, byte value)
         {
             IsModified = true;
             if (ParentRegion != null)
-                ParentRegion.DamageChunk(Coordinates);
+                ParentRegion.DamageChunk((LocalChunkCoordinates)Coordinates);
             int index = coordinates.Y + (coordinates.Z * Height) + (coordinates.X * Height * Width);
             Data[index] = value;
             if (value == AirBlock.BlockID)
@@ -144,8 +142,8 @@ namespace TrueCraft.Core.World
                     // Shift height downwards
                     while (coordinates.Y > 0)
                     {
-                        coordinates.Y--;
-                        if (GetBlockID(coordinates) != 0)
+                        coordinates = new LocalVoxelCoordinates(coordinates.X, coordinates.Y - 1, coordinates.Z);
+                        if (GetBlockID(coordinates) != AirBlock.BlockID)
                         {
                             SetHeight((byte)coordinates.X, (byte)coordinates.Z, coordinates.Y);
                             if (coordinates.Y > MaxHeight)
@@ -166,11 +164,11 @@ namespace TrueCraft.Core.World
         /// Sets the metadata at specific coordinates relative to this chunk.
         /// Warning: The parent world's BlockChanged event handler does not get called.
         /// </summary>
-        public void SetMetadata(Coordinates3D coordinates, byte value)
+        public void SetMetadata(LocalVoxelCoordinates coordinates, byte value)
         {
             IsModified = true;
             if (ParentRegion != null)
-                ParentRegion.DamageChunk(Coordinates);
+                ParentRegion.DamageChunk((LocalChunkCoordinates)Coordinates);
             int index = coordinates.Y + (coordinates.Z * Height) + (coordinates.X * Height * Width);
             Metadata[index] = value;
         }
@@ -179,11 +177,11 @@ namespace TrueCraft.Core.World
         /// Sets the sky light at specific coordinates relative to this chunk.
         /// Warning: The parent world's BlockChanged event handler does not get called.
         /// </summary>
-        public void SetSkyLight(Coordinates3D coordinates, byte value)
+        public void SetSkyLight(LocalVoxelCoordinates coordinates, byte value)
         {
             IsModified = true;
             if (ParentRegion != null)
-                ParentRegion.DamageChunk(Coordinates);
+                ParentRegion.DamageChunk((LocalChunkCoordinates)Coordinates);
             int index = coordinates.Y + (coordinates.Z * Height) + (coordinates.X * Height * Width);
             SkyLight[index] = value;
         }
@@ -192,11 +190,11 @@ namespace TrueCraft.Core.World
         /// Sets the block light at specific coordinates relative to this chunk.
         /// Warning: The parent world's BlockChanged event handler does not get called.
         /// </summary>
-        public void SetBlockLight(Coordinates3D coordinates, byte value)
+        public void SetBlockLight(LocalVoxelCoordinates coordinates, byte value)
         {
             IsModified = true;
             if (ParentRegion != null)
-                ParentRegion.DamageChunk(Coordinates);
+                ParentRegion.DamageChunk((LocalChunkCoordinates)Coordinates);
             int index = coordinates.Y + (coordinates.Z * Height) + (coordinates.X * Height * Width);
             BlockLight[index] = value;
         }
@@ -204,7 +202,7 @@ namespace TrueCraft.Core.World
         /// <summary>
         /// Gets the tile entity for the given coordinates. May return null.
         /// </summary>
-        public NbtCompound GetTileEntity(Coordinates3D coordinates)
+        public NbtCompound GetTileEntity(LocalVoxelCoordinates coordinates)
         {
             if (TileEntities.ContainsKey(coordinates))
                 return TileEntities[coordinates];
@@ -214,7 +212,7 @@ namespace TrueCraft.Core.World
         /// <summary>
         /// Sets the tile entity at the given coordinates to the given value.
         /// </summary>
-        public void SetTileEntity(Coordinates3D coordinates, NbtCompound value)
+        public void SetTileEntity(LocalVoxelCoordinates coordinates, NbtCompound value)
         {
             if (value == null && TileEntities.ContainsKey(coordinates))
                 TileEntities.Remove(coordinates);
@@ -222,7 +220,7 @@ namespace TrueCraft.Core.World
                 TileEntities[coordinates] = value;
             IsModified = true;
             if (ParentRegion != null)
-                ParentRegion.DamageChunk(Coordinates);
+                ParentRegion.DamageChunk((LocalChunkCoordinates)Coordinates);
         }
 
         /// <summary>
@@ -337,7 +335,7 @@ namespace TrueCraft.Core.World
             {
                 foreach (var entity in tag["TileEntities"] as NbtList)
                 {
-                    TileEntities[new Coordinates3D(entity["coordinates"][0].IntValue,
+                    TileEntities[new LocalVoxelCoordinates(entity["coordinates"][0].IntValue,
                         entity["coordinates"][1].IntValue,
                         entity["coordinates"][2].IntValue)] = entity["value"][0] as NbtCompound;
                 }

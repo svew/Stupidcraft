@@ -9,7 +9,9 @@ namespace TrueCraft.API.World
         int X { get; }
         int Z { get; }
         int MaxHeight { get; }
-        Coordinates2D Coordinates { get; set; }
+
+        GlobalChunkCoordinates Coordinates { get; }
+
         bool IsModified { get; set; }
         bool LightPopulated { get; set; }
         int[] HeightMap { get; }
@@ -17,22 +19,25 @@ namespace TrueCraft.API.World
         DateTime LastAccessed { get; set; }
         byte[] Data { get; }
         bool TerrainPopulated { get; set; }
-        Dictionary<Coordinates3D, NbtCompound> TileEntities { get; set; }
+
+        Dictionary<LocalVoxelCoordinates, NbtCompound> TileEntities { get; }
+
         NibbleSlice Metadata { get; }
         NibbleSlice BlockLight { get; }
         NibbleSlice SkyLight { get; }
         IRegion ParentRegion { get; set; }
         int GetHeight(byte x, byte z);
         void UpdateHeightMap();
-        byte GetBlockID(Coordinates3D coordinates);
-        byte GetMetadata(Coordinates3D coordinates);
-        byte GetSkyLight(Coordinates3D coordinates);
-        byte GetBlockLight(Coordinates3D coordinates);
-        void SetBlockID(Coordinates3D coordinates, byte value);
-        void SetMetadata(Coordinates3D coordinates, byte value);
-        void SetSkyLight(Coordinates3D coordinates, byte value);
-        void SetBlockLight(Coordinates3D coordinates, byte value);
-        NbtCompound GetTileEntity(Coordinates3D coordinates);
-        void SetTileEntity(Coordinates3D coordinates, NbtCompound value);
+
+        byte GetBlockID(LocalVoxelCoordinates coordinates);
+        byte GetMetadata(LocalVoxelCoordinates coordinates);
+        byte GetSkyLight(LocalVoxelCoordinates coordinates);
+        byte GetBlockLight(LocalVoxelCoordinates coordinates);
+        void SetBlockID(LocalVoxelCoordinates coordinates, byte value);
+        void SetMetadata(LocalVoxelCoordinates coordinates, byte value);
+        void SetSkyLight(LocalVoxelCoordinates coordinates, byte value);
+        void SetBlockLight(LocalVoxelCoordinates coordinates, byte value);
+        NbtCompound GetTileEntity(LocalVoxelCoordinates coordinates);
+        void SetTileEntity(LocalVoxelCoordinates coordinates, NbtCompound value);
     }
 }
