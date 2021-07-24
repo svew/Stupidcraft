@@ -21,12 +21,12 @@ namespace TrueCraft.Core.World
         /// <summary>
         /// The number of chunks within the region in the X-direction.
         /// </summary>
-        public const int Width = 32;
+        public const int Width = WorldConstants.RegionWidth;
 
         /// <summary>
         /// The number of chunks within the region in the Z-direction.
         /// </summary>
-        public const int Depth = 32;
+        public const int Depth = WorldConstants.RegionDepth;
 
         private ConcurrentDictionary<Coordinates2D, IChunk> _Chunks { get; set; }
         /// <summary>

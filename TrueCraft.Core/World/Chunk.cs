@@ -10,7 +10,9 @@ namespace TrueCraft.Core.World
 {
     public class Chunk : INbtSerializable, IChunk
     {
-        public const int Width = 16, Height = 128, Depth = 16;
+        public const int Width = WorldConstants.ChunkWidth;
+        public const int Height = WorldConstants.Height;
+        public const int Depth = WorldConstants.ChunkDepth;
 
         public event EventHandler Disposed;
 
