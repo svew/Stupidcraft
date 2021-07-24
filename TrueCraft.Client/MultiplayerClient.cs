@@ -343,8 +343,13 @@ namespace TrueCraft.Client
 
         #endregion
 
+        #region IDisposable implementation
+        private bool _disposed = false;
         public void Dispose()
         {
+            if (_disposed) return;
+
+            _disposed = true;
             Dispose(true);
 
             GC.SuppressFinalize(this);
@@ -355,15 +360,19 @@ namespace TrueCraft.Client
             if (disposing)
             {
                 Disconnect();
+                _socketPool?.Dispose();
+                _socketPool = null;
+                Inventory?.Dispose();
+                Inventory = null;
+                CurrentWindow?.Dispose();
+                CurrentWindow = null;
             }
-
-            _socketPool?.Dispose();
-            _socketPool = null;
         }
 
         ~MultiplayerClient()
         {
             Dispose(false);
         }
+        #endregion
     }
 }
