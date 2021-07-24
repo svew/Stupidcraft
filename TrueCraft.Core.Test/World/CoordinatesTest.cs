@@ -1,5 +1,5 @@
 using System;
-using TrueCraft.API;
+using TrueCraft.API.World;
 using TrueCraft.Core.World;
 using NUnit.Framework;
 
@@ -23,11 +23,11 @@ namespace TrueCraft.Core.Test.World
         public void GlobalBlockToLocalBlock(int globalX, int globalZ, int localX, int localZ)
         {
             int y = (new Random()).Next(0, Chunk.Height);
-            Coordinates3D global = new Coordinates3D(globalX, y, globalZ);
-            Coordinates3D expected = new Coordinates3D(localX, y, localZ);
-            Coordinates3D actual;
+            GlobalVoxelCoordinates global = new GlobalVoxelCoordinates(globalX, y, globalZ);
+            LocalVoxelCoordinates expected = new LocalVoxelCoordinates(localX, y, localZ);
+            LocalVoxelCoordinates actual;
 
-            actual = Coordinates.GlobalBlockToLocalBlock(global);
+            actual = (LocalVoxelCoordinates)global;
 
             Assert.IsNotNull(actual);
             Assert.AreEqual(expected.X, actual.X);
@@ -48,11 +48,11 @@ namespace TrueCraft.Core.Test.World
         [TestCase(0, -Region.Depth - 1, 0, Region.Depth - 1)]  // going north - first chunk in region 0, -2 maps to 0, 31
         public void GlobalChunkToLocalChunk_Test(int globalX, int globalZ, int localX, int localZ)
         {
-            Coordinates2D global = new Coordinates2D(globalX, globalZ);
-            Coordinates2D expected = new Coordinates2D(localX, localZ);
-            Coordinates2D actual;
+            GlobalChunkCoordinates global = new GlobalChunkCoordinates(globalX, globalZ);
+            LocalChunkCoordinates expected = new LocalChunkCoordinates(localX, localZ);
+            LocalChunkCoordinates actual;
 
-            actual = Coordinates.GlobalChunkToLocalChunk(global);
+            actual = (LocalChunkCoordinates)global;
 
             Assert.IsNotNull(actual);
             Assert.AreEqual(expected.X, actual.X);
@@ -71,11 +71,11 @@ namespace TrueCraft.Core.Test.World
         [TestCase(0, -Region.Depth - 1, 0, -2)]  // going north - first chunk in Region 0, -2
         public void GlobalChunkToRegion_Test(int globalX, int globalZ, int regionX, int regionZ)
         {
-            Coordinates2D global = new Coordinates2D(globalX, globalZ);
-            Coordinates2D expected = new Coordinates2D(regionX, regionZ);
-            Coordinates2D actual;
+            GlobalChunkCoordinates global = new GlobalChunkCoordinates(globalX, globalZ);
+            RegionCoordinates expected = new RegionCoordinates(regionX, regionZ);
+            RegionCoordinates actual;
 
-            actual = Coordinates.GlobalChunkToRegion(global);
+            actual = (RegionCoordinates)global;
 
             Assert.IsNotNull(actual);
             Assert.AreEqual(expected.X, actual.X);
@@ -95,11 +95,10 @@ namespace TrueCraft.Core.Test.World
         [TestCase(0, -Chunk.Depth - 1, 0, -2)]   // going north - first block in chunk 0, -2
         public void BlockToGlobalChunk_C2D_Test(int blockX, int blockZ, int globalX, int globalZ)
         {
-            Coordinates2D global = new Coordinates2D(blockX, blockZ);
-            Coordinates2D expected = new Coordinates2D(globalX, globalZ);
-            Coordinates2D actual;
+            GlobalVoxelCoordinates global = new GlobalVoxelCoordinates(blockX, 0, blockZ);
+            GlobalChunkCoordinates expected = new GlobalChunkCoordinates(globalX, globalZ);
 
-            actual = Coordinates.BlockToGlobalChunk(global);
+            GlobalChunkCoordinates actual = (GlobalChunkCoordinates)global;
 
             Assert.IsNotNull(actual);
             Assert.AreEqual(expected.X, actual.X);
