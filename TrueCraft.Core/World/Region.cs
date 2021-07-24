@@ -28,29 +28,31 @@ namespace TrueCraft.Core.World
         /// </summary>
         public const int Depth = WorldConstants.RegionDepth;
 
-        private ConcurrentDictionary<Coordinates2D, IChunk> _Chunks { get; set; }
-        /// <summary>
-        /// The currently loaded chunk list.
-        /// </summary>
-        public IDictionary<Coordinates2D, IChunk> Chunks { get { return _Chunks; } }
+        private ConcurrentDictionary<LocalChunkCoordinates, IChunk> _Chunks { get; }
+
         /// <summary>
         /// The location of this region in the overworld.
         /// </summary>
-        public Coordinates2D Position { get; set; }
+        public RegionCoordinates Position { get; }
 
-        public World World { get; set; }
+        public World World { get; }
 
-        private HashSet<Coordinates2D> DirtyChunks { get; set; } = new HashSet<Coordinates2D>();
+        private HashSet<LocalChunkCoordinates> DirtyChunks { get; } = new HashSet<LocalChunkCoordinates>(Width * Depth);
+
         private Stream regionFile { get; set; }
         private object streamLock = new object();
 
         /// <summary>
-        /// Creates a new Region for server-side use at the given position using
-        /// the provided terrain generator.
+        /// Creates a new Region for server-side use at the given position in
+        /// the given World.
         /// </summary>
-        public Region(Coordinates2D position, World world)
+        /// <params>
+        /// <param name="position"></param>
+        /// <param name="world"></param>
+        /// </params>
+        public Region(RegionCoordinates position, World world)
         {
-            _Chunks = new ConcurrentDictionary<Coordinates2D, IChunk>();
+            _Chunks = new ConcurrentDictionary<LocalChunkCoordinates, IChunk>(Environment.ProcessorCount, Width * Depth);
             Position = position;
             World = world;
         }
@@ -58,7 +60,7 @@ namespace TrueCraft.Core.World
         /// <summary>
         /// Creates a region from the given region file.
         /// </summary>
-        public Region(Coordinates2D position, World world, string file) : this(position, world)
+        public Region(RegionCoordinates position, World world, string file) : this(position, world)
         {
             if (File.Exists(file))
             {
@@ -72,19 +74,19 @@ namespace TrueCraft.Core.World
             }
         }
 
-        public void DamageChunk(Coordinates2D coords)
+        public void DamageChunk(LocalChunkCoordinates coords)
         {
-            int x = coords.X / Region.Width - ((coords.X < 0) ? 1 : 0);
-            int z = coords.Z / Region.Depth - ((coords.Z < 0) ? 1 : 0);
-            DirtyChunks.Add(new Coordinates2D(coords.X - x * 32, coords.Z - z * 32));
+            DirtyChunks.Add(coords);
         }
 
         /// <summary>
         /// Retrieves the requested chunk from the region, or
         /// generates it if a world generator is provided.
         /// </summary>
+        /// <params>
         /// <param name="position">The position of the requested local chunk coordinates.</param>
-        public IChunk GetChunk(Coordinates2D position, bool generate = true)
+        /// </params>
+        public IChunk GetChunk(LocalChunkCoordinates position, bool generate = true)
         {
             if (!Chunks.ContainsKey(position))
             {
@@ -138,9 +140,9 @@ namespace TrueCraft.Core.World
             return Chunks[position];
         }
 
-        public void GenerateChunk(Coordinates2D position)
+        public void GenerateChunk(LocalChunkCoordinates position)
         {
-            var globalPosition = (Position * new Coordinates2D(Width, Depth)) + position;
+            GlobalChunkCoordinates globalPosition = this.Position.GetGlobalChunkCoordinates(position);
             var chunk = World.ChunkProvider.GenerateChunk(World, globalPosition);
             chunk.IsModified = true;
             chunk.Coordinates = globalPosition;
@@ -153,7 +155,7 @@ namespace TrueCraft.Core.World
         /// <summary>
         /// Sets the chunk at the specified local position to the given value.
         /// </summary>
-        public void SetChunk(Coordinates2D position, IChunk chunk)
+        public void SetChunk(LocalChunkCoordinates position, IChunk chunk)
         {
             Chunks[position] = chunk;
             chunk.IsModified = true;
@@ -183,7 +185,7 @@ namespace TrueCraft.Core.World
         {
             lock (streamLock)
             {
-                var toRemove = new List<Coordinates2D>();
+                var toRemove = new List<LocalChunkCoordinates>();
                 var chunks = DirtyChunks.ToList();
                 DirtyChunks.Clear();
                 foreach (var coords in chunks)
@@ -224,9 +226,9 @@ namespace TrueCraft.Core.World
         private const int ChunkSizeMultiplier = 4096;
         private byte[] HeaderCache = new byte[8192];
         
-        private Tuple<int, int> GetChunkFromTable(Coordinates2D position) // <offset, length>
+        private Tuple<int, int> GetChunkFromTable(LocalChunkCoordinates position) // <offset, length>
         {
-            int tableOffset = ((position.X % Width) + (position.Z % Depth) * Width) * 4;
+            int tableOffset = GetTableOffset(position);
             byte[] offsetBuffer = new byte[4];
             Buffer.BlockCopy(HeaderCache, tableOffset, offsetBuffer, 0, 3);
             Array.Reverse(offsetBuffer);
@@ -245,7 +247,7 @@ namespace TrueCraft.Core.World
             regionFile.Flush();
         }
 
-        private Tuple<int, int> AllocateNewChunks(Coordinates2D position, int length)
+        private Tuple<int, int> AllocateNewChunks(LocalChunkCoordinates position, int length)
         {
             // Expand region file
             regionFile.Seek(0, SeekOrigin.End);
@@ -256,7 +258,7 @@ namespace TrueCraft.Core.World
             regionFile.Write(new byte[length * ChunkSizeMultiplier], 0, length * ChunkSizeMultiplier);
 
             // Write table entry
-            int tableOffset = ((position.X % Width) + (position.Z % Depth) * Width) * 4;
+            int tableOffset = GetTableOffset(position);
             regionFile.Seek(tableOffset, SeekOrigin.Begin);
 
             byte[] entry = BitConverter.GetBytes(dataOffset >> 4);
@@ -268,14 +270,19 @@ namespace TrueCraft.Core.World
             return new Tuple<int, int>(dataOffset, length * ChunkSizeMultiplier);
         }
 
+        private int GetTableOffset(LocalChunkCoordinates pos)
+        {
+            return (pos.X + pos.Z * Width) * 4;
+        }
+
         #endregion
 
-        public static string GetRegionFileName(Coordinates2D position)
+        public static string GetRegionFileName(RegionCoordinates position)
         {
             return string.Format("r.{0}.{1}.mca", position.X, position.Z);
         }
 
-        public void UnloadChunk(Coordinates2D position)
+        public void UnloadChunk(LocalChunkCoordinates position)
         {
             Chunks.Remove(position);
         }

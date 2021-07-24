@@ -107,7 +107,7 @@ namespace TrueCraft.API.World
         }
         #endregion // object overrides
 
-        #region Conversion operators
+        #region Conversions
         public static explicit operator RegionCoordinates(GlobalChunkCoordinates value)
         {
             int regionX;
@@ -152,6 +152,14 @@ namespace TrueCraft.API.World
                 regionZ = (z + 1) / (WorldConstants.ChunkDepth * WorldConstants.RegionDepth) - 1;
 
             return new RegionCoordinates(regionX, regionZ);
+        }
+
+        public GlobalChunkCoordinates GetGlobalChunkCoordinates(LocalChunkCoordinates value)
+        {
+            int x = this.X * WorldConstants.RegionWidth * WorldConstants.ChunkWidth + value.X;
+            int z = this.Z * WorldConstants.RegionDepth * WorldConstants.ChunkDepth + value.Z;
+
+            return new GlobalChunkCoordinates(x, z);
         }
         #endregion
     }
