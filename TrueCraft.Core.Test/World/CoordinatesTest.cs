@@ -214,13 +214,13 @@ namespace TrueCraft.Core.Test.World
         [TestCase(0, -1, 0, Region.Depth - 1)]                               // going north - first block in region 0, -1
         [TestCase(0, -Region.Width * Chunk.Depth, 0, 0)]                     // going north - last block in region 0, -1
         [TestCase(0, -Region.Width * Chunk.Depth - 1, 0, Region.Depth - 1)]  // going north - first block in region 0, -2
-        public void BlockToLocalChunk_C3D_Test(int blockX, int blockZ, int localX, int localZ)
+        public void BlockToLocalChunk_Test(int blockX, int blockZ, int localX, int localZ)
         {
-            Coordinates3D global = new Coordinates3D(blockX, 63, blockZ);
-            Coordinates2D expected = new Coordinates2D(localX, localZ);
-            Coordinates2D actual;
+            GlobalVoxelCoordinates global = new GlobalVoxelCoordinates(blockX, 63, blockZ);
+            LocalChunkCoordinates expected = new LocalChunkCoordinates(localX, localZ);
+            LocalChunkCoordinates actual;
 
-            actual = Coordinates.BlockToLocalChunk(global);
+            actual = (LocalChunkCoordinates)global;
 
             Assert.IsNotNull(actual);
             Assert.AreEqual(expected.X, actual.X);

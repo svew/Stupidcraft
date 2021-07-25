@@ -126,6 +126,34 @@ namespace TrueCraft.API.World
 
             return new LocalChunkCoordinates(value.X - localX * WorldConstants.RegionWidth, value.Z - localZ * WorldConstants.RegionDepth);
         }
+
+        public static explicit operator LocalChunkCoordinates(GlobalVoxelCoordinates value)
+        {
+            return GlobalVoxelToLocalChunk(value.X, value.Z);
+        }
+
+        private static LocalChunkCoordinates GlobalVoxelToLocalChunk(int x, int z)
+        {
+            int regionX;
+            int regionZ;
+            int regionWidth = WorldConstants.RegionWidth * WorldConstants.ChunkWidth;
+            int regionDepth = WorldConstants.RegionDepth * WorldConstants.ChunkDepth;
+
+            if (x >= 0)
+                regionX = x / regionWidth;
+            else
+                regionX = (x + 1) / regionWidth - 1;
+
+            if (z >= 0)
+                regionZ = z / regionDepth;
+            else
+                regionZ = (z + 1) / regionDepth - 1;
+
+            int localX = (x - regionX * regionWidth) / WorldConstants.ChunkWidth;
+            int localZ = (z - regionZ * regionDepth) / WorldConstants.ChunkDepth;
+
+            return new LocalChunkCoordinates(localX, localZ);
+        }
         #endregion
     }
 }

@@ -9,7 +9,9 @@ namespace TrueCraft.API.World
     public interface IChunkProvider
     {
         IList<IChunkDecorator> ChunkDecorators { get; }
-        IChunk GenerateChunk(IWorld world, Coordinates2D coordinates);
+
+        IChunk GenerateChunk(IWorld world, GlobalChunkCoordinates coordinates);
+
         Coordinates3D GetSpawn(IWorld world);
         void Initialize(IWorld world);
     }

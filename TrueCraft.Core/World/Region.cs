@@ -40,7 +40,7 @@ namespace TrueCraft.Core.World
         private HashSet<LocalChunkCoordinates> DirtyChunks { get; } = new HashSet<LocalChunkCoordinates>(Width * Depth);
 
         private Stream _regionFile;
-        private object streamLock = new object();
+        private object _streamLock = new object();
 
         /// <summary>
         /// Creates a new Region for server-side use at the given position in
@@ -109,7 +109,7 @@ namespace TrueCraft.Core.World
                             return null;
                         return _chunks[position];
                     }
-                    lock (streamLock)
+                    lock (_streamLock)
                     {
                         _regionFile.Seek(chunkData.Item1, SeekOrigin.Begin);
                         /*int length = */
@@ -187,7 +187,7 @@ namespace TrueCraft.Core.World
         /// </summary>
         public void Save()
         {
-            lock (streamLock)
+            lock (_streamLock)
             {
                 var toRemove = new List<LocalChunkCoordinates>();
                 var chunks = DirtyChunks.ToList();
@@ -296,7 +296,7 @@ namespace TrueCraft.Core.World
         {
             if (_regionFile == null)
                 return;
-            lock (streamLock)
+            lock (_streamLock)
             {
                 _regionFile.Flush();
                 _regionFile.Close();
