@@ -95,7 +95,7 @@ namespace TrueCraft.Core.TerrainGen
         public bool SingleBiome { get; private set; }
         public byte GenerationBiome { get; private set; }
 
-        public IChunk GenerateChunk(IWorld world, Coordinates2D coordinates)
+        public IChunk GenerateChunk(IWorld world, GlobalChunkCoordinates coordinates)
         {
             const int featurePointDistance = 400;
 

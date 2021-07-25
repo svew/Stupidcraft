@@ -12,7 +12,7 @@ namespace TrueCraft.API.World
 
         IChunk GenerateChunk(IWorld world, GlobalChunkCoordinates coordinates);
 
-        Coordinates3D GetSpawn(IWorld world);
+        GlobalVoxelCoordinates GetSpawn(IWorld world);
         void Initialize(IWorld world);
     }
 }

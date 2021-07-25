@@ -8,14 +8,14 @@ namespace TrueCraft.Core
 {
     public class EmptyGenerator : IChunkProvider
     {
-        public IChunk GenerateChunk(IWorld world, Coordinates2D coordinates)
+        public IChunk GenerateChunk(IWorld world, GlobalChunkCoordinates coordinates)
         {
             return new Chunk(coordinates);
         }
 
-        public Coordinates3D GetSpawn(IWorld world)
+        public GlobalVoxelCoordinates GetSpawn(IWorld world)
         {
-            return Coordinates3D.Zero;
+            return GlobalVoxelCoordinates.Zero;
         }
 
         public void Initialize(IWorld world)
