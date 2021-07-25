@@ -152,91 +152,25 @@ namespace TrueCraft.API.World
             }
         }
 
-        //public static GlobalVoxelCoordinates operator +(GlobalVoxelCoordinates a, GlobalVoxelCoordinates b)
-        //{
-        //    return new GlobalVoxelCoordinates(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
-        //}
+        public GlobalVoxelCoordinates Add(Vector3i other)
+        {
+            return new GlobalVoxelCoordinates(this.X + other.X, this.Y + other.Y, this.Z + other.Z);
+        }
 
-        //public static GlobalVoxelCoordinates operator -(GlobalVoxelCoordinates a, GlobalVoxelCoordinates b)
-        //{
-        //    return new GlobalVoxelCoordinates(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
-        //}
+        public static GlobalVoxelCoordinates operator+(GlobalVoxelCoordinates c, Vector3i v)
+        {
+            return c.Add(v);
+        }
 
-        //public static GlobalVoxelCoordinates operator -(GlobalVoxelCoordinates a)
-        //{
-        //    return new GlobalVoxelCoordinates(-a.X, -a.Y, -a.Z);
-        //}
-
-        //public static GlobalVoxelCoordinates operator *(GlobalVoxelCoordinates a, GlobalVoxelCoordinates b)
-        //{
-        //    return new GlobalVoxelCoordinates(a.X * b.X, a.Y * b.Y, a.Z * b.Z);
-        //}
-
-        //public static GlobalVoxelCoordinates operator /(GlobalVoxelCoordinates a, GlobalVoxelCoordinates b)
-        //{
-        //    return new GlobalVoxelCoordinates(a.X / b.X, a.Y / b.Y, a.Z / b.Z);
-        //}
-
-        //public static GlobalVoxelCoordinates operator %(GlobalVoxelCoordinates a, GlobalVoxelCoordinates b)
-        //{
-        //    return new GlobalVoxelCoordinates(a.X % b.X, a.Y % b.Y, a.Z % b.Z);
-        //}
-
-        //public static GlobalVoxelCoordinates operator +(GlobalVoxelCoordinates a, int b)
-        //{
-        //    return new GlobalVoxelCoordinates(a.X + b, a.Y + b, a.Z + b);
-        //}
-
-        //public static GlobalVoxelCoordinates operator -(GlobalVoxelCoordinates a, int b)
-        //{
-        //    return new GlobalVoxelCoordinates(a.X - b, a.Y - b, a.Z - b);
-        //}
-
-        //public static GlobalVoxelCoordinates operator *(GlobalVoxelCoordinates a, int b)
-        //{
-        //    return new GlobalVoxelCoordinates(a.X * b, a.Y * b, a.Z * b);
-        //}
-
-        //public static GlobalVoxelCoordinates operator /(GlobalVoxelCoordinates a, int b)
-        //{
-        //    return new GlobalVoxelCoordinates(a.X / b, a.Y / b, a.Z / b);
-        //}
-
-        //public static GlobalVoxelCoordinates operator %(GlobalVoxelCoordinates a, int b)
-        //{
-        //    return new GlobalVoxelCoordinates(a.X % b, a.Y % b, a.Z % b);
-        //}
-
-        //public static GlobalVoxelCoordinates operator +(int a, GlobalVoxelCoordinates b)
-        //{
-        //    return new GlobalVoxelCoordinates(a + b.X, a + b.Y, a + b.Z);
-        //}
-
-        //public static GlobalVoxelCoordinates operator -(int a, GlobalVoxelCoordinates b)
-        //{
-        //    return new GlobalVoxelCoordinates(a - b.X, a - b.Y, a - b.Z);
-        //}
-
-        //public static GlobalVoxelCoordinates operator *(int a, GlobalVoxelCoordinates b)
-        //{
-        //    return new GlobalVoxelCoordinates(a * b.X, a * b.Y, a * b.Z);
-        //}
-
-        //public static GlobalVoxelCoordinates operator /(int a, GlobalVoxelCoordinates b)
-        //{
-        //    return new GlobalVoxelCoordinates(a / b.X, a / b.Y, a / b.Z);
-        //}
-
-        //public static GlobalVoxelCoordinates operator %(int a, GlobalVoxelCoordinates b)
-        //{
-        //    return new GlobalVoxelCoordinates(a % b.X, a % b.Y, a % b.Z);
-        //}
-
+        public static GlobalVoxelCoordinates operator +(Vector3i v, GlobalVoxelCoordinates c)
+        {
+            return c.Add(v);
+        }
         #endregion
 
         #region Conversion operators
 
-        public static explicit operator GlobalVoxelCoordinates(Coordinates2D a)
+        public static explicit operator GlobalVoxelCoordinates(GlobalColumnCoordinates a)
         {
             return new GlobalVoxelCoordinates(a.X, 0, a.Z);
         }
@@ -247,14 +181,6 @@ namespace TrueCraft.API.World
                                      (int)a.Y,
                                      (int)a.Z);
         }
-
-        //public static explicit operator GlobalVoxelCoordinates(Size s)
-        //{
-        //    return new GlobalVoxelCoordinates((int)s.Width,
-        //                             (int)s.Height,
-        //                             (int)s.Depth);
-        //}
-
         #endregion
 
         #region Constants
