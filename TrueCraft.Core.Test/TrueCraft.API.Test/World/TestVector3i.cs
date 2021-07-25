@@ -57,5 +57,19 @@ namespace TrueCraft.API.Test.World
 
             Assert.AreEqual("<2,3,5>", actual);
         }
+
+        [TestCase(1, 2, 3)]
+        [TestCase(-3, -2, -1)]
+        public void Vector3i_NegationOperator(int x, int y, int z)
+        {
+            Vector3i t = new Vector3i(x, y, z);
+            Vector3i expected = new Vector3i(-x, -y, -z);
+
+            Vector3i actual = -t;
+
+            Assert.AreEqual(expected.X, actual.X);
+            Assert.AreEqual(expected.Y, actual.Y);
+            Assert.AreEqual(expected.Z, actual.Z);
+        }
     }
 }

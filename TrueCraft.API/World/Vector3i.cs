@@ -77,7 +77,13 @@ namespace TrueCraft.API.World
         }
         #endregion
 
+        public static Vector3i operator-(Vector3i arg)
+        {
+            return new Vector3i(-arg.X, -arg.Y, -arg.Z);
+        }
+
         #region constant vectors
+        public static readonly Vector3i Zero  = new Vector3i( 0,  0,  0);
         public static readonly Vector3i Up    = new Vector3i( 0,  1,  0);
         public static readonly Vector3i Down  = new Vector3i( 0, -1,  0);
         public static readonly Vector3i North = new Vector3i( 0,  0, -1);
