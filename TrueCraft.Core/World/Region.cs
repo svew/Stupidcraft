@@ -28,7 +28,7 @@ namespace TrueCraft.Core.World
         /// </summary>
         public const int Depth = WorldConstants.RegionDepth;
 
-        private ConcurrentDictionary<LocalChunkCoordinates, IChunk> _Chunks { get; }
+        private ConcurrentDictionary<LocalChunkCoordinates, IChunk> _chunks { get; }
 
         /// <summary>
         /// The location of this region in the overworld.
@@ -39,7 +39,7 @@ namespace TrueCraft.Core.World
 
         private HashSet<LocalChunkCoordinates> DirtyChunks { get; } = new HashSet<LocalChunkCoordinates>(Width * Depth);
 
-        private Stream regionFile { get; set; }
+        private Stream _regionFile;
         private object streamLock = new object();
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace TrueCraft.Core.World
         /// </params>
         public Region(RegionCoordinates position, World world)
         {
-            _Chunks = new ConcurrentDictionary<LocalChunkCoordinates, IChunk>(Environment.ProcessorCount, Width * Depth);
+            _chunks = new ConcurrentDictionary<LocalChunkCoordinates, IChunk>(Environment.ProcessorCount, Width * Depth);
             Position = position;
             World = world;
         }
@@ -64,12 +64,12 @@ namespace TrueCraft.Core.World
         {
             if (File.Exists(file))
             {
-                regionFile = File.Open(file, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
-                regionFile.Read(HeaderCache, 0, 8192);
+                _regionFile = File.Open(file, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
+                _regionFile.Read(HeaderCache, 0, 8192);
             }
             else
             {
-                regionFile = File.Open(file, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
+                _regionFile = File.Open(file, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
                 CreateRegionHeader();
             }
         }
@@ -77,6 +77,11 @@ namespace TrueCraft.Core.World
         public void DamageChunk(LocalChunkCoordinates coords)
         {
             DirtyChunks.Add(coords);
+        }
+
+        public bool IsChunkLoaded(LocalChunkCoordinates position)
+        {
+            return _chunks.ContainsKey(position);
         }
 
         /// <summary>
@@ -88,9 +93,9 @@ namespace TrueCraft.Core.World
         /// </params>
         public IChunk GetChunk(LocalChunkCoordinates position, bool generate = true)
         {
-            if (!Chunks.ContainsKey(position))
+            if (!_chunks.ContainsKey(position))
             {
-                if (regionFile != null)
+                if (_regionFile != null)
                 {
                     // Search the stream for that region
                     var chunkData = GetChunkFromTable(position);
@@ -102,24 +107,24 @@ namespace TrueCraft.Core.World
                             GenerateChunk(position);
                         else
                             return null;
-                        return Chunks[position];
+                        return _chunks[position];
                     }
                     lock (streamLock)
                     {
-                        regionFile.Seek(chunkData.Item1, SeekOrigin.Begin);
+                        _regionFile.Seek(chunkData.Item1, SeekOrigin.Begin);
                         /*int length = */
-                        new MinecraftStream(regionFile).ReadInt32(); // TODO: Avoid making new objects here, and in the WriteInt32
-                        int compressionMode = regionFile.ReadByte();
+                        new MinecraftStream(_regionFile).ReadInt32(); // TODO: Avoid making new objects here, and in the WriteInt32
+                        int compressionMode = _regionFile.ReadByte();
                         switch (compressionMode)
                         {
                             case 1: // gzip
                                 throw new NotImplementedException("gzipped chunks are not implemented");
                             case 2: // zlib
                                 var nbt = new NbtFile();
-                                nbt.LoadFromStream(regionFile, NbtCompression.ZLib, null);
+                                nbt.LoadFromStream(_regionFile, NbtCompression.ZLib, null);
                                 var chunk = Chunk.FromNbt(nbt);
                                 chunk.ParentRegion = this;
-                                Chunks[position] = chunk;
+                                _chunks[position] = chunk;
                                 World.OnChunkLoaded(new ChunkLoadedEventArgs(chunk));
                                 break;
                             default:
@@ -137,7 +142,7 @@ namespace TrueCraft.Core.World
                         return null;
                 }
             }
-            return Chunks[position];
+            return _chunks[position];
         }
 
         public void GenerateChunk(LocalChunkCoordinates position)
@@ -145,10 +150,9 @@ namespace TrueCraft.Core.World
             GlobalChunkCoordinates globalPosition = this.Position.GetGlobalChunkCoordinates(position);
             var chunk = World.ChunkProvider.GenerateChunk(World, globalPosition);
             chunk.IsModified = true;
-            chunk.Coordinates = globalPosition;
             chunk.ParentRegion = this;
             DirtyChunks.Add(position);
-            Chunks[position] = chunk;
+            _chunks[position] = chunk;
             World.OnChunkGenerated(new ChunkLoadedEventArgs(chunk));
         }
 
@@ -157,7 +161,7 @@ namespace TrueCraft.Core.World
         /// </summary>
         public void SetChunk(LocalChunkCoordinates position, IChunk chunk)
         {
-            Chunks[position] = chunk;
+            _chunks[position] = chunk;
             chunk.IsModified = true;
             DirtyChunks.Add(position);
             chunk.ParentRegion = this;
@@ -169,10 +173,10 @@ namespace TrueCraft.Core.World
         public void Save(string file)
         {
             if(File.Exists(file))
-                regionFile = regionFile ?? File.Open(file, FileMode.OpenOrCreate);
+                _regionFile = _regionFile ?? File.Open(file, FileMode.OpenOrCreate);
             else
             {
-                regionFile = regionFile ?? File.Open(file, FileMode.OpenOrCreate);
+                _regionFile = _regionFile ?? File.Open(file, FileMode.OpenOrCreate);
                 CreateRegionHeader();
             }
             Save();
@@ -200,22 +204,22 @@ namespace TrueCraft.Core.World
                         if (header == null || header.Item2 > raw.Length)
                             header = AllocateNewChunks(coords, raw.Length);
 
-                        regionFile.Seek(header.Item1, SeekOrigin.Begin);
-                        new MinecraftStream(regionFile).WriteInt32(raw.Length);
-                        regionFile.WriteByte(2); // Compressed with zlib
-                        regionFile.Write(raw, 0, raw.Length);
+                        _regionFile.Seek(header.Item1, SeekOrigin.Begin);
+                        new MinecraftStream(_regionFile).WriteInt32(raw.Length);
+                        _regionFile.WriteByte(2); // Compressed with zlib
+                        _regionFile.Write(raw, 0, raw.Length);
 
                         chunk.IsModified = false;
                     }
                     if ((DateTime.UtcNow - chunk.LastAccessed).TotalMinutes > 5)
                         toRemove.Add(coords);
                 }
-                regionFile.Flush();
+                _regionFile.Flush();
                 // Unload idle chunks
                 foreach (var chunk in toRemove)
                 {
-                    var c = Chunks[chunk];
-                    Chunks.Remove(chunk);
+                    IChunk c;
+                    _chunks.Remove(chunk, out c);
                     c.Dispose();
                 }
             }
@@ -243,28 +247,28 @@ namespace TrueCraft.Core.World
         private void CreateRegionHeader()
         {
             HeaderCache = new byte[8192];
-            regionFile.Write(HeaderCache, 0, 8192);
-            regionFile.Flush();
+            _regionFile.Write(HeaderCache, 0, 8192);
+            _regionFile.Flush();
         }
 
         private Tuple<int, int> AllocateNewChunks(LocalChunkCoordinates position, int length)
         {
             // Expand region file
-            regionFile.Seek(0, SeekOrigin.End);
-            int dataOffset = (int)regionFile.Position;
+            _regionFile.Seek(0, SeekOrigin.End);
+            int dataOffset = (int)_regionFile.Position;
 
             length /= ChunkSizeMultiplier;
             length++;
-            regionFile.Write(new byte[length * ChunkSizeMultiplier], 0, length * ChunkSizeMultiplier);
+            _regionFile.Write(new byte[length * ChunkSizeMultiplier], 0, length * ChunkSizeMultiplier);
 
             // Write table entry
             int tableOffset = GetTableOffset(position);
-            regionFile.Seek(tableOffset, SeekOrigin.Begin);
+            _regionFile.Seek(tableOffset, SeekOrigin.Begin);
 
             byte[] entry = BitConverter.GetBytes(dataOffset >> 4);
             entry[0] = (byte)length;
             Array.Reverse(entry);
-            regionFile.Write(entry, 0, entry.Length);
+            _regionFile.Write(entry, 0, entry.Length);
             Buffer.BlockCopy(entry, 0, HeaderCache, tableOffset, 4);
 
             return new Tuple<int, int>(dataOffset, length * ChunkSizeMultiplier);
@@ -284,17 +288,18 @@ namespace TrueCraft.Core.World
 
         public void UnloadChunk(LocalChunkCoordinates position)
         {
-            Chunks.Remove(position);
+            IChunk c;
+            _chunks.Remove(position, out c);
         }
 
         public void Dispose()
         {
-            if (regionFile == null)
+            if (_regionFile == null)
                 return;
             lock (streamLock)
             {
-                regionFile.Flush();
-                regionFile.Close();
+                _regionFile.Flush();
+                _regionFile.Close();
             }
         }
     }

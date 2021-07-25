@@ -12,6 +12,8 @@ namespace TrueCraft.API.World
 
         IChunk GetChunk(LocalChunkCoordinates position, bool generate = true);
 
+        bool IsChunkLoaded(LocalChunkCoordinates position);
+
         /// <summary>
         /// Marks the chunk for saving in the next Save().
         /// </summary>
