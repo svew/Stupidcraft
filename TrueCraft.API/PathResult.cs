@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using TrueCraft.API.World;
 
 namespace TrueCraft.API
 {
@@ -10,7 +11,7 @@ namespace TrueCraft.API
             Index = 0;
         }
 
-        public IList<Coordinates3D> Waypoints;
+        public IList<GlobalVoxelCoordinates> Waypoints;
         public int Index;
     }
 }

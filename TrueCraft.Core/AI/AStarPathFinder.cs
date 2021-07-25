@@ -9,25 +9,25 @@ namespace TrueCraft.Core.AI
 {
     public class AStarPathFinder
     {
-        private readonly Coordinates3D[] Neighbors =
+        private readonly Vector3i[] Neighbors =
         {
-            Coordinates3D.North,
-            Coordinates3D.East,
-            Coordinates3D.South,
-            Coordinates3D.West
+            Vector3i.North,
+            Vector3i.East,
+            Vector3i.South,
+            Vector3i.West
         };
 
-        private readonly Coordinates3D[][] DiagonalNeighbors =
+        private readonly Vector3i[][] DiagonalNeighbors =
         {
-            new[] { Coordinates3D.North, Coordinates3D.East },
-            new[] { Coordinates3D.North, Coordinates3D.West },
-            new[] { Coordinates3D.South, Coordinates3D.East },
-            new[] { Coordinates3D.South, Coordinates3D.West },
+            new[] { Vector3i.North, Vector3i.East },
+            new[] { Vector3i.North, Vector3i.West },
+            new[] { Vector3i.South, Vector3i.East },
+            new[] { Vector3i.South, Vector3i.West },
         };
 
-        private PathResult TracePath(Coordinates3D start, Coordinates3D goal, Dictionary<Coordinates3D, Coordinates3D> parents)
+        private PathResult TracePath(GlobalVoxelCoordinates start, GlobalVoxelCoordinates goal, Dictionary<GlobalVoxelCoordinates, GlobalVoxelCoordinates> parents)
         {
-            var list = new List<Coordinates3D>();
+            var list = new List<GlobalVoxelCoordinates>();
             var current = goal;
             while (current != start)
             {
@@ -38,7 +38,7 @@ namespace TrueCraft.Core.AI
             return new PathResult { Waypoints = list };
         }
 
-        private bool CanOccupyVoxel(IWorld world, BoundingBox box, Coordinates3D voxel)
+        private bool CanOccupyVoxel(IWorld world, BoundingBox box, GlobalVoxelCoordinates voxel)
         {
             var id = world.GetBlockID(voxel);
             if (world.BlockRepository == null)
@@ -49,7 +49,7 @@ namespace TrueCraft.Core.AI
             return provider.BoundingBox == null;
         }
 
-        private IEnumerable<Coordinates3D> GetNeighbors(IWorld world, BoundingBox subject, Coordinates3D current)
+        private IEnumerable<GlobalVoxelCoordinates> GetNeighbors(IWorld world, BoundingBox subject, GlobalVoxelCoordinates current)
         {
             for (int i = 0; i < Neighbors.Length; i++)
             {
@@ -69,13 +69,13 @@ namespace TrueCraft.Core.AI
             }
         }
 
-        public PathResult FindPath(IWorld world, BoundingBox subject, Coordinates3D start, Coordinates3D goal)
+        public PathResult FindPath(IWorld world, BoundingBox subject, GlobalVoxelCoordinates start, GlobalVoxelCoordinates goal)
         {
             // Thanks to www.redblobgames.com/pathfinding/a-star/implementation.html
-            var parents = new Dictionary<Coordinates3D, Coordinates3D>();
-            var costs = new Dictionary<Coordinates3D, double>();
-            var openset = new PriorityQueue<Coordinates3D>();
-            var closedset = new HashSet<Coordinates3D>();
+            var parents = new Dictionary<GlobalVoxelCoordinates, GlobalVoxelCoordinates>();
+            var costs = new Dictionary<GlobalVoxelCoordinates, double>();
+            var openset = new PriorityQueue<GlobalVoxelCoordinates>();
+            var closedset = new HashSet<GlobalVoxelCoordinates>();
 
             openset.Enqueue(start, 0);
             parents[start] = start;
