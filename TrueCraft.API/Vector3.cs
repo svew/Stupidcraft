@@ -362,11 +362,6 @@ namespace TrueCraft.API
         {
             return new Vector3(a.X, a.Y, a.Z);
         }
-
-        public static explicit operator Vector3(Coordinates2D c)
-        {
-            return new Vector3(c.X, 0, c.Z);
-        }
         #endregion
 
         #region Constants
