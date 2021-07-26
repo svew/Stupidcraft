@@ -44,7 +44,7 @@ namespace TrueCraft.Core.Logic.Blocks
                     var item = window[i];
                     if (!item.Empty)
                     {
-                        var entity = new ItemEntity(descriptor.Coordinates + Coordinates3D.Up, item);
+                        var entity = new ItemEntity((Vector3)(descriptor.Coordinates + Vector3i.Up), item);
                         entityManager.SpawnEntity(entity);
                     }
                 }

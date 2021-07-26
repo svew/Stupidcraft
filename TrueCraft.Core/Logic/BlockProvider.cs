@@ -69,7 +69,7 @@ namespace TrueCraft.Core.Logic
             foreach (var i in items)
             {
                 if (i.Empty) continue;
-                var entity = new ItemEntity(new Vector3(descriptor.Coordinates) + new Vector3(0.5), i);
+                var entity = new ItemEntity((Vector3)descriptor.Coordinates + new Vector3(0.5), i);
                 entityManager.SpawnEntity(entity);
             }
         }
@@ -77,7 +77,7 @@ namespace TrueCraft.Core.Logic
         public virtual bool IsSupported(BlockDescriptor descriptor, IMultiplayerServer server, IWorld world)
         {
             var support = GetSupportDirection(descriptor);
-            if (support != Coordinates3D.Zero)
+            if (support != Vector3i.Zero)
             {
                 var supportingBlock = server.BlockRepository.GetBlockProvider(world.GetBlockID(descriptor.Coordinates + support));
                 if (!supportingBlock.Opaque)
@@ -125,7 +125,7 @@ namespace TrueCraft.Core.Logic
             SnowfallBlock.BlockID
         };
 
-        public virtual void ItemUsedOnBlock(Coordinates3D coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user)
+        public virtual void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user)
         {
             var old = world.GetBlockData(coordinates);
             if (!Overwritable.Any(b => b == old.ID))
@@ -140,7 +140,7 @@ namespace TrueCraft.Core.Logic
             if (BoundingBox.HasValue)
             {
                 var em = user.Server.GetEntityManagerForWorld(world);
-                var entities = em.EntitiesInRange(coordinates, 3);
+                var entities = em.EntitiesInRange((Vector3)coordinates, 3);
                 var box = new BoundingBox(BoundingBox.Value.Min + (Vector3)coordinates,
                     BoundingBox.Value.Max + (Vector3)coordinates);
                 foreach (var entity in entities)
@@ -176,7 +176,7 @@ namespace TrueCraft.Core.Logic
             }
         }
 
-        public virtual void BlockLoadedFromChunk(Coordinates3D coords, IMultiplayerServer server, IWorld world)
+        public virtual void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IWorld world)
         {
             // This space intentionally left blank
         }
@@ -204,9 +204,9 @@ namespace TrueCraft.Core.Logic
             return null; // Blocks are rendered in 3D
         }
 
-        public virtual Coordinates3D GetSupportDirection(BlockDescriptor descriptor)
+        public virtual Vector3i GetSupportDirection(BlockDescriptor descriptor)
         {
-            return Coordinates3D.Zero;
+            return Vector3i.Zero;
         }
 
         public virtual SoundEffectClass SoundEffect { get { return SoundEffectClass.Stone; } }

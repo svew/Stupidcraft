@@ -1,5 +1,6 @@
 using System;
 using System.Runtime.InteropServices;
+using TrueCraft.API.World;
 
 namespace TrueCraft.API
 {
@@ -357,7 +358,7 @@ namespace TrueCraft.API
 
         #region Conversion operators
 
-        public static implicit operator Vector3(Coordinates3D a)
+        public static explicit operator Vector3(GlobalVoxelCoordinates a)
         {
             return new Vector3(a.X, a.Y, a.Z);
         }
@@ -365,11 +366,6 @@ namespace TrueCraft.API
         public static explicit operator Vector3(Coordinates2D c)
         {
             return new Vector3(c.X, 0, c.Z);
-        }
-
-        public static implicit operator Vector3(Size s)
-        {
-            return new Vector3(s.Width, s.Height, s.Depth);
         }
         #endregion
 

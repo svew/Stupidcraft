@@ -44,32 +44,32 @@ namespace TrueCraft.Core.Logic.Blocks
             return new ItemStack[0];
         }
 
-        private static readonly Coordinates3D[] SpreadableBlocks =
+        private static readonly Vector3i[] SpreadableBlocks =
         {
-            Coordinates3D.Down,
-            Coordinates3D.Left,
-            Coordinates3D.Right,
-            Coordinates3D.Forwards,
-            Coordinates3D.Backwards,
-            Coordinates3D.Up * 1,
-            Coordinates3D.Up * 2,
-            Coordinates3D.Up * 3,
-            Coordinates3D.Up * 4
+            Vector3i.Down,
+            Vector3i.West,
+            Vector3i.East,
+            Vector3i.North,
+            Vector3i.South,
+            Vector3i.Up * 1,
+            Vector3i.Up * 2,
+            Vector3i.Up * 3,
+            Vector3i.Up * 4
         };
 
-        private static readonly Coordinates3D[] AdjacentBlocks =
+        private static readonly Vector3i[] AdjacentBlocks =
         {
-            Coordinates3D.Up,
-            Coordinates3D.Down,
-            Coordinates3D.Left,
-            Coordinates3D.Right,
-            Coordinates3D.Forwards,
-            Coordinates3D.Backwards
+            Vector3i.Up,
+            Vector3i.Down,
+            Vector3i.West,
+            Vector3i.East,
+            Vector3i.North,
+            Vector3i.South
         };
 
         public void DoUpdate(IMultiplayerServer server, IWorld world, BlockDescriptor descriptor)
         {
-            var down = descriptor.Coordinates + Coordinates3D.Down;
+            var down = descriptor.Coordinates + Vector3i.Down;
 
             var current = world.GetBlockID(descriptor.Coordinates);
             if (current != FireBlock.BlockID && current != LavaBlock.BlockID && current != StationaryLavaBlock.BlockID)

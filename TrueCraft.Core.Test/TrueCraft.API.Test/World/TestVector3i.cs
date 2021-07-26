@@ -71,5 +71,23 @@ namespace TrueCraft.API.Test.World
             Assert.AreEqual(expected.Y, actual.Y);
             Assert.AreEqual(expected.Z, actual.Z);
         }
+
+        [TestCase(1, 2, 3, 5)]
+        public void Vector3i_MultiplyOperator(int x, int y, int z, int m)
+        {
+            Vector3i v = new Vector3i(x, y, z);
+
+            Vector3i actual = m * v;
+
+            Assert.AreEqual(actual.X, m * x);
+            Assert.AreEqual(actual.Y, m * y);
+            Assert.AreEqual(actual.Z, m * z);
+
+            actual = v * m;
+
+            Assert.AreEqual(actual.X, m * x);
+            Assert.AreEqual(actual.Y, m * y);
+            Assert.AreEqual(actual.Z, m * z);
+        }
     }
 }

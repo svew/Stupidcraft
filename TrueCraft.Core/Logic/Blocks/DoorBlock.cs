@@ -15,7 +15,7 @@ namespace TrueCraft.Core.Logic.Blocks
         public override void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IWorld world)
         {
             bool upper = ((DoorItem.DoorFlags)descriptor.Metadata & DoorItem.DoorFlags.Upper) == DoorItem.DoorFlags.Upper;
-            var other = upper ? Coordinates3D.Down : Coordinates3D.Up;
+            var other = upper ? Vector3i.Down : Vector3i.Up;
             if (world.GetBlockID(descriptor.Coordinates + other) != ID)
                 world.SetBlockID(descriptor.Coordinates, 0);
         }
@@ -65,7 +65,7 @@ namespace TrueCraft.Core.Logic.Blocks
         public override bool BlockRightClicked(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
         {
             bool upper = ((DoorItem.DoorFlags)descriptor.Metadata & DoorItem.DoorFlags.Upper) == DoorItem.DoorFlags.Upper;
-            var other = upper ? Coordinates3D.Down : Coordinates3D.Up;
+            var other = upper ? Vector3i.Down : Vector3i.Up;
             var otherMeta = world.GetMetadata(descriptor.Coordinates + other);
             world.SetMetadata(descriptor.Coordinates, (byte)(descriptor.Metadata ^ (byte)DoorItem.DoorFlags.Open));
             world.SetMetadata(descriptor.Coordinates + other, (byte)(otherMeta ^ (byte)DoorItem.DoorFlags.Open));

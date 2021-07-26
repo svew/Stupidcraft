@@ -77,19 +77,19 @@ namespace TrueCraft.Core.Logic.Blocks
             get { return false; }
         }
 
-        private static readonly Coordinates3D[] AdjacentBlocks =
+        private static readonly Vector3i[] AdjacentBlocks =
         {
-            Coordinates3D.North,
-            Coordinates3D.South,
-            Coordinates3D.West,
-            Coordinates3D.East
+            Vector3i.North,
+            Vector3i.South,
+            Vector3i.West,
+            Vector3i.East
         };
 
-        public override void ItemUsedOnBlock(Coordinates3D coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user)
+        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user)
         {
             int adjacent = 0;
-            var coords = coordinates + MathHelper.BlockFaceToCoordinates(face);
-            Coordinates3D _ = Coordinates3D.Down;
+            GlobalVoxelCoordinates coords = coordinates + MathHelper.BlockFaceToCoordinates(face);
+            GlobalVoxelCoordinates _ = null;
             // Check for adjacent chests. We can only allow one adjacent check block.
             for (int i = 0; i < AdjacentBlocks.Length; i++)
             {
@@ -101,7 +101,7 @@ namespace TrueCraft.Core.Logic.Blocks
             }
             if (adjacent <= 1)
             {
-                if (_ != Coordinates3D.Down)
+                if (!object.ReferenceEquals(_, null))
                 {
                     // Confirm that adjacent chest is not a double chest
                     for (int i = 0; i < AdjacentBlocks.Length; i++)
@@ -122,25 +122,25 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override bool BlockRightClicked(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
         {
-            var adjacent = -Coordinates3D.One; // -1, no adjacent chest
-            var self = descriptor.Coordinates;
+            GlobalVoxelCoordinates adjacent = null; // No adjacent chest
+            GlobalVoxelCoordinates self = descriptor.Coordinates;
             for (int i = 0; i < AdjacentBlocks.Length; i++)
             {
                 var test = self + AdjacentBlocks[i];
                 if (world.GetBlockID(test) == ChestBlock.BlockID)
                 {
                     adjacent = test;
-                    var up = world.BlockRepository.GetBlockProvider(world.GetBlockID(test + Coordinates3D.Up));
+                    var up = world.BlockRepository.GetBlockProvider(world.GetBlockID(test + Vector3i.Up));
                     if (up.Opaque && !(up is WallSignBlock)) // Wall sign blocks are an exception
                         return false; // Obstructed
                     break;
                 }
             }
-            var upSelf = world.BlockRepository.GetBlockProvider(world.GetBlockID(self + Coordinates3D.Up));
+            var upSelf = world.BlockRepository.GetBlockProvider(world.GetBlockID(self + Vector3i.Up));
             if (upSelf.Opaque && !(upSelf is WallSignBlock))
                 return false; // Obstructed
 
-            if (adjacent != -Coordinates3D.One)
+            if (!object.ReferenceEquals(adjacent, null))
             {
                 // Ensure that chests are always opened in the same arrangement
                 if (adjacent.X < self.X ||
@@ -152,7 +152,7 @@ namespace TrueCraft.Core.Logic.Blocks
                 }
             }
 
-            var window = new ChestWindow((InventoryWindow)user.Inventory, adjacent != -Coordinates3D.One);
+            var window = new ChestWindow((InventoryWindow)user.Inventory, !object.ReferenceEquals(adjacent, null));
             // Add items
             var entity = world.GetTileEntity(self);
             if (entity != null)
@@ -164,7 +164,7 @@ namespace TrueCraft.Core.Logic.Blocks
                 }
             }
             // Add adjacent items
-            if (adjacent != -Coordinates3D.One)
+            if (!object.ReferenceEquals(adjacent, null))
             {
                 entity = world.GetTileEntity(adjacent);
                 if (entity != null)
@@ -203,7 +203,7 @@ namespace TrueCraft.Core.Logic.Blocks
                     else
                         newEntity["Items"] = entitySelf;
                     world.SetTileEntity(self, newEntity);
-                    if (adjacent != -Coordinates3D.One)
+                    if (!object.ReferenceEquals(adjacent, null))
                     {
                         newEntity = world.GetTileEntity(adjacent);
                         if (newEntity == null)
@@ -227,7 +227,7 @@ namespace TrueCraft.Core.Logic.Blocks
                 foreach (var item in (NbtList)entity["Items"])
                 {
                     var slot = ItemStack.FromNbt((NbtCompound)item);
-                    manager.SpawnEntity(new ItemEntity(descriptor.Coordinates + new Vector3(0.5), slot));
+                    manager.SpawnEntity(new ItemEntity(new Vector3(descriptor.Coordinates.X + 0.5, descriptor.Coordinates.Y + 0.5, descriptor.Coordinates.Z + 0.5), slot));
                 }
             }
             world.SetTileEntity(self, null);

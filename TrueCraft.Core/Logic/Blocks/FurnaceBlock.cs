@@ -64,13 +64,14 @@ namespace TrueCraft.Core.Logic.Blocks
             return new[] { new ItemStack(BlockID) };
         }
 
-        protected static Dictionary<Coordinates3D, FurnaceEventSubject> TrackedFurnaces { get; set; }
-        protected static Dictionary<Coordinates3D, List<IWindow>> TrackedFurnaceWindows { get; set; }
+        protected static Dictionary<GlobalVoxelCoordinates, FurnaceEventSubject> TrackedFurnaces { get; set; }
+        protected static Dictionary<GlobalVoxelCoordinates, List<IWindow>> TrackedFurnaceWindows { get; set; }
 
         public FurnaceBlock()
         {
-            TrackedFurnaces = new Dictionary<Coordinates3D, FurnaceEventSubject>();
-            TrackedFurnaceWindows = new Dictionary<Coordinates3D, List<IWindow>>();
+            // TODO: Why are static members initialized in an instance constructor???
+            TrackedFurnaces = new Dictionary<GlobalVoxelCoordinates, FurnaceEventSubject>();
+            TrackedFurnaceWindows = new Dictionary<GlobalVoxelCoordinates, List<IWindow>>();
         }
 
         private NbtCompound CreateTileEntity()
@@ -89,7 +90,7 @@ namespace TrueCraft.Core.Logic.Blocks
             });
         }
 
-        private FurnaceState GetState(IWorld world, Coordinates3D coords)
+        private FurnaceState GetState(IWorld world, GlobalVoxelCoordinates coords)
         {
             var tileEntity = world.GetTileEntity(coords);
             if (tileEntity == null)
@@ -113,7 +114,7 @@ namespace TrueCraft.Core.Logic.Blocks
             return state;
         }
 
-        private void UpdateWindows(Coordinates3D coords, FurnaceState state)
+        private void UpdateWindows(GlobalVoxelCoordinates coords, FurnaceState state)
         {
             if (TrackedFurnaceWindows.ContainsKey(coords))
             {
@@ -135,7 +136,7 @@ namespace TrueCraft.Core.Logic.Blocks
             }
         }
 
-        private void SetState(IWorld world, Coordinates3D coords, FurnaceState state)
+        private void SetState(IWorld world, GlobalVoxelCoordinates coords, FurnaceState state)
         {
             world.SetTileEntity(coords, new NbtCompound(new NbtTag[]
             {
@@ -152,7 +153,7 @@ namespace TrueCraft.Core.Logic.Blocks
             UpdateWindows(coords, state);
         }
 
-        public override void BlockLoadedFromChunk(Coordinates3D coords, IMultiplayerServer server, IWorld world)
+        public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IWorld world)
         {
             var state = GetState(world, coords);
             TryInitializeFurnace(state, server.Scheduler, world, coords, server.ItemRepository);
@@ -167,7 +168,7 @@ namespace TrueCraft.Core.Logic.Blocks
                 {
                     var manager = user.Server.GetEntityManagerForWorld(world);
                     var slot = ItemStack.FromNbt((NbtCompound)item);
-                    manager.SpawnEntity(new ItemEntity(descriptor.Coordinates + new Vector3(0.5), slot));
+                    manager.SpawnEntity(new ItemEntity(new Vector3(descriptor.Coordinates.X + 0.5, descriptor.Coordinates.Y + 0.5, descriptor.Coordinates.Z + 0.5), slot));
                 }
                 world.SetTileEntity(descriptor.Coordinates, null);
             }
@@ -231,7 +232,7 @@ namespace TrueCraft.Core.Logic.Blocks
         }
 
         private void TryInitializeFurnace(FurnaceState state, IEventScheduler scheduler, IWorld world,
-                                          Coordinates3D coords, IItemRepository itemRepository)
+                                          GlobalVoxelCoordinates coords, IItemRepository itemRepository)
         {
             if (TrackedFurnaces.ContainsKey(coords))
                 return;
@@ -275,7 +276,7 @@ namespace TrueCraft.Core.Logic.Blocks
             }
         }
 
-        private void UpdateFurnace(IEventScheduler scheduler, IWorld world, Coordinates3D coords, IItemRepository itemRepository)
+        private void UpdateFurnace(IEventScheduler scheduler, IWorld world, GlobalVoxelCoordinates coords, IItemRepository itemRepository)
         {
             if (TrackedFurnaces.ContainsKey(coords))
                 TrackedFurnaces.Remove(coords);

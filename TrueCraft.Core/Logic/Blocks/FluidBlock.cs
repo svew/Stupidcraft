@@ -38,12 +38,12 @@ namespace TrueCraft.Core.Logic.Blocks
 
         protected virtual bool AllowSourceCreation { get { return true; } }
 
-        private static readonly Coordinates3D[] Neighbors =
+        private static readonly Vector3i[] Neighbors =
             {
-                Coordinates3D.North,
-                Coordinates3D.South,
-                Coordinates3D.East,
-                Coordinates3D.West
+                Vector3i.North,
+                Vector3i.South,
+                Vector3i.East,
+                Vector3i.West
             };
 
         /// <summary>
@@ -51,7 +51,7 @@ namespace TrueCraft.Core.Logic.Blocks
         /// </summary>
         protected struct LiquidFlow
         {
-            public LiquidFlow(Coordinates3D targetBlock, byte level)
+            public LiquidFlow(GlobalVoxelCoordinates targetBlock, byte level)
             {
                 TargetBlock = targetBlock;
                 Level = level;
@@ -60,14 +60,15 @@ namespace TrueCraft.Core.Logic.Blocks
             /// <summary>
             /// The block to be filled with fluid.
             /// </summary>
-            public Coordinates3D TargetBlock;
+            public GlobalVoxelCoordinates TargetBlock;
+
             /// <summary>
             /// The fluid level to fill the target block with.
             /// </summary>
             public byte Level;
         }
 
-        public void ScheduleNextEvent(Coordinates3D coords, IWorld world, IMultiplayerServer server)
+        public void ScheduleNextEvent(GlobalVoxelCoordinates coords, IWorld world, IMultiplayerServer server)
         {
             if (world.GetBlockID(coords) == StillID)
                 return;
@@ -97,12 +98,12 @@ namespace TrueCraft.Core.Logic.Blocks
             }
         }
 
-        public override void BlockLoadedFromChunk(Coordinates3D coords, IMultiplayerServer server, IWorld world)
+        public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IWorld world)
         {
             ScheduleNextEvent(coords, world, server);
         }
 
-        private void AutomataUpdate(IMultiplayerServer server, IWorld world, Coordinates3D coords)
+        private void AutomataUpdate(IMultiplayerServer server, IWorld world, GlobalVoxelCoordinates coords)
         {
             if (world.GetBlockID(coords) != FlowingID && world.GetBlockID(coords) != StillID)
                 return;
@@ -118,14 +119,14 @@ namespace TrueCraft.Core.Logic.Blocks
             }
         }
 
-        public bool DoAutomata(IMultiplayerServer server, IWorld world, Coordinates3D coords)
+        public bool DoAutomata(IMultiplayerServer server, IWorld world, GlobalVoxelCoordinates coords)
         {
             var previousLevel = world.GetMetadata(coords);
 
             var inward = DetermineInwardFlow(world, coords);
             var outward = DetermineOutwardFlow(world, coords);
 
-            if (outward.Length == 1 && outward[0].TargetBlock == coords + Coordinates3D.Down)
+            if (outward.Length == 1 && outward[0].TargetBlock == coords + Vector3i.Down)
             {
                 // Exit early if we have placed a fluid block beneath us (and we aren't a source block)
                 FlowOutward(world, outward[0], server);
@@ -180,10 +181,10 @@ namespace TrueCraft.Core.Logic.Blocks
         /// <summary>
         /// Examines neighboring blocks and determines the new fluid level that this block should adopt.
         /// </summary>
-        protected byte DetermineInwardFlow(IWorld world, Coordinates3D coords)
+        protected byte DetermineInwardFlow(IWorld world, GlobalVoxelCoordinates coords)
         {
             var currentLevel = world.GetMetadata(coords);
-            var up = world.GetBlockID(coords + Coordinates3D.Up);
+            var up = world.GetBlockID(coords + Vector3i.Up);
             if (up == FlowingID || up == StillID) // Check for fluid above us
                 return currentLevel;
             else
@@ -216,7 +217,7 @@ namespace TrueCraft.Core.Logic.Blocks
         /// <summary>
         /// Produces a list of outward flow targets that this block may flow towards.
         /// </summary>
-        protected LiquidFlow[] DetermineOutwardFlow(IWorld world, Coordinates3D coords)
+        protected LiquidFlow[] DetermineOutwardFlow(IWorld world, GlobalVoxelCoordinates coords)
         {
             // The maximum distance we will search for lower ground to flow towards
             const int dropCheckDistance = 5;
@@ -224,10 +225,10 @@ namespace TrueCraft.Core.Logic.Blocks
             var outwardFlow = new List<LiquidFlow>(5);
 
             var currentLevel = world.GetMetadata(coords);
-            var blockBelow = world.BlockRepository.GetBlockProvider(world.GetBlockID(coords + Coordinates3D.Down));
+            var blockBelow = world.BlockRepository.GetBlockProvider(world.GetBlockID(coords + Vector3i.Down));
             if (blockBelow.Hardness == 0 && blockBelow.ID != FlowingID && blockBelow.ID != StillID)
             {
-                outwardFlow.Add(new LiquidFlow(coords + Coordinates3D.Down, 1));
+                outwardFlow.Add(new LiquidFlow(coords + Vector3i.Down, 1));
                 if (currentLevel != 0)
                     return outwardFlow.ToArray();
             }
@@ -239,8 +240,8 @@ namespace TrueCraft.Core.Logic.Blocks
                 // there is at least one block removed on the Y axis.
                 // It will flow towards several equally strong candidates at once.
 
-                var candidateFlowPoints = new List<Coordinates3D>(4);
-                var furthestPossibleCandidate = new Coordinates3D(x: dropCheckDistance + 1, z: dropCheckDistance + 1) + Coordinates3D.Down;
+                var candidateFlowPoints = new List<Vector3i>(4);
+                Vector3i furthestPossibleCandidate = new Vector3i(dropCheckDistance + 1, -1, dropCheckDistance + 1);
 
                 var nearestCandidate = furthestPossibleCandidate;
                 for (int x = -dropCheckDistance; x < dropCheckDistance; x++)
@@ -249,7 +250,7 @@ namespace TrueCraft.Core.Logic.Blocks
                     {
                         if (Math.Abs(z) + Math.Abs(x) > dropCheckDistance)
                             continue;
-                        var check = new Coordinates3D(x: x, z: z) + Coordinates3D.Down;
+                        Vector3i check = new Vector3i(x, -1, z);
                         var c = world.BlockRepository.GetBlockProvider(world.GetBlockID(check + coords));
                         if (c.Hardness == 0)
                         {
@@ -267,9 +268,9 @@ namespace TrueCraft.Core.Logic.Blocks
                 }
                 if (nearestCandidate == furthestPossibleCandidate)
                 {
-                    candidateFlowPoints.Add(new Coordinates3D(x: -dropCheckDistance - 1, z: dropCheckDistance + 1) + Coordinates3D.Down);
-                    candidateFlowPoints.Add(new Coordinates3D(x: dropCheckDistance + 1, z: -dropCheckDistance - 1) + Coordinates3D.Down);
-                    candidateFlowPoints.Add(new Coordinates3D(x: -dropCheckDistance - 1, z: -dropCheckDistance - 1) + Coordinates3D.Down);
+                    candidateFlowPoints.Add(new Vector3i(-dropCheckDistance - 1, -1, dropCheckDistance + 1));
+                    candidateFlowPoints.Add(new Vector3i(dropCheckDistance + 1, -1, -dropCheckDistance - 1));
+                    candidateFlowPoints.Add(new Vector3i(-dropCheckDistance - 1, -1, -dropCheckDistance - 1));
                 }
                 candidateFlowPoints.Add(nearestCandidate);
 
@@ -279,10 +280,10 @@ namespace TrueCraft.Core.Logic.Blocks
                 for (int i = 0; i < candidateFlowPoints.Count; i++)
                 {
                     var location = candidateFlowPoints[i];
-                    location.Clamp(1);
+                    location = location.Clamp(1);
 
-                    var xCoordinateCheck = new Coordinates3D(x: location.X) + coords;
-                    var zCoordinateCheck = new Coordinates3D(z: location.Z) + coords;
+                    var xCoordinateCheck = new GlobalVoxelCoordinates(coords.X + location.X, coords.Y, coords.Z);
+                    var zCoordinateCheck = new GlobalVoxelCoordinates(coords.X, coords.Y, coords.Z + location.Z);
 
                     var xID = world.BlockRepository.GetBlockProvider(world.GetBlockID(xCoordinateCheck));
                     var zID = world.BlockRepository.GetBlockProvider(world.GetBlockID(zCoordinateCheck));
@@ -318,11 +319,11 @@ namespace TrueCraft.Core.Logic.Blocks
         /// <summary>
         /// Returns true if the given candidate coordinate has a line-of-sight to the given target coordinate.
         /// </summary>
-        private bool LineOfSight(IWorld world, Coordinates3D candidate, Coordinates3D target)
+        private bool LineOfSight(IWorld world, GlobalVoxelCoordinates candidate, GlobalVoxelCoordinates target)
         {
-            candidate += Coordinates3D.Up;
-            var direction = target - candidate;
-            direction.Clamp(1);
+            GlobalVoxelCoordinates sight = new GlobalVoxelCoordinates(candidate.X, candidate.Y + 1, candidate.Z);
+            Vector3i direction = (target - candidate).Clamp(1);
+
             do
             {
                 int z = candidate.Z;
@@ -331,10 +332,9 @@ namespace TrueCraft.Core.Logic.Blocks
                     var p = world.BlockRepository.GetBlockProvider(world.GetBlockID(candidate));
                     if (p.Hardness != 0)
                         return false;
-                    candidate.Z += direction.Z;
+                    sight = new GlobalVoxelCoordinates(sight.X, sight.Y, sight.Z + direction.Z);
                 } while (target.Z != candidate.Z);
-                candidate.Z = z;
-                candidate.X += direction.X;
+                sight = new GlobalVoxelCoordinates(sight.X + direction.X, sight.Y, z);
             } while (target.X != candidate.X);
             return true;
         }

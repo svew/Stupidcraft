@@ -41,6 +41,17 @@ namespace TrueCraft.API.World
         }
 
         /// <summary>
+        /// Creates a new instance of GlobalVoxelCoordinates that is a copy of the given one.
+        /// </summary>
+        /// <param name="other"></param>
+        public GlobalVoxelCoordinates(GlobalVoxelCoordinates other)
+        {
+            X = other.X;
+            Y = other.Y;
+            Z = other.Z;
+        }
+
+        /// <summary>
         /// Converts this GlobalVoxelCoordinates to a string in the format &lt;x, y, z&gt;.
         /// </summary>
         /// <returns></returns>
@@ -165,6 +176,11 @@ namespace TrueCraft.API.World
         public static GlobalVoxelCoordinates operator +(Vector3i v, GlobalVoxelCoordinates c)
         {
             return c.Add(v);
+        }
+
+        public static Vector3i operator-(GlobalVoxelCoordinates l, GlobalVoxelCoordinates r)
+        {
+            return new Vector3i(l.X - r.X, l.Y - r.Y, l.Z - r.Z);
         }
         #endregion
 

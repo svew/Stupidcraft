@@ -64,7 +64,7 @@ namespace TrueCraft.Core.Logic.Blocks
             return false;
         }
 
-        public override void ItemUsedOnBlock(Coordinates3D coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user)
+        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user)
         {
             if (face == BlockFace.PositiveY || face == BlockFace.NegativeY)
             {
