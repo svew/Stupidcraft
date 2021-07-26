@@ -41,7 +41,7 @@ namespace TrueCraft.Core.Logic
             });
         }
             
-        public BoundingBox? GetBoundingBox(IWorld world, Coordinates3D coordinates)
+        public BoundingBox? GetBoundingBox(IWorld world, GlobalVoxelCoordinates coordinates)
         {
             // TODO: Block-specific bounding boxes
             var id = world.GetBlockID(coordinates);
