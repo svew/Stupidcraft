@@ -25,7 +25,7 @@ namespace TrueCraft.Core.Logic
             // This space intentionally left blank
         }
 
-        public virtual void ItemUsedOnBlock(Coordinates3D coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user)
+        public virtual void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user)
         {
             // This space intentionally left blank
         }
