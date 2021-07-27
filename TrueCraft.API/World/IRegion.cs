@@ -10,6 +10,8 @@ namespace TrueCraft.API.World
         /// </summary>
         RegionCoordinates Position { get; }
 
+        IEnumerable<IChunk> Chunks { get; }
+
         IChunk GetChunk(LocalChunkCoordinates position, bool generate = true);
 
         bool IsChunkLoaded(LocalChunkCoordinates position);

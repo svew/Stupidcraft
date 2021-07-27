@@ -30,6 +30,8 @@ namespace TrueCraft.Core.World
 
         private ConcurrentDictionary<LocalChunkCoordinates, IChunk> _chunks { get; }
 
+        public IEnumerable<IChunk> Chunks { get => _chunks.Values;  }
+
         /// <summary>
         /// The location of this region in the overworld.
         /// </summary>

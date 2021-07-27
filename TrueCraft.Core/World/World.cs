@@ -449,7 +449,7 @@ namespace TrueCraft.Core.World
                 var regions = world._regions.Values.ToList();
                 var chunks = new List<IChunk>();
                 foreach (var region in regions)
-                    chunks.AddRange(region.Chunks.Values);
+                    chunks.AddRange(region.Chunks);
                 Chunks = chunks;
             }
 
