@@ -88,6 +88,20 @@ namespace TrueCraft.API.World
         }
 
         /// <summary>
+        /// Calculates the distance from the center of this Voxel to the
+        /// given position vector.
+        /// </summary>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public double DistanceTo(Vector3 other)
+        {
+            double dx = other.X - (this.X + 0.5);
+            double dy = other.Y - (this.Y + 0.5);
+            double dz = other.Z - (this.Z + 0.5);
+            return Math.Sqrt(dx * dx + dy * dy + dz * dz);
+        }
+
+        /// <summary>
         /// Calculates the square of a num.
         /// </summary>
         private int Square(int num)
