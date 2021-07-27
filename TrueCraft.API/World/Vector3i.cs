@@ -138,6 +138,12 @@ namespace TrueCraft.API.World
         /// same Y-level.
         /// </summary>
         public static readonly Vector3i[] Neighbors4 = { North, East, South, West };
+
+        /// <summary>
+        /// A set of Vector3i objects pointing to the 6-connected neighbors.
+        /// These are connected to each face of a Block.
+        /// </summary>
+        public static readonly Vector3i[] Neighbors6 = { North, East, South, West, Up, Down };
         #endregion
     }
 }

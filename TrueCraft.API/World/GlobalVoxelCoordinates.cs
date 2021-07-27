@@ -197,6 +197,19 @@ namespace TrueCraft.API.World
                                      (int)a.Y,
                                      (int)a.Z);
         }
+
+        /// <summary>
+        /// Converts Global Chunk Coordinates to Global Voxel Coordinates
+        /// </summary>
+        /// <param name="a">The Global Chunk Coordinates to convert.</param>
+        /// <returns>
+        /// The Global Voxel Coordinates of the bottom Block of the North-West column of
+        /// Blocks in the specified Chunk.
+        /// </returns>
+        public static explicit operator GlobalVoxelCoordinates(GlobalChunkCoordinates a)
+        {
+            return new GlobalVoxelCoordinates(WorldConstants.ChunkWidth * a.X, 0, WorldConstants.ChunkDepth * a.Z);
+        }
         #endregion
 
         #region Constants
