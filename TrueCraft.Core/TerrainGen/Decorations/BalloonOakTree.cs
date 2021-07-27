@@ -13,7 +13,7 @@ namespace TrueCraft.Core.TerrainGen.Decorations
     {
         const int LeafRadius = 2;
 
-        public override bool ValidLocation(Coordinates3D location)
+        public override bool ValidLocation(LocalVoxelCoordinates location)
         {
             if (location.X - LeafRadius < 0
                 || location.X + LeafRadius >= Chunk.Width
@@ -26,7 +26,7 @@ namespace TrueCraft.Core.TerrainGen.Decorations
             return true;
         }
 
-        public override bool GenerateAt(IWorld world, IChunk chunk, Coordinates3D location)
+        public override bool GenerateAt(IWorld world, IChunk chunk, LocalVoxelCoordinates location)
         {
             if (!ValidLocation(location))
                 return false;
@@ -34,7 +34,7 @@ namespace TrueCraft.Core.TerrainGen.Decorations
             var random = new Random(world.Seed);
             int height = random.Next(4, 5);
             GenerateColumn(chunk, location, height, WoodBlock.BlockID, 0x0);
-            var leafLocation = location + new Coordinates3D(0, height, 0);
+            LocalVoxelCoordinates leafLocation = new LocalVoxelCoordinates(location.X, location.Y + height, location.Z);
             GenerateSphere(chunk, leafLocation, LeafRadius, LeavesBlock.BlockID, 0x0);
             return true;
         }

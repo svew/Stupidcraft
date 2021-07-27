@@ -16,7 +16,7 @@ namespace TrueCraft.Core.TerrainGen.Decorations
 
         const int MaxEntrances = 5;
 
-        public override bool ValidLocation(Coordinates3D location)
+        public override bool ValidLocation(LocalVoxelCoordinates location)
         {
             var OffsetSize = Size + new Vector3(1, 1, 1);
             if (location.X + (int)OffsetSize.X >= Chunk.Width
@@ -26,7 +26,7 @@ namespace TrueCraft.Core.TerrainGen.Decorations
             return true;
         }
 
-        public override bool GenerateAt(IWorld world, IChunk chunk, Coordinates3D location)
+        public override bool GenerateAt(IWorld world, IChunk chunk, LocalVoxelCoordinates location)
         {
             Console.WriteLine("Dungeon in chunk {0}", chunk.Coordinates);
             if (!ValidLocation(location))
@@ -41,10 +41,13 @@ namespace TrueCraft.Core.TerrainGen.Decorations
             MossFloor(chunk, location, random);
 
             //Place Spawner
-            chunk.SetBlockID(new Coordinates3D((int)(location.X + ((Size.X + 1) / 2)), (int)((location + Coordinates3D.Up).Y), (int)(location.Z + ((Size.Z + 1) / 2))), MonsterSpawnerBlock.BlockID);
+            int spawnerX = (int)(location.X + ((Size.X + 1) / 2));
+            int spawnerY = location.Y + 1;
+            int spawnerZ = (int)(location.Z + ((Size.Z + 1) / 2));
+            chunk.SetBlockID(new LocalVoxelCoordinates(spawnerX, spawnerY, spawnerZ), MonsterSpawnerBlock.BlockID);
             
             //Create entrances
-            CreateEntraces(chunk, location, random);
+            CreateEntrances(chunk, location, random);
 
             //Place Chests
             PlaceChests(chunk, location, random);
@@ -52,10 +55,17 @@ namespace TrueCraft.Core.TerrainGen.Decorations
             return true;
         }
 
-        private void CreateEntraces(IChunk chunk, Coordinates3D location, Random random)
+        private void CreateEntrances(IChunk chunk, LocalVoxelCoordinates location, Random random)
         {
             int entrances = 0;
-            var above = location + Coordinates3D.Up;
+
+            // TODO? Optimize by running around the outside of the Dungeon rather
+            //    than through all the interior blocks that cannot be entrances anyway
+            //     This would take the algorithm from N**2 to 4*N
+            // Optimize by moving the check on X & Z to the loop limits.
+            // Note that the above would have the effect of altering the number of
+            // calls to random, and therefore the generated world would be different.
+
             for (int X = location.X; X < location.X + Size.X; X++)
             {
                 if (entrances >= MaxEntrances)
@@ -64,23 +74,23 @@ namespace TrueCraft.Core.TerrainGen.Decorations
                 {
                     if (entrances >= MaxEntrances)
                         break;
-                    if (random.Next(0, 3) == 0 && IsCuboidWall(new Coordinates2D(X, Z), location, Size)
-                        && !IsCuboidCorner(new Coordinates2D(X, Z), location, Size))
+                    if (random.Next(0, 3) == 0 && IsCuboidWall(new LocalVoxelCoordinates(X, 0, Z), location, Size)
+                        && !IsCuboidCorner(new LocalVoxelCoordinates(X, 0, Z), location, Size))
                     {
-                        var blockLocation = new Coordinates3D(X, above.Y, Z);
+                        var blockLocation = new LocalVoxelCoordinates(X, location.Y + 1, Z);
                         if (blockLocation.X < 0 || blockLocation.X >= Chunk.Width
                             || blockLocation.Z < 0 || blockLocation.Z >= Chunk.Depth
                             || blockLocation.Y < 0 || blockLocation.Y >= Chunk.Height)
                             continue;
                         chunk.SetBlockID(blockLocation, AirBlock.BlockID);
-                        chunk.SetBlockID(blockLocation + Coordinates3D.Up, AirBlock.BlockID);
+                        chunk.SetBlockID(new LocalVoxelCoordinates(X, location.Y + 2, Z), AirBlock.BlockID);
                         entrances++;
                     }
                 }
             }
         }
 
-        private void MossFloor(IChunk chunk, Coordinates3D location, Random random)
+        private void MossFloor(IChunk chunk, LocalVoxelCoordinates location, Random random)
         {
             for (int x = location.X; x < location.X + Size.X; x++)
             {
@@ -91,14 +101,14 @@ namespace TrueCraft.Core.TerrainGen.Decorations
                             || location.Y < 0 || location.Y >= Chunk.Height)
                             continue;
                     if (random.Next(0, 3) == 0)
-                        chunk.SetBlockID(new Coordinates3D(x, location.Y, z), MossStoneBlock.BlockID);
+                        chunk.SetBlockID(new LocalVoxelCoordinates(x, location.Y, z), MossStoneBlock.BlockID);
                 }
             }
         }
 
-        private void PlaceChests(IChunk chunk, Coordinates3D location, Random random)
+        private void PlaceChests(IChunk chunk, LocalVoxelCoordinates location, Random random)
         {
-            var above = location + Coordinates3D.Up;
+            int aboveY = location.Y + 1;
             var chests = random.Next(0, 2);
             for (int i = 0; i < chests; i++)
             {
@@ -106,15 +116,15 @@ namespace TrueCraft.Core.TerrainGen.Decorations
                 {
                     var x = random.Next(location.X, location.X + (int)Size.X);
                     var z = random.Next(location.Z, location.Z + (int)Size.Z);
-                    if (!IsCuboidWall(new Coordinates2D(x, z), location, Size) && !IsCuboidCorner(new Coordinates2D(x, z), location, Size))
+                    if (!IsCuboidWall(new LocalVoxelCoordinates(x, 0, z), location, Size) && !IsCuboidCorner(new LocalVoxelCoordinates(x, 0, z), location, Size))
                     {
-                        if (NeighboursBlock(chunk, new Coordinates3D(x, above.Y, z), CobblestoneBlock.BlockID))
+                        if (NeighboursBlock(chunk, new LocalVoxelCoordinates(x, aboveY, z), CobblestoneBlock.BlockID))
                         {
                             if (x < 0 || x >= Chunk.Width
                                 || z < 0 || z >= Chunk.Depth
-                                || above.Y < 0 || above.Y >= Chunk.Height)
+                                || aboveY < 0 || aboveY >= Chunk.Height)
                             continue;
-                            chunk.SetBlockID(new Coordinates3D(x, above.Y, z), ChestBlock.BlockID);
+                            chunk.SetBlockID(new LocalVoxelCoordinates(x, aboveY, z), ChestBlock.BlockID);
                             break;
                         }
                     }
