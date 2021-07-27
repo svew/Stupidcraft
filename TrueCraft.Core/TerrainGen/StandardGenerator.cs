@@ -108,9 +108,9 @@ namespace TrueCraft.Core.TerrainGen
 
             var chunk = new Chunk(coordinates);
 
-            for (int x = 0; x < 16; x++)
+            for (int x = 0; x < Chunk.Width; x++)
             {
-                for (int z = 0; z < 16; z++)
+                for (int z = 0; z < Chunk.Depth; z++)
                 {
                     var blockX = MathHelper.ChunkToBlockX(x, coordinates.X);
                     var blockZ = MathHelper.ChunkToBlockZ(z, coordinates.Z);
@@ -132,7 +132,7 @@ namespace TrueCraft.Core.TerrainGen
                     FinalNoise = new ModifyNoise(FinalNoise, BottomClamp, NoiseModifier.Subtract);
 
                     var cellValue = worley.Value2D(blockX, blockZ);
-                    var location = new Coordinates2D(blockX, blockZ);
+                    GlobalColumnCoordinates location = new GlobalColumnCoordinates(blockX, blockZ);
                     if (world.BiomeDiagram.BiomeCells.Count < 1
                         || cellValue.Equals(1)
                         && world.BiomeDiagram.ClosestCellPoint(location) >= featurePointDistance)
@@ -171,17 +171,17 @@ namespace TrueCraft.Core.TerrainGen
                         if (cave < threshold)
                         {
                             if (y == 0)
-                                chunk.SetBlockID(new Coordinates3D(x, y, z), BedrockBlock.BlockID);
+                                chunk.SetBlockID(new LocalVoxelCoordinates(x, y, z), BedrockBlock.BlockID);
                             else
                             {
                                 if (y.Equals(height) || y < height && y > surfaceHeight)
-                                    chunk.SetBlockID(new Coordinates3D(x, y, z), biome.SurfaceBlock);
+                                    chunk.SetBlockID(new LocalVoxelCoordinates(x, y, z), biome.SurfaceBlock);
                                 else
                                 {
                                     if (y > surfaceHeight - biome.FillerDepth)
-                                        chunk.SetBlockID(new Coordinates3D(x, y, z), biome.FillerBlock);
+                                        chunk.SetBlockID(new LocalVoxelCoordinates(x, y, z), biome.FillerBlock);
                                     else
-                                        chunk.SetBlockID(new Coordinates3D(x, y, z), StoneBlock.BlockID);
+                                        chunk.SetBlockID(new LocalVoxelCoordinates(x, y, z), StoneBlock.BlockID);
                                 }
                             }
                         }
@@ -195,20 +195,23 @@ namespace TrueCraft.Core.TerrainGen
             return chunk;
         }
 
-        public Coordinates3D GetSpawn(IWorld world)
+        public GlobalVoxelCoordinates GetSpawn(IWorld world)
         {
-            var chunk = GenerateChunk(world, Coordinates2D.Zero);
+            var chunk = GenerateChunk(world, new GlobalChunkCoordinates(0, 0));
             var spawnPointHeight = chunk.HeightMap[0];
-            return new Coordinates3D(0, spawnPointHeight + 1, 0);
+            return new GlobalVoxelCoordinates(0, spawnPointHeight + 1, 0);
         }
 
-        byte GetBiome(IWorld world, Coordinates2D location)
+        byte GetBiome(IWorld world, GlobalColumnCoordinates location)
         {
             if (SingleBiome)
                 return GenerationBiome;
             return world.BiomeDiagram.GetBiome(location);
         }
 
+        // TODO:  for the following values of (x,z), this will return true:
+        //     (-2000, 0) (2000, 0) (0, -2000) (0, 2000)
+        //   Is this really desired behaviour????
         bool IsSpawnCoordinate(int x, int z)
         {
             return x > -1000 && x < 1000 || z > -1000 && z < 1000;
@@ -217,8 +220,8 @@ namespace TrueCraft.Core.TerrainGen
         int GetHeight(int x, int z)
         {
             var value = FinalNoise.Value2D(x, z) + GroundLevel;
-            var coords = new Coordinates2D(x, z);
-            double distance = IsSpawnCoordinate(x, z) ? coords.Distance : 1000;
+            double distanceFromOrigin = Math.Sqrt(x * x + z * z);
+            double distance = IsSpawnCoordinate(x, z) ? distanceFromOrigin : 1000;
             if (distance < 1000) // Avoids deep water within 1km sq of spawn
                 value += (1 - distance / 1000f) * 18;
             if (value < 0)
