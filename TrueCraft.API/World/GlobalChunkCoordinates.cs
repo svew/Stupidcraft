@@ -126,6 +126,26 @@ namespace TrueCraft.API.World
 
             return new GlobalChunkCoordinates(chunkX, chunkZ);
         }
+
+        public static explicit operator GlobalChunkCoordinates(Vector3 value)
+        {
+            int x = (int)value.X;
+            int y = (int)value.Y;
+            int z = (int)value.Z;
+            int chunkX, chunkZ;
+
+            if (x >= 0)
+                chunkX = x / WorldConstants.ChunkWidth;
+            else
+                chunkX = (x + 1) / WorldConstants.ChunkWidth - 1;
+
+            if (z >= 0)
+                chunkZ = z / WorldConstants.ChunkDepth;
+            else
+                chunkZ = (z + 1) / WorldConstants.ChunkDepth - 1;
+
+            return new GlobalChunkCoordinates(chunkX, chunkZ);
+        }
         #endregion
     }
 }

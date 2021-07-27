@@ -30,7 +30,7 @@ namespace TrueCraft
     {
         public RemoteClient(IMultiplayerServer server, IPacketReader packetReader, PacketHandler[] packetHandlers, Socket connection)
         {
-            _loadedChunks = new HashSet<Coordinates2D>();
+            _loadedChunks = new HashSet<GlobalChunkCoordinates>();
             Server = server;
             Inventory = new InventoryWindow(server.CraftingRepository);
             InventoryWindow.WindowChange += HandleWindowChange;
@@ -144,7 +144,7 @@ namespace TrueCraft
         internal int ChunkRadius { get; set; }
 
         private readonly object _loadedChunkLock = new object();
-        private HashSet<Coordinates2D> _loadedChunks;
+        private HashSet<GlobalChunkCoordinates> _loadedChunks;
 
         public bool DataAvailable
         {
@@ -394,9 +394,9 @@ namespace TrueCraft
 
         internal void UpdateChunks(bool block = false)
         {
-            var toLoad = new List<Tuple<Coordinates2D, IChunk>>();
+            var toLoad = new List<Tuple<GlobalChunkCoordinates, IChunk>>();
             int cr = ChunkRadius;
-            Coordinates2D entityChunk = Coordinates.BlockToGlobalChunk(Entity.Position);
+            GlobalChunkCoordinates entityChunk = (GlobalChunkCoordinates)Entity.Position;
 
             Profiler.Start("client.new-chunks");
             lock(_loadedChunkLock)
@@ -404,9 +404,9 @@ namespace TrueCraft
                 {
                     for (int z = -cr; z < cr; z++)
                     {
-                        var coords = new Coordinates2D(entityChunk.X + x, entityChunk.Z + z);
+                        GlobalChunkCoordinates coords = new GlobalChunkCoordinates(entityChunk.X + x, entityChunk.Z + z);
                         if (!_loadedChunks.Contains(coords))
-                            toLoad.Add(new Tuple<Coordinates2D, IChunk>(
+                            toLoad.Add(new Tuple<GlobalChunkCoordinates, IChunk>(
                                 coords, World.GetChunk(coords, generate: block)));
                     }
                 }
@@ -432,7 +432,7 @@ namespace TrueCraft
                 Task.Factory.StartNew(encode);
 
             Profiler.Start("client.old-chunks");
-            List<Coordinates2D> unload = new List<Coordinates2D>(2 * cr + 1);
+            List<GlobalChunkCoordinates> unload = new List<GlobalChunkCoordinates>(2 * cr + 1);
             lock(_loadedChunkLock)
                 unload.AddRange(_loadedChunks.Where((a) => Math.Abs(a.X - entityChunk.X) > cr || Math.Abs(a.Z - entityChunk.Z) > cr));
             unload.ForEach((a) => UnloadChunk(a));
@@ -457,28 +457,29 @@ namespace TrueCraft
             lock(_loadedChunkLock)
                 _loadedChunks.Add(chunk.Coordinates);
 
-            Server.Scheduler.ScheduleEvent("client.finalize-chunks", this,
-                TimeSpan.Zero, server =>
-                {
-                    return;
-                    foreach (var kvp in chunk.TileEntities)
-                    {
-                        var coords = kvp.Key;
-                        var descriptor = new BlockDescriptor
-                        {
-                            Coordinates = coords + new Coordinates3D(chunk.X, 0, chunk.Z),
-                            Metadata = chunk.GetMetadata(coords),
-                            ID = chunk.GetBlockID(coords),
-                            BlockLight = chunk.GetBlockLight(coords),
-                            SkyLight = chunk.GetSkyLight(coords)
-                        };
-                        var provider = Server.BlockRepository.GetBlockProvider(descriptor.ID);
-                        provider.TileEntityLoadedForClient(descriptor, World, kvp.Value, this);
-                    }
-                });
+            // TODO:
+            //Server.Scheduler.ScheduleEvent("client.finalize-chunks", this,
+            //    TimeSpan.Zero, server =>
+            //    {
+            //        return;
+            //        foreach (var kvp in chunk.TileEntities)
+            //        {
+            //            var coords = kvp.Key;
+            //            var descriptor = new BlockDescriptor
+            //            {
+            //                Coordinates = coords + new Coordinates3D(chunk.X, 0, chunk.Z),
+            //                Metadata = chunk.GetMetadata(coords),
+            //                ID = chunk.GetBlockID(coords),
+            //                BlockLight = chunk.GetBlockLight(coords),
+            //                SkyLight = chunk.GetSkyLight(coords)
+            //            };
+            //            var provider = Server.BlockRepository.GetBlockProvider(descriptor.ID);
+            //            provider.TileEntityLoadedForClient(descriptor, World, kvp.Value, this);
+            //        }
+            //    });
         }
 
-        internal void UnloadChunk(Coordinates2D position)
+        internal void UnloadChunk(GlobalChunkCoordinates position)
         {
             QueuePacket(new ChunkPreamblePacket(position.X, position.Z, false));
             lock(_loadedChunkLock)
