@@ -227,6 +227,19 @@ namespace TrueCraft.API
                 a.Z + b.Z);
         }
 
+        public static Vector3 operator+(Vector3 l, Vector3i r)
+        {
+            return new Vector3(
+                l.X + r.X,
+                l.Y + r.Y,
+                l.Z + r.Z);
+        }
+
+        public static Vector3 operator+(Vector3i l, Vector3 r)
+        {
+            return r + l;
+        }
+
         public static Vector3 operator -(Vector3 a, Vector3 b)
         {
             return new Vector3(
