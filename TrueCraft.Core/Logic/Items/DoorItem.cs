@@ -59,10 +59,10 @@ namespace TrueCraft.Core.Logic.Items
             }
         }
 
-        public override void ItemUsedOnBlock(Coordinates3D coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user)
+        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user)
         {
             var bottom = coordinates + MathHelper.BlockFaceToCoordinates(face);
-            var top = bottom + Coordinates3D.Up;
+            var top = bottom + Vector3i.Up;
             if (world.GetBlockID(top) != 0 || world.GetBlockID(bottom) != 0)
                 return;
             DoorFlags direction;

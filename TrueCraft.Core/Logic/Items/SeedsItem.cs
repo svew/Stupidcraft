@@ -20,7 +20,7 @@ namespace TrueCraft.Core.Logic.Items
 
         public override string DisplayName { get { return "Seeds"; } }
 
-        public override void ItemUsedOnBlock(Coordinates3D coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user)
+        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user)
         {
             if (world.GetBlockID(coordinates) == FarmlandBlock.BlockID)
             {

@@ -22,7 +22,7 @@ namespace TrueCraft.Core.Logic.Items
 
         protected virtual byte? RelevantBlockType { get { return null; } }
 
-        public override void ItemUsedOnBlock(Coordinates3D coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user)
+        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user)
         {
             coordinates += MathHelper.BlockFaceToCoordinates(face);
             if (item.ID == ItemID) // Empty bucket
