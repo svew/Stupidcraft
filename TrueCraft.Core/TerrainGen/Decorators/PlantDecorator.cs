@@ -17,18 +17,18 @@ namespace TrueCraft.Core.TerrainGen.Decorators
             var noise = new Perlin(world.Seed);
             var chanceNoise = new ClampNoise(noise);
             chanceNoise.MaxValue = 2;
-            for (int x = 0; x < 16; x++)
+            for (int x = 0; x < Chunk.Width; x++)
             {
-                for (int z = 0; z < 16; z++)
+                for (int z = 0; z < Chunk.Depth; z++)
                 {
                     var biome = biomes.GetBiome(chunk.Biomes[x * Chunk.Width + z]);
                     var blockX = MathHelper.ChunkToBlockX(x, chunk.Coordinates.X);
                     var blockZ = MathHelper.ChunkToBlockZ(z, chunk.Coordinates.Z);
-                    var height = chunk.HeightMap[x * Chunk.Width + z];
+                    int height = chunk.HeightMap[x * Chunk.Width + z];
                     if (noise.Value2D(blockX, blockZ) > 0)
                     {
-                        var blockLocation = new Coordinates3D(x, height, z);
-                        var plantPosition = blockLocation + Coordinates3D.Up;
+                        LocalVoxelCoordinates blockLocation = new LocalVoxelCoordinates(x, height, z);
+                        LocalVoxelCoordinates plantPosition = new LocalVoxelCoordinates(blockLocation.X, blockLocation.Y + 1, blockLocation.Z);
                         if (chunk.GetBlockID(blockLocation) == biome.SurfaceBlock && plantPosition.Y < Chunk.Height)
                         {
                             var chance = chanceNoise.Value2D(blockX, blockZ);
@@ -67,23 +67,23 @@ namespace TrueCraft.Core.TerrainGen.Decorators
             }
         }
 
-        void GenerateRose(IChunk chunk, Coordinates3D location)
+        void GenerateRose(IChunk chunk, LocalVoxelCoordinates location)
         {
             chunk.SetBlockID(location, RoseBlock.BlockID);
         }
 
-        void GenerateDandelion(IChunk chunk, Coordinates3D location)
+        void GenerateDandelion(IChunk chunk, LocalVoxelCoordinates location)
         {
             chunk.SetBlockID(location, DandelionBlock.BlockID);
         }
 
-        void GenerateTallGrass(IChunk chunk, Coordinates3D location, byte meta)
+        void GenerateTallGrass(IChunk chunk, LocalVoxelCoordinates location, byte meta)
         {
             chunk.SetBlockID(location, TallGrassBlock.BlockID);
             chunk.SetMetadata(location, meta);
         }
 
-        void GenerateDeadBush(IChunk chunk, Coordinates3D location)
+        void GenerateDeadBush(IChunk chunk, LocalVoxelCoordinates location)
         {
             chunk.SetBlockID(location, DeadBushBlock.BlockID);
         }
