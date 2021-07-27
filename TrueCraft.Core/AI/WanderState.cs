@@ -36,18 +36,18 @@ namespace TrueCraft.Core.AI
             }
             else
             {
-                var target = new Coordinates3D(
+                GlobalVoxelCoordinates target = new GlobalVoxelCoordinates(
                     (int)(cast.Position.X + (MathHelper.Random.Next(Distance) - Distance / 2)),
                     0,
                     (int)(cast.Position.Z + (MathHelper.Random.Next(Distance) - Distance / 2))
                 );
                 IChunk chunk;
                 var adjusted = entity.World.FindBlockPosition(target, out chunk, generate: false);
-                target.Y = chunk.GetHeight((byte)adjusted.X, (byte)adjusted.Z) + 1;
+                target = new GlobalVoxelCoordinates(target.X, chunk.GetHeight((byte)adjusted.X, (byte)adjusted.Z), target.Z);
                 Task.Factory.StartNew(() =>
                 {
                     entity.CurrentPath = PathFinder.FindPath(entity.World, entity.BoundingBox,
-                        (Coordinates3D)cast.Position, target);
+                        (GlobalVoxelCoordinates)cast.Position, target);
                 });
             }
         }
