@@ -26,7 +26,7 @@ namespace TrueCraft.Core.Test.World
         public void TestGetChunk()
         {
             var chunk = Region.GetChunk(LocalChunkCoordinates.Zero);
-            Assert.AreEqual(LocalChunkCoordinates.Zero, chunk.Coordinates);
+            Assert.AreEqual(GlobalChunkCoordinates.Zero, chunk.Coordinates);
             Assert.Throws(typeof(ArgumentException), () =>
                 Region.GetChunk(new LocalChunkCoordinates(31, 31)));
         }
