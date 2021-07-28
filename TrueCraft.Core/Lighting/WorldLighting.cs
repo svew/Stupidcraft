@@ -91,7 +91,7 @@ namespace TrueCraft.Core.Lighting
             LocalVoxelCoordinates localCoords;
             for (byte y = (byte)(Math.Min(Chunk.Height, chunk.GetHeight(x, z) + 2)); y > 0; y--)
             {
-                localCoords = new LocalVoxelCoordinates(x, y, z);
+                localCoords = new LocalVoxelCoordinates(x, y - 1, z);
                 var id = chunk.GetBlockID(localCoords);
                 if (id == 0)
                     continue;

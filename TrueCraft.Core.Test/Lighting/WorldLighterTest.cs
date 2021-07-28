@@ -186,17 +186,27 @@ namespace TrueCraft.Core.Test.Lighting
             watch.Stop();
 
             // Output lighting
+            Console.WriteLine("Block IDS:");
+            Console.WriteLine("y");
             for (int y = 3; y >= 0; y--)
             {
+                Console.Write($"{y} ");
                 for (int x = 0; x <= 5; x++)
                 {
                     Console.Write(world.GetBlockID(new GlobalVoxelCoordinates(x, y, 5)).ToString("D2") + " ");
                 }
                 Console.WriteLine();
             }
+            Console.Write("x:");
+            for (int x = 0; x <= 5; x++)
+                Console.Write($"{x:D2} ");
             Console.WriteLine();
+
+            Console.WriteLine("Sky Light levels:");
+            Console.WriteLine("y");
             for (int y = 3; y >= 0; y--)
             {
+                Console.Write($"{y} ");
                 for (int x = 0; x <= 5; x++)
                 {
                     Console.Write(world.GetSkyLight(new GlobalVoxelCoordinates(x, y, 5)).ToString("D2") + " ");
