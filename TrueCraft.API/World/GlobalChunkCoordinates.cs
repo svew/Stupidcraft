@@ -147,5 +147,9 @@ namespace TrueCraft.API.World
             return new GlobalChunkCoordinates(chunkX, chunkZ);
         }
         #endregion
+
+        #region Constants
+        public static readonly GlobalChunkCoordinates Zero = new GlobalChunkCoordinates(0, 0);
+        #endregion
     }
 }

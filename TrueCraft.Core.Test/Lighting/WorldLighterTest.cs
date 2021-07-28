@@ -25,15 +25,15 @@ namespace TrueCraft.Core.Test.Lighting
             var world = new TrueCraft.Core.World.World("TEST", new FlatlandGenerator());
             world.BlockRepository = repository;
             var lighter = new WorldLighting(world, repository);
-            world.GetBlockID(Coordinates3D.Zero); // Generate a chunk
-            lighter.InitialLighting(world.GetChunk(Coordinates2D.Zero));
+            world.GetBlockID(GlobalVoxelCoordinates.Zero); // Generate a chunk
+            lighter.InitialLighting(world.GetChunk(GlobalChunkCoordinates.Zero));
 
             for (int y = 5; y >= 0; y--)
             {
                 Console.Write("Y: {0} ", y);
-                Console.Write(world.GetBlockID(new Coordinates3D(0, y, 0)));
+                Console.Write(world.GetBlockID(new GlobalVoxelCoordinates(0, y, 0)));
                 Console.Write(" -> ");
-                Console.WriteLine(world.GetSkyLight(new Coordinates3D(0, y, 0)));
+                Console.WriteLine(world.GetSkyLight(new GlobalVoxelCoordinates(0, y, 0)));
             }
 
             // Validate behavior
@@ -43,7 +43,7 @@ namespace TrueCraft.Core.Test.Lighting
                 {
                     for (int z = 0; z < Chunk.Depth; z++)
                     {
-                        var coords = new Coordinates3D(x, y, z);
+                        var coords = new GlobalVoxelCoordinates(x, y, z);
                         var sky = world.GetSkyLight(coords);
                         if (y < 4)
                             Assert.AreEqual(0, sky, coords.ToString());
@@ -65,13 +65,13 @@ namespace TrueCraft.Core.Test.Lighting
             var world = new TrueCraft.Core.World.World("TEST", new FlatlandGenerator());
             world.BlockRepository = repository;
             var lighter = new WorldLighting(world, repository);
-            world.GetBlockID(Coordinates3D.Zero); // Generate a chunk
-            lighter.InitialLighting(world.GetChunk(Coordinates2D.Zero));
+            world.GetBlockID(GlobalVoxelCoordinates.Zero); // Generate a chunk
+            lighter.InitialLighting(world.GetChunk(GlobalChunkCoordinates.Zero));
 
-            world.SetBlockID(new Coordinates3D(5, 3, 5), 0); // Create area that looks like so:
-            world.SetBlockID(new Coordinates3D(5, 2, 5), 0); // x x  Light goes like so: |
-            world.SetBlockID(new Coordinates3D(5, 1, 5), 0); // x x                      |
-            world.SetBlockID(new Coordinates3D(4, 1, 5), 0); //   x                     -/
+            world.SetBlockID(new GlobalVoxelCoordinates(5, 3, 5), 0); // Create area that looks like so:
+            world.SetBlockID(new GlobalVoxelCoordinates(5, 2, 5), 0); // x x  Light goes like so: |
+            world.SetBlockID(new GlobalVoxelCoordinates(5, 1, 5), 0); // x x                      |
+            world.SetBlockID(new GlobalVoxelCoordinates(4, 1, 5), 0); //   x                     -/
 
             lighter.EnqueueOperation(new BoundingBox(new Vector3(5, 2, 5),
                 new Vector3(6, 4, 6)), true);
@@ -80,14 +80,14 @@ namespace TrueCraft.Core.Test.Lighting
             {
             }
 
-            Console.WriteLine("Testing {0}", new Coordinates3D(5, 3, 5));
-            Assert.AreEqual(15, world.GetSkyLight(new Coordinates3D(5, 3, 5)));
-            Console.WriteLine("Testing {0}", new Coordinates3D(5, 2, 5));
-            Assert.AreEqual(15, world.GetSkyLight(new Coordinates3D(5, 2, 5)));
-            Console.WriteLine("Testing {0}", new Coordinates3D(5, 1, 5));
-            Assert.AreEqual(15, world.GetSkyLight(new Coordinates3D(5, 1, 5)));
-            Console.WriteLine("Testing {0}", new Coordinates3D(4, 1, 5));
-            Assert.AreEqual(14, world.GetSkyLight(new Coordinates3D(4, 1, 5)));
+            Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(5, 3, 5));
+            Assert.AreEqual(15, world.GetSkyLight(new GlobalVoxelCoordinates(5, 3, 5)));
+            Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(5, 2, 5));
+            Assert.AreEqual(15, world.GetSkyLight(new GlobalVoxelCoordinates(5, 2, 5)));
+            Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(5, 1, 5));
+            Assert.AreEqual(15, world.GetSkyLight(new GlobalVoxelCoordinates(5, 1, 5)));
+            Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(4, 1, 5));
+            Assert.AreEqual(14, world.GetSkyLight(new GlobalVoxelCoordinates(4, 1, 5)));
         }
 
         [Test]
@@ -101,17 +101,17 @@ namespace TrueCraft.Core.Test.Lighting
             var world = new TrueCraft.Core.World.World("TEST", new FlatlandGenerator());
             world.BlockRepository = repository;
             var lighter = new WorldLighting(world, repository);
-            world.GetBlockID(Coordinates3D.Zero); // Generate a chunk
-            lighter.InitialLighting(world.GetChunk(Coordinates2D.Zero));
+            world.GetBlockID(GlobalVoxelCoordinates.Zero); // Generate a chunk
+            lighter.InitialLighting(world.GetChunk(GlobalChunkCoordinates.Zero));
 
-            world.SetBlockID(new Coordinates3D(5, 3, 5), 0); // Create area that looks like so:
-            world.SetBlockID(new Coordinates3D(5, 2, 5), 0); // x x  Light goes like so: |
-            world.SetBlockID(new Coordinates3D(5, 1, 5), 0); // x x                      |
-            world.SetBlockID(new Coordinates3D(4, 1, 5), 0); //   x                     -/
+            world.SetBlockID(new GlobalVoxelCoordinates(5, 3, 5), 0); // Create area that looks like so:
+            world.SetBlockID(new GlobalVoxelCoordinates(5, 2, 5), 0); // x x  Light goes like so: |
+            world.SetBlockID(new GlobalVoxelCoordinates(5, 1, 5), 0); // x x                      |
+            world.SetBlockID(new GlobalVoxelCoordinates(4, 1, 5), 0); //   x                     -/
 
             for (int x = 0; x < 4; x++)
             {
-                world.SetBlockID(new Coordinates3D(x, 1, 5), 0); // Dig a tunnel
+                world.SetBlockID(new GlobalVoxelCoordinates(x, 1, 5), 0); // Dig a tunnel
                 // xxxxx x ish
                 // x     x
                 // xxxxxxx
@@ -124,18 +124,18 @@ namespace TrueCraft.Core.Test.Lighting
             {
             }
 
-            Console.WriteLine("Testing {0}", new Coordinates3D(5, 3, 5));
-            Assert.AreEqual(15, world.GetSkyLight(new Coordinates3D(5, 3, 5)));
-            Console.WriteLine("Testing {0}", new Coordinates3D(5, 2, 5));
-            Assert.AreEqual(15, world.GetSkyLight(new Coordinates3D(5, 2, 5)));
-            Console.WriteLine("Testing {0}", new Coordinates3D(5, 1, 5));
-            Assert.AreEqual(15, world.GetSkyLight(new Coordinates3D(5, 1, 5)));
+            Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(5, 3, 5));
+            Assert.AreEqual(15, world.GetSkyLight(new GlobalVoxelCoordinates(5, 3, 5)));
+            Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(5, 2, 5));
+            Assert.AreEqual(15, world.GetSkyLight(new GlobalVoxelCoordinates(5, 2, 5)));
+            Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(5, 1, 5));
+            Assert.AreEqual(15, world.GetSkyLight(new GlobalVoxelCoordinates(5, 1, 5)));
 
             byte expected = 15;
             for (int x = 5; x >= 0; x--)
             {
-                Console.WriteLine("Testing {0}", new Coordinates3D(x, 1, 5));
-                Assert.AreEqual(expected, world.GetSkyLight(new Coordinates3D(x, 1, 5)));
+                Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(x, 1, 5));
+                Assert.AreEqual(expected, world.GetSkyLight(new GlobalVoxelCoordinates(x, 1, 5)));
                 expected--;
             }
         }
@@ -151,8 +151,8 @@ namespace TrueCraft.Core.Test.Lighting
             var world = new TrueCraft.Core.World.World("TEST", new FlatlandGenerator());
             world.BlockRepository = repository;
             var lighter = new WorldLighting(world, repository);
-            world.GetBlockID(Coordinates3D.Zero); // Generate a chunk
-            lighter.InitialLighting(world.GetChunk(Coordinates2D.Zero));
+            world.GetBlockID(GlobalVoxelCoordinates.Zero); // Generate a chunk
+            lighter.InitialLighting(world.GetChunk(GlobalChunkCoordinates.Zero));
 
             // Test this layout:
             // xxx x    y=3
@@ -164,13 +164,13 @@ namespace TrueCraft.Core.Test.Lighting
 
             for (int y = 1; y <= 3; y++) // Dig hole
             {
-                world.SetBlockID(new Coordinates3D(5, y, 5), 0);
+                world.SetBlockID(new GlobalVoxelCoordinates(5, y, 5), 0);
             }
 
             for (int x = 0; x <= 4; x++) // Dig outwards
             {
-                world.SetBlockID(new Coordinates3D(x, 2, 5), 0); // Dig a tunnel
-                world.SetBlockID(new Coordinates3D(x, 1, 5), 0); // Dig a tunnel
+                world.SetBlockID(new GlobalVoxelCoordinates(x, 2, 5), 0); // Dig a tunnel
+                world.SetBlockID(new GlobalVoxelCoordinates(x, 1, 5), 0); // Dig a tunnel
             }
 
             var watch = new Stopwatch();
@@ -190,7 +190,7 @@ namespace TrueCraft.Core.Test.Lighting
             {
                 for (int x = 0; x <= 5; x++)
                 {
-                    Console.Write(world.GetBlockID(new Coordinates3D(x, y, 5)).ToString("D2") + " ");
+                    Console.Write(world.GetBlockID(new GlobalVoxelCoordinates(x, y, 5)).ToString("D2") + " ");
                 }
                 Console.WriteLine();
             }
@@ -199,30 +199,30 @@ namespace TrueCraft.Core.Test.Lighting
             {
                 for (int x = 0; x <= 5; x++)
                 {
-                    Console.Write(world.GetSkyLight(new Coordinates3D(x, y, 5)).ToString("D2") + " ");
+                    Console.Write(world.GetSkyLight(new GlobalVoxelCoordinates(x, y, 5)).ToString("D2") + " ");
                 }
                 Console.WriteLine();
             }
 
-            Console.WriteLine("Testing {0}", new Coordinates3D(5, 3, 5));
-            Assert.AreEqual(15, world.GetSkyLight(new Coordinates3D(5, 3, 5)));
-            Console.WriteLine("Testing {0}", new Coordinates3D(5, 2, 5));
-            Assert.AreEqual(15, world.GetSkyLight(new Coordinates3D(5, 2, 5)));
-            Console.WriteLine("Testing {0}", new Coordinates3D(5, 1, 5));
-            Assert.AreEqual(15, world.GetSkyLight(new Coordinates3D(5, 1, 5)));
+            Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(5, 3, 5));
+            Assert.AreEqual(15, world.GetSkyLight(new GlobalVoxelCoordinates(5, 3, 5)));
+            Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(5, 2, 5));
+            Assert.AreEqual(15, world.GetSkyLight(new GlobalVoxelCoordinates(5, 2, 5)));
+            Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(5, 1, 5));
+            Assert.AreEqual(15, world.GetSkyLight(new GlobalVoxelCoordinates(5, 1, 5)));
 
             byte expected = 15;
             for (int x = 5; x >= 0; x--)
             {
-                Console.WriteLine("Testing {0}", new Coordinates3D(x, 2, 5));
-                Assert.AreEqual(expected, world.GetSkyLight(new Coordinates3D(x, 2, 5)));
+                Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(x, 2, 5));
+                Assert.AreEqual(expected, world.GetSkyLight(new GlobalVoxelCoordinates(x, 2, 5)));
                 expected--;
             }
             expected = 15;
             for (int x = 5; x >= 0; x--)
             {
-                Console.WriteLine("Testing {0}", new Coordinates3D(x, 1, 5));
-                Assert.AreEqual(expected, world.GetSkyLight(new Coordinates3D(x, 1, 5)));
+                Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(x, 1, 5));
+                Assert.AreEqual(expected, world.GetSkyLight(new GlobalVoxelCoordinates(x, 1, 5)));
                 expected--;
             }
 
@@ -241,20 +241,20 @@ namespace TrueCraft.Core.Test.Lighting
             var world = new TrueCraft.Core.World.World("TEST", new FlatlandGenerator());
             world.BlockRepository = repository;
             var lighter = new WorldLighting(world, repository);
-            world.GetBlockID(Coordinates3D.Zero); // Generate a chunk
+            world.GetBlockID(GlobalVoxelCoordinates.Zero); // Generate a chunk
 
             for (int y = 1; y <= 16; y++)
             {
-                var coords = new Coordinates3D(5, y, 5);
+                var coords = new GlobalVoxelCoordinates(5, y, 5);
                 world.SetBlockID(coords, 0);
-                world.SetBlockID(coords + Coordinates3D.East, DirtBlock.BlockID);
-                world.SetBlockID(coords + Coordinates3D.West, DirtBlock.BlockID);
-                world.SetBlockID(coords + Coordinates3D.North, DirtBlock.BlockID);
-                world.SetBlockID(coords + Coordinates3D.South, DirtBlock.BlockID);
+                world.SetBlockID(coords + Vector3i.East, DirtBlock.BlockID);
+                world.SetBlockID(coords + Vector3i.West, DirtBlock.BlockID);
+                world.SetBlockID(coords + Vector3i.North, DirtBlock.BlockID);
+                world.SetBlockID(coords + Vector3i.South, DirtBlock.BlockID);
             }
-            world.GetChunk(Coordinates2D.Zero).UpdateHeightMap();
+            world.GetChunk(GlobalChunkCoordinates.Zero).UpdateHeightMap();
 
-            lighter.InitialLighting(world.GetChunk(Coordinates2D.Zero));
+            lighter.InitialLighting(world.GetChunk(GlobalChunkCoordinates.Zero));
 
             // Test this layout:
             // xox      o == leaves
@@ -266,9 +266,9 @@ namespace TrueCraft.Core.Test.Lighting
             for (int y = 1; y <= 16; y++)
             {
                 if (y % 2 == 1)
-                    world.SetBlockID(new Coordinates3D(5, y, 5), LeavesBlock.BlockID);
+                    world.SetBlockID(new GlobalVoxelCoordinates(5, y, 5), LeavesBlock.BlockID);
             }
-            world.GetChunk(Coordinates2D.Zero).UpdateHeightMap();
+            world.GetChunk(GlobalChunkCoordinates.Zero).UpdateHeightMap();
 
             lighter.EnqueueOperation(new BoundingBox(new Vector3(5, 0, 5),
                     new Vector3(6, 16, 6)), true);
@@ -280,8 +280,8 @@ namespace TrueCraft.Core.Test.Lighting
             // Output lighting
             for (int y = 16; y >= 0; y--)
             {
-                Console.Write(world.GetBlockID(new Coordinates3D(5, y, 5)).ToString("D2"));
-                Console.Write(" " + world.GetSkyLight(new Coordinates3D(5, y, 5)).ToString("D2"));
+                Console.Write(world.GetBlockID(new GlobalVoxelCoordinates(5, y, 5)).ToString("D2"));
+                Console.Write(" " + world.GetSkyLight(new GlobalVoxelCoordinates(5, y, 5)).ToString("D2"));
                 Console.WriteLine("   Y={0}", y);
             }                
 
@@ -308,7 +308,7 @@ namespace TrueCraft.Core.Test.Lighting
                     ex = expected[i];
                 else
                     ex = 0;
-                Assert.AreEqual(ex, world.GetSkyLight(new Coordinates3D(5, y, 5)));
+                Assert.AreEqual(ex, world.GetSkyLight(new GlobalVoxelCoordinates(5, y, 5)));
             }
         }
     }

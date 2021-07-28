@@ -6,9 +6,9 @@ using Moq;
 using TrueCraft.API.Entities;
 using TrueCraft.API.Physics;
 using TrueCraft.API;
+using TrueCraft.API.World;
 using TrueCraft.Core.Logic;
 using TrueCraft.Core.Logic.Blocks;
-using TrueCraft.API.Logic;
 
 namespace TrueCraft.Core.Test.Physics
 {
@@ -165,7 +165,7 @@ namespace TrueCraft.Core.Test.Physics
 
             // Create a wall
             for (int y = 0; y < 12; y++)
-                world.SetBlockID(new Coordinates3D(1, y, 0), StoneBlock.BlockID);
+                world.SetBlockID(new GlobalVoxelCoordinates(1, y, 0), StoneBlock.BlockID);
 
             // Test
             physics.Update(TimeSpan.FromSeconds(1));
@@ -186,7 +186,7 @@ namespace TrueCraft.Core.Test.Physics
             entity.Drag = 0;
             physics.AddEntity(entity);
 
-            world.SetBlockID(new Coordinates3D(0, 4, 0), StoneBlock.BlockID);
+            world.SetBlockID(new GlobalVoxelCoordinates(0, 4, 0), StoneBlock.BlockID);
 
             // Test
             physics.Update(TimeSpan.FromSeconds(1));
@@ -206,7 +206,7 @@ namespace TrueCraft.Core.Test.Physics
             entity.Drag = 0;
             entity.Velocity = new Vector3(1, 0, 0);
             physics.AddEntity(entity);
-            world.SetBlockID(new Coordinates3D(1, 5, 0), StoneBlock.BlockID);
+            world.SetBlockID(new GlobalVoxelCoordinates(1, 5, 0), StoneBlock.BlockID);
 
             // Test
             physics.Update(TimeSpan.FromSeconds(1));
@@ -227,7 +227,7 @@ namespace TrueCraft.Core.Test.Physics
             entity.Drag = 0;
             entity.Velocity = new Vector3(1, 0, 1);
             physics.AddEntity(entity);
-            world.SetBlockID(new Coordinates3D(0, 10, 0), StoneBlock.BlockID);
+            world.SetBlockID(new GlobalVoxelCoordinates(0, 10, 0), StoneBlock.BlockID);
 
             // Test
             physics.Update(TimeSpan.FromSeconds(1));

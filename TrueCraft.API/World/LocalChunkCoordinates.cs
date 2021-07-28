@@ -155,5 +155,9 @@ namespace TrueCraft.API.World
             return new LocalChunkCoordinates(localX, localZ);
         }
         #endregion
+
+        #region Constants
+        public static readonly LocalChunkCoordinates Zero = new LocalChunkCoordinates(0, 0);
+        #endregion
     }
 }

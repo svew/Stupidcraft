@@ -162,5 +162,9 @@ namespace TrueCraft.API.World
             return new GlobalChunkCoordinates(x, z);
         }
         #endregion
+
+        #region Constants
+        public static readonly RegionCoordinates Zero = new RegionCoordinates(0, 0);
+        #endregion
     }
 }
