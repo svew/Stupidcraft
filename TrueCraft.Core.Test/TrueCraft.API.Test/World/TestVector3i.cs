@@ -33,7 +33,7 @@ namespace TrueCraft.API.Test.World
             Assert.IsFalse(a != b);
         }
 
-        [TestCase(2, 4, 6, 1, 0, 0, 3, 4, 5)]
+        [TestCase(2, 4, 6, 1, 0, 0, 3, 4, 6)]
         [TestCase(2, 4, 6, 0, 1, 0, 2, 5, 6)]
         [TestCase(2, 4, 6, 0, 0, 1, 2, 4, 7)]
         public void Vector3i_Add(int x1, int y1, int z1, int x2, int y2, int z2,

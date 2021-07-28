@@ -10,6 +10,8 @@ namespace TrueCraft.API.World
     {
         public LocalColumnCoordinates(int x, int z)
         {
+            X = x;
+            Z = z;
         }
 
         public int X { get; }
