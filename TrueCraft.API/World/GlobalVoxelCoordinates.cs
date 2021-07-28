@@ -196,6 +196,11 @@ namespace TrueCraft.API.World
         {
             return new Vector3i(l.X - r.X, l.Y - r.Y, l.Z - r.Z);
         }
+
+        public static GlobalVoxelCoordinates operator-(GlobalVoxelCoordinates arg)
+        {
+            return new GlobalVoxelCoordinates(-arg.X, -arg.Y, -arg.Z);
+        }
         #endregion
 
         #region Conversion operators
@@ -232,6 +237,11 @@ namespace TrueCraft.API.World
         /// A trio of 3D coordinates with components set to 0.0.
         /// </summary>
         public static readonly GlobalVoxelCoordinates Zero = new GlobalVoxelCoordinates(0, 0, 0);
+
+        /// <summary>
+        /// Coordinates with x = y = z = 1.
+        /// </summary>
+        public static readonly GlobalVoxelCoordinates One = new GlobalVoxelCoordinates(1, 1, 1);
         #endregion
 
         /// <summary>
