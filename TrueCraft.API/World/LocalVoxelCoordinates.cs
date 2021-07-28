@@ -133,5 +133,9 @@ namespace TrueCraft.API.World
 
         }
         #endregion
+
+        #region Constants
+        public static readonly LocalVoxelCoordinates Zero = new LocalVoxelCoordinates(0, 0, 0);
+        #endregion
     }
 }
