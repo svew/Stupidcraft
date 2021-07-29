@@ -129,9 +129,9 @@ namespace TrueCraft.API.World
 
         public static explicit operator GlobalChunkCoordinates(Vector3 value)
         {
-            int x = (int)value.X;
-            int y = (int)value.Y;
-            int z = (int)value.Z;
+            int x = (int)Math.Floor(value.X);
+            int y = (int)Math.Floor(value.Y);
+            int z = (int)Math.Floor(value.Z);
             int chunkX, chunkZ;
 
             if (x >= 0)
