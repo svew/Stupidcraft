@@ -61,22 +61,6 @@ namespace TrueCraft.API.World
         }
 
         #region Math
-
-        ///// <summary>
-        ///// Clamps the coordinates to within the specified value.
-        ///// </summary>
-        ///// <param name="value">Value.</param>
-        //public void Clamp(int value)
-        //{
-        //    // TODO: Fix for negative values
-        //    if (Math.Abs(X) > value)
-        //        X = value * (X < 0 ? -1 : 1);
-        //    if (Math.Abs(Y) > value)
-        //        Y = value * (Y < 0 ? -1 : 1);
-        //    if (Math.Abs(Z) > value)
-        //        Z = value * (Z < 0 ? -1 : 1);
-        //}
-
         /// <summary>
         /// Calculates the distance between two GlobalVoxelCoordinates objects.
         /// </summary>
@@ -119,37 +103,6 @@ namespace TrueCraft.API.World
                 return DistanceTo(Zero);
             }
         }
-
-        /// <summary>
-        /// Returns the component-wise minimum of two 3D coordinates.
-        /// </summary>
-        /// <param name="value1">The first coordinates.</param>
-        /// <param name="value2">The second coordinates.</param>
-        /// <returns></returns>
-        public static GlobalVoxelCoordinates Min(GlobalVoxelCoordinates value1, GlobalVoxelCoordinates value2)
-        {
-            return new GlobalVoxelCoordinates(
-                Math.Min(value1.X, value2.X),
-                Math.Min(value1.Y, value2.Y),
-                Math.Min(value1.Z, value2.Z)
-                );
-        }
-
-        /// <summary>
-        /// Returns the component-wise maximum of two 3D coordinates.
-        /// </summary>
-        /// <param name="value1">The first coordinates.</param>
-        /// <param name="value2">The second coordinates.</param>
-        /// <returns></returns>
-        public static GlobalVoxelCoordinates Max(GlobalVoxelCoordinates value1, GlobalVoxelCoordinates value2)
-        {
-            return new GlobalVoxelCoordinates(
-                Math.Max(value1.X, value2.X),
-                Math.Max(value1.Y, value2.Y),
-                Math.Max(value1.Z, value2.Z)
-                );
-        }
-
         #endregion
 
         #region Operators
