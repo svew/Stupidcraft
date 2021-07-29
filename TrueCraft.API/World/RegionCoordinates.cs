@@ -156,8 +156,8 @@ namespace TrueCraft.API.World
 
         public GlobalChunkCoordinates GetGlobalChunkCoordinates(LocalChunkCoordinates value)
         {
-            int x = this.X * WorldConstants.RegionWidth * WorldConstants.ChunkWidth + value.X;
-            int z = this.Z * WorldConstants.RegionDepth * WorldConstants.ChunkDepth + value.Z;
+            int x = this.X * WorldConstants.RegionWidth + value.X;
+            int z = this.Z * WorldConstants.RegionDepth + value.Z;
 
             return new GlobalChunkCoordinates(x, z);
         }
