@@ -30,6 +30,13 @@ namespace TrueCraft.API.World
         /// <param name="z">The Z component of the coordinates.</param>
         public LocalChunkCoordinates(int x, int z)
         {
+#if DEBUG
+            if (x < 0 || x >= WorldConstants.RegionWidth)
+                throw new ArgumentOutOfRangeException($"{nameof(x)} is outside the valid range of [0,{WorldConstants.RegionWidth - 1}]");
+            if (z < 0 || z >= WorldConstants.RegionDepth)
+                throw new ArgumentOutOfRangeException($"{nameof(z)} is outside the valid range of [0,{WorldConstants.RegionDepth - 1}]");
+#endif
+
             X = x;
             Z = z;
         }
