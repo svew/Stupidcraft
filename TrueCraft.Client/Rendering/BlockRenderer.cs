@@ -42,12 +42,7 @@ namespace TrueCraft.Client.Rendering
             for (int i = 0; i < texture.Length; i++)
                 texture[i] *= new Vector2(16f / 256f);
 
-            var lighting = new int[6];
-            for (int i = 0; i < 6; i++)
-            {
-                var coords = (descriptor.Coordinates + FaceCoords[i]);
-                lighting[i] = GetLight(descriptor.Chunk, coords);
-            }
+            int[] lighting = GetLighting(descriptor);
 
             return CreateUniformCube(offset, texture, faces, indiciesOffset, out indicies, Color.White, lighting);
         }
@@ -143,11 +138,11 @@ namespace TrueCraft.Client.Rendering
         /// <summary>
         /// The offset coordinates used to get the position of a block for a face.
         /// </summary>
-        protected static readonly Coordinates3D[] FaceCoords =
+        protected static readonly Vector3i[] FaceCoords =
             {
-                Coordinates3D.South, Coordinates3D.North,
-                Coordinates3D.East, Coordinates3D.West,
-                Coordinates3D.Up, Coordinates3D.Down
+                Vector3i.South, Vector3i.North,
+                Vector3i.East, Vector3i.West,
+                Vector3i.Up, Vector3i.Down
             };
 
         /// <summary>
@@ -163,30 +158,56 @@ namespace TrueCraft.Client.Rendering
             };
 
         /// <summary>
+        /// Gets an array describing the lighting of each Cube Face.
+        /// </summary>
+        /// <param name="descriptor"></param>
+        /// <returns></returns>
+        protected static int[] GetLighting(BlockDescriptor descriptor)
+        {
+            int[] lighting = new int[(int)CubeFace.Count];
+            LocalVoxelCoordinates coords = (LocalVoxelCoordinates)descriptor.Coordinates;
+            int localX, localY, localZ;
+            for (int i = 0; i < (int)CubeFace.Count; i++)
+            {
+                localX = coords.X + FaceCoords[i].X;
+                localY = coords.Y + FaceCoords[i].Y;
+                localZ = coords.Z + FaceCoords[i].Z;
+                lighting[i] = GetLight(descriptor.Chunk, localX, localY, localZ);
+            }
+
+            return lighting;
+        }
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="chunk"></param>
         /// <param name="coords"></param>
         /// <returns></returns>
-        protected static int GetLight(IChunk chunk, Coordinates3D coords)
+        private static int GetLight(IChunk chunk, int x, int y, int z)
         {
+            // TODO: There are no calls to this method with chunk == null.
+            //       Is this a future feature?  If not, remove it.
             // Handle icon renderer.
             if (chunk == null)
                 return 15;
 
             // Handle top (and bottom) of the world.
-            if (coords.Y < 0)
+            if (y < 0)
                 return 0;
-            if (coords.Y >= Chunk.Height)
+            if (y >= Chunk.Height)
                 return 15;
 
+            // TODO: Have to return a proper value for light outside the local chunk.
+            //      This will require the Renderer to have access to the World object.
             // Handle coordinates outside the chunk.
-            if ((coords.X < 0) || (coords.X >= Chunk.Width) ||
-                (coords.Z < 0) || (coords.Z >= Chunk.Depth))
+            if ((x < 0) || (x >= Chunk.Width) ||
+                (z < 0) || (z >= Chunk.Depth))
             {
                 return 15;
             }
 
+            LocalVoxelCoordinates coords = new LocalVoxelCoordinates(x, y, z);
             return Math.Min(chunk.GetBlockLight(coords) + chunk.GetSkyLight(coords), 15);
         }
 
@@ -199,7 +220,8 @@ namespace TrueCraft.Client.Rendering
             PositiveX = 2,
             NegativeX = 3,
             PositiveY = 4,
-            NegativeY = 5
+            NegativeY = 5,
+            Count = 6
         }
 
         protected static readonly VisibleFaces[] VisibleForCubeFace =
