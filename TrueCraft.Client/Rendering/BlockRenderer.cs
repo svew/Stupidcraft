@@ -4,7 +4,6 @@ using Microsoft.Xna.Framework;
 using TrueCraft.API.Logic;
 using TrueCraft.API.World;
 using TrueCraft.Core.World;
-using Coordinates3D = TrueCraft.API.Coordinates3D;
 
 namespace TrueCraft.Client.Rendering
 {
