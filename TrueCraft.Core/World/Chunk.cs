@@ -38,9 +38,17 @@ namespace TrueCraft.Core.World
         public int[] HeightMap { get; set; }
         public int MaxHeight { get; private set; }
 
+        /// <summary>
+        /// Gets the distance at which this Chunk is located away
+        /// from the origin (in Chunks) in the X-direction.
+        /// </summary>
         [TagName("xPos")]
         public int X { get; private set; }
 
+        /// <summary>
+        /// Gets the distance at which this Chunk is located away
+        /// from the origin (in Chunks) in the Z-direction.
+        /// </summary>
         [TagName("zPos")]
         public int Z { get; private set; }
 
