@@ -212,6 +212,21 @@ namespace TrueCraft.Client.Rendering
             VisibleFaces.Bottom
         };
 
+        /// <summary>
+        /// Specifies the vertices of a cube for each face.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The first index ranges from 0 to 5 and specifies the
+        /// face of the cube (as per the CubeFace enumeration).
+        /// The second index ranges from 0 to 3 and specifies each
+        /// vertex of the face.
+        /// </para>
+        /// <para>
+        /// All vertices are listed in clockwise order when facing
+        /// into the cube.
+        /// </para>
+        /// </remarks>
         protected static readonly Vector3[][] CubeMesh;
 
         protected static readonly Vector3[] CubeNormals =
@@ -242,7 +257,7 @@ namespace TrueCraft.Client.Rendering
 
             CubeMesh = new Vector3[6][];
 
-            CubeMesh[0] = new[] // Positive Z face
+            CubeMesh[(int)CubeFace.PositiveZ] = new[]
             {
                 new Vector3(1, 0, 1),
                 new Vector3(0, 0, 1),
@@ -250,7 +265,7 @@ namespace TrueCraft.Client.Rendering
                 new Vector3(1, 1, 1)
             };
 
-            CubeMesh[1] = new[] // Negative Z face
+            CubeMesh[(int)CubeFace.NegativeZ] = new[]
             {
                 new Vector3(0, 0, 0),
                 new Vector3(1, 0, 0),
@@ -258,7 +273,7 @@ namespace TrueCraft.Client.Rendering
                 new Vector3(0, 1, 0)
             };
 
-            CubeMesh[2] = new[] // Positive X face
+            CubeMesh[(int)CubeFace.PositiveX] = new[]
             {
                 new Vector3(1, 0, 0),
                 new Vector3(1, 0, 1),
@@ -266,7 +281,7 @@ namespace TrueCraft.Client.Rendering
                 new Vector3(1, 1, 0)
             };
 
-            CubeMesh[3] = new[] // Negative X face
+            CubeMesh[(int)CubeFace.NegativeX] = new[]
             {
                 new Vector3(0, 0, 1),
                 new Vector3(0, 0, 0),
@@ -274,7 +289,7 @@ namespace TrueCraft.Client.Rendering
                 new Vector3(0, 1, 1)
             };
 
-            CubeMesh[4] = new[] // Positive Y face
+            CubeMesh[(int)CubeFace.PositiveY] = new[]
             {
                 new Vector3(1, 1, 1),
                 new Vector3(0, 1, 1),
@@ -282,7 +297,7 @@ namespace TrueCraft.Client.Rendering
                 new Vector3(1, 1, 0)
             };
 
-            CubeMesh[5] = new[] // Negative Y face
+            CubeMesh[(int)CubeFace.NegativeY] = new[]
             {
                 new Vector3(1, 0, 0),
                 new Vector3(0, 0, 0),
