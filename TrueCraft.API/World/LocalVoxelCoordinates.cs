@@ -125,6 +125,24 @@ namespace TrueCraft.API.World
         }
         #endregion   // object overrides
 
+        #region operators
+
+        public LocalVoxelCoordinates Add(Vector3i other)
+        {
+            return new LocalVoxelCoordinates(this.X + other.X, this.Y + other.Y, this.Z + other.Z);
+        }
+
+        public static LocalVoxelCoordinates operator +(LocalVoxelCoordinates c, Vector3i v)
+        {
+            return c.Add(v);
+        }
+
+        public static LocalVoxelCoordinates operator +(Vector3i v, LocalVoxelCoordinates c)
+        {
+            return c.Add(v);
+        }
+        #endregion
+
         #region conversion operators
         public static explicit operator LocalVoxelCoordinates(GlobalVoxelCoordinates value)
         {

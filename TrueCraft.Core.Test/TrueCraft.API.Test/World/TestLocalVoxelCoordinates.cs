@@ -119,6 +119,51 @@ namespace TrueCraft.API.Test.World
             Assert.AreEqual(expected, actual);
         }
 
+        [TestCase(1, 2, 3, 2, 4, 6)]
+        public void Add(int x1, int y1, int z1, int x2, int y2, int z2)
+        {
+            LocalVoxelCoordinates a = new LocalVoxelCoordinates(x1, y1, z1);
+            Vector3i b = new Vector3i(x2, y2, z2);
+            LocalVoxelCoordinates expected = new LocalVoxelCoordinates(x1 + x2, y1 + y2, z1 + z2);
+
+            LocalVoxelCoordinates actual = a.Add(b);
+            Assert.AreEqual(expected, actual);
+
+            actual = a + b;
+            Assert.AreEqual(expected, actual);
+
+            actual = b + a;
+            Assert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        public void Add_Throws()
+        {
+            // Too far north
+            LocalVoxelCoordinates a = new LocalVoxelCoordinates(5, 27, 0);
+            Assert.Throws<ArgumentOutOfRangeException>(() => a.Add(Vector3i.North));
+
+            // Too far south
+            a = new LocalVoxelCoordinates(5, 28, WorldConstants.ChunkDepth - 1);
+            Assert.Throws<ArgumentOutOfRangeException>(() => a.Add(Vector3i.South));
+
+            // West
+            a = new LocalVoxelCoordinates(0, 13, 0);
+            Assert.Throws<ArgumentOutOfRangeException>(() => a.Add(Vector3i.West));
+
+            // East
+            a = new LocalVoxelCoordinates(WorldConstants.ChunkWidth - 1, 64, 7);
+            Assert.Throws<ArgumentOutOfRangeException>(() => a.Add(Vector3i.East));
+
+            // Down
+            a = new LocalVoxelCoordinates(8, 0, 8);
+            Assert.Throws<ArgumentOutOfRangeException>(() => a.Add(Vector3i.Down));
+
+            // Up
+            a = new LocalVoxelCoordinates(8, WorldConstants.Height - 1, 8);
+            Assert.Throws<ArgumentOutOfRangeException>(() => a.Add(Vector3i.Up));
+        }
+
         [TestCase(0, 0, 0, 0, 0, 0)]
         [TestCase(0, 50, 0, WorldConstants.ChunkWidth, 50, 0)]
         [TestCase(0, 45, 0, 0, 45, WorldConstants.ChunkDepth)]
