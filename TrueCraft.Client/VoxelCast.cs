@@ -1,5 +1,6 @@
 ﻿using System;
 using TrueCraft.API;
+using TrueCraft.API.World;
 using TrueCraft.Core.Logic;
 using TrueCraft.Core.Logic.Blocks;
 using TrueCraft.API.Logic;
@@ -14,13 +15,13 @@ namespace TrueCraft.Client
     {
         // Thanks to http://gamedev.stackexchange.com/questions/47362/cast-ray-to-select-block-in-voxel-game
 
-        public static Tuple<Coordinates3D, BlockFace> Cast(ReadOnlyWorld world,
+        public static Tuple<GlobalVoxelCoordinates, BlockFace> Cast(ReadOnlyWorld world,
             Ray ray, IBlockRepository repository, int posmax, int negmax)
         {
             // TODO: There are more efficient ways of doing this, fwiw
 
             double min = negmax * 2;
-            var pick = -Coordinates3D.One;
+            GlobalVoxelCoordinates pick = null;
             var face = BlockFace.PositiveY;
             for (int x = -posmax; x <= posmax; x++)
             {
@@ -28,7 +29,7 @@ namespace TrueCraft.Client
                 {
                     for (int z = -posmax; z <= posmax; z++)
                     {
-                        var coords = (Coordinates3D)(new Vector3(x, y, z) + ray.Position).Round();
+                        GlobalVoxelCoordinates coords = (GlobalVoxelCoordinates)(new Vector3(x, y, z) + ray.Position).Round();
                         if (!world.IsValidPosition(coords))
                             continue;
                         var id = world.GetBlockID(coords);
@@ -39,7 +40,7 @@ namespace TrueCraft.Client
                             if (box != null)
                             {
                                 BlockFace _face;
-                                var distance = ray.Intersects(box.Value.OffsetBy(coords), out _face);
+                                var distance = ray.Intersects(box.Value.OffsetBy((Vector3)coords), out _face);
                                 if (distance != null && distance.Value < min)
                                 {
                                     min = distance.Value;
@@ -51,9 +52,9 @@ namespace TrueCraft.Client
                     }
                 }
             }
-            if (pick == -Coordinates3D.One)
+            if (object.ReferenceEquals(pick, null))
                 return null;
-            return new Tuple<Coordinates3D, BlockFace>(pick, face);
+            return new Tuple<GlobalVoxelCoordinates, BlockFace>(pick, face);
         }
     }
 }

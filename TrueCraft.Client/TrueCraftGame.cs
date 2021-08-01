@@ -33,11 +33,11 @@ namespace TrueCraft.Client
         public ChunkModule ChunkModule { get; set; }
         public ChatModule ChatModule { get; set; }
         public float ScaleFactor { get; set; }
-        public Coordinates3D HighlightedBlock { get; set; }
+        public GlobalVoxelCoordinates HighlightedBlock { get; set; }
         public BlockFace HighlightedBlockFace { get; set; }
         public DateTime StartDigging { get; set; }
         public DateTime EndDigging { get; set; }
-        public Coordinates3D TargetBlock { get; set; }
+        public GlobalVoxelCoordinates TargetBlock { get; set; }
         public AudioManager Audio { get; set; }
         public Texture2D White1x1 { get; set; }
         public PlayerControlModule ControlModule { get; set; }
@@ -352,8 +352,8 @@ namespace TrueCraft.Client
                 action();
 
             IChunk chunk;
-            var adjusted = Client.World.World.FindBlockPosition(
-                new Coordinates3D((int)Client.Position.X, 0, (int)Client.Position.Z), out chunk);
+            LocalVoxelCoordinates adjusted = Client.World.World.FindBlockPosition(
+                new GlobalVoxelCoordinates((int)Client.Position.X, 0, (int)Client.Position.Z), out chunk);
             if (chunk != null && Client.LoggedIn)
             {
                 if (chunk.GetHeight((byte)adjusted.X, (byte)adjusted.Z) != 0)

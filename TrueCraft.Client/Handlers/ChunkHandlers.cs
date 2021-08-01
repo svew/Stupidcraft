@@ -14,8 +14,8 @@ namespace TrueCraft.Client.Handlers
         public static void HandleBlockChange(IPacket _packet, MultiplayerClient client)
         {
             var packet = (BlockChangePacket)_packet;
-            var coordinates = new Coordinates3D(packet.X, packet.Y, packet.Z);
-            Coordinates3D adjusted;
+            var coordinates = new GlobalVoxelCoordinates(packet.X, packet.Y, packet.Z);
+            LocalVoxelCoordinates adjusted;
             IChunk chunk;
             try
             {
@@ -23,6 +23,8 @@ namespace TrueCraft.Client.Handlers
             }
             catch (ArgumentException)
             {
+                // TODO: FindBlockPosition will cause the loading or generation
+                //       of the block, which is totally inappropriate on the client.
                 // Relevant chunk is not loaded - ignore packet
                 return;
             }
@@ -36,14 +38,14 @@ namespace TrueCraft.Client.Handlers
         public static void HandleChunkPreamble(IPacket _packet, MultiplayerClient client)
         {
             var packet = (ChunkPreamblePacket)_packet;
-            var coords = new Coordinates2D(packet.X, packet.Z);
+            GlobalChunkCoordinates coords = new GlobalChunkCoordinates(packet.X, packet.Z);
             client.World.SetChunk(coords, new Chunk(coords));
         }
 
         public static void HandleChunkData(IPacket _packet, MultiplayerClient client)
         {
             var packet = (ChunkDataPacket)_packet;
-            var coords = new Coordinates3D(packet.X, packet.Y, packet.Z);
+            GlobalVoxelCoordinates coords = new GlobalVoxelCoordinates(packet.X, packet.Y, packet.Z);
             var data = ZlibStream.UncompressBuffer(packet.CompressedData);
             IChunk chunk;
             var adjustedCoords = client.World.World.FindBlockPosition(coords, out chunk);
@@ -85,7 +87,7 @@ namespace TrueCraft.Client.Handlers
                 int nibbleLength = fullLength / 2; // Length of nibble sections
                 for (int i = 0; i < fullLength; i++) // Iterate through block IDs
                 {
-                    chunk.SetBlockID(new Coordinates3D(x, y, z), data[i]);
+                    chunk.SetBlockID(new LocalVoxelCoordinates(x, y, z), data[i]);
                     y++;
                     if (y >= packet.Height)
                     {
@@ -106,8 +108,8 @@ namespace TrueCraft.Client.Handlers
                 for (int i = fullLength; i < nibbleLength; i++) // Iterate through metadata
                 {
                     byte m = data[i];
-                    chunk.SetMetadata(new Coordinates3D(x, y, z), (byte)(m & 0xF));
-                    chunk.SetMetadata(new Coordinates3D(x, y + 1, z), (byte)(m & 0xF0 << 8));
+                    chunk.SetMetadata(new LocalVoxelCoordinates(x, y, z), (byte)(m & 0xF));
+                    chunk.SetMetadata(new LocalVoxelCoordinates(x, y + 1, z), (byte)(m & 0xF0 << 8));
                     y += 2;
                     if (y >= packet.Height)
                     {

@@ -5,6 +5,7 @@ using TrueCraft.Core.Logic.Blocks;
 using TrueCraft.API.Logic;
 using TrueCraft.Core.World;
 using TrueCraft.API;
+using TrueCraft.API.World;
 
 namespace TrueCraft.Client.Rendering.Blocks
 {
@@ -98,7 +99,7 @@ namespace TrueCraft.Client.Rendering.Blocks
             var texture = Texture;
             if (descriptor.Coordinates.Y < World.Height && descriptor.Chunk != null)
             {
-                if (descriptor.Chunk.GetBlockID(descriptor.Coordinates + Coordinates3D.Up) == SnowfallBlock.BlockID)
+                if (descriptor.Chunk.GetBlockID((LocalVoxelCoordinates)(descriptor.Coordinates + Vector3i.Up)) == SnowfallBlock.BlockID)
                 {
                     texture = SnowTexture;
                 }
