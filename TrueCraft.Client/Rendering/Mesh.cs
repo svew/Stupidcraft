@@ -40,7 +40,7 @@ namespace TrueCraft.Client.Rendering
         /// <summary>
         /// Gets or sets the vertices in this mesh.
         /// </summary>
-        public VertexPositionNormalColorTexture[] Vertices
+        protected VertexPositionNormalColorTexture[] Vertices
         {
             set
             {

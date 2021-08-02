@@ -46,6 +46,27 @@ namespace TrueCraft.Client.Rendering
             return CreateUniformCube(offset, texture, faces, indiciesOffset, out indicies, Color.White, lighting);
         }
 
+        public static VertexPositionNormalColorTexture[] RenderIcon(byte blockID, out int[] indices)
+        {
+            var texCoords = new Vector2(0, 0);
+            var texture = new[]
+            {
+                texCoords + Vector2.UnitX + Vector2.UnitY,
+                texCoords + Vector2.UnitY,
+                texCoords,
+                texCoords + Vector2.UnitX
+            };
+
+            Vector3 offset = new Vector3(0.5f);
+
+            return Renderers[blockID].Render(offset, texture, out indices);
+        }
+
+        public virtual VertexPositionNormalColorTexture[] Render(Vector3 offset, Vector2[] texture, out int[] indices)
+        {
+            return CreateUniformCube(offset, texture, VisibleFaces.All, 0, out indices, Color.White);
+        }
+
         public static VertexPositionNormalColorTexture[] CreateUniformCube(Vector3 offset, Vector2[] texture,
             VisibleFaces faces, int indiciesOffset, out int[] indicies, Color color, int[] lighting = null)
         {
@@ -164,15 +185,6 @@ namespace TrueCraft.Client.Rendering
         protected static int[] GetLighting(BlockDescriptor descriptor)
         {
             int[] lighting = new int[(int)CubeFace.Count];
-
-            if (Object.ReferenceEquals(descriptor.Coordinates, null))
-            {
-                // The Icon Renderer will call without coordinates.
-                for (int i = 0; i < (int)CubeFace.Count; i++)
-                    lighting[i] = 15;
-                return lighting;
-            }
-
             LocalVoxelCoordinates coords = (LocalVoxelCoordinates)descriptor.Coordinates;
             int localX, localY, localZ;
             for (int i = 0; i < (int)CubeFace.Count; i++)
