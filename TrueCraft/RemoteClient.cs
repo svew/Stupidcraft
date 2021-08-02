@@ -179,6 +179,10 @@ namespace TrueCraft
 
         public void Save()
         {
+            // The remote client may be disconnected prior to setting the World property.
+            if (object.ReferenceEquals(World, null))
+                return;
+
             var path = Path.Combine(Directory.GetCurrentDirectory(), "players", Username + ".nbt");
             if (Program.ServerConfiguration.Singleplayer)
                 path = Path.Combine(((World)World).BaseDirectory, "player.nbt");
