@@ -156,8 +156,10 @@ namespace TrueCraft
                 QueryProtocol.Stop();
             foreach (var w in Worlds)
                 w.Save();
-            foreach (var c in Clients)
-                DisconnectClient(c);
+
+            // NOTE: DisconnectClient modifies the Clients collection!
+            for (int j = Clients.Count - 1; j >= 0; j --)
+                DisconnectClient(Clients[j]);
         }
 
         public void AddWorld(IWorld world)
