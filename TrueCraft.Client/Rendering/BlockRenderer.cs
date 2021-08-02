@@ -164,6 +164,15 @@ namespace TrueCraft.Client.Rendering
         protected static int[] GetLighting(BlockDescriptor descriptor)
         {
             int[] lighting = new int[(int)CubeFace.Count];
+
+            if (Object.ReferenceEquals(descriptor.Coordinates, null))
+            {
+                // The Icon Renderer will call without coordinates.
+                for (int i = 0; i < (int)CubeFace.Count; i++)
+                    lighting[i] = 15;
+                return lighting;
+            }
+
             LocalVoxelCoordinates coords = (LocalVoxelCoordinates)descriptor.Coordinates;
             int localX, localY, localZ;
             for (int i = 0; i < (int)CubeFace.Count; i++)
@@ -185,12 +194,6 @@ namespace TrueCraft.Client.Rendering
         /// <returns></returns>
         private static int GetLight(IChunk chunk, int x, int y, int z)
         {
-            // TODO: There are no calls to this method with chunk == null.
-            //       Is this a future feature?  If not, remove it.
-            // Handle icon renderer.
-            if (chunk == null)
-                return 15;
-
             // Handle top (and bottom) of the world.
             if (y < 0)
                 return 0;
