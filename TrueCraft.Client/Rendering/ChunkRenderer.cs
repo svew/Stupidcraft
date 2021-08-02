@@ -264,18 +264,16 @@ namespace TrueCraft.Client.Rendering
                     }
                 }
             }
-            var enumerator = state.DrawableCoordinates.GetEnumerator();
-            for (int j = 0; j <= state.DrawableCoordinates.Count; j++)
+
+            foreach(var coords in state.DrawableCoordinates)
             {
-                var coords = enumerator.Current;
-                enumerator.MoveNext();
-                var c = coords.Key;
+                LocalVoxelCoordinates c = coords.Key;
                 var descriptor = new BlockDescriptor
                 {
-                    ID = chunk.GetBlockId(coords.Key),
-                    Metadata = chunk.GetMetadata(coords.Key),
-                    BlockLight = chunk.GetBlockLight(coords.Key),
-                    SkyLight = chunk.GetSkyLight(coords.Key),
+                    ID = chunk.GetBlockId(c),
+                    Metadata = chunk.GetMetadata(c),
+                    BlockLight = chunk.GetBlockLight(c),
+                    SkyLight = chunk.GetSkyLight(c),
                     // Coordinates = coords.Key,   // not used & wrong coordinate system anyway.
                     Chunk = chunk.Chunk
                 };
