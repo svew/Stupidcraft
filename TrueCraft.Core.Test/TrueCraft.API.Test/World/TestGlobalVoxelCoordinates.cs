@@ -31,6 +31,32 @@ namespace TrueCraft.API.Test.World
             Assert.AreEqual(expected.Z, actual.Z);
         }
 
+        [TestCase(0, 0, 0, 0, 0, 0, 0, 0)]
+        [TestCase(WorldConstants.ChunkWidth, 15, 0,
+            1, 0, 0, 15, 0)]
+        [TestCase(0, 17, WorldConstants.ChunkDepth,
+            0, 1, 0, 17, 0)]
+        [TestCase(2 * WorldConstants.ChunkWidth, 17, 2 * WorldConstants.ChunkWidth,
+            2, 2, 0, 17, 0)]
+        [TestCase(2 * WorldConstants.ChunkWidth - 1, 19, 2 * WorldConstants.ChunkDepth - 1,
+            1, 1, WorldConstants.ChunkWidth - 1, 19, WorldConstants.ChunkDepth - 1)]
+        [TestCase(-1, 21, -1,
+            -1, -1, WorldConstants.ChunkWidth - 1, 21, WorldConstants. ChunkDepth - 1)]
+        [TestCase(-WorldConstants.ChunkWidth, 23, -WorldConstants.ChunkDepth,
+            -1, -1, 0, 23, 0)]
+        public void From_Chunk_And_Local(int expectedX, int expectedY, int expectedZ,
+                  int chunkX, int chunkZ, int localX, int localY, int localZ)
+        {
+            GlobalChunkCoordinates chunk = new GlobalChunkCoordinates(chunkX, chunkZ);
+            LocalVoxelCoordinates local = new LocalVoxelCoordinates(localX, localY, localZ);
+
+            GlobalVoxelCoordinates actual = GlobalVoxelCoordinates.GetGlobalVoxelCoordinates(chunk, local);
+
+            Assert.AreEqual(expectedX, actual.X);
+            Assert.AreEqual(expectedY, actual.Y);
+            Assert.AreEqual(expectedZ, actual.Z);
+        }
+
         [TestCase(true, 1, 2, 3, 1, 2, 3)]
         [TestCase(false, 1, 3, 5, 2, 3, 5)]  // x not equal 
         [TestCase(false, 2, 2, 5, 2, 3, 5)]  // y not equal

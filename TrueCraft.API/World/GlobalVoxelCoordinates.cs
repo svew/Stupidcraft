@@ -52,6 +52,20 @@ namespace TrueCraft.API.World
         }
 
         /// <summary>
+        /// Gets the Global Voxel Coordinates specified by the local coordinates within
+        /// the given chunk coordinates.
+        /// </summary>
+        /// <param name="chunk">The coordinates of the Chunk.</param>
+        /// <param name="local">The Local Voxel Coordinates within the Chunk.</param>
+        public static GlobalVoxelCoordinates GetGlobalVoxelCoordinates(GlobalChunkCoordinates chunk, LocalVoxelCoordinates local)
+        {
+            int x = chunk.X * WorldConstants.ChunkWidth + local.X;
+            int z = chunk.Z * WorldConstants.ChunkDepth + local.Z;
+
+            return new GlobalVoxelCoordinates(x, local.Y, z);
+        }
+
+        /// <summary>
         /// Converts this GlobalVoxelCoordinates to a string in the format &lt;x, y, z&gt;.
         /// </summary>
         /// <returns></returns>

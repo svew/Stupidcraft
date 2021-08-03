@@ -274,7 +274,7 @@ namespace TrueCraft.Client.Rendering
                     Metadata = chunk.GetMetadata(c),
                     BlockLight = chunk.GetBlockLight(c),
                     SkyLight = chunk.GetSkyLight(c),
-                    // Coordinates = coords.Key,   // not used & wrong coordinate system anyway.
+                    Coordinates = GlobalVoxelCoordinates.GetGlobalVoxelCoordinates(chunk.Chunk.Coordinates, c),
                     Chunk = chunk.Chunk
                 };
                 var provider = BlockRepository.GetBlockProvider(descriptor.ID);
