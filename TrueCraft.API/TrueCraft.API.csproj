@@ -25,11 +25,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\externals\fNbt\fNbt\fNbt.csproj">
-      <Name>fNbt</Name>
     </ProjectReference>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="YamlDotNet" Version="11.2.0" />
+    <PackageReference Include="YamlDotNet" Version="11.2.1" />
   </ItemGroup>
 </Project>
