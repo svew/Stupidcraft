@@ -111,6 +111,8 @@ namespace TrueCraft.Core.World
                             return null;
                         return _chunks[position];
                     }
+
+                    NbtFile nbt = new NbtFile();
                     lock (_streamLock)
                     {
                         _regionFile.Seek(chunkData.Item1, SeekOrigin.Begin);
@@ -122,17 +124,22 @@ namespace TrueCraft.Core.World
                             case 1: // gzip
                                 throw new NotImplementedException("gzipped chunks are not implemented");
                             case 2: // zlib
-                                var nbt = new NbtFile();
                                 nbt.LoadFromStream(_regionFile, NbtCompression.ZLib, null);
-                                var chunk = Chunk.FromNbt(nbt);
-                                chunk.ParentRegion = this;
-                                _chunks[position] = chunk;
-                                World.OnChunkLoaded(new ChunkLoadedEventArgs(chunk));
                                 break;
                             default:
                                 throw new InvalidDataException("Invalid compression scheme provided by region file.");
                         }
                     }
+                    IChunk chunk = Chunk.FromNbt(nbt);
+                    chunk.ParentRegion = this;
+                    _chunks[position] = chunk;
+                    // TODO: NOTE OnChunkLoaded will cause a lighting operation to be queued for this chunk.
+                    //    There are 2 threads enqueuing and dequeueing lighting operations (DoEnvironment,
+                    //    and the thread responding to the login packet).  Such lighting operations would
+                    //    then cross over from one thread to another, leading to each thread trying to obtain
+                    //    a lock owned by the other - a deadlock.  Moving the lighting operations outside the
+                    //    lock is to resolve this.
+                    World.OnChunkLoaded(new ChunkLoadedEventArgs(chunk));
                 }
                 else if (World.ChunkProvider == null)
                     throw new ArgumentException("The requested chunk is not loaded.", nameof(position));
@@ -144,6 +151,11 @@ namespace TrueCraft.Core.World
                         return null;
                 }
             }
+            // TODO BUG: Just after Client exit, this threw an exception because
+            //    position was not in the Dictionary.  It's happened for Grass
+            //    growing and also for expanding the Client's Chunk Radius (exit
+            //    was nearly immediately after entry, so the chunk radius was not
+            //    fully expanded).
             return _chunks[position];
         }
 
