@@ -13,9 +13,9 @@ namespace TrueCraft.Core.TerrainGen.Decorators
     {
         public void Decorate(IWorld world, IChunk chunk, IBiomeRepository biomes)
         {
-            for (int x = 0; x < 16; x++)
+            for (int x = 0; x < Chunk.Width; x++)
             {
-                for (int z = 0; z < 16; z++)
+                for (int z = 0; z < Chunk.Depth; z++)
                 {
                     var biome = biomes.GetBiome(chunk.Biomes[x * Chunk.Width + z]);
                     if (biome.Temperature < 0.15)
@@ -23,7 +23,7 @@ namespace TrueCraft.Core.TerrainGen.Decorators
                         var height = chunk.HeightMap[x * Chunk.Width + z];
                         for (int y = height; y < Chunk.Height; y++)
                         {
-                            var location = new Coordinates3D(x, y, z);
+                            var location = new LocalVoxelCoordinates(x, y, z);
                             if (chunk.GetBlockID(location).Equals(StationaryWaterBlock.BlockID) || chunk.GetBlockID(location).Equals(WaterBlock.BlockID))
                                 chunk.SetBlockID(location, IceBlock.BlockID);
                             else
@@ -39,9 +39,9 @@ namespace TrueCraft.Core.TerrainGen.Decorators
                                 if (y == height && whitelist.Any(w => w == below))
                                 {
                                     if (chunk.GetBlockID(location).Equals(IceBlock.BlockID) && CoverIce(chunk, biomes, location))
-                                        chunk.SetBlockID((location + Coordinates3D.Up), SnowfallBlock.BlockID);
+                                        chunk.SetBlockID(new LocalVoxelCoordinates(location.X, location.Y + 1, location.Z), SnowfallBlock.BlockID);
                                     else if (!chunk.GetBlockID(location).Equals(SnowfallBlock.BlockID) && !chunk.GetBlockID(location).Equals(AirBlock.BlockID))
-                                        chunk.SetBlockID((location + Coordinates3D.Up), SnowfallBlock.BlockID);
+                                        chunk.SetBlockID(new LocalVoxelCoordinates(location.X, location.Y + 1, location.Z), SnowfallBlock.BlockID);
                                 }
                             }
                         }
@@ -50,21 +50,26 @@ namespace TrueCraft.Core.TerrainGen.Decorators
             }
         }
 
-        bool CoverIce(IChunk chunk, IBiomeRepository biomes, Coordinates3D location)
+        bool CoverIce(IChunk chunk, IBiomeRepository biomes, LocalVoxelCoordinates location)
         {
             const int maxDistance = 4;
-            var adjacent = new[] {
-                location + new Coordinates3D(-maxDistance, 0, 0),
-                location + new Coordinates3D(maxDistance, 0, 0),
-                location + new Coordinates3D(0, 0, maxDistance),
-                location + new Coordinates3D(0, 0, -maxDistance),
-            };
-            for (int i = 0; i < adjacent.Length; i++)
+            Vector3i[] nearby = new Vector3i[]
             {
-                var check = adjacent[i];
-                if (check.X < 0 || check.X >= Chunk.Width || check.Z < 0 || check.Z >= Chunk.Depth || check.Y < 0 || check.Y >= Chunk.Height)
+                maxDistance * Vector3i.West,
+                maxDistance * Vector3i.East,
+                maxDistance * Vector3i.South,
+                maxDistance * Vector3i.North
+            };
+            for (int i = 0; i < nearby.Length; i++)
+            {
+                int checkX = location.X + nearby[i].X;
+                int checkZ = location.Z + nearby[i].Z;
+                // TODO: does the order of the nearby array produce peculiar direction-dependent variations
+                //       in snow cover near chunk boundaries?
+                if (checkX < 0 || checkX >= Chunk.Width || checkZ < 0 || checkZ >= Chunk.Depth)
                     return false;
-                var biome = biomes.GetBiome(chunk.Biomes[check.X * Chunk.Width + check.Z]);
+                LocalVoxelCoordinates check = new LocalVoxelCoordinates(checkX, location.Y, checkZ);
+                var biome = biomes.GetBiome(chunk.Biomes[checkX * Chunk.Width + checkZ]);
                 if (chunk.GetBlockID(check).Equals(biome.SurfaceBlock) || chunk.GetBlockID(check).Equals(biome.FillerBlock))
                     return true;
             }

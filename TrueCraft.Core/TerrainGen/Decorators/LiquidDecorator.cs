@@ -24,12 +24,12 @@ namespace TrueCraft.Core.TerrainGen.Decorators
                     var height = chunk.HeightMap[x * Chunk.Width + z];
                     for (int y = height; y <= WaterLevel; y++)
                     {
-                        var blockLocation = new Coordinates3D(x, y, z);
+                        LocalVoxelCoordinates blockLocation = new LocalVoxelCoordinates(x, y, z);
                         int blockId = chunk.GetBlockID(blockLocation);
                         if (blockId.Equals(AirBlock.BlockID))
                         {
                             chunk.SetBlockID(blockLocation, biome.WaterBlock);
-                            var below = blockLocation + Coordinates3D.Down;
+                            var below = new LocalVoxelCoordinates(blockLocation.X, blockLocation.Y - 1, blockLocation.Z);
                             if (!chunk.GetBlockID(below).Equals(AirBlock.BlockID) && !chunk.GetBlockID(below).Equals(biome.WaterBlock))
                             {
                                 if (!biome.WaterBlock.Equals(LavaBlock.BlockID) && !biome.WaterBlock.Equals(StationaryLavaBlock.BlockID))
@@ -49,7 +49,7 @@ namespace TrueCraft.Core.TerrainGen.Decorators
                     }
                     for (int y = 4; y < height / 8; y++)
                     {
-                        var blockLocation = new Coordinates3D(x, y, z);
+                        LocalVoxelCoordinates blockLocation = new LocalVoxelCoordinates(x, y, z);
                         int blockId = chunk.GetBlockID(blockLocation);
                         if (blockId.Equals(AirBlock.BlockID))
                         {

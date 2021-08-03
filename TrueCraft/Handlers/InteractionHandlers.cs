@@ -23,7 +23,7 @@ namespace TrueCraft.Handlers
             var packet = (PlayerDiggingPacket)_packet;
             var client = (RemoteClient)_client;
             var world = _client.World;
-            var position = new Coordinates3D(packet.X, packet.Y, packet.Z);
+            var position = new GlobalVoxelCoordinates(packet.X, packet.Y, packet.Z);
             var descriptor = world.GetBlockData(position);
             var provider = server.BlockRepository.GetBlockProvider(descriptor.ID);
             short damage;
@@ -116,11 +116,11 @@ namespace TrueCraft.Handlers
             var client = (RemoteClient)_client;
 
             var slot = client.SelectedItem;
-            var position = new Coordinates3D(packet.X, packet.Y, packet.Z);
+            var position = new GlobalVoxelCoordinates(packet.X, packet.Y, packet.Z);
             BlockDescriptor? block = null;
-            if (position != -Coordinates3D.One)
+            if (position != -GlobalVoxelCoordinates.One)
             {
-                if (position.DistanceTo((Coordinates3D)client.Entity.Position) > 10 /* TODO: Reach */)
+                if (position.DistanceTo(client.Entity.Position) > 10 /* TODO: Reach */)
                     return;
                 block = client.World.GetBlockData(position);
             }
@@ -259,8 +259,8 @@ namespace TrueCraft.Handlers
         {
             var packet = (UpdateSignPacket)_packet;
             var client = (RemoteClient)_client;
-            var coords = new Coordinates3D(packet.X, packet.Y, packet.Z);
-            if (client.Entity.Position.DistanceTo(coords) < 10) // TODO: Reach
+            var coords = new GlobalVoxelCoordinates(packet.X, packet.Y, packet.Z);
+            if (client.Entity.Position.DistanceTo((Vector3)coords) < 10) // TODO: Reach
             {
                 var block = client.World.GetBlockID(coords);
                 if (block == UprightSignBlock.BlockID || block == WallSignBlock.BlockID)

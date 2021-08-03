@@ -22,7 +22,7 @@ namespace TrueCraft.Core.Logic.Items
 
         public override string DisplayName { get { return "Bed"; } }
 
-        public override void ItemUsedOnBlock(Coordinates3D coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user)
+        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user)
         {
             coordinates += MathHelper.BlockFaceToCoordinates(face);
             var head = coordinates;
@@ -31,19 +31,19 @@ namespace TrueCraft.Core.Logic.Items
             switch (MathHelper.DirectionByRotationFlat(user.Entity.Yaw))
             {
                 case Direction.North:
-                    head += Coordinates3D.North;
+                    head += Vector3i.North;
                     direction = BedBlock.BedDirection.North;
                     break;
                 case Direction.South:
-                    head += Coordinates3D.South;
+                    head += Vector3i.South;
                     direction = BedBlock.BedDirection.South;
                     break;
                 case Direction.East:
-                    head += Coordinates3D.East;
+                    head += Vector3i.East;
                     direction = BedBlock.BedDirection.East;
                     break;
                 case Direction.West:
-                    head += Coordinates3D.West;
+                    head += Vector3i.West;
                     direction = BedBlock.BedDirection.West;
                     break;
             }

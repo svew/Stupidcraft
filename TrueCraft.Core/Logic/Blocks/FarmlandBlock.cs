@@ -54,17 +54,17 @@ namespace TrueCraft.Core.Logic.Blocks
             return new Tuple<int, int>(7, 5);
         }
 
-        public bool IsHydrated(Coordinates3D coordinates, IWorld world)
+        public bool IsHydrated(GlobalVoxelCoordinates coordinates, IWorld world)
         {
-            var min = new Coordinates3D(-6 + coordinates.X, coordinates.Y, -6 + coordinates.Z);
-            var max = new Coordinates3D(6 + coordinates.X, coordinates.Y + 1, 6 + coordinates.Z);
+            var min = new GlobalVoxelCoordinates(-6 + coordinates.X, coordinates.Y, -6 + coordinates.Z);
+            var max = new GlobalVoxelCoordinates(6 + coordinates.X, coordinates.Y + 1, 6 + coordinates.Z);
             for (int x = min.X; x < max.X; x++)
             {
                 for (int y = min.Y; y < max.Y; y++) // TODO: This does not check one above the farmland block for some reason
                 {
                     for (int z = min.Z; z < max.Z; z++)
                     {
-                        var id = world.GetBlockID(new Coordinates3D(x, y, z));
+                        var id = world.GetBlockID(new GlobalVoxelCoordinates(x, y, z));
                         if (id == WaterBlock.BlockID || id == StationaryWaterBlock.BlockID)
                             return true;
                     }
@@ -73,7 +73,7 @@ namespace TrueCraft.Core.Logic.Blocks
             return false;
         }
 
-        void HydrationCheckEvent(IMultiplayerServer server, Coordinates3D coords, IWorld world)
+        void HydrationCheckEvent(IMultiplayerServer server, GlobalVoxelCoordinates coords, IWorld world)
         {
             if (world.GetBlockID(coords) != BlockID)
                 return;
@@ -111,7 +111,7 @@ namespace TrueCraft.Core.Logic.Blocks
                 server => HydrationCheckEvent(server, descriptor.Coordinates, world));
         }
 
-        public override void BlockLoadedFromChunk(Coordinates3D coords, IMultiplayerServer server, IWorld world)
+        public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IWorld world)
         {
             var chunk = world.FindChunk(coords);
             server.Scheduler.ScheduleEvent("farmland", chunk,

@@ -40,7 +40,7 @@ namespace TrueCraft.Core.TerrainGen.Decorators
                 var spawnValue = offsetNoise.Value2D(blockX, blockZ);
                 if (spawnValue > 1.95 && spawnValue < 2.09)
                 {
-                    var generated = new Dungeon().GenerateAt(world, chunk, new Coordinates3D(blockX, y, blockZ));
+                    var generated = new Dungeon().GenerateAt(world, chunk, new LocalVoxelCoordinates(finalX, y, finalZ));
                     if (generated)
                         break;
                 }

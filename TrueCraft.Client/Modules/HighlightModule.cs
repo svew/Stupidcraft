@@ -1,6 +1,6 @@
 ﻿using System;
 using Microsoft.Xna.Framework.Graphics;
-using TrueCraft.API;
+using TrueCraft.API.World;
 using TrueCraft.Client.Rendering;
 using Microsoft.Xna.Framework;
 using Matrix = Microsoft.Xna.Framework.Matrix;
@@ -99,7 +99,7 @@ namespace TrueCraft.Client.Modules
                 Game.BlockRepository, TrueCraftGame.Reach, TrueCraftGame.Reach + 2);
 
             if (cast == null)
-                Game.HighlightedBlock = -Coordinates3D.One;
+                Game.HighlightedBlock = null;
             else
             {
                 var provider = Game.BlockRepository.GetBlockProvider(Game.Client.World.GetBlockID(cast.Item1));
@@ -123,7 +123,7 @@ namespace TrueCraft.Client.Modules
             Game.Camera.ApplyTo(HighlightEffect);
             Game.Camera.ApplyTo(DestructionEffect);
 
-            if (Game.HighlightedBlock != -Coordinates3D.One)
+            if (!object.ReferenceEquals(Game.HighlightedBlock, null))
             {
                 Game.GraphicsDevice.RasterizerState = RasterizerState;
                 foreach (var pass in HighlightEffect.CurrentTechnique.Passes)

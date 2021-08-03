@@ -63,7 +63,7 @@ namespace TrueCraft.Core.TerrainGen
             Biome = (Biome)byte.Parse(parts[2]);
         }
 
-        public IChunk GenerateChunk(IWorld world, Coordinates2D position)
+        public IChunk GenerateChunk(IWorld world, GlobalChunkCoordinates position)
         {
             var chunk = new Chunk(position);
             int y = 0;
@@ -76,8 +76,9 @@ namespace TrueCraft.Core.TerrainGen
                     {
                         for (int z = 0; z < 16; z++)
                         {
-                            chunk.SetBlockID(new Coordinates3D(x, y, z), Layers[i].BlockId);
-                            chunk.SetMetadata(new Coordinates3D(x, y, z), Layers[i].Metadata);
+                            LocalVoxelCoordinates local = new LocalVoxelCoordinates(x, y, z);
+                            chunk.SetBlockID(local, Layers[i].BlockId);
+                            chunk.SetMetadata(local, Layers[i].Metadata);
                         }
                     }
                     y++;
@@ -101,9 +102,9 @@ namespace TrueCraft.Core.TerrainGen
 
         public IList<IChunkDecorator> ChunkDecorators { get; set; }
 
-        public Coordinates3D GetSpawn(IWorld world)
+        public GlobalVoxelCoordinates GetSpawn(IWorld world)
         {
-            return Coordinates3D.Up * 5;
+            return new GlobalVoxelCoordinates(0, 5, 0);
         }
 
         protected class GeneratorLayer

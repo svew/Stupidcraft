@@ -90,7 +90,7 @@ namespace TrueCraft.Core.Logic.Blocks
             world.SetBlockData(descriptor.Coordinates, descriptor);
         }
 
-        public override void ItemUsedOnBlock(Coordinates3D coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user)
+        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user)
         {
             coordinates += MathHelper.BlockFaceToCoordinates(face);
             var old = world.GetBlockData(coordinates);
@@ -120,22 +120,22 @@ namespace TrueCraft.Core.Logic.Blocks
             }
         }
 
-        public override Coordinates3D GetSupportDirection(BlockDescriptor descriptor)
+        public override Vector3i GetSupportDirection(BlockDescriptor descriptor)
         {
             switch ((TorchDirection)descriptor.Metadata)
             {
                 case TorchDirection.Ground:
-                    return Coordinates3D.Down;
+                    return Vector3i.Down;
                 case TorchDirection.East:
-                    return Coordinates3D.West;
+                    return Vector3i.West;
                 case TorchDirection.West:
-                    return Coordinates3D.East;
+                    return Vector3i.East;
                 case TorchDirection.North:
-                    return Coordinates3D.South;
+                    return Vector3i.South;
                 case TorchDirection.South:
-                    return Coordinates3D.North;
+                    return Vector3i.North;
             }
-            return Coordinates3D.Zero;
+            return Vector3i.Zero;
         }
 
         public override Tuple<int, int> GetTextureMap(byte metadata)

@@ -18,20 +18,20 @@ namespace TrueCraft.Core.TerrainGen.Decorators
             var noise = new Perlin(world.Seed);
             var chanceNoise = new ClampNoise(noise);
             chanceNoise.MaxValue = 1;
-            for (int x = 0; x < 16; x++)
+            for (int x = 0; x < Chunk.Width; x++)
             {
-                for (int z = 0; z < 16; z++)
+                for (int z = 0; z < Chunk.Depth; z++)
                 {
                     var biome = biomes.GetBiome(chunk.Biomes[x * Chunk.Width + z]);
-                    var height = chunk.HeightMap[x * Chunk.Width + z];
-                    var blockX = MathHelper.ChunkToBlockX(x, chunk.Coordinates.X);
-                    var blockZ = MathHelper.ChunkToBlockZ(z, chunk.Coordinates.Z);
+                    int height = chunk.HeightMap[x * Chunk.Width + z];
+                    int blockX = MathHelper.ChunkToBlockX(x, chunk.Coordinates.X);
+                    int blockZ = MathHelper.ChunkToBlockZ(z, chunk.Coordinates.Z);
                     if (biome.Plants.Contains(PlantSpecies.SugarCane))
                     {
                         if (noise.Value2D(blockX, blockZ) > 0.65)
                         {
-                            var blockLocation = new Coordinates3D(x, height, z);
-                            var sugarCaneLocation = blockLocation + Coordinates3D.Up;
+                            LocalVoxelCoordinates blockLocation = new LocalVoxelCoordinates(x, height, z);
+                            LocalVoxelCoordinates sugarCaneLocation = new LocalVoxelCoordinates(x, height + 1, z);
                             var neighborsWater = Decoration.NeighboursBlock(chunk, blockLocation, WaterBlock.BlockID) || Decoration.NeighboursBlock(chunk, blockLocation, StationaryWaterBlock.BlockID);
                             if (chunk.GetBlockID(blockLocation).Equals(GrassBlock.BlockID) && neighborsWater || chunk.GetBlockID(blockLocation).Equals(SandBlock.BlockID) && neighborsWater)
                             {

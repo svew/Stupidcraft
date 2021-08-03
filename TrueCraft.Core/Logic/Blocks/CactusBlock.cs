@@ -47,22 +47,15 @@ namespace TrueCraft.Core.Logic.Blocks
         {
             if (checkNeighbor)
             {
-                var adjacent = new Coordinates3D[]
-                {
-                    descriptor.Coordinates + Coordinates3D.North,
-                    descriptor.Coordinates + Coordinates3D.East,
-                    descriptor.Coordinates + Coordinates3D.South,
-                    descriptor.Coordinates + Coordinates3D.West,
-                };
-
-                foreach (var coords in adjacent)
-                    if (world.GetBlockID(coords) != AirBlock.BlockID)
+                GlobalVoxelCoordinates coords = descriptor.Coordinates;
+                foreach (Vector3i neighbor in Vector3i.Neighbors4)
+                    if (world.GetBlockID(coords + neighbor) != AirBlock.BlockID)
                         return false;
             }
 
             if (checkSupport)
             {
-                var supportingBlock = repository.GetBlockProvider(world.GetBlockID(descriptor.Coordinates + Coordinates3D.Down));
+                var supportingBlock = repository.GetBlockProvider(world.GetBlockID(descriptor.Coordinates + Vector3i.Down));
                 if ((supportingBlock.ID != CactusBlock.BlockID) && (supportingBlock.ID != SandBlock.BlockID))
                     return false;
             }
@@ -70,7 +63,7 @@ namespace TrueCraft.Core.Logic.Blocks
             return true;
         }
 
-        private void TryGrowth(IMultiplayerServer server, Coordinates3D coords, IWorld world)
+        private void TryGrowth(IMultiplayerServer server, GlobalVoxelCoordinates coords, IWorld world)
         {
             if (world.GetBlockID(coords) != BlockID)
                 return;
@@ -78,7 +71,7 @@ namespace TrueCraft.Core.Logic.Blocks
             int height = 0;
             for (int y = -MaxGrowHeight; y <= MaxGrowHeight; y++)
             {
-                if (world.GetBlockID(coords + (Coordinates3D.Down * y)) == BlockID)
+                if (world.GetBlockID(coords + (Vector3i.Down * y)) == BlockID)
                     height++;
             }
             if (height < MaxGrowHeight)
@@ -89,12 +82,12 @@ namespace TrueCraft.Core.Logic.Blocks
                 var chunk = world.FindChunk(coords);
                 if (meta == 15)
                 {
-                    if (world.GetBlockID(coords + Coordinates3D.Up) == 0)
+                    if (world.GetBlockID(coords + Vector3i.Up) == 0)
                     {
-                        world.SetBlockID(coords + Coordinates3D.Up, BlockID);
+                        world.SetBlockID(coords + Vector3i.Up, BlockID);
                         server.Scheduler.ScheduleEvent("cactus", chunk,
                             TimeSpan.FromSeconds(MathHelper.Random.Next(MinGrowthSeconds, MaxGrowthSeconds)),
-                            (_server) => TryGrowth(_server, coords + Coordinates3D.Up, world));
+                            (_server) => TryGrowth(_server, coords + Vector3i.Up, world));
                     }
                 }
                 else
@@ -113,7 +106,7 @@ namespace TrueCraft.Core.Logic.Blocks
             // Search upwards
             for (int y = descriptor.Coordinates.Y; y < 127; y++)
             {
-                var coordinates = new Coordinates3D(descriptor.Coordinates.X, y, descriptor.Coordinates.Z);
+                var coordinates = new GlobalVoxelCoordinates(descriptor.Coordinates.X, y, descriptor.Coordinates.Z);
                 if (world.GetBlockID(coordinates) == CactusBlock.BlockID)
                 {
                     world.SetBlockID(coordinates, AirBlock.BlockID);
@@ -124,7 +117,7 @@ namespace TrueCraft.Core.Logic.Blocks
             // Search downwards.
             for (int y = descriptor.Coordinates.Y - 1; y > 0; y--)
             {
-                var coordinates = new Coordinates3D(descriptor.Coordinates.X, y, descriptor.Coordinates.Z);
+                var coordinates = new GlobalVoxelCoordinates(descriptor.Coordinates.X, y, descriptor.Coordinates.Z);
                 if (world.GetBlockID(coordinates) == CactusBlock.BlockID)
                 {
                     world.SetBlockID(coordinates, AirBlock.BlockID);
@@ -134,7 +127,7 @@ namespace TrueCraft.Core.Logic.Blocks
 
             var manager = server.GetEntityManagerForWorld(world);
             manager.SpawnEntity(
-                new ItemEntity(descriptor.Coordinates + Coordinates3D.Up,
+                new ItemEntity((Vector3)(descriptor.Coordinates + Vector3i.Up),
                     new ItemStack(CactusBlock.BlockID, (sbyte)toDrop)));
         }
 
@@ -148,7 +141,7 @@ namespace TrueCraft.Core.Logic.Blocks
 
                 var manager = user.Server.GetEntityManagerForWorld(world);
                 manager.SpawnEntity(
-                    new ItemEntity(descriptor.Coordinates + Coordinates3D.Up,
+                    new ItemEntity((Vector3)(descriptor.Coordinates + Vector3i.Up),
                         new ItemStack(CactusBlock.BlockID, (sbyte)1)));
                 // user.Inventory.PickUpStack() wasn't working?
             }
@@ -166,7 +159,7 @@ namespace TrueCraft.Core.Logic.Blocks
             base.BlockUpdate(descriptor, source, server, world);
         }
 
-        public override void BlockLoadedFromChunk(Coordinates3D coords, IMultiplayerServer server, IWorld world)
+        public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IWorld world)
         {
             var chunk = world.FindChunk(coords);
             server.Scheduler.ScheduleEvent("cactus", chunk,

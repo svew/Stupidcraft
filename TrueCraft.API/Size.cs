@@ -234,17 +234,6 @@ namespace TrueCraft.API
             return new Size(v.X, v.Y, v.Z);
         }
 
-        public static implicit operator Size(Coordinates3D c)
-        {
-            return new Size(c.X, c.Y, c.Z);
-        }
-
-
-        public static explicit operator Size(Coordinates2D c)
-        {
-            return new Size(c.X, 0, c.Z);
-        }
-
         public static explicit operator Size(Tuple<double, double, double> t)
         {
             return new Size(t.Item1,

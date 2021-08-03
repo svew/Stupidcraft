@@ -37,13 +37,13 @@ namespace TrueCraft.Core.World
             BiomeCells.Add(cell);
         }
 
-        public byte GetBiome(Coordinates2D location)
+        public byte GetBiome(GlobalColumnCoordinates location)
         {
             byte BiomeID = (ClosestCell(location) != null) ? ClosestCell(location).BiomeID : (byte)Biome.Plains;
             return BiomeID;
         }
 
-        public byte GenerateBiome(int seed, IBiomeRepository biomes, Coordinates2D location, bool spawn)
+        public byte GenerateBiome(int seed, IBiomeRepository biomes, GlobalColumnCoordinates location, bool spawn)
         {
             double temp = Math.Abs(TempNoise.Value2D(location.X, location.Z));
             double rainfall = Math.Abs(RainNoise.Value2D(location.X, location.Z));
@@ -54,7 +54,7 @@ namespace TrueCraft.Core.World
         /*
          * The closest biome cell to the specified location(uses the Chebyshev distance function).
          */
-        public BiomeCell ClosestCell(Coordinates2D location)
+        public BiomeCell ClosestCell(GlobalColumnCoordinates location)
         {
             BiomeCell cell = null;
             var distance = double.MaxValue;
@@ -73,7 +73,7 @@ namespace TrueCraft.Core.World
         /*
          * The distance to the closest biome cell point to the specified location(uses the Chebyshev distance function).
          */
-        public double ClosestCellPoint(Coordinates2D location)
+        public double ClosestCellPoint(GlobalColumnCoordinates location)
         {
             var distance = double.MaxValue;
             foreach (BiomeCell C in BiomeCells)
@@ -87,10 +87,9 @@ namespace TrueCraft.Core.World
             return distance;
         }
 
-        public double Distance(Coordinates2D a, Coordinates2D b)
+        private double Distance(GlobalColumnCoordinates a, GlobalColumnCoordinates b)
         {
-            Coordinates2D diff = a - b;
-            return Math.Max(Math.Abs(diff.X), Math.Abs(diff.Z));
+            return Math.Max(Math.Abs(a.X - b.X), Math.Abs(a.Z - b.Z));
         }
     }
 }

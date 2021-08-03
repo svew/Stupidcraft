@@ -26,14 +26,15 @@ namespace TrueCraft.Core.World
                 BiomeDiagram = new BiomeMap(_Seed);
             }
         }
-        private Coordinates3D? _SpawnPoint;
-        public Coordinates3D SpawnPoint
+        private GlobalVoxelCoordinates _SpawnPoint = null;
+
+        public GlobalVoxelCoordinates SpawnPoint
         {
             get
             {
-                if (_SpawnPoint == null)
+                if (object.ReferenceEquals(_SpawnPoint, null))
                     _SpawnPoint = ChunkProvider.GetSpawn(this);
-                return _SpawnPoint.Value;
+                return _SpawnPoint;
             }
             set
             {
@@ -41,7 +42,9 @@ namespace TrueCraft.Core.World
             }
         }
         public string BaseDirectory { get; internal set; }
-        public IDictionary<Coordinates2D, IRegion> Regions { get; set; }
+
+        private IDictionary<RegionCoordinates, IRegion> _regions;
+
         public IBiomeMap BiomeDiagram { get; set; }
         public IChunkProvider ChunkProvider { get; set; }
         public IBlockRepository BlockRepository { get; set; }
@@ -65,7 +68,7 @@ namespace TrueCraft.Core.World
 
         public World()
         {
-            Regions = new Dictionary<Coordinates2D, IRegion>();
+            _regions = new Dictionary<RegionCoordinates, IRegion>();
             BaseTime = DateTime.UtcNow;
         }
 
@@ -97,7 +100,7 @@ namespace TrueCraft.Core.World
             if (File.Exists(Path.Combine(baseDirectory, "manifest.nbt")))
             {
                 var file = new NbtFile(Path.Combine(baseDirectory, "manifest.nbt"));
-                world.SpawnPoint = new Coordinates3D(file.RootTag["SpawnPoint"]["X"].IntValue,
+                world.SpawnPoint = new GlobalVoxelCoordinates(file.RootTag["SpawnPoint"]["X"].IntValue,
                     file.RootTag["SpawnPoint"]["Y"].IntValue,
                     file.RootTag["SpawnPoint"]["Z"].IntValue);
                 world.Seed = file.RootTag["Seed"].IntValue;
@@ -115,7 +118,7 @@ namespace TrueCraft.Core.World
         /// <summary>
         /// Finds a chunk that contains the specified block coordinates.
         /// </summary>
-        public IChunk FindChunk(Coordinates3D coordinates, bool generate = true)
+        public IChunk FindChunk(GlobalVoxelCoordinates coordinates, bool generate = true)
         {
             IChunk chunk;
             FindBlockPosition(coordinates, out chunk, generate);
@@ -125,19 +128,18 @@ namespace TrueCraft.Core.World
         /// <summary>
         /// Gets the specified Chunk 
         /// </summary>
-        /// <param name="globalChunk">The Global Chunk Coordinates to retrieve</param>
+        /// <param name="chunkCoords">The Global Chunk Coordinates to retrieve</param>
         /// <param name="generate">True to generate the Chunk if it has never been generated.</param>
         /// <returns>A reference to the Chunk.  This may return null.</returns>
-        public IChunk GetChunk(Coordinates2D globalChunk, bool generate = true)
+        public IChunk GetChunk(GlobalChunkCoordinates chunkCoords, bool generate = true)
         {
-            Coordinates2D regionCoords = Coordinates.GlobalChunkToRegion(globalChunk);
+            RegionCoordinates regionCoords = (RegionCoordinates)chunkCoords;
 
             var region = LoadOrGenerateRegion(regionCoords, generate);
             if (region == null)
                 return null;
 
-            Coordinates2D localChunk = Coordinates.GlobalChunkToLocalChunk(globalChunk);
-            return region.GetChunk(localChunk, generate);
+            return region.GetChunk((LocalChunkCoordinates)chunkCoords, generate);
         }
 
         /// <summary>
@@ -145,10 +147,10 @@ namespace TrueCraft.Core.World
         /// </summary>
         /// <param name="globalChunk">The Global Chunk Coordinates of the Chunk.</param>
         /// <param name="chunk">The Chunk to add to the world.</param>
-        public void SetChunk(Coordinates2D globalChunk, Chunk chunk)
+        public void SetChunk(GlobalChunkCoordinates globalChunk, Chunk chunk)
         {
-            Coordinates2D regionCoords = Coordinates.GlobalChunkToRegion(globalChunk);
-            Coordinates2D localChunk = Coordinates.GlobalChunkToLocalChunk(globalChunk);
+            RegionCoordinates regionCoords = (RegionCoordinates)globalChunk;
+            LocalChunkCoordinates localChunk = (LocalChunkCoordinates)globalChunk;
 
             var region = LoadOrGenerateRegion(regionCoords);
             lock (region)
@@ -158,12 +160,12 @@ namespace TrueCraft.Core.World
             }
         }
 
-        public void UnloadRegion(Coordinates2D coordinates)
+        public void UnloadRegion(RegionCoordinates coordinates)
         {
-            lock (Regions)
+            lock (_regions)
             {
-                Regions[coordinates].Save(Path.Combine(BaseDirectory, Region.GetRegionFileName(coordinates)));
-                Regions.Remove(coordinates);
+                _regions[coordinates].Save(Path.Combine(BaseDirectory, Region.GetRegionFileName(coordinates)));
+                _regions.Remove(coordinates);
             }
         }
 
@@ -171,60 +173,60 @@ namespace TrueCraft.Core.World
         /// Unloads the specified Chunk
         /// </summary>
         /// <param name="globalChunk">The Global Chunk Coordinates of the Chunk to unload.</param>
-        public void UnloadChunk(Coordinates2D globalChunk)
+        public void UnloadChunk(GlobalChunkCoordinates globalChunk)
         {
-            Coordinates2D regionCoords = Coordinates.GlobalChunkToRegion(globalChunk);
-            Coordinates2D localCoords = Coordinates.GlobalChunkToLocalChunk(globalChunk);
+            RegionCoordinates regionCoords = (RegionCoordinates)globalChunk;
+            LocalChunkCoordinates localCoords = (LocalChunkCoordinates)globalChunk;
 
-            if (!Regions.ContainsKey(regionCoords))
+            if (!_regions.ContainsKey(regionCoords))
                 throw new ArgumentOutOfRangeException("coordinates");
 
-            Regions[regionCoords].UnloadChunk(localCoords);
+            _regions[regionCoords].UnloadChunk(localCoords);
         }
 
-        public byte GetBlockID(Coordinates3D coordinates)
+        public byte GetBlockID(GlobalVoxelCoordinates coordinates)
         {
             IChunk chunk;
-            coordinates = FindBlockPosition(coordinates, out chunk);
-            return chunk.GetBlockID(coordinates);
+            LocalVoxelCoordinates local = FindBlockPosition(coordinates, out chunk);
+            return chunk.GetBlockID(local);
         }
 
-        public byte GetMetadata(Coordinates3D coordinates)
+        public byte GetMetadata(GlobalVoxelCoordinates coordinates)
         {
             IChunk chunk;
-            coordinates = FindBlockPosition(coordinates, out chunk);
-            return chunk.GetMetadata(coordinates);
+            LocalVoxelCoordinates local = FindBlockPosition(coordinates, out chunk);
+            return chunk.GetMetadata(local);
         }
 
-        public byte GetSkyLight(Coordinates3D coordinates)
+        public byte GetSkyLight(GlobalVoxelCoordinates coordinates)
         {
             IChunk chunk;
-            coordinates = FindBlockPosition(coordinates, out chunk);
-            return chunk.GetSkyLight(coordinates);
+            LocalVoxelCoordinates local = FindBlockPosition(coordinates, out chunk);
+            return chunk.GetSkyLight(local);
         }
 
-        public byte GetBlockLight(Coordinates3D coordinates)
+        public byte GetBlockLight(GlobalVoxelCoordinates coordinates)
         {
             IChunk chunk;
-            coordinates = FindBlockPosition(coordinates, out chunk);
-            return chunk.GetBlockLight(coordinates);
+            LocalVoxelCoordinates local = FindBlockPosition(coordinates, out chunk);
+            return chunk.GetBlockLight(local);
         }
 
-        public NbtCompound GetTileEntity(Coordinates3D coordinates)
+        public NbtCompound GetTileEntity(GlobalVoxelCoordinates coordinates)
         {
             IChunk chunk;
-            coordinates = FindBlockPosition(coordinates, out chunk);
-            return chunk.GetTileEntity(coordinates);
+            LocalVoxelCoordinates local = FindBlockPosition(coordinates, out chunk);
+            return chunk.GetTileEntity(local);
         }
 
-        public BlockDescriptor GetBlockData(Coordinates3D coordinates)
+        public BlockDescriptor GetBlockData(GlobalVoxelCoordinates coordinates)
         {
             IChunk chunk;
-            var adjustedCoordinates = FindBlockPosition(coordinates, out chunk);
-            return GetBlockDataFromChunk(adjustedCoordinates, chunk, coordinates);
+            LocalVoxelCoordinates local = FindBlockPosition(coordinates, out chunk);
+            return GetBlockDataFromChunk(local, chunk, coordinates);
         }
 
-        public void SetBlockData(Coordinates3D coordinates, BlockDescriptor descriptor)
+        public void SetBlockData(GlobalVoxelCoordinates coordinates, BlockDescriptor descriptor)
         {
             IChunk chunk;
             var adjustedCoordinates = FindBlockPosition(coordinates, out chunk);
@@ -235,7 +237,7 @@ namespace TrueCraft.Core.World
                 BlockChanged(this, new BlockChangeEventArgs(coordinates, old, GetBlockDataFromChunk(adjustedCoordinates, chunk, coordinates)));
         }
 
-        private BlockDescriptor GetBlockDataFromChunk(Coordinates3D adjustedCoordinates, IChunk chunk, Coordinates3D coordinates)
+        private BlockDescriptor GetBlockDataFromChunk(LocalVoxelCoordinates adjustedCoordinates, IChunk chunk, GlobalVoxelCoordinates coordinates)
         {
             return new BlockDescriptor
             {
@@ -247,7 +249,7 @@ namespace TrueCraft.Core.World
             };
         }
 
-        public void SetBlockID(Coordinates3D coordinates, byte value)
+        public void SetBlockID(GlobalVoxelCoordinates coordinates, byte value)
         {
             IChunk chunk;
             var adjustedCoordinates = FindBlockPosition(coordinates, out chunk);
@@ -259,7 +261,7 @@ namespace TrueCraft.Core.World
                 BlockChanged(this, new BlockChangeEventArgs(coordinates, old, GetBlockDataFromChunk(adjustedCoordinates, chunk, coordinates)));
         }
 
-        public void SetMetadata(Coordinates3D coordinates, byte value)
+        public void SetMetadata(GlobalVoxelCoordinates coordinates, byte value)
         {
             IChunk chunk;
             var adjustedCoordinates = FindBlockPosition(coordinates, out chunk);
@@ -271,7 +273,7 @@ namespace TrueCraft.Core.World
                 BlockChanged(this, new BlockChangeEventArgs(coordinates, old, GetBlockDataFromChunk(adjustedCoordinates, chunk, coordinates)));
         }
 
-        public void SetSkyLight(Coordinates3D coordinates, byte value)
+        public void SetSkyLight(GlobalVoxelCoordinates coordinates, byte value)
         {
             IChunk chunk;
             var adjustedCoordinates = FindBlockPosition(coordinates, out chunk);
@@ -283,7 +285,7 @@ namespace TrueCraft.Core.World
                 BlockChanged(this, new BlockChangeEventArgs(coordinates, old, GetBlockDataFromChunk(adjustedCoordinates, chunk, coordinates)));
         }
 
-        public void SetBlockLight(Coordinates3D coordinates, byte value)
+        public void SetBlockLight(GlobalVoxelCoordinates coordinates, byte value)
         {
             IChunk chunk;
             var adjustedCoordinates = FindBlockPosition(coordinates, out chunk);
@@ -295,18 +297,18 @@ namespace TrueCraft.Core.World
                 BlockChanged(this, new BlockChangeEventArgs(coordinates, old, GetBlockDataFromChunk(adjustedCoordinates, chunk, coordinates)));
         }
 
-        public void SetTileEntity(Coordinates3D coordinates, NbtCompound value)
+        public void SetTileEntity(GlobalVoxelCoordinates coordinates, NbtCompound value)
         {
             IChunk chunk;
-            coordinates = FindBlockPosition(coordinates, out chunk);
-            chunk.SetTileEntity(coordinates, value);
+            LocalVoxelCoordinates local = FindBlockPosition(coordinates, out chunk);
+            chunk.SetTileEntity(local, value);
         }
 
         public void Save()
         {
-            lock (Regions)
+            lock (_regions)
             {
-                foreach (var region in Regions)
+                foreach (var region in _regions)
                     region.Value.Save(Path.Combine(BaseDirectory, Region.GetRegionFileName(region.Key)));
             }
             var file = new NbtFile();
@@ -340,12 +342,12 @@ namespace TrueCraft.Core.World
         /// <param name="chunk">returns the Chunk containing the given Block Coordinates</param>
         /// <param name="generate">True to generate the Chunk, if it has not yet been generated.</param>
         /// <returns>The Local Block Coordinates within the Chunk.</returns>
-        public Coordinates3D FindBlockPosition(Coordinates3D blockCoordinates, out IChunk chunk, bool generate = true)
+        public LocalVoxelCoordinates FindBlockPosition(GlobalVoxelCoordinates blockCoordinates, out IChunk chunk, bool generate = true)
         {
             if (blockCoordinates.Y < 0 || blockCoordinates.Y >= Chunk.Height)
                 throw new ArgumentOutOfRangeException("coordinates", "Coordinates are out of range");
 
-            Coordinates2D globalChunk = Coordinates.BlockToGlobalChunk(blockCoordinates);
+            GlobalChunkCoordinates globalChunk = (GlobalChunkCoordinates)blockCoordinates;
 
             if (ChunkCache.ContainsKey(Thread.CurrentThread))
             {
@@ -367,10 +369,10 @@ namespace TrueCraft.Core.World
             }
 
             chunk = GetChunk(globalChunk, generate);
-            return Coordinates.GlobalBlockToLocalBlock(blockCoordinates);
+            return (LocalVoxelCoordinates)blockCoordinates;
         }
 
-        public bool IsValidPosition(Coordinates3D position)
+        public bool IsValidPosition(GlobalVoxelCoordinates position)
         {
             return position.Y >= 0 && position.Y < Chunk.Height;
         }
@@ -381,21 +383,21 @@ namespace TrueCraft.Core.World
         /// </summary>
         /// <param name="blockCoordinates">The Block Coordinates to check.</param>
         /// <returns>True if the Chunk is loaded; false otherwise.</returns>
-        public bool IsChunkLoaded(Coordinates3D blockCoordinates)
+        public bool IsChunkLoaded(GlobalVoxelCoordinates blockCoordinates)
         {
-            Coordinates2D regionCoordinates = Coordinates.BlockToRegion(blockCoordinates);
-            if (!Regions.ContainsKey(regionCoordinates))
+            RegionCoordinates regionCoordinates = (RegionCoordinates)blockCoordinates;
+            if (!_regions.ContainsKey(regionCoordinates))
                 return false;
 
-            Coordinates2D local = Coordinates.BlockToLocalChunk(blockCoordinates);
+            LocalChunkCoordinates local = (LocalChunkCoordinates)blockCoordinates;
 
-            return Regions[regionCoordinates].Chunks.ContainsKey(local);
+            return _regions[regionCoordinates].IsChunkLoaded(local);
         }
 
-        private Region LoadOrGenerateRegion(Coordinates2D coordinates, bool generate = true)
+        private Region LoadOrGenerateRegion(RegionCoordinates coordinates, bool generate = true)
         {
-            if (Regions.ContainsKey(coordinates))
-                return (Region)Regions[coordinates];
+            if (_regions.ContainsKey(coordinates))
+                return (Region)_regions[coordinates];
             if (!generate)
                 return null;
             Region region;
@@ -409,14 +411,14 @@ namespace TrueCraft.Core.World
             }
             else
                 region = new Region(coordinates, this);
-            lock (Regions)
-                Regions[coordinates] = region;
+            lock (_regions)
+                _regions[coordinates] = region;
             return region;
         }
 
         public void Dispose()
         {
-            foreach (var region in Regions)
+            foreach (var region in _regions)
                 region.Value.Dispose();
             BlockChanged = null;
             ChunkGenerated = null;
@@ -444,10 +446,10 @@ namespace TrueCraft.Core.World
             {
                 World = world;
                 Index = -1;
-                var regions = world.Regions.Values.ToList();
+                var regions = world._regions.Values.ToList();
                 var chunks = new List<IChunk>();
                 foreach (var region in regions)
-                    chunks.AddRange(region.Chunks.Values);
+                    chunks.AddRange(region.Chunks);
                 Chunks = chunks;
             }
 

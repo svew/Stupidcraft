@@ -181,7 +181,7 @@ namespace TrueCraft
         {
             if (entity.EntityID == -1)
                 return; // We haven't finished setting this entity up yet
-            client.Log("Spawning entity {0} ({1}) at {2}", entity.EntityID, entity.GetType().Name, (Coordinates3D)entity.Position);
+            client.Log("Spawning entity {0} ({1}) at {2}", entity.EntityID, entity.GetType().Name, (GlobalVoxelCoordinates)entity.Position);
             RemoteClient spawnedClient = null;
             if (entity is PlayerEntity)
                 spawnedClient = (RemoteClient)GetClientForEntity(entity as PlayerEntity);

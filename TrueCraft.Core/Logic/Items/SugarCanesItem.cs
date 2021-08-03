@@ -20,7 +20,7 @@ namespace TrueCraft.Core.Logic.Items
 
         public override string DisplayName { get { return "Sugar Canes"; } }
 
-        public override void ItemUsedOnBlock(Coordinates3D coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user)
+        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user)
         {
             coordinates += MathHelper.BlockFaceToCoordinates(face);
             if (SugarcaneBlock.ValidPlacement(new BlockDescriptor { Coordinates = coordinates }, world))

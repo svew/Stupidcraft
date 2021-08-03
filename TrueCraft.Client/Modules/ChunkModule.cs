@@ -21,7 +21,8 @@ namespace TrueCraft.Client.Modules
         public ChunkRenderer ChunkRenderer { get; set; }
         public int ChunksRendered { get; set; }
 
-        private HashSet<Coordinates2D> ActiveMeshes { get; set; }
+        private HashSet<GlobalChunkCoordinates> ActiveMeshes { get; }
+
         private List<ChunkMesh> ChunkMeshes { get; set; }
         private ConcurrentBag<Mesh> IncomingChunks { get; set; }
         private WorldLighting WorldLighting { get; set; }
@@ -60,21 +61,21 @@ namespace TrueCraft.Client.Modules
 
             ChunkMeshes = new List<ChunkMesh>();
             IncomingChunks = new ConcurrentBag<Mesh>();
-            ActiveMeshes = new HashSet<Coordinates2D>();
+            ActiveMeshes = new HashSet<GlobalChunkCoordinates>();
         }
 
         void Game_Client_BlockChanged(object sender, BlockChangeEventArgs e)
         {
             WorldLighting.EnqueueOperation(new TrueCraft.API.BoundingBox(
-                e.Position, e.Position + Coordinates3D.One), false);
+                (API.Vector3)e.Position, (API.Vector3)(e.Position + Vector3i.One)), false);
             WorldLighting.EnqueueOperation(new TrueCraft.API.BoundingBox(
-                e.Position, e.Position + Coordinates3D.One), true);
-            var posA = e.Position;
-            posA.Y = 0;
-            var posB = e.Position;
-            posB.Y = World.Height;
-            posB.X++;
-            posB.Z++;
+                (API.Vector3)e.Position, (API.Vector3)(e.Position + Vector3i.One)), true);
+
+            // TODO What is the purpose of enqueuing an entire column after the block?
+            //      Could it be related to the lighting height map adding 2 to the height?
+            //      That would result in incorrect heights when placing blocks high above other blocks.
+            API.Vector3 posA = new API.Vector3(e.Position.X, 0, e.Position.Z);
+            API.Vector3 posB = new API.Vector3(e.Position.X + 1, World.Height, e.Position.Z + 1);
             WorldLighting.EnqueueOperation(new TrueCraft.API.BoundingBox(posA, posB), true);
             WorldLighting.EnqueueOperation(new TrueCraft.API.BoundingBox(posA, posB), false);
             for (int i = 0; i < 100; i++)
@@ -90,22 +91,27 @@ namespace TrueCraft.Client.Modules
             ChunkRenderer.Enqueue(e.Chunk, true);
         }
 
-        private readonly static Coordinates2D[] AdjacentCoordinates =
-            {
-                Coordinates2D.North, Coordinates2D.South,
-                Coordinates2D.East, Coordinates2D.West
-            };
+        //private readonly static Coordinates2D[] AdjacentCoordinates =
+        //    {
+        //        Coordinates2D.North, Coordinates2D.South,
+        //        Coordinates2D.East, Coordinates2D.West
+        //    };
 
         private void Game_Client_ChunkLoaded(object sender, ChunkEventArgs e)
         {
             ChunkRenderer.Enqueue(e.Chunk);
-            for (int i = 0; i < AdjacentCoordinates.Length; i++)
-            {
-                ReadOnlyChunk adjacent = Game.Client.World.GetChunk(
-                     AdjacentCoordinates[i] + e.Chunk.Coordinates);
-                if (adjacent != null)
-                    ChunkRenderer.Enqueue(adjacent);
-            }
+
+            //    // TODO:  What is the reason for enqueueing adjacent chunks?
+            //    //        Surely, they would have been queued when loaded?
+            //    //        NOTE: World.GetChunk WILL load or generate the chunk if not present!!!!!
+            //    //              This is expected to cause runaway chunk loading/generating.
+            //    for (int i = 0; i < AdjacentCoordinates.Length; i++)
+            //    {
+            //        ReadOnlyChunk adjacent = Game.Client.World.GetChunk(
+            //             AdjacentCoordinates[i] + e.Chunk.Coordinates);
+            //        if (adjacent != null)
+            //            ChunkRenderer.Enqueue(adjacent);
+            //    }
         }
 
         void MeshCompleted(object sender, RendererEventArgs<ReadOnlyChunk> e)
@@ -127,7 +133,7 @@ namespace TrueCraft.Client.Modules
             switch (e.PropertyName)
             {
                 case "Position":
-                    var sorter = new ChunkRenderer.ChunkSorter(new Coordinates3D(
+                    var sorter = new ChunkRenderer.ChunkSorter(new GlobalVoxelCoordinates(
                         (int)Game.Client.Position.X, 0, (int)Game.Client.Position.Z));
                     Game.Invoke(() => ChunkMeshes.Sort(sorter));
                     break;

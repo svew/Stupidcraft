@@ -61,20 +61,20 @@ namespace TrueCraft.Core.Logic.Blocks
         {
             if (checkNeighbor)
             {
-                var other = Coordinates3D.Zero;
+                var other = Vector3i.Zero;
                 switch ((BedDirection)(descriptor.Metadata & 0x3))
                 {
                     case BedDirection.East:
-                        other = Coordinates3D.East;
+                        other = Vector3i.East;
                         break;
                     case BedDirection.West:
-                        other = Coordinates3D.West;
+                        other = Vector3i.West;
                         break;
                     case BedDirection.North:
-                        other = Coordinates3D.North;
+                        other = Vector3i.North;
                         break;
                     case BedDirection.South:
-                        other = Coordinates3D.South;
+                        other = Vector3i.South;
                         break;
                 }
                 if ((descriptor.Metadata & (byte)BedType.Head) == (byte)BedType.Head)
@@ -84,7 +84,7 @@ namespace TrueCraft.Core.Logic.Blocks
             }
             if (checkSupport)
             {
-                var supportingBlock = repository.GetBlockProvider(world.GetBlockID(descriptor.Coordinates + Coordinates3D.Down));
+                var supportingBlock = repository.GetBlockProvider(world.GetBlockID(descriptor.Coordinates + Vector3i.Down));
                 if (!supportingBlock.Opaque)
                     return false;
             }

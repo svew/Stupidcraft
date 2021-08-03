@@ -13,7 +13,7 @@ namespace TrueCraft.Core.TerrainGen.Decorations
     {
         const int LeafRadius = 2;
 
-        public override bool GenerateAt(IWorld world, IChunk chunk, Coordinates3D location)
+        public override bool GenerateAt(IWorld world, IChunk chunk, LocalVoxelCoordinates location)
         {
             if (!ValidLocation(location))
                 return false;
@@ -21,10 +21,14 @@ namespace TrueCraft.Core.TerrainGen.Decorations
             var random = new Random(world.Seed);
             int height = random.Next(7, 8);
             GenerateColumn(chunk, location, height, WoodBlock.BlockID, 0x1);
-            GenerateCircle(chunk, location + new Coordinates3D(0, height - 2, 0), LeafRadius - 1, LeavesBlock.BlockID, 0x1);
-            GenerateCircle(chunk, location + new Coordinates3D(0, height - 1, 0), LeafRadius, LeavesBlock.BlockID, 0x1);
-            GenerateCircle(chunk, location + new Coordinates3D(0, height, 0), LeafRadius, LeavesBlock.BlockID, 0x1);
-            GenerateTopper(chunk, (location + new Coordinates3D(0, height + 1, 0)), 0x0);
+            LocalVoxelCoordinates centre = new LocalVoxelCoordinates(location.X, location.Y + height - 2, location.Z);
+            GenerateCircle(chunk, centre, LeafRadius - 1, LeavesBlock.BlockID, 0x1);
+            centre = new LocalVoxelCoordinates(location.X, location.Y + height - 1, location.Z);
+            GenerateCircle(chunk, centre, LeafRadius, LeavesBlock.BlockID, 0x1);
+            centre = new LocalVoxelCoordinates(location.X, location.Y + height, location.Z);
+            GenerateCircle(chunk, centre, LeafRadius, LeavesBlock.BlockID, 0x1);
+            centre = new LocalVoxelCoordinates(location.X, location.Y + height + 1, location.Z);
+            GenerateTopper(chunk, centre, 0x0);
             return true;
         }
     }

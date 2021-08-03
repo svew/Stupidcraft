@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using TrueCraft.API;
+using TrueCraft.API.World;
 using TrueCraft.Core.World;
 
 namespace TrueCraft.Core
@@ -38,39 +39,23 @@ namespace TrueCraft.Core
             return degrees * 0.017453292519943295769236907684886;
         }
 
-        public static Coordinates3D BlockFaceToCoordinates(BlockFace face)
+        public static Vector3i BlockFaceToCoordinates(BlockFace face)
         {
             switch (face)
             {
                 case BlockFace.NegativeY:
-                    return Coordinates3D.Down;
+                    return Vector3i.Down;
                 case BlockFace.PositiveY:
-                    return Coordinates3D.Up;
+                    return Vector3i.Up;
                 case BlockFace.NegativeZ:
-                    return Coordinates3D.Backwards;
+                    return Vector3i.North;
                 case BlockFace.PositiveZ:
-                    return Coordinates3D.Forwards;
+                    return Vector3i.South;
                 case BlockFace.NegativeX:
-                    return Coordinates3D.Left;
+                    return Vector3i.West;
                 default:
-                    return Coordinates3D.Right;
+                    return Vector3i.East;
             }
-        }
-
-        public static BlockFace CoordinatesToBlockFace(Coordinates3D face)
-        {
-            if (face == Coordinates3D.Down)
-                return BlockFace.NegativeY;
-            else if (face == Coordinates3D.Up)
-                return BlockFace.PositiveY;
-            else if (face == Coordinates3D.Backwards)
-                return BlockFace.NegativeZ;
-            else if (face == Coordinates3D.Forwards)
-                return BlockFace.PositiveZ;
-            else if (face == Coordinates3D.Left)
-                return BlockFace.NegativeX;
-            else
-                return BlockFace.PositiveX;
         }
 
         public static double Distance2D(double a1, double a2, double b1, double b2)
@@ -100,7 +85,7 @@ namespace TrueCraft.Core
             return 0;
         }
 
-        public static Direction DirectionByRotation(Vector3 source, float yaw, Vector3 position, bool invert = false)
+        public static Direction DirectionByRotation(Vector3 source, float yaw, GlobalVoxelCoordinates position, bool invert = false)
         {
             // TODO: Figure out some algorithm based on player's look yaw
             double d = Math.Asin((source.Y - position.Y) / position.DistanceTo(source));

@@ -5,6 +5,7 @@ using System.Text;
 using TrueCraft.API.Windows;
 using TrueCraft.API.Logic;
 using TrueCraft.API;
+using TrueCraft.API.World;
 using TrueCraft.API.Server;
 
 namespace TrueCraft.Core.Windows
@@ -13,9 +14,9 @@ namespace TrueCraft.Core.Windows
     {
         public IItemRepository ItemRepository { get; set; }
         public IEventScheduler EventScheduler { get; set; }
-        public Coordinates3D Coordinates { get; set; }
+        public GlobalVoxelCoordinates Coordinates { get; }
         
-        public FurnaceWindow(IEventScheduler scheduler, Coordinates3D coordinates,
+        public FurnaceWindow(IEventScheduler scheduler, GlobalVoxelCoordinates coordinates,
             IItemRepository itemRepository, InventoryWindow inventory)
         {
             ItemRepository = itemRepository;

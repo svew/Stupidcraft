@@ -69,7 +69,7 @@ namespace TrueCraft
                 for (int x = -5; x < 5; x++)
                 {
                     for (int z = -5; z < 5; z++)
-                        world.GetChunk(new Coordinates2D(x, z));
+                        world.GetChunk(new GlobalChunkCoordinates(x, z));
                     int progress = (int)(((x + 5) / 10.0) * 100);
                     if (progress % 10 == 0)
                         Server.Log(LogCategory.Notice, "{0}% complete", progress + 10);
@@ -79,14 +79,14 @@ namespace TrueCraft
                 {
                     for (int z = -5; z < 5; z++)
                     {
-                        var chunk = world.GetChunk(new Coordinates2D(x, z));
+                        var chunk = world.GetChunk(new GlobalChunkCoordinates(x, z));
                         for (byte _x = 0; _x < Chunk.Width; _x++)
                         {
                             for (byte _z = 0; _z < Chunk.Depth; _z++)
                             {
                                 for (int _y = 0; _y < chunk.GetHeight(_x, _z); _y++)
                                 {
-                                    var coords = new Coordinates3D(x + _x, _y, z + _z);
+                                    GlobalVoxelCoordinates coords = new GlobalVoxelCoordinates(x + _x, _y, z + _z);
                                     var data = world.GetBlockData(coords);
                                     var provider = world.BlockRepository.GetBlockProvider(data.ID);
                                     provider.BlockUpdate(data, data, Server, world);

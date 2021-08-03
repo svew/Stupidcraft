@@ -15,7 +15,7 @@ namespace TrueCraft.Core.Logic.Blocks
 
         static GrassBlock()
         {
-            GrowthCandidates = new Coordinates3D[3 * 3 * 5];
+            GrowthCandidates = new Vector3i[3 * 3 * 5];
             int i = 0;
             for (int x = -1; x <= 1; x++)
             {
@@ -23,13 +23,13 @@ namespace TrueCraft.Core.Logic.Blocks
                 {
                     for (int y = -3; y <= 1; y++)
                     {
-                        GrowthCandidates[i++] = new Coordinates3D(x, y, z);
+                        GrowthCandidates[i++] = new Vector3i(x, y, z);
                     }
                 }
             }
         }
 
-        private static readonly Coordinates3D[] GrowthCandidates;
+        private static readonly Vector3i[] GrowthCandidates;
 
         public static readonly int MaxDecayTime = 60 * 10;
         public static readonly int MinDecayTime = 60 * 2;
@@ -64,11 +64,11 @@ namespace TrueCraft.Core.Logic.Blocks
             return new[] { new ItemStack(DirtBlock.BlockID, 1) };
         }
 
-        private void ScheduledUpdate(IWorld world, Coordinates3D coords)
+        private void ScheduledUpdate(IWorld world, GlobalVoxelCoordinates coords)
         {
-            if (world.IsValidPosition(coords + Coordinates3D.Up))
+            if (world.IsValidPosition(coords + Vector3i.Up))
             {
-                var id = world.GetBlockID(coords + Coordinates3D.Up);
+                var id = world.GetBlockID(coords + Vector3i.Up);
                 var provider = world.BlockRepository.GetBlockProvider(id);
                 if (provider.Opaque)
                     world.SetBlockID(coords, DirtBlock.BlockID);
@@ -77,7 +77,7 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IWorld world)
         {
-            if (source.Coordinates == descriptor.Coordinates + Coordinates3D.Up)
+            if (source.Coordinates == descriptor.Coordinates + Vector3i.Up)
             {
                 var provider = world.BlockRepository.GetBlockProvider(source.ID);
                 if (provider.Opaque)
@@ -92,24 +92,24 @@ namespace TrueCraft.Core.Logic.Blocks
             }
         }
 
-        public void TrySpread(Coordinates3D coords, IWorld world, IMultiplayerServer server)
+        public void TrySpread(GlobalVoxelCoordinates coords, IWorld world, IMultiplayerServer server)
         {
-            if (!world.IsValidPosition(coords + Coordinates3D.Up))
+            if (!world.IsValidPosition(coords + Vector3i.Up))
                 return;
-            var sky = world.GetSkyLight(coords + Coordinates3D.Up);
-            var block = world.GetBlockLight(coords + Coordinates3D.Up);
+            var sky = world.GetSkyLight(coords + Vector3i.Up);
+            var block = world.GetBlockLight(coords + Vector3i.Up);
             if (sky < 9 && block < 9)
                 return;
             for (int i = 0, j = MathHelper.Random.Next(GrowthCandidates.Length); i < GrowthCandidates.Length; i++, j++)
             {
                 var candidate = GrowthCandidates[j % GrowthCandidates.Length] + coords;
-                if (!world.IsValidPosition(candidate) || !world.IsValidPosition(candidate + Coordinates3D.Up))
+                if (!world.IsValidPosition(candidate) || !world.IsValidPosition(candidate + Vector3i.Up))
                     continue;
                 var id = world.GetBlockID(candidate);
                 if (id == DirtBlock.BlockID)
                 {
-                    var _sky = world.GetSkyLight(candidate + Coordinates3D.Up);
-                    var _block = world.GetBlockLight(candidate + Coordinates3D.Up);
+                    var _sky = world.GetSkyLight(candidate + Vector3i.Up);
+                    var _block = world.GetBlockLight(candidate + Vector3i.Up);
                     if (_sky < 4 && _block < 4)
                         continue;
                     IChunk chunk;
@@ -117,7 +117,7 @@ namespace TrueCraft.Core.Logic.Blocks
                     bool grow = true;
                     for (int y = candidate.Y; y < chunk.GetHeight((byte)_candidate.X, (byte)_candidate.Z); y++)
                     {
-                        var b = world.GetBlockID(new Coordinates3D(candidate.X, y, candidate.Z));
+                        var b = world.GetBlockID(new GlobalVoxelCoordinates(candidate.X, y, candidate.Z));
                         var p = world.BlockRepository.GetBlockProvider(b);
                         if (p.LightOpacity >= 2)
                         {
@@ -145,7 +145,7 @@ namespace TrueCraft.Core.Logic.Blocks
                 s => TrySpread(descriptor.Coordinates, world, user.Server));
         }
 
-        public override void BlockLoadedFromChunk(Coordinates3D coords, IMultiplayerServer server, IWorld world)
+        public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IWorld world)
         {
             var chunk = world.FindChunk(coords);
             server.Scheduler.ScheduleEvent("grass", chunk,

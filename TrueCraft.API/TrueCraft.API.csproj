@@ -24,8 +24,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\externals\fNbt\fNbt\fNbt.csproj">
-    </ProjectReference>
+    <ProjectReference Include="..\externals\fNbt\fNbt\fNbt.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -4,7 +4,6 @@ using Microsoft.Xna.Framework;
 using TrueCraft.API.Logic;
 using TrueCraft.API.World;
 using TrueCraft.Core.World;
-using Coordinates3D = TrueCraft.API.Coordinates3D;
 
 namespace TrueCraft.Client.Rendering
 {
@@ -42,14 +41,30 @@ namespace TrueCraft.Client.Rendering
             for (int i = 0; i < texture.Length; i++)
                 texture[i] *= new Vector2(16f / 256f);
 
-            var lighting = new int[6];
-            for (int i = 0; i < 6; i++)
-            {
-                var coords = (descriptor.Coordinates + FaceCoords[i]);
-                lighting[i] = GetLight(descriptor.Chunk, coords);
-            }
+            int[] lighting = GetLighting(descriptor);
 
             return CreateUniformCube(offset, texture, faces, indiciesOffset, out indicies, Color.White, lighting);
+        }
+
+        public static VertexPositionNormalColorTexture[] RenderIcon(byte blockID, out int[] indices)
+        {
+            var texCoords = new Vector2(0, 0);
+            var texture = new[]
+            {
+                texCoords + Vector2.UnitX + Vector2.UnitY,
+                texCoords + Vector2.UnitY,
+                texCoords,
+                texCoords + Vector2.UnitX
+            };
+
+            Vector3 offset = new Vector3(0.5f);
+
+            return Renderers[blockID].Render(offset, texture, out indices);
+        }
+
+        public virtual VertexPositionNormalColorTexture[] Render(Vector3 offset, Vector2[] texture, out int[] indices)
+        {
+            return CreateUniformCube(offset, texture, VisibleFaces.All, 0, out indices, Color.White);
         }
 
         public static VertexPositionNormalColorTexture[] CreateUniformCube(Vector3 offset, Vector2[] texture,
@@ -143,11 +158,11 @@ namespace TrueCraft.Client.Rendering
         /// <summary>
         /// The offset coordinates used to get the position of a block for a face.
         /// </summary>
-        protected static readonly Coordinates3D[] FaceCoords =
+        protected static readonly Vector3i[] FaceCoords =
             {
-                Coordinates3D.South, Coordinates3D.North,
-                Coordinates3D.East, Coordinates3D.West,
-                Coordinates3D.Up, Coordinates3D.Down
+                Vector3i.South, Vector3i.North,
+                Vector3i.East, Vector3i.West,
+                Vector3i.Up, Vector3i.Down
             };
 
         /// <summary>
@@ -163,30 +178,50 @@ namespace TrueCraft.Client.Rendering
             };
 
         /// <summary>
+        /// Gets an array describing the lighting of each Cube Face.
+        /// </summary>
+        /// <param name="descriptor"></param>
+        /// <returns></returns>
+        protected static int[] GetLighting(BlockDescriptor descriptor)
+        {
+            int[] lighting = new int[(int)CubeFace.Count];
+            LocalVoxelCoordinates coords = (LocalVoxelCoordinates)descriptor.Coordinates;
+            int localX, localY, localZ;
+            for (int i = 0; i < (int)CubeFace.Count; i++)
+            {
+                localX = coords.X + FaceCoords[i].X;
+                localY = coords.Y + FaceCoords[i].Y;
+                localZ = coords.Z + FaceCoords[i].Z;
+                lighting[i] = GetLight(descriptor.Chunk, localX, localY, localZ);
+            }
+
+            return lighting;
+        }
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="chunk"></param>
         /// <param name="coords"></param>
         /// <returns></returns>
-        protected static int GetLight(IChunk chunk, Coordinates3D coords)
+        private static int GetLight(IChunk chunk, int x, int y, int z)
         {
-            // Handle icon renderer.
-            if (chunk == null)
-                return 15;
-
             // Handle top (and bottom) of the world.
-            if (coords.Y < 0)
+            if (y < 0)
                 return 0;
-            if (coords.Y >= Chunk.Height)
+            if (y >= Chunk.Height)
                 return 15;
 
+            // TODO: Have to return a proper value for light outside the local chunk.
+            //      This will require the Renderer to have access to the World object.
             // Handle coordinates outside the chunk.
-            if ((coords.X < 0) || (coords.X >= Chunk.Width) ||
-                (coords.Z < 0) || (coords.Z >= Chunk.Depth))
+            if ((x < 0) || (x >= Chunk.Width) ||
+                (z < 0) || (z >= Chunk.Depth))
             {
                 return 15;
             }
 
+            LocalVoxelCoordinates coords = new LocalVoxelCoordinates(x, y, z);
             return Math.Min(chunk.GetBlockLight(coords) + chunk.GetSkyLight(coords), 15);
         }
 
@@ -199,7 +234,8 @@ namespace TrueCraft.Client.Rendering
             PositiveX = 2,
             NegativeX = 3,
             PositiveY = 4,
-            NegativeY = 5
+            NegativeY = 5,
+            Count = 6
         }
 
         protected static readonly VisibleFaces[] VisibleForCubeFace =
@@ -212,6 +248,21 @@ namespace TrueCraft.Client.Rendering
             VisibleFaces.Bottom
         };
 
+        /// <summary>
+        /// Specifies the vertices of a cube for each face.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The first index ranges from 0 to 5 and specifies the
+        /// face of the cube (as per the CubeFace enumeration).
+        /// The second index ranges from 0 to 3 and specifies each
+        /// vertex of the face.
+        /// </para>
+        /// <para>
+        /// All vertices are listed in clockwise order when facing
+        /// into the cube.
+        /// </para>
+        /// </remarks>
         protected static readonly Vector3[][] CubeMesh;
 
         protected static readonly Vector3[] CubeNormals =
@@ -242,7 +293,7 @@ namespace TrueCraft.Client.Rendering
 
             CubeMesh = new Vector3[6][];
 
-            CubeMesh[0] = new[] // Positive Z face
+            CubeMesh[(int)CubeFace.PositiveZ] = new[]
             {
                 new Vector3(1, 0, 1),
                 new Vector3(0, 0, 1),
@@ -250,7 +301,7 @@ namespace TrueCraft.Client.Rendering
                 new Vector3(1, 1, 1)
             };
 
-            CubeMesh[1] = new[] // Negative Z face
+            CubeMesh[(int)CubeFace.NegativeZ] = new[]
             {
                 new Vector3(0, 0, 0),
                 new Vector3(1, 0, 0),
@@ -258,7 +309,7 @@ namespace TrueCraft.Client.Rendering
                 new Vector3(0, 1, 0)
             };
 
-            CubeMesh[2] = new[] // Positive X face
+            CubeMesh[(int)CubeFace.PositiveX] = new[]
             {
                 new Vector3(1, 0, 0),
                 new Vector3(1, 0, 1),
@@ -266,7 +317,7 @@ namespace TrueCraft.Client.Rendering
                 new Vector3(1, 1, 0)
             };
 
-            CubeMesh[3] = new[] // Negative X face
+            CubeMesh[(int)CubeFace.NegativeX] = new[]
             {
                 new Vector3(0, 0, 1),
                 new Vector3(0, 0, 0),
@@ -274,7 +325,7 @@ namespace TrueCraft.Client.Rendering
                 new Vector3(0, 1, 1)
             };
 
-            CubeMesh[4] = new[] // Positive Y face
+            CubeMesh[(int)CubeFace.PositiveY] = new[]
             {
                 new Vector3(1, 1, 1),
                 new Vector3(0, 1, 1),
@@ -282,7 +333,7 @@ namespace TrueCraft.Client.Rendering
                 new Vector3(1, 1, 0)
             };
 
-            CubeMesh[5] = new[] // Negative Y face
+            CubeMesh[(int)CubeFace.NegativeY] = new[]
             {
                 new Vector3(1, 0, 0),
                 new Vector3(0, 0, 0),

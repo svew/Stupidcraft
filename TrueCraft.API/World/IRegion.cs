@@ -5,15 +5,24 @@ namespace TrueCraft.API.World
 {
     public interface IRegion : IDisposable
     {
-        IDictionary<Coordinates2D, IChunk> Chunks { get; }
-        Coordinates2D Position { get; }
+        /// <summary>
+        /// The location of this IRegion within the world.
+        /// </summary>
+        RegionCoordinates Position { get; }
 
-        IChunk GetChunk(Coordinates2D position, bool generate = true);
+        IEnumerable<IChunk> Chunks { get; }
+
+        IChunk GetChunk(LocalChunkCoordinates position, bool generate = true);
+
+        bool IsChunkLoaded(LocalChunkCoordinates position);
+
         /// <summary>
         /// Marks the chunk for saving in the next Save().
         /// </summary>
-        void DamageChunk(Coordinates2D position);
-        void UnloadChunk(Coordinates2D position);
+        void DamageChunk(LocalChunkCoordinates position);
+
+        void UnloadChunk(LocalChunkCoordinates position);
+
         void Save(string path);
     }
 }

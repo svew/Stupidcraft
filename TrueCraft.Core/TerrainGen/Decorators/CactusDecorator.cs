@@ -18,9 +18,9 @@ namespace TrueCraft.Core.TerrainGen.Decorators
             var noise = new Perlin(world.Seed);
             var chanceNoise = new ClampNoise(noise);
             chanceNoise.MaxValue = 2;
-            for (int x = 0; x < 16; x++)
+            for (int x = 0; x < Chunk.Width; x++)
             {
-                for (int z = 0; z < 16; z++)
+                for (int z = 0; z < Chunk.Depth; z++)
                 {
                     var biome = biomes.GetBiome(chunk.Biomes[x * Chunk.Width + z]);
                     var blockX = MathHelper.ChunkToBlockX(x, chunk.Coordinates.X);
@@ -28,8 +28,8 @@ namespace TrueCraft.Core.TerrainGen.Decorators
                     var height = chunk.HeightMap[x * Chunk.Width + z];
                     if (biome.Plants.Contains(PlantSpecies.Cactus) && chanceNoise.Value2D(blockX, blockZ) > 1.7)
                     {
-                        var blockLocation = new Coordinates3D(x, height, z);
-                        var cactiPosition = blockLocation + Coordinates3D.Up;
+                        var blockLocation = new LocalVoxelCoordinates(x, height, z);
+                        var cactiPosition = new LocalVoxelCoordinates(blockLocation.X, blockLocation.Y + 1, blockLocation.Z);
                         if (chunk.GetBlockID(blockLocation).Equals(SandBlock.BlockID))
                         {
                             var HeightChance = chanceNoise.Value2D(blockX, blockZ);

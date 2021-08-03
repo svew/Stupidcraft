@@ -51,7 +51,7 @@ namespace TrueCraft
 
         private struct BlockUpdate
         {
-            public Coordinates3D Coordinates;
+            public GlobalVoxelCoordinates Coordinates;
             public IWorld World;
         }
         private Queue<BlockUpdate> PendingBlockUpdates { get; set; }
@@ -156,8 +156,10 @@ namespace TrueCraft
                 QueryProtocol.Stop();
             foreach (var w in Worlds)
                 w.Save();
-            foreach (var c in Clients)
-                DisconnectClient(c);
+
+            // NOTE: DisconnectClient modifies the Clients collection!
+            for (int j = Clients.Count - 1; j >= 0; j --)
+                DisconnectClient(Clients[j]);
         }
 
         public void AddWorld(IWorld world)
@@ -208,11 +210,8 @@ namespace TrueCraft
                     var lighter = WorldLighters.SingleOrDefault(l => l.World == sender);
                     if (lighter != null)
                     {
-                        var posA = e.Position;
-                        posA.Y = 0;
-                        var posB = e.Position;
-                        posB.Y = World.Height;
-                        posB.X++; posB.Z++;
+                        Vector3 posA = new Vector3(e.Position.X, 0, e.Position.Z);
+                        Vector3 posB = new Vector3(e.Position.X + 1, World.Height, e.Position.Z + 1);
                         lighter.EnqueueOperation(new BoundingBox(posA, posB), true);
                         lighter.EnqueueOperation(new BoundingBox(posA, posB), false);
                     }
@@ -242,18 +241,19 @@ namespace TrueCraft
             chunk.UpdateHeightMap();
             int _x = chunk.Coordinates.X * Chunk.Width;
             int _z = chunk.Coordinates.Z * Chunk.Depth;
-            Coordinates3D coords, _coords;
+            LocalVoxelCoordinates _coords;
+            GlobalVoxelCoordinates coords;
             for (byte x = 0; x < Chunk.Width; x++)
             {
                 for (byte z = 0; z < Chunk.Depth; z++)
                 {
                     for (int y = 0; y < chunk.GetHeight(x, z); y++)
                     {
-                        _coords.X = x; _coords.Y = y; _coords.Z = z;
+                        _coords = new LocalVoxelCoordinates(x, y, z);
                         var id = chunk.GetBlockID(_coords);
                         if (id == 0)
                             continue;
-                        coords.X = _x + x; coords.Y = y; coords.Z = _z + z;
+                        coords = new GlobalVoxelCoordinates(_x + x, y, _z + z);
                         var provider = BlockRepository.GetBlockProvider(id);
                         provider.BlockLoadedFromChunk(coords, this, world);
                     }
@@ -265,17 +265,12 @@ namespace TrueCraft
         {
             if (!BlockUpdatesEnabled)
                 return;
-            var adjacent = new[]
-            {
-                Coordinates3D.Up, Coordinates3D.Down,
-                Coordinates3D.Left, Coordinates3D.Right,
-                Coordinates3D.Forwards, Coordinates3D.Backwards
-            };
+
             while (PendingBlockUpdates.Count != 0)
             {
                 var update = PendingBlockUpdates.Dequeue();
                 var source = update.World.GetBlockData(update.Coordinates);
-                foreach (var offset in adjacent)
+                foreach (var offset in Vector3i.Neighbors6)
                 {
                     var descriptor = update.World.GetBlockData(update.Coordinates + offset);
                     var provider = BlockRepository.GetBlockProvider(descriptor.ID);

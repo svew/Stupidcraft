@@ -10,7 +10,7 @@ namespace TrueCraft.API.Logic
         public byte BlockLight;
         public byte SkyLight;
         // Optional
-        public Coordinates3D Coordinates;
+        public GlobalVoxelCoordinates Coordinates;
         // Optional
         public IChunk Chunk;
     }

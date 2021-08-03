@@ -57,24 +57,24 @@ namespace TrueCraft.Core.Logic.Blocks
             return new Tuple<int, int>(3, 5);
         }
 
-        public override Coordinates3D GetSupportDirection(BlockDescriptor descriptor)
+        public override Vector3i GetSupportDirection(BlockDescriptor descriptor)
         {
             switch ((LadderDirection)descriptor.Metadata)
             {
                 case LadderDirection.East:
-                    return Coordinates3D.East;
+                    return Vector3i.East;
                 case LadderDirection.West:
-                    return Coordinates3D.West;
+                    return Vector3i.West;
                 case LadderDirection.North:
-                    return Coordinates3D.North;
+                    return Vector3i.North;
                 case LadderDirection.South:
-                    return Coordinates3D.South;
+                    return Vector3i.South;
                 default:
-                    return Coordinates3D.Zero;
+                    return Vector3i.Zero;
             }
         }
 
-        public override void ItemUsedOnBlock(Coordinates3D coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user)
+        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user)
         {
             coordinates += MathHelper.BlockFaceToCoordinates(face);
             var descriptor = world.GetBlockData(coordinates);

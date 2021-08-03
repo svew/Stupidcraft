@@ -1,6 +1,6 @@
 ﻿using System;
 using TrueCraft.API.Networking;
-using TrueCraft.API;
+using TrueCraft.API.World;
 
 namespace TrueCraft.Core.Networking.Packets
 {
@@ -9,7 +9,7 @@ namespace TrueCraft.Core.Networking.Packets
         public byte ID { get { return 0x34; } }
 
         public int ChunkX, ChunkZ;
-        public Coordinates3D[] Coordinates;
+        public LocalVoxelCoordinates[] Coordinates;
         public sbyte[] BlockIDs;
         public sbyte[] Metadata;
 
@@ -18,11 +18,11 @@ namespace TrueCraft.Core.Networking.Packets
             ChunkX = stream.ReadInt32();
             ChunkZ = stream.ReadInt32();
             short length = stream.ReadInt16();
-            Coordinates = new Coordinates3D[length];
+            Coordinates = new LocalVoxelCoordinates[length];
             for (int i = 0; i < length; i++)
             {
                 ushort value = stream.ReadUInt16();
-                Coordinates[i] = new Coordinates3D(
+                Coordinates[i] = new LocalVoxelCoordinates(
                     value >> 12 & 0xF,
                     value & 0xFF,
                     value >> 8 & 0xF);

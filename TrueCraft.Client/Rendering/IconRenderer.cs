@@ -17,11 +17,10 @@ namespace TrueCraft.Client.Rendering
                 var provider = repository.GetBlockProvider((byte)i);
                 if (provider == null || provider.GetIconTexture(0) != null)
                     continue;
-                int[] indicies;
-                var verticies = BlockRenderer.RenderBlock(provider,
-                    new BlockDescriptor { ID = provider.ID }, VisibleFaces.All, new Vector3(-0.5f),
-                    0, out indicies);
-                var mesh = new Mesh(game, verticies, indicies);
+
+                int[] indices;
+                VertexPositionNormalColorTexture[] vertices = BlockRenderer.RenderIcon(provider.ID, out indices);
+                Mesh mesh = new Mesh(game, vertices, indices);
                 BlockMeshes[provider.ID] = mesh;
             }
 

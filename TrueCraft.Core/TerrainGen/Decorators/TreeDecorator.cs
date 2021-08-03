@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using TrueCraft.API.World;
 using TrueCraft.API;
+using TrueCraft.API.Logic;
 using TrueCraft.Core.Logic.Blocks;
 using TrueCraft.Core.TerrainGen.Noise;
 using TrueCraft.Core.World;
@@ -21,42 +22,42 @@ namespace TrueCraft.Core.TerrainGen.Decorators
             Noise = new Perlin(world.Seed);
             ChanceNoise = new ClampNoise(Noise);
             ChanceNoise.MaxValue = 2;
-            Coordinates2D? lastTree = null;
-            for (int x = 0; x < 16; x++)
+            LocalColumnCoordinates lastTree = null;
+            for (int x = 0; x < Chunk.Width; x++)
             {
-                for (int z = 0; z < 16; z++)
+                for (int z = 0; z < Chunk.Depth; z++)
                 {
                     var biome = biomes.GetBiome(chunk.Biomes[x * Chunk.Width + z]);
                     var blockX = MathHelper.ChunkToBlockX(x, chunk.Coordinates.X);
                     var blockZ = MathHelper.ChunkToBlockZ(z, chunk.Coordinates.Z);
                     var height = chunk.HeightMap[x * Chunk.Width + z];
 
-                    if (lastTree != null && lastTree.Value.DistanceTo(new Coordinates2D(x, z)) < biome.TreeDensity)
+                    if (lastTree != null && lastTree.DistanceTo(new LocalColumnCoordinates(x, z)) < biome.TreeDensity)
                         continue;
 
                     if (Noise.Value2D(blockX, blockZ) > 0.3)
                     {
-                        var location = new Coordinates3D(x, height, z);
-                        var id = chunk.GetBlockID(location);
-                        var provider = world.BlockRepository.GetBlockProvider(id);
+                        LocalVoxelCoordinates location = new LocalVoxelCoordinates(x, height, z);
+                        byte id = chunk.GetBlockID(location);
+                        IBlockProvider provider = world.BlockRepository.GetBlockProvider(id);
                         if (id == DirtBlock.BlockID || id == GrassBlock.BlockID || id == SnowfallBlock.BlockID
                             || (id != StationaryWaterBlock.BlockID && id != WaterBlock.BlockID
                                 && id != LavaBlock.BlockID && id != StationaryLavaBlock.BlockID
                                 && provider.BoundingBox == null))
                         {
                             if (provider.BoundingBox == null)
-                                location.Y--;
+                                location = new LocalVoxelCoordinates(location.X, location.Y - 1, location.Z);
                             var oakNoise = ChanceNoise.Value2D(blockX * 0.6, blockZ * 0.6);
                             var birchNoise = ChanceNoise.Value2D(blockX * 0.2, blockZ * 0.2);
                             var spruceNoise = ChanceNoise.Value2D(blockX * 0.35, blockZ * 0.35);
 
-                            var baseCoordinates = location + Coordinates3D.Up;
+                            LocalVoxelCoordinates baseCoordinates = new LocalVoxelCoordinates(location.X, location.Y + 1, location.Z);
                             if (biome.Trees.Contains(TreeSpecies.Oak) && oakNoise > 1.01 && oakNoise < 1.25)
                             {
                                 var oak = new OakTree().GenerateAt(world, chunk, baseCoordinates);
                                 if (oak)
                                 {
-                                    lastTree = new Coordinates2D(x, z);
+                                    lastTree = new LocalColumnCoordinates(x, z);
                                     continue;
                                 }
                             }
@@ -65,7 +66,7 @@ namespace TrueCraft.Core.TerrainGen.Decorators
                                 var birch = new BirchTree().GenerateAt(world, chunk, baseCoordinates);
                                 if (birch)
                                 {
-                                    lastTree = new Coordinates2D(x, z);
+                                    lastTree = new LocalColumnCoordinates(x, z);
                                     continue;
                                 }
                             }
@@ -81,7 +82,7 @@ namespace TrueCraft.Core.TerrainGen.Decorators
 
                                 if (generated)
                                 {
-                                    lastTree = new Coordinates2D(x, z);
+                                    lastTree = new LocalColumnCoordinates(x, z);
                                     continue;
                                 }
                             }

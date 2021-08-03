@@ -5,15 +5,15 @@ namespace TrueCraft.API.World
 {
     public class BlockChangeEventArgs : EventArgs
     {
-        public BlockChangeEventArgs(Coordinates3D position, BlockDescriptor oldBlock, BlockDescriptor newBlock)
+        public BlockChangeEventArgs(GlobalVoxelCoordinates position, BlockDescriptor oldBlock, BlockDescriptor newBlock)
         {
             Position = position;
             OldBlock = oldBlock;
             NewBlock = newBlock;
         }
 
-        public Coordinates3D Position;
-        public BlockDescriptor OldBlock;
-        public BlockDescriptor NewBlock;
+        public GlobalVoxelCoordinates Position { get; }
+        public BlockDescriptor OldBlock { get; }
+        public BlockDescriptor NewBlock { get; }
     }
 }

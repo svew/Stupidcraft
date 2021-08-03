@@ -2,6 +2,7 @@ using System;
 using TrueCraft.API.Logic;
 using TrueCraft.Core.Logic.Items;
 using TrueCraft.API;
+using TrueCraft.API.World;
 
 namespace TrueCraft.Core.Logic.Blocks
 {
@@ -48,9 +49,9 @@ namespace TrueCraft.Core.Logic.Blocks
             }
         }
 
-        public override Coordinates3D GetSupportDirection(BlockDescriptor descriptor)
+        public override Vector3i GetSupportDirection(BlockDescriptor descriptor)
         {
-            return Coordinates3D.Down;
+            return Vector3i.Down;
         }
 
         public override Tuple<int, int> GetTextureMap(byte metadata)

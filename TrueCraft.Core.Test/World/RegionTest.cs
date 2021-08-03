@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Linq;
 using NUnit.Framework;
 using TrueCraft.Core.World;
-using TrueCraft.API;
+using TrueCraft.API.World;
 using System.IO;
 using System.Reflection;
 
@@ -17,27 +18,27 @@ namespace TrueCraft.Core.Test.World
         {
             var world = new TrueCraft.Core.World.World();
             var assemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            Region = new Region(Coordinates2D.Zero, world,
+            Region = new Region(RegionCoordinates.Zero, world,
                 Path.Combine(assemblyDir, "Files", "r.0.0.mca"));
         }
 
         [Test]
         public void TestGetChunk()
         {
-            var chunk = Region.GetChunk(Coordinates2D.Zero);
-            Assert.AreEqual(Coordinates2D.Zero, chunk.Coordinates);
+            var chunk = Region.GetChunk(LocalChunkCoordinates.Zero);
+            Assert.AreEqual(GlobalChunkCoordinates.Zero, chunk.Coordinates);
             Assert.Throws(typeof(ArgumentException), () =>
-                Region.GetChunk(new Coordinates2D(31, 31)));
+                Region.GetChunk(new LocalChunkCoordinates(31, 31)));
         }
 
         [Test]
         public void TestUnloadChunk()
         {
-            var chunk = Region.GetChunk(Coordinates2D.Zero);
-            Assert.AreEqual(Coordinates2D.Zero, chunk.Coordinates);
-            Assert.IsTrue(Region.Chunks.ContainsKey(Coordinates2D.Zero));
-            Region.UnloadChunk(Coordinates2D.Zero);
-            Assert.IsFalse(Region.Chunks.ContainsKey(Coordinates2D.Zero));
+            var chunk = Region.GetChunk(LocalChunkCoordinates.Zero);
+            Assert.AreEqual(GlobalChunkCoordinates.Zero, chunk.Coordinates);
+            Assert.IsTrue(Region.Chunks.Any(c => c.Coordinates == GlobalChunkCoordinates.Zero));
+            Region.UnloadChunk(LocalChunkCoordinates.Zero);
+            Assert.IsFalse(Region.Chunks.Any(c => c.Coordinates == GlobalChunkCoordinates.Zero));
         }
 
         [Test]

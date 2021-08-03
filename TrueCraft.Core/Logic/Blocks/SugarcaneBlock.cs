@@ -64,15 +64,15 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public static bool ValidPlacement(BlockDescriptor descriptor, IWorld world)
         {
-            var below = world.GetBlockID(descriptor.Coordinates + Coordinates3D.Down);
+            var below = world.GetBlockID(descriptor.Coordinates + Vector3i.Down);
             if (below != SugarcaneBlock.BlockID && below != GrassBlock.BlockID && below != DirtBlock.BlockID)
                 return false;
             var toCheck = new[]
             {
-                Coordinates3D.Down + Coordinates3D.Left,
-                Coordinates3D.Down + Coordinates3D.Right,
-                Coordinates3D.Down + Coordinates3D.Backwards,
-                Coordinates3D.Down + Coordinates3D.Forwards
+                Vector3i.Down + Vector3i.West,
+                Vector3i.Down + Vector3i.East,
+                Vector3i.Down + Vector3i.North,
+                Vector3i.Down + Vector3i.South
             };
             if (below != BlockID)
             {
@@ -101,7 +101,7 @@ namespace TrueCraft.Core.Logic.Blocks
             }
         }
 
-        private void TryGrowth(IMultiplayerServer server, Coordinates3D coords, IWorld world)
+        private void TryGrowth(IMultiplayerServer server, GlobalVoxelCoordinates coords, IWorld world)
         {
             if (world.GetBlockID(coords) != BlockID)
                 return;
@@ -109,7 +109,7 @@ namespace TrueCraft.Core.Logic.Blocks
             int height = 0;
             for (int y = -MaxGrowHeight; y <= MaxGrowHeight; y++)
             {
-                if (world.GetBlockID(coords + (Coordinates3D.Down * y)) == BlockID)
+                if (world.GetBlockID(coords + (Vector3i.Down * y)) == BlockID)
                     height++;
             }
             if (height < MaxGrowHeight)
@@ -120,12 +120,12 @@ namespace TrueCraft.Core.Logic.Blocks
                 var chunk = world.FindChunk(coords);
                 if (meta == 15)
                 {
-                    if (world.GetBlockID(coords + Coordinates3D.Up) == 0)
+                    if (world.GetBlockID(coords + Vector3i.Up) == 0)
                     {
-                        world.SetBlockID(coords + Coordinates3D.Up, BlockID);
+                        world.SetBlockID(coords + Vector3i.Up, BlockID);
                         server.Scheduler.ScheduleEvent("sugarcane", chunk,
                             TimeSpan.FromSeconds(MathHelper.Random.Next(MinGrowthSeconds, MaxGrowthSeconds)),
-                            (_server) => TryGrowth(_server, coords + Coordinates3D.Up, world));
+                            (_server) => TryGrowth(_server, coords + Vector3i.Up, world));
                     }
                 }
                 else
@@ -145,7 +145,7 @@ namespace TrueCraft.Core.Logic.Blocks
                 (server) => TryGrowth(server, descriptor.Coordinates, world));
         }
 
-        public override void BlockLoadedFromChunk(Coordinates3D coords, IMultiplayerServer server, IWorld world)
+        public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IWorld world)
         {
             var chunk = world.FindChunk(coords);
             server.Scheduler.ScheduleEvent("sugarcane", chunk,

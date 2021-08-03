@@ -11,6 +11,7 @@ using TrueCraft.Core.Logic;
 using TrueCraft.Core.Networking.Packets;
 using TrueCraft.Core.Logic.Blocks;
 using TrueCraft.API.Logic;
+using TrueCraft.API.World;
 
 namespace TrueCraft.Client.Modules
 {
@@ -31,7 +32,7 @@ namespace TrueCraft.Client.Modules
             Digging = false;
             Game.StartDigging = DateTime.MinValue;
             Game.EndDigging = DateTime.MaxValue;
-            Game.TargetBlock = -Coordinates3D.One;
+            Game.TargetBlock = null;
             NextAnimation = DateTime.MaxValue;
             GamePadState = GamePad.GetState(PlayerIndex.One);
         }
@@ -261,7 +262,7 @@ namespace TrueCraft.Client.Modules
             return false;
         }
 
-        private void BeginDigging(Coordinates3D target)
+        private void BeginDigging(GlobalVoxelCoordinates target)
         {
             // TODO: Adjust digging time to compensate for latency
             var block = Game.Client.World.GetBlockID(target);
@@ -291,10 +292,10 @@ namespace TrueCraft.Client.Modules
 
         private void PlayFootstep()
         {
-            var coords = (Coordinates3D)Game.Client.BoundingBox.Min.Floor();
+            GlobalVoxelCoordinates coords = (GlobalVoxelCoordinates)Game.Client.BoundingBox.Min.Floor();
             var target = Game.Client.World.GetBlockID(coords);
             if (target == AirBlock.BlockID)
-                target = Game.Client.World.GetBlockID(coords + Coordinates3D.Down);
+                target = Game.Client.World.GetBlockID(coords + Vector3i.Down);
             var provider = Game.BlockRepository.GetBlockProvider(target);
             if (provider.SoundEffect == SoundEffectClass.None)
                 return;
@@ -336,17 +337,17 @@ namespace TrueCraft.Client.Modules
                 if (Game.StartDigging == DateTime.MinValue) // Would like to start digging a block
                 {
                     var target = Game.HighlightedBlock;
-                    if (target != -Coordinates3D.One)
+                    if (!object.ReferenceEquals(target, null))
                         BeginDigging(target);
                 }
                 else // Currently digging a block
                 {
                     var target = Game.HighlightedBlock;
-                    if (target == -Coordinates3D.One) // Cancel
+                    if (object.ReferenceEquals(target, null)) // Cancel
                     {
                         Game.StartDigging = DateTime.MinValue;
                         Game.EndDigging = DateTime.MaxValue;
-                        Game.TargetBlock = -Coordinates3D.One;
+                        Game.TargetBlock = null;
                     }
                     else if (target != Game.TargetBlock) // Change target
                         BeginDigging(target);
@@ -356,7 +357,7 @@ namespace TrueCraft.Client.Modules
             {
                 Game.StartDigging = DateTime.MinValue;
                 Game.EndDigging = DateTime.MaxValue;
-                Game.TargetBlock = -Coordinates3D.One;
+                Game.TargetBlock = null;
             }
 
             if (delta != XVector3.Zero)

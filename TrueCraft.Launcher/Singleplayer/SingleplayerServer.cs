@@ -1,11 +1,10 @@
 ﻿using System;
 using TrueCraft.Core.World;
-using System.Threading.Tasks;
 using TrueCraft.API.Logging;
-using TrueCraft.API;
 using System.Net;
 using TrueCraft.Core.Logging;
-using TrueCraft;
+using TrueCraft.API.World;
+using TrueCraft.API.Logic;
 
 namespace TrueCraft.Launcher.Singleplayer
 {
@@ -36,7 +35,7 @@ namespace TrueCraft.Launcher.Singleplayer
             for (int x = -5; x < 5; x++)
             {
                 for (int z = -5; z < 5; z++)
-                    World.GetChunk(new Coordinates2D(x, z));
+                    World.GetChunk(new GlobalChunkCoordinates(x, z));
                 int progress = (int)(((x + 5) / 10.0) * 100);
                 if (progressNotification != null)
                     progressNotification(progress / 100.0, "Generating world...");
@@ -48,16 +47,16 @@ namespace TrueCraft.Launcher.Singleplayer
             {
                 for (int z = -5; z < 5; z++)
                 {
-                    var chunk = World.GetChunk(new Coordinates2D(x, z));
+                    var chunk = World.GetChunk(new GlobalChunkCoordinates(x, z));
                     for (byte _x = 0; _x < Chunk.Width; _x++)
                     {
                         for (byte _z = 0; _z < Chunk.Depth; _z++)
                         {
                             for (int _y = 0; _y < chunk.GetHeight(_x, _z); _y++)
                             {
-                                var coords = new Coordinates3D(x + _x, _y, z + _z);
-                                var data = World.GetBlockData(coords);
-                                var provider = World.BlockRepository.GetBlockProvider(data.ID);
+                                GlobalVoxelCoordinates coords = new GlobalVoxelCoordinates(x + _x, _y, z + _z);
+                                BlockDescriptor data = World.GetBlockData(coords);
+                                IBlockProvider provider = World.BlockRepository.GetBlockProvider(data.ID);
                                 provider.BlockUpdate(data, data, Server, World);
                             }
                         }

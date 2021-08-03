@@ -5,6 +5,7 @@ using TrueCraft.Core.Logic.Blocks;
 using TrueCraft.API.Logic;
 using TrueCraft.Core.World;
 using TrueCraft.API;
+using TrueCraft.API.World;
 
 namespace TrueCraft.Client.Rendering.Blocks
 {
@@ -96,20 +97,11 @@ namespace TrueCraft.Client.Rendering.Blocks
             VisibleFaces faces, Tuple<int, int> textureMap, int indiciesOffset, out int[] indicies)
         {
             var texture = Texture;
-            if (descriptor.Coordinates.Y < World.Height && descriptor.Chunk != null)
-            {
-                if (descriptor.Chunk.GetBlockID(descriptor.Coordinates + Coordinates3D.Up) == SnowfallBlock.BlockID)
-                {
-                    texture = SnowTexture;
-                }
-            }
-            
-            var lighting = new int[6];
-            for (int i = 0; i < 6; i++)
-            {
-                var coords = (descriptor.Coordinates + FaceCoords[i]);
-                lighting[i] = GetLight(descriptor.Chunk, coords);
-            }
+            if (descriptor.Coordinates.Y < World.Height && descriptor.Chunk != null &&
+                    descriptor.Chunk.GetBlockID((LocalVoxelCoordinates)(descriptor.Coordinates + Vector3i.Up)) == SnowfallBlock.BlockID)
+                texture = SnowTexture;
+
+            int[] lighting = GetLighting(descriptor);
 
             var cube = CreateUniformCube(offset, texture, faces, indiciesOffset, out indicies, Color.White, lighting);
             // Apply biome colors to top of cube

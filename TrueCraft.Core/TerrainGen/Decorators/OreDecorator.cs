@@ -95,8 +95,9 @@ namespace TrueCraft.Core.TerrainGen.Decorators
                         if (x >= 0 && z >= 0 && y >= data.MinY && x < Chunk.Width && y < data.MaxY && z < Chunk.Depth)
                         {
                             var biome = biomes.GetBiome(chunk.Biomes[(int)(x * Chunk.Width + z)]);
-                            if (biome.Ores.Contains(data.Type) && chunk.GetBlockID(new Coordinates3D((int)x, (int)y, (int)z)).Equals(StoneBlock.BlockID))
-                                chunk.SetBlockID(new Coordinates3D((int)x, (int)y, (int)z), data.ID);
+                            LocalVoxelCoordinates cur = new LocalVoxelCoordinates((int)x, (int)y, (int)z);
+                            if (biome.Ores.Contains(data.Type) && chunk.GetBlockID(cur).Equals(StoneBlock.BlockID))
+                                chunk.SetBlockID(cur, data.ID);
                         }
                         var blockX = MathHelper.ChunkToBlockX((int)(x), chunk.Coordinates.X);
                         var blockZ = MathHelper.ChunkToBlockZ((int)(z), chunk.Coordinates.Z);
@@ -120,7 +121,7 @@ namespace TrueCraft.Core.TerrainGen.Decorators
                         if (newX >= 0 && newZ >= 0 && newY >= data.MinY && newX < Chunk.Width && newY < data.MaxY && newZ < Chunk.Depth)
                         {
                             IBiomeProvider Biome = biomes.GetBiome(chunk.Biomes[newX * Chunk.Width + newZ]);
-                            var coordinates = new Coordinates3D((int)newX, (int)newY, (int)newZ);
+                            LocalVoxelCoordinates coordinates = new LocalVoxelCoordinates((int)newX, (int)newY, (int)newZ);
                             if (Biome.Ores.Contains(data.Type) && chunk.GetBlockID(coordinates).Equals(StoneBlock.BlockID))
                             {
                                 chunk.SetBlockID(coordinates, data.ID);

@@ -1,6 +1,7 @@
 ﻿using TrueCraft.API.Networking;
 using TrueCraft.Core.Networking.Packets;
 using TrueCraft.API;
+using TrueCraft.API.World;
 using System;
 using TrueCraft.API.Entities;
 using TrueCraft.Core;
@@ -101,7 +102,7 @@ namespace TrueCraft.Commands
             if (arguments.Length == 1)
                 int.TryParse(arguments[0], out mod);
             client.SendMessage(client.World.GetSkyLight(
-                (Coordinates3D)(client.Entity.Position + new Vector3(0, -mod, 0))).ToString());
+                (GlobalVoxelCoordinates)(client.Entity.Position + new Vector3(0, -mod, 0))).ToString());
         }
 
         public override void Help(IRemoteClient client, string alias, string[] arguments)
@@ -206,7 +207,7 @@ namespace TrueCraft.Commands
             Task.Factory.StartNew(() =>
             {
                 var astar = new AStarPathFinder();
-                var path = astar.FindPath(client.World, entity.BoundingBox, (Coordinates3D)entity.Position, (Coordinates3D)client.Entity.Position);
+                var path = astar.FindPath(client.World, entity.BoundingBox, (GlobalVoxelCoordinates)entity.Position, (GlobalVoxelCoordinates)client.Entity.Position);
                 if (path == null)
                 {
                     client.SendMessage(ChatColor.Red + "It is impossible for this entity to reach you.");
@@ -513,7 +514,7 @@ namespace TrueCraft.Commands
                 return;
             }
             var server = client.Server as MultiplayerServer;
-            var chunk = client.World.FindChunk((Coordinates3D)client.Entity.Position);
+            var chunk = client.World.FindChunk((GlobalVoxelCoordinates)client.Entity.Position);
             var lighter = server.WorldLighters.SingleOrDefault(l => l.World == client.World);
             if (lighter != null)
             {

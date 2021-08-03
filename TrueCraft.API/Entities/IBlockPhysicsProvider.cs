@@ -6,6 +6,6 @@ namespace TrueCraft.API.Entities
 {
     public interface IBlockPhysicsProvider
     {
-        BoundingBox? GetBoundingBox(IWorld world, Coordinates3D coordinates);
+        BoundingBox? GetBoundingBox(IWorld world, GlobalVoxelCoordinates coordinates);
     }
 }

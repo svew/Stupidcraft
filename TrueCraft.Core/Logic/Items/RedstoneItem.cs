@@ -21,10 +21,10 @@ namespace TrueCraft.Core.Logic.Items
 
         public override string DisplayName { get { return "Redstone"; } }
 
-        public override void ItemUsedOnBlock(Coordinates3D coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user)
+        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user)
         {
             coordinates += MathHelper.BlockFaceToCoordinates(face);
-            IBlockProvider supportingBlock = world.BlockRepository.GetBlockProvider(world.GetBlockID(coordinates + Coordinates3D.Down));
+            IBlockProvider supportingBlock = world.BlockRepository.GetBlockProvider(world.GetBlockID(coordinates + Vector3i.Down));
 
             if (supportingBlock.Opaque)
             {

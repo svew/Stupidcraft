@@ -12,6 +12,7 @@ using Vector2 = Microsoft.Xna.Framework.Vector2;
 using Vector3 = Microsoft.Xna.Framework.Vector3;
 using TrueCraft.API.Logic;
 using System.Threading.Tasks;
+using TrueCraft.API.World;
 
 namespace TrueCraft.Client.Rendering
 {
@@ -23,19 +24,22 @@ namespace TrueCraft.Client.Rendering
     {
         public class ChunkSorter : Comparer<Mesh>
         {
-            public Coordinates3D Camera { get; set; }
+            private GlobalVoxelCoordinates _camera;
 
-            public ChunkSorter(Coordinates3D camera)
+            public ChunkSorter(GlobalVoxelCoordinates camera)
             {
-                Camera = camera;
+                _camera = camera;
             }
 
             public override int Compare(Mesh _x, Mesh _y)
             {
-                var x = ((ChunkMesh)_x).Chunk;
-                var y = ((ChunkMesh)_y).Chunk;
-                return (int)(new Coordinates3D(y.X * Chunk.Width, 0, y.Z * Chunk.Depth).DistanceTo(Camera) -
-                    new Coordinates3D(x.X * Chunk.Width, 0, x.Z * Chunk.Depth).DistanceTo(Camera));
+                ReadOnlyChunk x = ((ChunkMesh)_x).Chunk;
+                ReadOnlyChunk y = ((ChunkMesh)_y).Chunk;
+
+                double distX = ((GlobalVoxelCoordinates)x.Coordinates).DistanceTo(_camera);
+                double distY = ((GlobalVoxelCoordinates)y.Coordinates).DistanceTo(_camera);
+
+                return (int)(distY - distX);
             }
         }
 
@@ -59,14 +63,14 @@ namespace TrueCraft.Client.Rendering
             Game = game;
         }
 
-        private static readonly Coordinates3D[] AdjacentCoordinates =
+        private static readonly Vector3i[] AdjacentCoordinates =
         {
-            Coordinates3D.Up,
-            Coordinates3D.Down,
-            Coordinates3D.North,
-            Coordinates3D.South,
-            Coordinates3D.East,
-            Coordinates3D.West
+            Vector3i.Up,
+            Vector3i.Down,
+            Vector3i.North,
+            Vector3i.South,
+            Vector3i.East,
+            Vector3i.West
         };
 
         private static readonly VisibleFaces[] AdjacentCoordFaces =
@@ -96,13 +100,13 @@ namespace TrueCraft.Client.Rendering
                 = new List<VertexPositionNormalColorTexture>();
             public readonly List<int> OpaqueIndicies = new List<int>();
             public readonly List<int> TransparentIndicies = new List<int>();
-            public readonly Dictionary<Coordinates3D, VisibleFaces> DrawableCoordinates
-                = new Dictionary<Coordinates3D, VisibleFaces>();
+            public readonly Dictionary<LocalVoxelCoordinates, VisibleFaces> DrawableCoordinates
+                = new Dictionary<LocalVoxelCoordinates, VisibleFaces>();
         }
 
-        private void AddBottomBlock(Coordinates3D coords, RenderState state, ReadOnlyChunk chunk)
+        private void AddBottomBlock(LocalVoxelCoordinates coords, RenderState state, ReadOnlyChunk chunk)
         {
-            var desiredFaces = VisibleFaces.None;
+            VisibleFaces desiredFaces = VisibleFaces.None;
             if (coords.X == 0)
                 desiredFaces |= VisibleFaces.West;
             else if (coords.X == Chunk.Width - 1)
@@ -122,18 +126,20 @@ namespace TrueCraft.Client.Rendering
             state.DrawableCoordinates[coords] = desiredFaces;
         }
 
-        private void AddAdjacentBlocks(Coordinates3D coords, RenderState state, ReadOnlyChunk chunk)
+        private void AddAdjacentBlocks(LocalVoxelCoordinates coords, RenderState state, ReadOnlyChunk chunk)
         {
             // Add adjacent blocks
             for (int i = 0; i < AdjacentCoordinates.Length; i++)
             {
-                var next = coords + AdjacentCoordinates[i];
-                if (next.X < 0 || next.X >= Chunk.Width
-                    || next.Y < 0 || next.Y >= Chunk.Height
-                    || next.Z < 0 || next.Z >= Chunk.Depth)
-                {
+                Vector3i adjacent = AdjacentCoordinates[i];
+                int nextX = coords.X + adjacent.X;
+                int nextY = coords.Y + adjacent.Y;
+                int nextZ = coords.Z + adjacent.Z;
+                if (nextX < 0 || nextX >= Chunk.Width || nextY < 0 || nextY >= Chunk.Height
+                         || nextZ < 0 || nextZ >= Chunk.Depth)
                     continue;
-                }
+
+                LocalVoxelCoordinates next = new LocalVoxelCoordinates(nextX, nextY, nextZ);
                 var provider = BlockRepository.GetBlockProvider(chunk.GetBlockId(next));
                 if (provider.Opaque)
                 {
@@ -146,20 +152,24 @@ namespace TrueCraft.Client.Rendering
             }
         }
 
-        private void AddTransparentBlock(Coordinates3D coords, RenderState state, ReadOnlyChunk chunk)
+        private void AddTransparentBlock(LocalVoxelCoordinates coords, RenderState state, ReadOnlyChunk chunk)
         {
             // Add adjacent blocks
             VisibleFaces faces = VisibleFaces.None;
             for (int i = 0; i < AdjacentCoordinates.Length; i++)
             {
-                var next = coords + AdjacentCoordinates[i];
-                if (next.X < 0 || next.X >= Chunk.Width
-                    || next.Y < 0 || next.Y >= Chunk.Height
-                    || next.Z < 0 || next.Z >= Chunk.Depth)
+                Vector3i adjacent = AdjacentCoordinates[i];
+                int nextX = coords.X + adjacent.X;
+                int nextY = coords.Y + adjacent.Y;
+                int nextZ = coords.Z + adjacent.Z;
+
+                if (nextX < 0 || nextX >= Chunk.Width || nextY < 0 || nextY >= Chunk.Height
+                         || nextZ < 0 || nextZ >= Chunk.Depth)
                 {
                     faces |= AdjacentCoordFaces[i];
                     continue;
                 }
+                LocalVoxelCoordinates next = new LocalVoxelCoordinates(nextX, nextY, nextZ);
                 if (chunk.GetBlockId(next) == 0)
                     faces |= AdjacentCoordFaces[i];
             }
@@ -167,7 +177,7 @@ namespace TrueCraft.Client.Rendering
                 state.DrawableCoordinates[coords] = faces;
         }
 
-        private void UpdateFacesFromAdjacent(Coordinates3D adjacent, ReadOnlyChunk chunk,
+        private void UpdateFacesFromAdjacent(LocalVoxelCoordinates adjacent, ReadOnlyChunk chunk,
             VisibleFaces mod, ref VisibleFaces faces)
         {
             if (chunk == null)
@@ -177,40 +187,41 @@ namespace TrueCraft.Client.Rendering
                 faces |= mod;
         }
 
-        private void AddChunkBoundaryBlocks(Coordinates3D coords, RenderState state, ReadOnlyChunk chunk)
+        private void AddChunkBoundaryBlocks(LocalVoxelCoordinates coords, RenderState state, ReadOnlyChunk chunk)
         {
             VisibleFaces faces;
             if (!state.DrawableCoordinates.TryGetValue(coords, out faces))
                 faces = VisibleFaces.None;
             VisibleFaces oldFaces = faces;
 
+            GlobalChunkCoordinates thisChunk = chunk.Chunk.Coordinates;
             if (coords.X == 0)
             {
-                var adjacent = coords;
-                adjacent.X = Chunk.Width - 1;
-                var nextChunk = World.GetChunk(chunk.Chunk.Coordinates + Coordinates2D.West);
+                GlobalChunkCoordinates westChunk = new GlobalChunkCoordinates(thisChunk.X - 1, thisChunk.Z);
+                ReadOnlyChunk nextChunk = World.GetChunk(westChunk);
+                LocalVoxelCoordinates adjacent = new LocalVoxelCoordinates(Chunk.Width - 1, coords.Y, coords.Z);
                 UpdateFacesFromAdjacent(adjacent, nextChunk, VisibleFaces.West, ref faces);
             }
             else if (coords.X == Chunk.Width - 1)
             {
-                var adjacent = coords;
-                adjacent.X = 0;
-                var nextChunk = World.GetChunk(chunk.Chunk.Coordinates + Coordinates2D.East);
+                GlobalChunkCoordinates eastChunk = new GlobalChunkCoordinates(thisChunk.X + 1, thisChunk.Z);
+                var nextChunk = World.GetChunk(eastChunk);
+                LocalVoxelCoordinates adjacent = new LocalVoxelCoordinates(0, coords.Y, coords.Z);
                 UpdateFacesFromAdjacent(adjacent, nextChunk, VisibleFaces.East, ref faces);
             }
 
             if (coords.Z == 0)
             {
-                var adjacent = coords;
-                adjacent.Z = Chunk.Depth - 1;
-                var nextChunk = World.GetChunk(chunk.Chunk.Coordinates + Coordinates2D.North);
+                GlobalChunkCoordinates northChunk = new GlobalChunkCoordinates(thisChunk.X, thisChunk.Z - 1);
+                var nextChunk = World.GetChunk(northChunk);
+                LocalVoxelCoordinates adjacent = new LocalVoxelCoordinates(coords.X, coords.Y, Chunk.Depth - 1);
                 UpdateFacesFromAdjacent(adjacent, nextChunk, VisibleFaces.North, ref faces);
             }
             else if (coords.Z == Chunk.Depth - 1)
             {
-                var adjacent = coords;
-                adjacent.Z = 0;
-                var nextChunk = World.GetChunk(chunk.Chunk.Coordinates + Coordinates2D.South);
+                GlobalChunkCoordinates southChunk = new GlobalChunkCoordinates(thisChunk.X, thisChunk.Z + 1);
+                var nextChunk = World.GetChunk(southChunk);
+                LocalVoxelCoordinates adjacent = new LocalVoxelCoordinates(coords.X, coords.Y, 0);
                 UpdateFacesFromAdjacent(adjacent, nextChunk, VisibleFaces.South, ref faces);
             }
 
@@ -231,7 +242,7 @@ namespace TrueCraft.Client.Rendering
                 {
                     for (byte y = 0; y < Chunk.Height; y++)
                     {
-                        var coords = new Coordinates3D(x, y, z);
+                        LocalVoxelCoordinates coords = new LocalVoxelCoordinates(x, y, z);
                         var id = chunk.GetBlockId(coords);
                         var provider = BlockRepository.GetBlockProvider(id);
                         if (id != 0 && coords.Y == 0)
@@ -253,19 +264,17 @@ namespace TrueCraft.Client.Rendering
                     }
                 }
             }
-            var enumerator = state.DrawableCoordinates.GetEnumerator();
-            for (int j = 0; j <= state.DrawableCoordinates.Count; j++)
+
+            foreach(var coords in state.DrawableCoordinates)
             {
-                var coords = enumerator.Current;
-                enumerator.MoveNext();
-                var c = coords.Key;
+                LocalVoxelCoordinates c = coords.Key;
                 var descriptor = new BlockDescriptor
                 {
-                    ID = chunk.GetBlockId(coords.Key),
-                    Metadata = chunk.GetMetadata(coords.Key),
-                    BlockLight = chunk.GetBlockLight(coords.Key),
-                    SkyLight = chunk.GetSkyLight(coords.Key),
-                    Coordinates = coords.Key,
+                    ID = chunk.GetBlockId(c),
+                    Metadata = chunk.GetMetadata(c),
+                    BlockLight = chunk.GetBlockLight(c),
+                    SkyLight = chunk.GetSkyLight(c),
+                    Coordinates = GlobalVoxelCoordinates.GetGlobalVoxelCoordinates(chunk.Chunk.Coordinates, c),
                     Chunk = chunk.Chunk
                 };
                 var provider = BlockRepository.GetBlockProvider(descriptor.ID);

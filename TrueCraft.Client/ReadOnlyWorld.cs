@@ -23,36 +23,36 @@ namespace TrueCraft.Client
             UnloadChunks = true;
         }
 
-        public byte GetBlockID(Coordinates3D coordinates)
+        public byte GetBlockID(GlobalVoxelCoordinates coordinates)
         {
             return World.GetBlockID(coordinates);
         }
 
-        internal void SetBlockID(Coordinates3D coordinates, byte value)
+        internal void SetBlockID(GlobalVoxelCoordinates coordinates, byte value)
         {
           World.SetBlockID(coordinates, value);
         }
 
-        internal void SetMetadata(Coordinates3D coordinates, byte value)
+        internal void SetMetadata(GlobalVoxelCoordinates coordinates, byte value)
         {
           World.SetMetadata(coordinates, value);
         }
 
-        public byte GetMetadata(Coordinates3D coordinates)
+        public byte GetMetadata(GlobalVoxelCoordinates coordinates)
         {
             return World.GetMetadata(coordinates);
         }
 
-        public byte GetSkyLight(Coordinates3D coordinates)
+        public byte GetSkyLight(GlobalVoxelCoordinates coordinates)
         {
             return World.GetSkyLight(coordinates);
         }
 
-        internal IChunk FindChunk(Coordinates2D coordinates)
+        internal IChunk FindChunk(GlobalColumnCoordinates coordinates)
         {
             try
             {
-                return World.FindChunk(new Coordinates3D(coordinates.X, 0, coordinates.Z));
+                return World.FindChunk(new GlobalVoxelCoordinates(coordinates.X, 0, coordinates.Z));
             }
             catch
             {
@@ -60,23 +60,23 @@ namespace TrueCraft.Client
             }
         }
 
-        public ReadOnlyChunk GetChunk(Coordinates2D coordinates)
+        public ReadOnlyChunk GetChunk(GlobalChunkCoordinates coordinates)
         {
             return new ReadOnlyChunk(World.GetChunk(coordinates));
         }
 
-        internal void SetChunk(Coordinates2D coordinates, Chunk chunk)
+        internal void SetChunk(GlobalChunkCoordinates coordinates, Chunk chunk)
         {
             World.SetChunk(coordinates, chunk);
         }
 
-        internal void RemoveChunk(Coordinates2D coordinates)
+        internal void RemoveChunk(GlobalChunkCoordinates coordinates)
         {
             if (UnloadChunks)
                 World.UnloadChunk(coordinates);
         }
 
-        public bool IsValidPosition(Coordinates3D coords)
+        public bool IsValidPosition(GlobalVoxelCoordinates coords)
         {
             return World.IsValidPosition(coords);
         }
@@ -91,27 +91,27 @@ namespace TrueCraft.Client
             Chunk = chunk;
         }
 
-        public byte GetBlockId(Coordinates3D coordinates)
+        public byte GetBlockId(LocalVoxelCoordinates coordinates)
         {
             return Chunk.GetBlockID(coordinates);
         }
 
-        public byte GetMetadata(Coordinates3D coordinates)
+        public byte GetMetadata(LocalVoxelCoordinates coordinates)
         {
             return Chunk.GetMetadata(coordinates);
         }
 
-        public byte GetSkyLight(Coordinates3D coordinates)
+        public byte GetSkyLight(LocalVoxelCoordinates coordinates)
         {
             return Chunk.GetSkyLight(coordinates);
         }
 
-        public byte GetBlockLight(Coordinates3D coordinates)
+        public byte GetBlockLight(LocalVoxelCoordinates coordinates)
         {
             return Chunk.GetBlockLight(coordinates);
         }
 
-        public Coordinates2D Coordinates { get { return Chunk.Coordinates; } }
+        public GlobalChunkCoordinates Coordinates { get { return Chunk.Coordinates; } }
 
         public int X { get { return Chunk.X; } }
         public int Z { get { return Chunk.Z; } }
