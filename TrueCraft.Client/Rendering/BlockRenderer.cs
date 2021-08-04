@@ -57,7 +57,7 @@ namespace TrueCraft.Client.Rendering
                 texCoords + Vector2.UnitX
             };
 
-            Vector3 offset = new Vector3(0.5f);
+            Vector3 offset = new Vector3(-0.5f);
 
             return Renderers[blockID].Render(offset, texture, out indices);
         }
