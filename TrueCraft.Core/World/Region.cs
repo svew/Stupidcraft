@@ -109,6 +109,8 @@ namespace TrueCraft.Core.World
                             GenerateChunk(position);
                         else
                             return null;
+                        // TODO BUG On client exit, an exception was thrown here
+                        //     due to position not being in the Dictionary.
                         return _chunks[position];
                     }
 
