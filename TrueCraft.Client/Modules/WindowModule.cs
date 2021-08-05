@@ -69,14 +69,14 @@ namespace TrueCraft.Client.Modules
                     Game.GraphicsDevice.Viewport.Width, Game.GraphicsDevice.Viewport.Height), new Color(Color.Black, 180));
                 switch (Game.Client.CurrentWindow.Type)
                 {
-                    case -1:
+                    case WindowType.Inventory:
                         SpriteBatch.Draw(Inventory, new Vector2(
                             Game.GraphicsDevice.Viewport.Width / 2 - Scale(InventoryWindowRect.Width / 2),
                             Game.GraphicsDevice.Viewport.Height / 2 - Scale(InventoryWindowRect.Height / 2)),
                             InventoryWindowRect, Color.White, 0, Vector2.Zero, Game.ScaleFactor * 2, SpriteEffects.None, 1);
                         DrawInventoryWindow(RenderStage.Sprites);
                         break;
-                    case 1: // Crafting bench
+                    case WindowType.CraftingBench:
                         SpriteBatch.Draw(Crafting, new Vector2(
                             Game.GraphicsDevice.Viewport.Width / 2 - Scale(CraftingWindowRect.Width / 2),
                             Game.GraphicsDevice.Viewport.Height / 2 - Scale(CraftingWindowRect.Height / 2)),
@@ -95,10 +95,10 @@ namespace TrueCraft.Client.Modules
                 SpriteBatch.End();
                 switch (Game.Client.CurrentWindow.Type)
                 {
-                    case -1:
+                    case WindowType.Inventory:
                         DrawInventoryWindow(RenderStage.Models);
                         break;
-                    case 1: // Crafting bench
+                    case WindowType.CraftingBench:
                         DrawCraftingWindow(RenderStage.Models);
                         break;
                 }
@@ -112,10 +112,10 @@ namespace TrueCraft.Client.Modules
                 SpriteBatch.Begin(samplerState: SamplerState.PointClamp, blendState: BlendState.NonPremultiplied);
                 switch (Game.Client.CurrentWindow.Type)
                 {
-                    case -1:
+                    case WindowType.Inventory:
                         DrawInventoryWindow(RenderStage.Text);
                         break;
-                    case 1: // Crafting bench
+                    case WindowType.CraftingBench:
                         DrawCraftingWindow(RenderStage.Text);
                         break;
                 }
@@ -196,7 +196,7 @@ namespace TrueCraft.Client.Modules
             {
                 if (e.Key == Keys.Escape)
                 {
-                    if (Game.Client.CurrentWindow.Type != -1)
+                    if (Game.Client.CurrentWindow.Type != WindowType.Inventory)
                         Game.Client.QueuePacket(new CloseWindowPacket(Game.Client.CurrentWindow.ID));
                     Game.Client.CurrentWindow = null;
                     Mouse.SetPosition(Game.GraphicsDevice.Viewport.Width / 2, Game.GraphicsDevice.Viewport.Height / 2);

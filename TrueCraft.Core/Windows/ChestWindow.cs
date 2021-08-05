@@ -67,11 +67,11 @@ namespace TrueCraft.Core.Windows
             }
         }
 
-        public override sbyte Type
+        public override WindowType Type
         {
             get
             {
-                return 0;
+                return WindowType.Chest;
             }
         }
 

@@ -40,11 +40,11 @@ namespace TrueCraft.Core.Windows
             }
         }
 
-        public override sbyte Type
+        public override WindowType Type
         {
             get
             {
-                return -1; // NOTE: This window does not have a type
+                return WindowType.Inventory;
             }
         }
 

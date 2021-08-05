@@ -65,11 +65,11 @@ namespace TrueCraft.Core.Windows
             }
         }
 
-        public override sbyte Type
+        public override WindowType Type
         {
             get
             {
-                return 2;
+                return WindowType.Furnace;
             }
         }
 

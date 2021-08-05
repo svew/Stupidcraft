@@ -43,10 +43,12 @@ namespace TrueCraft.Client.Handlers
             IWindow window = null;
             switch (packet.Type)
             {
-                case 1: // Crafting bench window
+                case WindowType.CraftingBench:
                     window = new CraftingBenchWindow(client.CraftingRepository, client.Inventory);
                     break;
             }
+
+            // TODO: For any window type other than CraftingBench, window will be null.
             window.ID = packet.WindowID;
             client.CurrentWindow = window;
         }

@@ -34,7 +34,8 @@ namespace TrueCraft.Core.Windows
                 
         public sbyte ID { get; set; }
         public abstract string Name { get; }
-        public abstract sbyte Type { get; }
+
+        public abstract WindowType Type { get; }
 
         /// <summary>
         /// When shift-clicking items between areas, this method is used
