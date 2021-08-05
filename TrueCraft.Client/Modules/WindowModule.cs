@@ -162,7 +162,7 @@ namespace TrueCraft.Client.Modules
                 return false;
             var id = Game.Client.CurrentWindow.ID;
             if (id == -1)
-                id = 0; // Minecraft is stupid
+                id = 0;
             var item = ItemStack.EmptyStack;
             if (SelectedSlot > -1)
                 item = Game.Client.CurrentWindow[SelectedSlot];
@@ -237,7 +237,7 @@ namespace TrueCraft.Client.Modules
                 int y = (int)((i / area.Width) * Scale(18));
                 if (area is CraftingWindowArea)
                 {
-                    // yes I know this is a crappy hack, bite me
+                    // yes I know this is a crappy hack
                     if (i == 0)
                     {
                         if (area.Width == 2)
