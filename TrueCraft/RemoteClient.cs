@@ -264,6 +264,10 @@ namespace TrueCraft
 
         private void StartReceive()
         {
+            // Check if this RemoteClient has been disposed.
+            if (object.ReferenceEquals(_socketPool, null))
+                return;
+
             SocketAsyncEventArgs args = _socketPool.Get();
             args.Completed += OperationCompleted;
 
@@ -291,10 +295,6 @@ namespace TrueCraft
                         Server.DisconnectClient(this);
 
                     e.SetBuffer(null, 0, 0);
-                    break;
-                case SocketAsyncOperation.Disconnect:
-                    _connection.Close();
-
                     break;
             }
 
@@ -359,11 +359,20 @@ namespace TrueCraft
 
             Disconnected = true;
 
-            _connection.Shutdown(SocketShutdown.Send);
+            _connection.Shutdown(SocketShutdown.Both);
 
             SocketAsyncEventArgs args = new SocketAsyncEventArgs();
-            args.Completed += OperationCompleted;
-            _connection.DisconnectAsync(args);
+            args.Completed += DisconnectCompleted;
+            if (!_connection.DisconnectAsync(args))
+            {
+                DisconnectCompleted(_connection, args);
+                args.Dispose();
+            }
+        }
+
+        private void DisconnectCompleted(object sender, SocketAsyncEventArgs e)
+        {
+            _connection.Close();
         }
 
         public void SendMessage(string message)
@@ -553,14 +562,15 @@ namespace TrueCraft
 
                 Disconnect();
 
+                _socketPool?.Dispose();
+                _socketPool = null;
+                _connection?.Dispose();
+                _connection = null;
+
                 if (Disposed != null)
                     Disposed(this, null);
             }
 
-            _socketPool?.Dispose();
-            _socketPool = null;
-            _connection?.Dispose();
-            _connection = null;
         }
     }
 }
