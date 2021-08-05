@@ -84,7 +84,7 @@ namespace TrueCraft.Core.Windows
             }
         }
 
-        public virtual int MinecraftWasWrittenByFuckingIdiotsLength { get { return Length; } }
+        public virtual int Length2 { get { return Length; } }
 
         public bool Empty
         {

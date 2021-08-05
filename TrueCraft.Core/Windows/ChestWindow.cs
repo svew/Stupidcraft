@@ -99,7 +99,7 @@ namespace TrueCraft.Core.Windows
             }
         }
 
-        public override int MinecraftWasWrittenByFuckingIdiotsLength
+        public override int Length2
         {
             get
             {
