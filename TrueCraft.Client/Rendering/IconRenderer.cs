@@ -19,7 +19,7 @@ namespace TrueCraft.Client.Rendering
                     continue;
 
                 int[] indices;
-                VertexPositionNormalColorTexture[] vertices = BlockRenderer.RenderIcon(provider.ID, out indices);
+                VertexPositionNormalColorTexture[] vertices = BlockRenderer.RenderIcon(provider, out indices);
                 Mesh mesh = new Mesh(game, vertices, indices);
                 BlockMeshes[provider.ID] = mesh;
             }

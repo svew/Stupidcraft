@@ -139,5 +139,10 @@ namespace TrueCraft.Client.Rendering.Blocks
                     return CreateUniformCube(offset, BaseTexture, faces, indiciesOffset, out indicies, Color.White, lighting);
             }
         }
+
+        public override VertexPositionNormalColorTexture[] Render(Vector3 offset, Vector2[] texture, out int[] indices)
+        {
+            return base.Render(offset, BaseTexture, out indices);
+        }
     }
 }
