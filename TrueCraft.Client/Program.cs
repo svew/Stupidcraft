@@ -14,6 +14,8 @@ namespace TrueCraft.Client
         [STAThread]
         public static void Main(string[] args)
         {
+            WhoAmI.Answer = IAm.Client;
+
             UserSettings.Local = new UserSettings();
             UserSettings.Local.Load();
 

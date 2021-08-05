@@ -85,6 +85,7 @@ namespace TrueCraft
         
         public MultiplayerServer()
         {
+            TrueCraft.Core.WhoAmI.Answer = Core.IAm.Server;
             var reader = new PacketReader();
             PacketReader = reader;
             Clients = new List<IRemoteClient>();
