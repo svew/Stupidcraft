@@ -20,11 +20,11 @@ namespace TrueCraft.Core.Windows
                 Items[i] = ItemStack.EmptyStack;
         }
 
-        public int StartIndex { get; set; }
-        public int Length { get; set; }
-        public virtual int Width { get; set; }
-        public virtual int Height { get; set; }
-        public ItemStack[] Items { get; set; }
+        public int StartIndex { get; }
+        public int Length { get; }
+        public virtual int Width { get; }
+        public virtual int Height { get; }
+        public ItemStack[] Items { get; }
         public event EventHandler<WindowChangeEventArgs> WindowChange;
 
         public virtual ItemStack this[int index]

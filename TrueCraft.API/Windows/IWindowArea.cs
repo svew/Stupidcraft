@@ -6,11 +6,11 @@ namespace TrueCraft.API.Windows
     {
         event EventHandler<WindowChangeEventArgs> WindowChange;
 
-        int StartIndex { get; set; }
-        int Length { get; set; }
+        int StartIndex { get; }
+        int Length { get; }
         int Width { get; }
         int Height { get; }
-        ItemStack[] Items { get; set; }
+        ItemStack[] Items { get; }
 
         ItemStack this[int index] { get; set; }
 

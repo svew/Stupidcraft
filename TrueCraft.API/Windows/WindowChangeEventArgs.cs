@@ -7,8 +7,8 @@ namespace TrueCraft.API.Windows
 {
     public class WindowChangeEventArgs : EventArgs
     {
-        public int SlotIndex { get; set; }
-        public ItemStack Value { get; set; }
+        public int SlotIndex { get; }
+        public ItemStack Value { get; }
         public bool Handled { get; set; }
 
         public WindowChangeEventArgs(int slotIndex, ItemStack value)
