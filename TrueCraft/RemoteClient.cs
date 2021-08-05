@@ -331,8 +331,9 @@ namespace TrueCraft
                         }
                         catch (Exception ex)
                         {
-                            Server.Log(LogCategory.Debug, "Disconnecting client due to exception in network worker");
+                            Server.Log(LogCategory.Notice, "Disconnecting client due to exception in network worker");
                             Server.Log(LogCategory.Debug, ex.ToString());
+                            Server.Log(LogCategory.Debug, ex.StackTrace.ToString());
 
                             Server.DisconnectClient(this);
                         }

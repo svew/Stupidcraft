@@ -26,7 +26,7 @@ namespace TrueCraft.Launcher.Singleplayer
             };
             world.BlockRepository = Server.BlockRepository;
             Server.AddWorld(world);
-            Server.AddLogProvider(new ConsoleLogProvider());
+            Server.AddLogProvider(new ConsoleLogProvider(LogCategory.Notice | LogCategory.Warning | LogCategory.Error | LogCategory.Debug));
         }
 
         public void Initialize(ProgressNotification progressNotification = null)
