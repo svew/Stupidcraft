@@ -65,7 +65,7 @@ namespace TrueCraft.Core.Windows
             }
         }
 
-        public WindowArea Bench
+        private IWindowArea Bench
         {
             get
             {
