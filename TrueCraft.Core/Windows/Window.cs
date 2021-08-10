@@ -87,14 +87,6 @@ namespace TrueCraft.Core.Windows
 
         public virtual int Length2 { get { return Length; } }
 
-        public bool Empty
-        {
-            get
-            {
-                return !WindowAreas.Any(a => a.Items.Any(i => !i.Empty));
-            }
-        }
-
         public virtual ItemStack[] GetSlots()
         {
             int length = WindowAreas.Sum(area => area.Length);

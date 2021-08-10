@@ -32,7 +32,7 @@ namespace TrueCraft.API.Windows
         int Length { get; }
         int Length2 { get; }
         ItemStack this[int index] { get; set; }
-        bool Empty { get; }
+
         short[] ReadOnlySlots { get; }
 
         /// <summary>
