@@ -46,9 +46,13 @@ namespace TrueCraft.Client.Handlers
                 case WindowType.CraftingBench:
                     window = new CraftingBenchWindow(client.CraftingRepository, client.Inventory);
                     break;
+
+                case WindowType.Chest:
+                    window = new ChestWindow(client.Inventory, packet.TotalSlots == 2 * ChestWindow.ChestLength);
+                    break;
             }
 
-            // TODO: For any window type other than CraftingBench, window will be null.
+            // TODO: For any window type other than CraftingBench or Chest, window will be null.
             window.ID = packet.WindowID;
             client.CurrentWindow = window;
         }

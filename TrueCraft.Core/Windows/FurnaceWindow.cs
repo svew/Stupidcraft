@@ -81,7 +81,7 @@ namespace TrueCraft.Core.Windows
             }
         }
 
-        public override IWindowArea[] WindowAreas { get; protected set; }
+        public override IWindowArea[] WindowAreas { get; }
 
         public IWindowArea Ingredient 
         {

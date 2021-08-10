@@ -33,6 +33,8 @@ namespace TrueCraft.Client.Rendering
             Defaults.Add("gui/gui.png", Texture2D.FromFile(graphicsDevice, "Content/gui.png"));
             Defaults.Add("gui/icons.png", Texture2D.FromFile(graphicsDevice, "Content/icons.png"));
             Defaults.Add("gui/crafting.png", Texture2D.FromFile(graphicsDevice, "Content/crafting.png"));
+            Defaults.Add("gui/generic_27.png", Texture2D.FromFile(graphicsDevice, "Content/generic_27.png"));
+            Defaults.Add("gui/generic_54.png", Texture2D.FromFile(graphicsDevice, "Content/generic_54.png"));
             Defaults.Add("gui/furnace.png", Texture2D.FromFile(graphicsDevice, "Content/furnace.png"));
             Defaults.Add("gui/inventory.png", Texture2D.FromFile(graphicsDevice, "Content/inventory.png"));
             Defaults.Add("terrain/moon.png", Texture2D.FromFile(graphicsDevice, "Content/moon.png"));
@@ -142,7 +144,8 @@ namespace TrueCraft.Client.Rendering
             Texture2D result = null;
             TryGetTexture(key, out result);
             if (result == null)
-                throw new InvalidOperationException();
+                // TODO Load a default texture.
+                throw new InvalidOperationException($"Failed to find Texture {key}");
 
             return result;
         }

@@ -11,7 +11,7 @@ namespace TrueCraft.Core.Windows
 {
     public abstract class Window : IWindow, IDisposable, IEventSubject
     {
-        public abstract IWindowArea[] WindowAreas { get; protected set; }
+        public abstract IWindowArea[] WindowAreas { get; }
 
         public event EventHandler<WindowChangeEventArgs> WindowChange;
 

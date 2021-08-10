@@ -5,27 +5,31 @@ using TrueCraft.API;
 
 namespace TrueCraft.Core.Windows
 {
+    // TODO Refactoring: Encapsulates InventoryWindow, only uses some of it;
+    //          Copies information back and forth.  Confusing for maintenance.
     public class ChestWindow : Window
     {
-        public ChestWindow(InventoryWindow inventory, bool doubleChest = false)
+        public ChestWindow(InventoryWindow inventory, bool doubleChest)
         {
             DoubleChest = doubleChest;
             if (doubleChest)
             {
                 WindowAreas = new[]
                 {
-                    new WindowArea(ChestIndex, 54, 9, 3), // Chest
-                    new WindowArea(DoubleMainIndex, 27, 9, 3), // Main inventory
-                    new WindowArea(DoubleHotbarIndex, 9, 9, 1) // Hotbar
+                    new WindowArea(ChestIndex, 2 * ChestLength, ChestWidth, 2 * ChestHeight), // Chest
+                    new WindowArea(DoubleMainIndex, InventoryWindow.InventoryLength,
+                             InventoryWindow.InventoryWidth, InventoryWindow.InventoryHeight), // Main inventory
+                    new WindowArea(DoubleHotbarIndex, 9, 9, 1) // Hotbar TODO hard-coded constants
                 };
             }
             else
             {
                 WindowAreas = new[]
                 {
-                    new WindowArea(ChestIndex, 27, 9, 3), // Chest
-                    new WindowArea(MainIndex, 27, 9, 3), // Main inventory
-                    new WindowArea(HotbarIndex, 9, 9, 1) // Hotbar
+                    new WindowArea(ChestIndex, ChestLength, ChestWidth, ChestHeight), // Chest
+                    new WindowArea(MainIndex, InventoryWindow.InventoryLength,
+                             InventoryWindow.InventoryWidth, InventoryWindow.InventoryHeight), // Main inventory
+                    new WindowArea(HotbarIndex, 9, 9, 1) // Hotbar TODO hard-coded constants
                 };
             }
             inventory.MainInventory.CopyTo(MainInventory);
@@ -34,8 +38,8 @@ namespace TrueCraft.Core.Windows
             inventory.WindowChange += (sender, e) =>
             {
                 if (Copying) return;
-                if ((e.SlotIndex >= InventoryWindow.MainIndex && e.SlotIndex < InventoryWindow.MainIndex + inventory.MainInventory.Length)
-                    || (e.SlotIndex >= InventoryWindow.HotbarIndex && e.SlotIndex < InventoryWindow.HotbarIndex + inventory.Hotbar.Length))
+                if (InventoryWindow.IsPlayerInventorySlot(e.SlotIndex)
+                    || InventoryWindow.IsHotbarIndex(e.SlotIndex))
                 {
                     inventory.MainInventory.CopyTo(MainInventory);
                     inventory.Hotbar.CopyTo(Hotbar);
@@ -47,14 +51,20 @@ namespace TrueCraft.Core.Windows
         }
 
         public const int ChestIndex = 0;
+        public const int ChestWidth = 9;
+        public const int ChestHeight = 3;
+        public const int ChestLength = ChestWidth * ChestHeight;
+
         public const int DoubleChestSecondaryIndex = 27;
         public const int MainIndex = 27;
         public const int HotbarIndex = 54;
         public const int DoubleMainIndex = 54;
         public const int DoubleHotbarIndex = 81;
 
-        public bool DoubleChest { get; set; }
-        public override IWindowArea[] WindowAreas { get; protected set; }
+        public bool DoubleChest { get; }
+
+        public override IWindowArea[] WindowAreas { get; }
+
         private bool Copying { get; set; }
 
         public override string Name

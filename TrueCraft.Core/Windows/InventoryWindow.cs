@@ -16,7 +16,7 @@ namespace TrueCraft.Core.Windows
                 {
                     new CraftingWindowArea(craftingRepository, CraftingOutputIndex),
                     new ArmorWindowArea(ArmorIndex),
-                    new WindowArea(MainIndex, 27, 9, 3), // Main inventory
+                    new WindowArea(MainIndex, InventoryLength, InventoryWidth, InventoryHeight), // Main inventory
                     new WindowArea(HotbarIndex, 9, 9, 1) // Hotbar
                 };
             foreach (var area in WindowAreas)
@@ -25,12 +25,27 @@ namespace TrueCraft.Core.Windows
         }
 
         #region Variables
+        public const int InventoryWidth = 9;
+        public const int InventoryHeight = 3;
+        public const int InventoryLength = InventoryWidth * InventoryHeight;
 
         public const short HotbarIndex = 36;
+        public const short HotbarLength = 9;
+
         public const short CraftingGridIndex = 1;
         public const short CraftingOutputIndex = 0;
         public const short ArmorIndex = 5;
         public const short MainIndex = 9;
+
+        public static bool IsPlayerInventorySlot(int slotIndex)
+        {
+            return slotIndex >= MainIndex && slotIndex < MainIndex + InventoryLength;
+        }
+
+        public static bool IsHotbarIndex(int slotIndex)
+        {
+            return slotIndex >= HotbarIndex && slotIndex < HotbarIndex + HotbarLength;
+        }
 
         public override string Name
         {
@@ -56,7 +71,7 @@ namespace TrueCraft.Core.Windows
             }
         }
 
-        public override IWindowArea[] WindowAreas { get; protected set; }
+        public override IWindowArea[] WindowAreas { get; }
 
         #region Properties
 
