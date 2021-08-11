@@ -14,7 +14,7 @@ namespace TrueCraft.Core.Windows
         {
             WindowAreas = new[]
                 {
-                    new CraftingWindowArea(craftingRepository, CraftingOutputIndex),
+                    new CraftingWindowArea(craftingRepository, CraftingOutputIndex, 2, 2),
                     new ArmorWindowArea(ArmorIndex),
                     new WindowArea(MainIndex, InventoryLength, InventoryWidth, InventoryHeight), // Main inventory
                     new WindowArea(HotbarIndex, 9, 9, 1) // Hotbar

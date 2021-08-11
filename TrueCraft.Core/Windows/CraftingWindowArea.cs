@@ -10,7 +10,7 @@ namespace TrueCraft.Core.Windows
         public ICraftingRepository Repository { get; set; }
         public bool Process { get; set; }
 
-        public CraftingWindowArea(ICraftingRepository repository, int startIndex, int width = 2, int height = 2)
+        public CraftingWindowArea(ICraftingRepository repository, int startIndex, int width, int height)
             : base(startIndex, width * height + 1, width, height)
         {
             Repository = repository;
