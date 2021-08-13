@@ -26,7 +26,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Castle.Core" Version="4.4.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.10.0" />
+    <PackageReference Include="Moq" Version="4.16.1" />
     <PackageReference Include="NUnit" Version="3.13.2" />
     <PackageReference Include="NUnit3TestAdapter" Version="4.0.0" />
     <PackageReference Include="coverlet.collector" Version="3.1.0"><IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -34,4 +36,10 @@
 </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="Logic\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Logic\" />
+  </ItemGroup>
 </Project>
