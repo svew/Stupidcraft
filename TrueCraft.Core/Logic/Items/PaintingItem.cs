@@ -5,7 +5,7 @@ using TrueCraft.Core.Logic.Blocks;
 
 namespace TrueCraft.Core.Logic.Items
 {
-    public class PaintingItem : ItemProvider, ICraftingRecipe
+    public class PaintingItem : ItemProvider
     {
         public static readonly short ItemID = 0x141;
 
@@ -17,34 +17,5 @@ namespace TrueCraft.Core.Logic.Items
         }
 
         public override string DisplayName { get { return "Painting"; } }
-
-        public ItemStack[,] Pattern
-        {
-            get
-            {
-                return new[,]
-                {
-                    { new ItemStack(StickItem.ItemID), new ItemStack(StickItem.ItemID), new ItemStack(StickItem.ItemID) },
-                    { new ItemStack(StickItem.ItemID), new ItemStack(WoolBlock.BlockID), new ItemStack(StickItem.ItemID) },
-                    { new ItemStack(StickItem.ItemID), new ItemStack(StickItem.ItemID), new ItemStack(StickItem.ItemID) }
-                };
-            }
-        }
-
-        public ItemStack Output
-        {
-            get
-            {
-                return new ItemStack(ItemID);
-            }
-        }
-
-        public bool SignificantMetadata
-        {
-            get
-            {
-                return true;
-            }
-        }
     }
 }

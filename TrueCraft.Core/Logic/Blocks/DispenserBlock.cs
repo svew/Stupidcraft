@@ -7,7 +7,7 @@ using TrueCraft.API.World;
 
 namespace TrueCraft.Core.Logic.Blocks
 {
-    public class DispenserBlock : BlockProvider, ICraftingRecipe
+    public class DispenserBlock : BlockProvider
     {
         public static readonly byte BlockID = 0x17;
         
@@ -24,41 +24,6 @@ namespace TrueCraft.Core.Logic.Blocks
         public override Tuple<int, int> GetTextureMap(byte metadata)
         {
             return new Tuple<int, int>(13, 2);
-        }
-
-        public ItemStack[,] Pattern
-        {
-            get
-            {
-                return new[,]
-                {
-                    {
-                        new ItemStack(CobblestoneBlock.BlockID),
-                        new ItemStack(CobblestoneBlock.BlockID),
-                        new ItemStack(CobblestoneBlock.BlockID)
-                    },
-                    {
-                        new ItemStack(CobblestoneBlock.BlockID),
-                        new ItemStack(BowItem.ItemID),
-                        new ItemStack(CobblestoneBlock.BlockID)
-                    },
-                    {
-                        new ItemStack(CobblestoneBlock.BlockID),
-                        new ItemStack(RedstoneItem.ItemID),
-                        new ItemStack(CobblestoneBlock.BlockID)
-                    }
-                };
-            }
-        }
-
-        public ItemStack Output
-        {
-            get { return new ItemStack(BlockID); }
-        }
-
-        public bool SignificantMetadata
-        {
-            get { return false; }
         }
 
         public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)

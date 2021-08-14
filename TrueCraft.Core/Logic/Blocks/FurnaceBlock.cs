@@ -13,7 +13,7 @@ using TrueCraft.Core.Entities;
 
 namespace TrueCraft.Core.Logic.Blocks
 {
-    public class FurnaceBlock : BlockProvider, ICraftingRecipe
+    public class FurnaceBlock : BlockProvider
     {
         protected class FurnaceState
         {
@@ -338,41 +338,6 @@ namespace TrueCraft.Core.Logic.Blocks
         public override Tuple<int, int> GetTextureMap(byte metadata)
         {
             return new Tuple<int, int>(13, 2);
-        }
-
-        public ItemStack[,] Pattern
-        {
-            get
-            {
-                return new[,]
-                {
-                    {
-                        new ItemStack(CobblestoneBlock.BlockID),
-                        new ItemStack(CobblestoneBlock.BlockID),
-                        new ItemStack(CobblestoneBlock.BlockID)
-                    },
-                    {
-                        new ItemStack(CobblestoneBlock.BlockID),
-                        ItemStack.EmptyStack,
-                        new ItemStack(CobblestoneBlock.BlockID)
-                    },
-                    {
-                        new ItemStack(CobblestoneBlock.BlockID),
-                        new ItemStack(CobblestoneBlock.BlockID),
-                        new ItemStack(CobblestoneBlock.BlockID)
-                    }
-                };
-            }
-        }
-
-        public ItemStack Output
-        {
-            get { return new ItemStack(BlockID); }
-        }
-
-        public bool SignificantMetadata
-        {
-            get { return false; }
         }
 
         public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)

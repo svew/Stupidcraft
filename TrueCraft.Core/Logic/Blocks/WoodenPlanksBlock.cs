@@ -4,7 +4,7 @@ using TrueCraft.API.Logic;
 
 namespace TrueCraft.Core.Logic.Blocks
 {
-    public class WoodenPlanksBlock : BlockProvider, ICraftingRecipe, IBurnableItem
+    public class WoodenPlanksBlock : BlockProvider, IBurnableItem
     {
         public static readonly byte BlockID = 0x05;
         
@@ -33,30 +33,6 @@ namespace TrueCraft.Core.Logic.Blocks
         public override Tuple<int, int> GetTextureMap(byte metadata)
         {
             return new Tuple<int, int>(4, 0);
-        }
-
-        public ItemStack[,] Pattern
-        {
-            get
-            {
-                return new[,]
-                {
-                    { new ItemStack(WoodBlock.BlockID) }
-                };
-            }
-        }
-
-        public ItemStack Output
-        {
-            get
-            {
-                return new ItemStack(BlockID, 4);
-            }
-        }
-
-        public bool SignificantMetadata
-        {
-            get { return false; }
         }
     }
 }

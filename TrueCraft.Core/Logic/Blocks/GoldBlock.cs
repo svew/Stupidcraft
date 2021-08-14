@@ -5,7 +5,7 @@ using TrueCraft.Core.Logic.Items;
 
 namespace TrueCraft.Core.Logic.Blocks
 {
-    public class GoldBlock : BlockProvider, ICraftingRecipe
+    public class GoldBlock : BlockProvider
     {
         public static readonly byte BlockID = 0x29;
         
@@ -22,29 +22,6 @@ namespace TrueCraft.Core.Logic.Blocks
         public override Tuple<int, int> GetTextureMap(byte metadata)
         {
             return new Tuple<int, int>(7, 1);
-        }
-
-        public ItemStack[,] Pattern
-        {
-            get
-            {
-                return new [,]
-                {
-                    {new ItemStack(GoldIngotItem.ItemID), new ItemStack(GoldIngotItem.ItemID), new ItemStack(GoldIngotItem.ItemID)},
-                    {new ItemStack(GoldIngotItem.ItemID), new ItemStack(GoldIngotItem.ItemID), new ItemStack(GoldIngotItem.ItemID)},
-                    {new ItemStack(GoldIngotItem.ItemID), new ItemStack(GoldIngotItem.ItemID), new ItemStack(GoldIngotItem.ItemID)}
-                };
-            }
-        }
-
-        public ItemStack Output
-        {
-            get { return new ItemStack(BlockID); }
-        }
-
-        public bool SignificantMetadata
-        {
-            get { return false; }
         }
 
         public override ToolMaterial EffectiveToolMaterials

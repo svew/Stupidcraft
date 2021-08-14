@@ -11,7 +11,7 @@ using TrueCraft.Core.Entities;
 
 namespace TrueCraft.Core.Logic.Blocks
 {
-    public class ChestBlock : BlockProvider, ICraftingRecipe, IBurnableItem
+    public class ChestBlock : BlockProvider, IBurnableItem
     {
         public static readonly byte BlockID = 0x36;
         
@@ -40,41 +40,6 @@ namespace TrueCraft.Core.Logic.Blocks
         public override Tuple<int, int> GetTextureMap(byte metadata)
         {
             return new Tuple<int, int>(10, 1);
-        }
-
-        public ItemStack[,] Pattern
-        {
-            get
-            {
-                return new[,]
-                {
-                    {
-                        new ItemStack(WoodenPlanksBlock.BlockID),
-                        new ItemStack(WoodenPlanksBlock.BlockID),
-                        new ItemStack(WoodenPlanksBlock.BlockID)
-                    },
-                    {
-                        new ItemStack(WoodenPlanksBlock.BlockID),
-                        ItemStack.EmptyStack,
-                        new ItemStack(WoodenPlanksBlock.BlockID)
-                    },
-                    {
-                        new ItemStack(WoodenPlanksBlock.BlockID),
-                        new ItemStack(WoodenPlanksBlock.BlockID),
-                        new ItemStack(WoodenPlanksBlock.BlockID)
-                    }
-                };
-            }
-        }
-
-        public ItemStack Output
-        {
-            get { return new ItemStack(BlockID); }
-        }
-
-        public bool SignificantMetadata
-        {
-            get { return false; }
         }
 
         private static readonly Vector3i[] AdjacentBlocks =

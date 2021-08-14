@@ -4,7 +4,7 @@ using TrueCraft.API;
 
 namespace TrueCraft.Core.Logic.Items
 {
-    public class SugarItem : ItemProvider, ICraftingRecipe
+    public class SugarItem : ItemProvider
     {
         public static readonly short ItemID = 0x161;
 
@@ -16,26 +16,5 @@ namespace TrueCraft.Core.Logic.Items
         }
 
         public override string DisplayName { get { return "Sugar"; } }
-
-        public ItemStack[,] Pattern
-        {
-            get
-            {
-                return new[,]
-                {
-                    { new ItemStack(SugarCanesItem.ItemID) }
-                };
-            }
-        }
-
-        public ItemStack Output
-        {
-            get { return new ItemStack(ItemID); }
-        }
-
-        public bool SignificantMetadata
-        {
-            get { return false; }
-        }
     }
 }

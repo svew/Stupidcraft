@@ -5,7 +5,7 @@ using TrueCraft.Core.Logic.Items;
 
 namespace TrueCraft.Core.Logic.Blocks
 {
-    public class RedstoneTorchBlock : TorchBlock, ICraftingRecipe
+    public class RedstoneTorchBlock : TorchBlock
     {
         public static readonly new byte BlockID = 0x4C;
         
@@ -32,34 +32,6 @@ namespace TrueCraft.Core.Logic.Blocks
         public override Tuple<int, int> GetTextureMap(byte metadata)
         {
             return new Tuple<int, int>(3, 6);
-        }
-
-        public override ItemStack[,] Pattern
-        {
-            get
-            {
-                return new[,]
-                {
-                    { new ItemStack(RedstoneDustBlock.BlockID) },
-                    { new ItemStack(StickItem.ItemID) }
-                };
-            }
-        }
-
-        public override ItemStack Output
-        {
-            get
-            {
-                return new ItemStack(BlockID);
-            }
-        }
-
-        public override bool SignificantMetadata
-        {
-            get
-            {
-                return false;
-            }
         }
     }
 

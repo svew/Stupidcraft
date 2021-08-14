@@ -7,7 +7,7 @@ using TrueCraft.API.Networking;
 
 namespace TrueCraft.Core.Logic.Blocks
 {
-    public class LadderBlock : BlockProvider, ICraftingRecipe
+    public class LadderBlock : BlockProvider
     {
         /// <summary>
         /// The side of the block that this ladder is attached to (i.e. "the north side")
@@ -102,41 +102,6 @@ namespace TrueCraft.Core.Logic.Blocks
                 item.Count--;
                 user.Inventory[user.SelectedSlot] = item;
             }
-        }
-
-        public ItemStack[,] Pattern
-        {
-            get
-            {
-                return new[,]
-                {
-                    {
-                        new ItemStack(StickItem.ItemID),
-                        ItemStack.EmptyStack,
-                        new ItemStack(StickItem.ItemID)
-                    },
-                    {
-                        new ItemStack(StickItem.ItemID),
-                        new ItemStack(StickItem.ItemID),
-                        new ItemStack(StickItem.ItemID)
-                    },
-                    {
-                        new ItemStack(StickItem.ItemID),
-                        ItemStack.EmptyStack,
-                        new ItemStack(StickItem.ItemID)
-                    }
-                };
-            }
-        }
-
-        public ItemStack Output
-        {
-            get { return new ItemStack(BlockID); }
-        }
-
-        public bool SignificantMetadata
-        {
-            get { return false; }
         }
     }
 }

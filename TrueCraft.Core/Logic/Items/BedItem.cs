@@ -7,7 +7,7 @@ using TrueCraft.Core.Logic.Blocks;
 
 namespace TrueCraft.Core.Logic.Items
 {
-    public class BedItem : ItemProvider, ICraftingRecipe
+    public class BedItem : ItemProvider
     {
         public static readonly short ItemID = 0x163;
 
@@ -63,39 +63,6 @@ namespace TrueCraft.Core.Logic.Items
             user.Server.BlockUpdatesEnabled = true;
             item.Count--;
             user.Inventory[user.SelectedSlot] = item;
-        }
-
-        public ItemStack[,] Pattern
-        {
-            get
-            {
-                return new[,]
-                {
-                    {
-                        new ItemStack(WoolBlock.BlockID),
-                        new ItemStack(WoolBlock.BlockID),
-                        new ItemStack(WoolBlock.BlockID),
-                    },
-                    {
-                        new ItemStack(WoodenPlanksBlock.BlockID),
-                        new ItemStack(WoodenPlanksBlock.BlockID),
-                        new ItemStack(WoodenPlanksBlock.BlockID),
-                    }
-                };
-            }
-        }
-
-        public ItemStack Output
-        {
-            get
-            {
-                return new ItemStack(ItemID);
-            }
-        }
-
-        public bool SignificantMetadata
-        {
-            get { return false; }
         }
     }
 }

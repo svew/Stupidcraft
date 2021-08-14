@@ -5,7 +5,7 @@ using TrueCraft.Core.Logic.Blocks;
 
 namespace TrueCraft.Core.Logic.Items
 {
-    public class IronIngotItem : ItemProvider, ICraftingRecipe
+    public class IronIngotItem : ItemProvider
     {
         public static readonly short ItemID = 0x109;
 
@@ -17,32 +17,5 @@ namespace TrueCraft.Core.Logic.Items
         }
 
         public override string DisplayName { get { return "Iron Ingot"; } }
-
-        public ItemStack[,] Pattern
-        {
-            get
-            {
-                return new[,]
-                {
-                    { new ItemStack(IronBlock.BlockID) }
-                };
-            }
-        }
-
-        public ItemStack Output
-        {
-            get
-            {
-                return new ItemStack(ItemID, 9);
-            }
-        }
-
-        public bool SignificantMetadata
-        {
-            get
-            {
-                return true;
-            }
-        }
     }
 }

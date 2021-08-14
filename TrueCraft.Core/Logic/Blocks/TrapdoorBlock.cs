@@ -6,7 +6,7 @@ using TrueCraft.API.Networking;
 
 namespace TrueCraft.Core.Logic.Blocks
 {
-    public class TrapdoorBlock : BlockProvider, ICraftingRecipe, IBurnableItem
+    public class TrapdoorBlock : BlockProvider, IBurnableItem
     {
         public enum TrapdoorDirection
         {
@@ -98,34 +98,6 @@ namespace TrueCraft.Core.Logic.Blocks
         protected override ItemStack[] GetDrop(BlockDescriptor descriptor, ItemStack item)
         {
             return new[] { new ItemStack(ID) };
-        }
-
-        public ItemStack[,] Pattern
-        {
-            get
-            {
-                return new[,]
-                {
-                    { new ItemStack(WoodenPlanksBlock.BlockID), new ItemStack(WoodenPlanksBlock.BlockID), new ItemStack(WoodenPlanksBlock.BlockID) },
-                    { new ItemStack(WoodenPlanksBlock.BlockID), new ItemStack(WoodenPlanksBlock.BlockID), new ItemStack(WoodenPlanksBlock.BlockID) }
-                };
-            }
-        }
-
-        public ItemStack Output
-        {
-            get
-            {
-                return new ItemStack(BlockID);
-            }
-        }
-
-        public bool SignificantMetadata
-        {
-            get
-            {
-                return false;
-            }
         }
     }
 }

@@ -38,13 +38,12 @@ namespace TrueCraft.Core.Logic
                 Recipes.Add(new CraftingRecipe(recipe));
         }
 
-        public ICraftingRecipe GetRecipe(IWindowArea craftingArea)
+        public ICraftingRecipe GetRecipe(CraftingPattern pattern)
         {
-            foreach (var r in Recipes)
-            {
-                if (MatchRecipe(r, craftingArea))
+            foreach (ICraftingRecipe r in Recipes)
+                if (r.Pattern == pattern)
                     return r;
-            }
+
             return null;
         }
 
@@ -66,35 +65,6 @@ namespace TrueCraft.Core.Logic
                 }
             }
             return true;
-        }
-
-        private bool MatchRecipe(ICraftingRecipe recipe, IWindowArea craftingArea)
-        {
-            for (int x = 0; x < craftingArea.Width; x++)
-            {
-                for (int y = 0; y < craftingArea.Height; y++)
-                {
-                    if (TestRecipe(craftingArea, recipe, x, y))
-                    {
-                        // Check to make sure there aren't any sneaky unused items in the grid
-                        int minX = x, maxX = x + recipe.Pattern.GetLength(1);
-                        int minY = y, maxY = y + recipe.Pattern.GetLength(0);
-                        for (int _x = 0; _x < craftingArea.Width; _x++)
-                        {
-                            for (int _y = 0; _y < craftingArea.Height; _y++)
-                            {
-                                if (_x < minX || _x >= maxX || _y < minY || _y >= maxY)
-                                {
-                                    if (!craftingArea[(_y * craftingArea.Width) + _x].Empty)
-                                        return false;
-                                }
-                            }
-                        }
-                        return true;
-                    }
-                }
-            }
-            return false;
         }
     }
 }

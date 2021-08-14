@@ -7,7 +7,7 @@ using TrueCraft.Core.Logic.Blocks;
 
 namespace TrueCraft.Core.Logic.Items
 {
-    public class CakeItem : FoodItem, ICraftingRecipe // TODO: This isn't really a FoodItem
+    public class CakeItem : FoodItem // TODO: This isn't really a FoodItem
     {
         public static readonly short ItemID = 0x162;
 
@@ -22,35 +22,6 @@ namespace TrueCraft.Core.Logic.Items
         public override float Restores { get { return 1.5f; } }
 
         public override string DisplayName { get { return "Cake"; } }
-
-        public ItemStack[,] Pattern
-        {
-            get
-            {
-                return new[,]
-                {
-                    { new ItemStack(MilkItem.ItemID), new ItemStack(MilkItem.ItemID), new ItemStack(MilkItem.ItemID) },
-                    { new ItemStack(SugarItem.ItemID), new ItemStack(EggItem.ItemID), new ItemStack(SugarItem.ItemID) },
-                    { new ItemStack(WheatItem.ItemID), new ItemStack(WheatItem.ItemID), new ItemStack(WheatItem.ItemID) }
-                };
-            }
-        }
-
-        public ItemStack Output
-        {
-            get
-            {
-                return new ItemStack(ItemID);
-            }
-        }
-
-        public bool SignificantMetadata
-        {
-            get
-            {
-                return false;
-            }
-        }
 
         public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user)
         {

@@ -5,7 +5,7 @@ using TrueCraft.Core.Logic.Blocks;
 
 namespace TrueCraft.Core.Logic.Items
 {
-    public class BoatItem : ItemProvider, ICraftingRecipe
+    public class BoatItem : ItemProvider
     {
         public static readonly short ItemID = 0x14D;
 
@@ -19,38 +19,5 @@ namespace TrueCraft.Core.Logic.Items
         public override sbyte MaximumStack { get { return 1; } }
 
         public override string DisplayName { get { return "Boat"; } }
-
-        public virtual ItemStack[,] Pattern
-        {
-            get
-            {
-                return new[,]
-                {
-                    {
-                        new ItemStack(WoodenPlanksBlock.BlockID),
-                        ItemStack.EmptyStack,
-                        new ItemStack(WoodenPlanksBlock.BlockID),
-                    },
-                    {
-                        new ItemStack(WoodenPlanksBlock.BlockID),
-                        new ItemStack(WoodenPlanksBlock.BlockID),
-                        new ItemStack(WoodenPlanksBlock.BlockID)
-                    }
-                };
-            }
-        }
-
-        public ItemStack Output
-        {
-            get
-            {
-                return new ItemStack(ItemID);
-            }
-        }
-
-        public bool SignificantMetadata
-        {
-            get { return false; }
-        }
     }
 }

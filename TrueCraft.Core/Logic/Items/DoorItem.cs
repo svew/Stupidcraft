@@ -10,7 +10,7 @@ using TrueCraft.API.Networking;
 
 namespace TrueCraft.Core.Logic.Items
 {
-    public abstract class DoorItem : ItemProvider, ICraftingRecipe
+    public abstract class DoorItem : ItemProvider
     {
         [Flags]
         public enum DoorFlags
@@ -28,36 +28,6 @@ namespace TrueCraft.Core.Logic.Items
         protected abstract byte BlockID { get; }
 
         public override sbyte MaximumStack { get { return 1; } }
-    
-        public ItemStack[,] Pattern
-        {
-            get
-            {
-                var baseMaterial = (this is IronDoorItem) ? IronIngotItem.ItemID : WoodenPlanksBlock.BlockID;
-                return new[,]
-                {
-                    { new ItemStack(baseMaterial), new ItemStack(baseMaterial) },
-                    { new ItemStack(baseMaterial), new ItemStack(baseMaterial) },
-                    { new ItemStack(baseMaterial), new ItemStack(baseMaterial) }
-                };
-            }
-        }
-
-        public ItemStack Output
-        {
-            get
-            {
-                return new ItemStack(ID);
-            }
-        }
-
-        public bool SignificantMetadata
-        {
-            get
-            {
-                return false;
-            }
-        }
 
         public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user)
         {

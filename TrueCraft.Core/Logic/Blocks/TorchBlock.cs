@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace TrueCraft.Core.Logic.Blocks
 {
-    public class TorchBlock : BlockProvider, ICraftingRecipe
+    public class TorchBlock : BlockProvider
     {
         public enum TorchDirection
         {
@@ -141,34 +141,6 @@ namespace TrueCraft.Core.Logic.Blocks
         public override Tuple<int, int> GetTextureMap(byte metadata)
         {
             return new Tuple<int, int>(0, 5);
-        }
-            
-        public virtual ItemStack[,] Pattern
-        {
-            get
-            {
-                return new[,]
-                {
-                    { new ItemStack(CoalItem.ItemID) },
-                    { new ItemStack(StickItem.ItemID) }
-                };
-            }
-        }
-
-        public virtual ItemStack Output
-        {
-            get
-            {
-                return new ItemStack(TorchBlock.BlockID, 4);
-            }
-        }
-
-        public virtual bool SignificantMetadata
-        {
-            get
-            {
-                return false;
-            }
         }
     }
 }

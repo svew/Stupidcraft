@@ -24,14 +24,6 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override byte LightOpacity { get { return 255; } }
 
-        public virtual bool SignificantMetadata
-        {
-            get
-            {
-                return false;
-            }
-        }
-
         public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
         {
             byte meta = 0;
@@ -57,7 +49,7 @@ namespace TrueCraft.Core.Logic.Blocks
         }
     }
 
-    public class WoodenStairsBlock : StairsBlock, ICraftingRecipe, IBurnableItem
+    public class WoodenStairsBlock : StairsBlock, IBurnableItem
     {
         public static readonly byte BlockID = 0x35;
         
@@ -78,30 +70,9 @@ namespace TrueCraft.Core.Logic.Blocks
                 return SoundEffectClass.Wood;
             }
         }
-
-        public ItemStack[,] Pattern
-        {
-            get
-            {
-                return new[,]
-                {
-                    { new ItemStack(WoodenPlanksBlock.BlockID), ItemStack.EmptyStack, ItemStack.EmptyStack },
-                    { new ItemStack(WoodenPlanksBlock.BlockID), new ItemStack(WoodenPlanksBlock.BlockID), ItemStack.EmptyStack },
-                    { new ItemStack(WoodenPlanksBlock.BlockID), new ItemStack(WoodenPlanksBlock.BlockID), new ItemStack(WoodenPlanksBlock.BlockID) }
-                };
-            }
-        }
-
-        public ItemStack Output
-        {
-            get
-            {
-                return new ItemStack(BlockID);
-            }
-        }
     }
 
-    public class StoneStairsBlock : StairsBlock, ICraftingRecipe
+    public class StoneStairsBlock : StairsBlock
     {
         public static readonly byte BlockID = 0x43;
 
@@ -110,26 +81,5 @@ namespace TrueCraft.Core.Logic.Blocks
         public override double BlastResistance { get { return 30; } }
 
         public override string DisplayName { get { return "Stone Stairs"; } }
-
-        public ItemStack[,] Pattern
-        {
-            get
-            {
-                return new[,]
-                {
-                    { new ItemStack(StoneBlock.BlockID), ItemStack.EmptyStack, ItemStack.EmptyStack },
-                    { new ItemStack(StoneBlock.BlockID), new ItemStack(StoneBlock.BlockID), ItemStack.EmptyStack },
-                    { new ItemStack(StoneBlock.BlockID), new ItemStack(StoneBlock.BlockID), new ItemStack(StoneBlock.BlockID) }
-                };
-            }
-        }
-
-        public ItemStack Output
-        {
-            get
-            {
-                return new ItemStack(BlockID);
-            }
-        }
     }
 }

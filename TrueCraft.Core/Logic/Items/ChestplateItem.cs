@@ -8,55 +8,9 @@ using TrueCraft.Core.Logic.Blocks;
 
 namespace TrueCraft.Core.Logic.Items
 {
-    public abstract class ChestplateItem : ArmorItem, ICraftingRecipe
+    public abstract class ChestplateItem : ArmorItem
     {
         public override sbyte MaximumStack { get { return 1; } }
-        
-        public ItemStack[,] Pattern
-        {
-            get
-            {
-                short baseMaterial = 0;
-                switch (Material)
-                {
-                    case ArmorMaterial.Diamond:
-                        baseMaterial = DiamondItem.ItemID;
-                        break;
-                    case ArmorMaterial.Gold:
-                        baseMaterial = GoldIngotItem.ItemID;
-                        break;
-                    case ArmorMaterial.Iron:
-                        baseMaterial = IronIngotItem.ItemID;
-                        break;
-                    case ArmorMaterial.Leather:
-                        baseMaterial = LeatherItem.ItemID;
-                        break;
-                }
-
-                return new[,]
-                {
-                    { new ItemStack(baseMaterial), ItemStack.EmptyStack, new ItemStack(baseMaterial) },
-                    { new ItemStack(baseMaterial), new ItemStack(baseMaterial), new ItemStack(baseMaterial) },
-                    { new ItemStack(baseMaterial), new ItemStack(baseMaterial), new ItemStack(baseMaterial) }
-                };
-            }
-        }
-
-        public ItemStack Output
-        {
-            get
-            {
-                return new ItemStack(ID);
-            }
-        }
-
-        public bool SignificantMetadata
-        {
-            get
-            {
-                return false;
-            }
-        }
     }
 
     public class LeatherTunicItem : ChestplateItem

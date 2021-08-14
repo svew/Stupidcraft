@@ -5,7 +5,7 @@ using TrueCraft.Core.Logic.Items;
 
 namespace TrueCraft.Core.Logic.Blocks
 {
-    public class LapisLazuliBlock : BlockProvider, ICraftingRecipe
+    public class LapisLazuliBlock : BlockProvider
     {
         public static readonly byte BlockID = 0x16;
         
@@ -22,41 +22,6 @@ namespace TrueCraft.Core.Logic.Blocks
         public override Tuple<int, int> GetTextureMap(byte metadata)
         {
             return new Tuple<int, int>(0, 9);
-        }
-
-        public ItemStack[,] Pattern
-        {
-            get
-            {
-                return new [,]
-                {
-                    {
-                        new ItemStack(DyeItem.ItemID, 1, (short)DyeItem.DyeType.LapisLazuli),
-                        new ItemStack(DyeItem.ItemID, 1, (short)DyeItem.DyeType.LapisLazuli),
-                        new ItemStack(DyeItem.ItemID, 1, (short)DyeItem.DyeType.LapisLazuli)
-                    },
-                    {
-                        new ItemStack(DyeItem.ItemID, 1, (short)DyeItem.DyeType.LapisLazuli),
-                        new ItemStack(DyeItem.ItemID, 1, (short)DyeItem.DyeType.LapisLazuli),
-                        new ItemStack(DyeItem.ItemID, 1, (short)DyeItem.DyeType.LapisLazuli)
-                    },
-                    {
-                        new ItemStack(DyeItem.ItemID, 1, (short)DyeItem.DyeType.LapisLazuli),
-                        new ItemStack(DyeItem.ItemID, 1, (short)DyeItem.DyeType.LapisLazuli),
-                        new ItemStack(DyeItem.ItemID, 1, (short)DyeItem.DyeType.LapisLazuli)
-                    }
-                };
-            }
-        }
-
-        public ItemStack Output
-        {
-            get { return new ItemStack(BlockID); }
-        }
-
-        public bool SignificantMetadata
-        {
-            get { return true; }
         }
 
         public override ToolMaterial EffectiveToolMaterials
