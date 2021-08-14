@@ -97,12 +97,7 @@ namespace TrueCraft.Core.Logic
 
         protected virtual ItemStack[] GetDrop(BlockDescriptor descriptor, ItemStack item)
         {
-            short meta;
-            if (this is ICraftingRecipe)
-                meta = (short)((this as ICraftingRecipe).SignificantMetadata ? descriptor.Metadata : 0);
-            else
-                meta = descriptor.Metadata;
-            return new[] { new ItemStack(descriptor.ID, 1, meta) };
+            return new[] { new ItemStack(descriptor.ID, 1, descriptor.Metadata) };
         }
 
         public virtual void ItemUsedOnEntity(ItemStack item, IEntity usedOn, IWorld world, IRemoteClient user)
