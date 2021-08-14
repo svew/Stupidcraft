@@ -166,6 +166,12 @@ namespace TrueCraft.API.Logic
         }
         #endregion  // Construction
 
+        public int Width { get => _pattern.GetLength(0); }
+
+        public int Height { get => _pattern.GetLength(1); }
+
+        public ItemStack this[int x, int y] { get => _pattern[x, y]; }
+
         #region object overrides
         public override bool Equals(object obj)
         {

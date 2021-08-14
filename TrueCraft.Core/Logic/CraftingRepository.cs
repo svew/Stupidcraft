@@ -46,25 +46,5 @@ namespace TrueCraft.Core.Logic
 
             return null;
         }
-
-        public bool TestRecipe(IWindowArea craftingArea, ICraftingRecipe recipe, int x, int y)
-        {
-            if (x + recipe.Pattern.GetLength(1) > craftingArea.Width || y + recipe.Pattern.GetLength(0) > craftingArea.Height)
-                return false;
-            for (int _x = 0; _x < recipe.Pattern.GetLength(1); _x++)
-            {
-                for (int _y = 0; _y < recipe.Pattern.GetLength(0); _y++)
-                {
-                    var supplied = craftingArea[(y + _y) * craftingArea.Width + (x + _x)];
-                    var required = recipe.Pattern[_y, _x];
-                    if (supplied.ID != required.ID || supplied.Count < required.Count ||
-                        (recipe.SignificantMetadata && (required.Metadata != supplied.Metadata)))
-                    {
-                        return false;
-                    }
-                }
-            }
-            return true;
-        }
     }
 }

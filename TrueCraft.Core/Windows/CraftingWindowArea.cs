@@ -4,30 +4,35 @@ using TrueCraft.API.Logic;
 
 namespace TrueCraft.Core.Windows
 {
-    public class CraftingWindowArea : WindowArea
+    public class CraftingWindowArea : WindowArea, ICraftingArea
     {
         public static readonly int CraftingOutput = 0;
-        public ICraftingRepository Repository { get; set; }
+
+        private ICraftingRepository _repository;
+
         public bool Process { get; set; }
 
         public CraftingWindowArea(ICraftingRepository repository, int startIndex, int width, int height)
             : base(startIndex, width * height + 1, width, height)
         {
-            Repository = repository;
+            _repository = repository;
             WindowChange += HandleWindowChange;
         }
 
         private void HandleWindowChange(object sender, WindowChangeEventArgs e)
         {
-            if (Repository == null)
+            if (_repository == null)
                 return;
-            var current = Repository.GetRecipe(Bench);
+
+            CraftingPattern inputPattern = CraftingPattern.GetCraftingPattern(this);
+
+            ICraftingRecipe current = _repository.GetRecipe(inputPattern);
             if (e.SlotIndex == CraftingOutput)
             {
                 if (e.Value.Empty && current != null) // Item picked up
                 {
                     RemoveItemFromOutput(current);
-                    current = Repository.GetRecipe(Bench);
+                    current = _repository.GetRecipe(inputPattern);
                 }
             }
             if (current == null)
@@ -45,7 +50,7 @@ namespace TrueCraft.Core.Windows
                 bool found = false;
                 for (y = 0; y < Height; y++)
                 {
-                    if (Repository.TestRecipe(Bench, recipe, x, y))
+                    if (TestRecipe(recipe, x, y))
                     {
                         found = true;
                         break;
@@ -53,27 +58,38 @@ namespace TrueCraft.Core.Windows
                 }
                 if (found) break;
             }
+
             // Remove items
-            for (int _x = 0; _x < recipe.Pattern.GetLength(1); _x++)
-            {
-                for (int _y = 0; _y < recipe.Pattern.GetLength(0); _y++)
-                {
-                    var item = Items[(y + _y) * Width + (x + _x) + 1];
-                    item.Count -= recipe.Pattern[_y, _x].Count;
-                    Items[(y + _y) * Width + (x + _x) + 1] = item;
-                }
-            }
+            for (int _x = 0; _x < recipe.Pattern.Width; _x++)
+                for (int _y = 0; _y < recipe.Pattern.Height; _y++)
+                    Items[(y + _y) * Width + (x + _x) + 1].Count -= recipe.Pattern[_x, _y].Count;
         }
 
-        private IWindowArea Bench
+
+        private bool TestRecipe(ICraftingRecipe recipe, int x, int y)
         {
-            get
+            if (x + recipe.Pattern.Width > Width || y + recipe.Pattern.Height > Height)
+                return false;
+
+            for (int _x = 0; _x < recipe.Pattern.Width; _x++)
             {
-                var result = new WindowArea(1, Width * Height, Width, Height);
-                for (var i = 1; i < Items.Length; i++)
-                    result.Items[i - 1] = Items[i];
-                return result;
+                for (int _y = 0; _y < recipe.Pattern.Height; _y++)
+                {
+                    ItemStack supplied = this[(y + _y) * Width + (x + _x)];
+                    ItemStack required = recipe.Pattern[_x, _y];
+                    if (supplied.ID != required.ID || supplied.Count < required.Count ||
+                        required.Metadata != supplied.Metadata)
+                    {
+                        return false;
+                    }
+                }
             }
+            return true;
+        }
+
+        public ItemStack GetItemStack(int x, int y)
+        {
+            return this[y * Width + x + 1];
         }
     }
 }

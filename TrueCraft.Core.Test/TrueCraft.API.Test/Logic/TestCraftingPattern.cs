@@ -64,6 +64,34 @@ namespace TrueCraft.API.Test.Logic
             Assert.Null(actual);
         }
 
+        [TestCase(3, new short[] { 1, 1, 1, 1, 1, 1, 1, 1, 1 })]
+        [TestCase(2, new short[] { 5, 5, 5, 5 })]
+        [TestCase(2, new short[] { 0, 0, 0, 0, 1, 1, 0, 1, 2 })]
+        [TestCase(1, new short[] { 0, 2, 0, 0, 1, 0, 0, 1, 0 })]
+        [TestCase(1, new short[] { 0, 0, 0, 0, 3, 0, 0, 0, 0 })]
+        public void Width(int expectedWidth, short[] grid)
+        {
+            Mock<ICraftingArea> area = GetCraftingArea(grid);
+
+            CraftingPattern actual = CraftingPattern.GetCraftingPattern(area.Object);
+
+            Assert.AreEqual(expectedWidth, actual.Width);
+        }
+
+        [TestCase(3, new short[] { 1, 1, 1, 1, 1, 1, 1, 1, 1 })]
+        [TestCase(2, new short[] { 5, 5, 5, 5 })]
+        [TestCase(2, new short[] { 0, 0, 0, 0, 1, 1, 0, 1, 2 })]
+        [TestCase(1, new short[] { 0, 0, 0, 2, 1, 1, 0, 0, 0 })]
+        [TestCase(1, new short[] { 0, 0, 0, 0, 3, 0, 0, 0, 0 })]
+        public void Height(int expectedHeight, short[] grid)
+        {
+            Mock<ICraftingArea> area = GetCraftingArea(grid);
+
+            CraftingPattern actual = CraftingPattern.GetCraftingPattern(area.Object);
+
+            Assert.AreEqual(expectedHeight, actual.Height);
+        }
+
         [TestCase(true, new short[] { 1, 1, 1, 0, 2, 0, 0, 2, 0 }, new short[] { 1, 1, 1, 0, 2, 0, 0, 2, 0 })]
         [TestCase(true, new short[] { 1, 0, 0, 0, 0, 0, 0, 0, 0 }, new short[] { 0, 1, 0, 0 })]
         [TestCase(true, new short[] { 0, 0, 0, 0, 1, 1, 0, 1, 2 }, new short[] { 1, 1, 1, 2 })]

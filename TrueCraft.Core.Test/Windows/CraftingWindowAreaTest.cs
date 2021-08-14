@@ -17,7 +17,7 @@ namespace TrueCraft.Core.Test.Windows
             var recipe = new Mock<ICraftingRecipe>();
             recipe.Setup(r => r.Output).Returns(new ItemStack(10));
             var repository = new Mock<ICraftingRepository>();
-            repository.Setup(r => r.GetRecipe(It.IsAny<IWindowArea>())).Returns(recipe.Object);
+            repository.Setup(r => r.GetRecipe(It.IsAny<CraftingPattern>())).Returns(recipe.Object);
 
             var area = new CraftingWindowArea(repository.Object, 0, 2, 2);
             area[0] = new ItemStack(11);
