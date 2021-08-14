@@ -1,9 +1,14 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
+using System.Linq;
+using System.Xml;
+using System.Xml.Schema;
 using TrueCraft.API;
 using TrueCraft.API.Windows;
 using TrueCraft.API.Logic;
+using System.Reflection;
 
 namespace TrueCraft.Core.Logic
 {
@@ -11,28 +16,26 @@ namespace TrueCraft.Core.Logic
     {
         private readonly List<ICraftingRecipe> Recipes = new List<ICraftingRecipe>();
 
-        public void RegisterRecipe(ICraftingRecipe recipe)
-        {
-            Recipes.Add(recipe);
-        }
-
         public void DiscoverRecipes()
         {
-            var recipeTypes = new List<Type>();
-            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            XmlDocument doc = new XmlDocument();
+
+            Assembly api = AppDomain.CurrentDomain.GetAssemblies().Where<Assembly>(a => a.Location.EndsWith("TrueCraft.API.dll")).First<Assembly>();  // TODO do without Linq
+            using (Stream xsd = api.GetManifestResourceStream("TrueCraft.API.Assets.TrueCraft.xsd"))
+                doc.Schemas.Add(XmlSchema.Read(xsd, null));
+
+            using (Stream sz = this.GetType().Assembly.GetManifestResourceStream("TrueCraft.Core.Assets.TrueCraft.xml.gz"))
+            using (Stream s = new GZipStream(sz, CompressionMode.Decompress))
+            using (XmlReader xmlr = XmlReader.Create(s))
             {
-                foreach (var type in assembly.GetTypes().Where(t =>
-                    typeof(ICraftingRecipe).IsAssignableFrom(t) && !t.IsAbstract))
-                {
-                    recipeTypes.Add(type);
-                }
+                doc.Load(xmlr);
+                doc.Validate(null);
             }
 
-            recipeTypes.ForEach(t =>
-            {
-                var instance = (ICraftingRecipe)Activator.CreateInstance(t);
-                RegisterRecipe(instance);
-            });
+            XmlNode truecraft = doc.ChildNodes.Item(0);
+            XmlNode recipes = truecraft.ChildNodes.OfType<XmlNode>().Where(n => n.LocalName == "recipes").First();
+            foreach (XmlNode recipe in recipes.ChildNodes)
+                Recipes.Add(new CraftingRecipe(recipe));
         }
 
         public ICraftingRecipe GetRecipe(IWindowArea craftingArea)

@@ -1,13 +1,35 @@
 using System;
+using System.Collections.Generic;
+using System.Xml;
 using TrueCraft.API.Windows;
 
 namespace TrueCraft.API.Logic
 {
     public class CraftingPattern : IEquatable<CraftingPattern>
     {
+        // TODO: These need to be immutable.
         private ItemStack[,] _pattern;
 
         #region Construction
+        public static CraftingPattern GetCraftingPattern(XmlNode pattern)
+        {
+            ItemStack[,] items = new ItemStack[3, 3];
+            int x = 0, y = 0;
+
+            foreach(XmlNode row in pattern.ChildNodes)
+            {
+                x = 0;
+                foreach (XmlNode itemNode in row.ChildNodes)
+                {
+                    items[x, y] = new ItemStack(itemNode);
+                    x++;
+                }
+                y++;
+            }
+
+            return GetCraftingPattern(items);
+        }
+
         public CraftingPattern(ItemStack[,] items, int xmin, int xmax, int ymin, int ymax)
         {
             _pattern = new ItemStack[xmax - xmin + 1, ymax - ymin + 1];

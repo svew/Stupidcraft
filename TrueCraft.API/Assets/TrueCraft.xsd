@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xs:schema version="1.0"
+   xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+   elementFormDefault="unqualified">
+
+  <xs:complexType name="itemStackType">
+     <xs:sequence>
+        <xs:element name="id" minOccurs="1" maxOccurs="1">
+           <xs:simpleType>
+              <xs:restriction base="xs:short">
+                 <xs:minInclusive value="-1" />
+              </xs:restriction>
+           </xs:simpleType>
+        </xs:element>
+        <xs:element name="count" minOccurs="1" maxOccurs="1">
+           <xs:simpleType>
+              <xs:restriction base="xs:byte">
+                 <xs:minInclusive value="0" />
+                 <xs:maxInclusive value="64" />
+              </xs:restriction>
+           </xs:simpleType>
+        </xs:element>
+        <xs:element name="metadata" default="0" minOccurs="0" maxOccurs="1">
+           <xs:simpleType>
+              <xs:restriction base="xs:short"/>
+           </xs:simpleType>
+        </xs:element>
+     </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="recipeInputRowType">
+     <xs:sequence>
+        <xs:element name="c" type="itemStackType" minOccurs="1" maxOccurs="3" />
+     </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="recipeInputPatternType">
+     <xs:sequence>
+        <!-- NOTE: every row should have the same number of <c> elements. -->
+        <xs:element name="r" type="recipeInputRowType" minOccurs="1" maxOccurs="3" />
+     </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="recipeType">
+     <xs:sequence>
+        <xs:element name="pattern" type="recipeInputPatternType" minOccurs="1" maxOccurs="1" />
+        <xs:element name="output" type ="itemStackType" minOccurs="1" maxOccurs="1" />
+     </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="recipeListType">
+     <xs:sequence>
+        <xs:element name="recipe" type="recipeType" minOccurs="0" maxOccurs="unbounded" />
+     </xs:sequence>
+  </xs:complexType>
+
+  <xs:element name="truecraft">
+     <xs:complexType>
+        <xs:sequence>
+           <xs:element name="recipes" type="recipeListType" minOccurs="1" maxOccurs="1" />
+        </xs:sequence>
+     </xs:complexType>
+  </xs:element>
+</xs:schema>

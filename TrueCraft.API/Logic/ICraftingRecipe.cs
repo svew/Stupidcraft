@@ -1,11 +1,12 @@
+using System;
 using TrueCraft.API;
 
 namespace TrueCraft.API.Logic
 {
-    public interface ICraftingRecipe
+    public interface ICraftingRecipe : IEquatable<ICraftingRecipe>
     {
-        ItemStack[,] Pattern { get; }
+        CraftingPattern Pattern { get; }
+
         ItemStack Output { get; }
-        bool SignificantMetadata { get; }
     }
 }

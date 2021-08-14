@@ -24,6 +24,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="Assets\" />
+    <EmbeddedResource Include="Assets\**\*" Type="Non-Resx" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\externals\fNbt\fNbt\fNbt.csproj" />
   </ItemGroup>
 

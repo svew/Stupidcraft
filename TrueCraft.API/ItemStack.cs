@@ -7,6 +7,7 @@ using System.IO.Compression;
 using fNbt;
 using fNbt.Serialization;
 using TrueCraft.API.Networking;
+using System.Xml;
 
 namespace TrueCraft.API
 {
@@ -40,6 +41,25 @@ namespace TrueCraft.API
         public static bool operator !=(ItemStack left, ItemStack right)
         {
             return !left.Equals(right);
+        }
+
+        /// <summary>
+        /// Creates a new Item Stack from the given XML.
+        /// </summary>
+        /// <param name="stack">The XML to parse into an ItemStack.</param>
+        public ItemStack(XmlNode stack)
+        {
+            XmlNode idNode = stack.FirstChild;
+            _Id = short.Parse(idNode.InnerText);
+
+            XmlNode countNode = idNode.NextSibling;
+            _Count = sbyte.Parse(countNode.InnerText);
+
+            XmlNode metadataNode = countNode.NextSibling;
+            _Metadata = short.Parse(metadataNode.InnerText);
+
+            Nbt = null;
+            Index = 0;
         }
 
         /// <summary>

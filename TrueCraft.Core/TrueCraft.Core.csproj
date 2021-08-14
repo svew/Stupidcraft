@@ -21,6 +21,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="Assets\" />
+    <EmbeddedResource Include="Assets\**\*" Type="Non-Resx" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\TrueCraft.API\TrueCraft.API.csproj" />
     <ProjectReference Include="..\TrueCraft.Profiling\TrueCraft.Profiling.csproj" />
     <ProjectReference Include="..\externals\fNbt\fNbt\fNbt.csproj" />
