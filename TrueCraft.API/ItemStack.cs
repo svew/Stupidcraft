@@ -56,7 +56,10 @@ namespace TrueCraft.API
             _Count = sbyte.Parse(countNode.InnerText);
 
             XmlNode metadataNode = countNode.NextSibling;
-            _Metadata = short.Parse(metadataNode.InnerText);
+            if (!object.ReferenceEquals(metadataNode, null))
+                _Metadata = short.Parse(metadataNode.InnerText);
+            else
+                _Metadata = 0;
 
             Nbt = null;
             Index = 0;
