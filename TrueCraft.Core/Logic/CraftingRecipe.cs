@@ -15,7 +15,7 @@ namespace TrueCraft.Core.Logic
         public CraftingRecipe(XmlNode recipe)
         {
             XmlNode pattern = recipe.FirstChild;
-            CraftingPattern _input = CraftingPattern.GetCraftingPattern(pattern);
+            _input = CraftingPattern.GetCraftingPattern(pattern);
 
             XmlNode input = pattern.NextSibling;
             _output = new ItemStack(input);
