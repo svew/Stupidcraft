@@ -13,9 +13,15 @@ namespace TrueCraft.API.Logic
         #region Construction
         public static CraftingPattern GetCraftingPattern(XmlNode pattern)
         {
-            ItemStack[,] items = new ItemStack[3, 3];
+            int xmax = 3, ymax = 3;
+            ItemStack[,] items = new ItemStack[xmax, ymax];
             int x = 0, y = 0;
 
+            for (x = 0; x < xmax; x++)
+                for (y = 0; y < ymax; y++)
+                    items[x, y] = ItemStack.EmptyStack;
+
+            y = 0;
             foreach(XmlNode row in pattern.ChildNodes)
             {
                 x = 0;
