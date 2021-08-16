@@ -67,6 +67,30 @@ namespace TrueCraft.API.Test.Logic
 
         [TestCase(1, 1, new int[] { 17 }, new int[] { 1 },
             @"<pattern><r><c><id>17</id><count>1</count></c></r></pattern>")]
+        [TestCase(3, 3,
+            new int[] { 5, 4, 4, 5, 265, 331, 5, 4, 4 },
+            new int[] { 1, 1, 1, 1, 1, 1, 1, 1, 1 },
+            @"<pattern>
+<r><c><id>5</id><count>1</count></c>
+<c><id>4</id><count>1</count></c>
+<c><id>4</id><count>1</count></c>
+</r>
+<r><c><id>5</id><count>1</count></c>
+<c><id>265</id><count>1</count></c>
+<c><id>331</id><count>1</count></c>
+</r>
+<r><c><id>5</id><count>1</count></c>
+<c><id>4</id><count>1</count></c>
+<c><id>4</id><count>1</count></c>
+</r></pattern>")]
+        [TestCase(3, 1,
+            new int[] { 5, 280, 280 },
+            new int[] { 1, 1, 1 },
+            @"<pattern>
+<r><c><id>5</id><count>1</count></c>
+<c><id>280</id><count>1</count></c>
+<c><id>280</id><count>1</count></c>
+</r></pattern>")]
         public void Ctor_xml(int expectedWidth, int expectedHeight,
             int[] expectedId, int[] expectedCount,
             string xml)
@@ -77,11 +101,11 @@ namespace TrueCraft.API.Test.Logic
 
             Assert.AreEqual(expectedWidth, actual.Width);
             Assert.AreEqual(expectedHeight, actual.Height);
-            for (int r = 0; r < expectedWidth; r ++)
-                for (int c = 0; c < expectedHeight; c ++)
+            for (int x = 0; x < expectedWidth; x ++)
+                for (int y = 0; y < expectedHeight; y ++)
                 {
-                    Assert.AreEqual(expectedId[r * expectedWidth + c], actual[r, c].ID);
-                    Assert.AreEqual(expectedCount[r * expectedWidth + c], actual[r, c].Count);
+                    Assert.AreEqual(expectedId[y * expectedWidth + x], actual[x, y].ID);
+                    Assert.AreEqual(expectedCount[y * expectedWidth + x], actual[x, y].Count);
                 }
         }
 
