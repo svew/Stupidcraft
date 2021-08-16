@@ -3,6 +3,7 @@ using Moq;
 using TrueCraft.API.Logic;
 using TrueCraft.API.Windows;
 using NUnit.Framework;
+using System.Xml;
 
 namespace TrueCraft.API.Test.Logic
 {
@@ -62,6 +63,26 @@ namespace TrueCraft.API.Test.Logic
 
             actual = CraftingPattern.GetCraftingPattern(grid2.Object);
             Assert.Null(actual);
+        }
+
+        [TestCase(1, 1, new int[] { 17 }, new int[] { 1 },
+            @"<pattern><r><c><id>17</id><count>1</count></c></r></pattern>")]
+        public void Ctor_xml(int expectedWidth, int expectedHeight,
+            int[] expectedId, int[] expectedCount,
+            string xml)
+        {
+            XmlDocument doc = new XmlDocument();
+            doc.LoadXml(xml);
+            CraftingPattern actual = CraftingPattern.GetCraftingPattern(doc.FirstChild);
+
+            Assert.AreEqual(expectedWidth, actual.Width);
+            Assert.AreEqual(expectedHeight, actual.Height);
+            for (int r = 0; r < expectedWidth; r ++)
+                for (int c = 0; c < expectedHeight; c ++)
+                {
+                    Assert.AreEqual(expectedId[r * expectedWidth + c], actual[r, c].ID);
+                    Assert.AreEqual(expectedCount[r * expectedWidth + c], actual[r, c].Count);
+                }
         }
 
         [TestCase(3, new short[] { 1, 1, 1, 1, 1, 1, 1, 1, 1 })]
