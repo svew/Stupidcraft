@@ -32,8 +32,8 @@ namespace TrueCraft.Core.Logic
                 doc.Validate(null);
             }
 
-            XmlNode truecraft = doc.ChildNodes.Item(0);
-            XmlNode recipes = truecraft.ChildNodes.OfType<XmlNode>().Where(n => n.LocalName == "recipes").First();
+            XmlNode truecraft = doc.ChildNodes.OfType<XmlNode>().Where<XmlNode>(n => n.LocalName == "truecraft").First<XmlNode>();
+            XmlNode recipes = truecraft.ChildNodes.OfType<XmlNode>().Where<XmlNode>(n => n.LocalName == "recipes").First<XmlNode>();
             foreach (XmlNode recipe in recipes.ChildNodes)
                 Recipes.Add(new CraftingRecipe(recipe));
         }
