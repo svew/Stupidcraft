@@ -75,7 +75,7 @@ namespace TrueCraft.Core.Windows
             {
                 for (int _y = 0; _y < recipe.Pattern.Height; _y++)
                 {
-                    ItemStack supplied = this[(y + _y) * Width + (x + _x)];
+                    ItemStack supplied = GetItemStack(x + _x, y + _y);
                     ItemStack required = recipe.Pattern[_x, _y];
                     if (supplied.ID != required.ID || supplied.Count < required.Count ||
                         required.Metadata != supplied.Metadata)
