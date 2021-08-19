@@ -199,6 +199,8 @@ namespace TrueCraft
                         new NbtDouble(Entity.Position.Y),
                         new NbtDouble(Entity.Position.Z)
                     }),
+                    // TODO BUG: this saves the items in the Crafting area as part of the player's inventory.
+                    //           They should be dropped when the player closes the window.
                     new NbtList("inventory", Inventory.GetSlots().Select(s => s.ToNbt())),
                     new NbtShort("health", (Entity as PlayerEntity).Health),
                     new NbtFloat("yaw", Entity.Yaw),

@@ -257,6 +257,8 @@ namespace TrueCraft.Client.Modules
             {
                 if (e.Key == Keys.Escape)
                 {
+                    // TODO When the player closes a window with a Crafting Grid,
+                    //      any items in the Grid's input should be dropped.
                     if (Game.Client.CurrentWindow.Type != WindowType.Inventory)
                         Game.Client.QueuePacket(new CloseWindowPacket(Game.Client.CurrentWindow.ID));
                     Game.Client.CurrentWindow = null;
