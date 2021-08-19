@@ -32,9 +32,14 @@ namespace TrueCraft.Core.Windows
             get { return Items[index]; }
             set
             {
+                if (value == Items[index])
+                    return;
+
                 if (IsValid(value, index))
+                {
                     Items[index] = value;
-                OnWindowChange(new WindowChangeEventArgs(index, value));
+                    OnWindowChange(new WindowChangeEventArgs(index, value));
+                }
             }
         }
 
