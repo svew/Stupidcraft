@@ -6,10 +6,9 @@ namespace TrueCraft.API.Windows
     /// Represents a collection of related item slots.
     /// </summary>
     /// <remarks>
-    /// Note that this does not implement a GUI.
     /// It represents a data storage that supports a window area on the GUI.
     /// </remarks>
-    public interface IWindowArea : IDisposable
+    public interface ISlots : IDisposable
     {
         event EventHandler<WindowChangeEventArgs> WindowChange;
 
@@ -32,7 +31,7 @@ namespace TrueCraft.API.Windows
         /// This is usually, but not always, the product of the
         /// Length and Width.
         /// </remarks>
-        int Length { get; }
+        int Count { get; }
 
         /// <summary>
         /// Gets the width of the rectangular portion of the Window Area
@@ -59,7 +58,10 @@ namespace TrueCraft.API.Windows
         /// <returns></returns>
         ItemStack this[int index] { get; set; }
 
-        void CopyTo(IWindowArea area);
-        int MoveOrMergeItem(int index, ItemStack item, IWindowArea from);
+        // TODO: remove CopyTo by using references to the collections rather
+        // than copying back and forth for the various windows.
+        void CopyTo(ISlots area);
+
+        int MoveOrMergeItem(int index, ItemStack item, ISlots from);
     }
 }

@@ -25,23 +25,23 @@ namespace TrueCraft.Core.Windows
 
             WindowAreas = new[]
                 {
-                    new WindowArea(IngredientIndex, 1, 1, 1),
-                    new WindowArea(FuelIndex, 1, 1, 1),
-                    new WindowArea(OutputIndex, 1, 1, 1),
-                    new WindowArea(MainIndex, 27, 9, 3),
-                    new WindowArea(HotbarIndex, 9, 9, 1)
+                    new Slots(IngredientIndex, 1, 1, 1),
+                    new Slots(FuelIndex, 1, 1, 1),
+                    new Slots(OutputIndex, 1, 1, 1),
+                    new Slots(MainIndex, 27, 9, 3),
+                    new Slots(HotbarIndex, 9, 9, 1)
                 };
             inventory.MainInventory.CopyTo(MainInventory);
             inventory.Hotbar.CopyTo(Hotbar);
             foreach (var area in WindowAreas)
                 area.WindowChange += (s, e) => OnWindowChange(new WindowChangeEventArgs(
-                    (s as WindowArea).StartIndex + e.SlotIndex, e.Value));
+                    (s as Slots).StartIndex + e.SlotIndex, e.Value));
             Copying = false;
             inventory.WindowChange += (sender, e) =>
             {
                 if (Copying) return;
-                if ((e.SlotIndex >= InventoryWindow.MainIndex && e.SlotIndex < InventoryWindow.MainIndex + inventory.MainInventory.Length)
-                    || (e.SlotIndex >= InventoryWindow.HotbarIndex && e.SlotIndex < InventoryWindow.HotbarIndex + inventory.Hotbar.Length))
+                if ((e.SlotIndex >= InventoryWindow.MainIndex && e.SlotIndex < InventoryWindow.MainIndex + inventory.MainInventory.Count)
+                    || (e.SlotIndex >= InventoryWindow.HotbarIndex && e.SlotIndex < InventoryWindow.HotbarIndex + inventory.Hotbar.Count))
                 {
                     inventory.MainInventory.CopyTo(MainInventory);
                     inventory.Hotbar.CopyTo(Hotbar);
@@ -81,29 +81,29 @@ namespace TrueCraft.Core.Windows
             }
         }
 
-        public override IWindowArea[] WindowAreas { get; }
+        public override ISlots[] WindowAreas { get; }
 
-        public IWindowArea Ingredient 
+        public ISlots Ingredient 
         {
             get { return WindowAreas[0]; }
         }
 
-        public IWindowArea Fuel
+        public ISlots Fuel
         {
             get { return WindowAreas[1]; }
         }
 
-        public IWindowArea Output
+        public ISlots Output
         {
             get { return WindowAreas[2]; }
         }
 
-        public IWindowArea MainInventory
+        public ISlots MainInventory
         {
             get { return WindowAreas[3]; }
         }
 
-        public IWindowArea Hotbar
+        public ISlots Hotbar
         {
             get { return WindowAreas[4]; }
         }
@@ -111,10 +111,10 @@ namespace TrueCraft.Core.Windows
         public override ItemStack[] GetSlots()
         {
             var relevantAreas = new[] { Ingredient, Fuel, Output };
-            int length = relevantAreas.Sum(area => area.Length);
+            int length = relevantAreas.Sum(area => area.Count);
             var slots = new ItemStack[length];
             foreach (var windowArea in relevantAreas)
-                Array.Copy(windowArea.Items, 0, slots, windowArea.StartIndex, windowArea.Length);
+                Array.Copy(windowArea.Items, 0, slots, windowArea.StartIndex, windowArea.Count);
             return slots;
         }
 
@@ -127,7 +127,7 @@ namespace TrueCraft.Core.Windows
             Copying = false;
         }
 
-        protected override IWindowArea GetLinkedArea(int index, ItemStack slot)
+        protected override ISlots GetLinkedArea(int index, ItemStack slot)
         {
             if (index < MainIndex)
                 return MainInventory;

@@ -11,7 +11,7 @@ namespace TrueCraft.Core.Test.Windows
         [Test]
         public void TestIndexing()
         {
-            var area = new WindowArea(0, 10, 10, 1);
+            var area = new Slots(0, 10, 10, 1);
             area[0] = new ItemStack(10);
             Assert.AreEqual(new ItemStack(10), area[0]);
             area[1] = new ItemStack(20);
@@ -25,8 +25,8 @@ namespace TrueCraft.Core.Test.Windows
         [Test]
         public void TestCopyTo()
         {
-            var area1 = new WindowArea(0, 10, 10, 1);
-            var area2 = new WindowArea(0, 10, 10, 1);
+            var area1 = new Slots(0, 10, 10, 1);
+            var area2 = new Slots(0, 10, 10, 1);
             area1[0] = new ItemStack(10);
             area1[1] = new ItemStack(20);
             area1[2] = new ItemStack(30);

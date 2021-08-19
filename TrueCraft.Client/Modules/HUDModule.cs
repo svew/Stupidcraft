@@ -130,7 +130,7 @@ namespace TrueCraft.Client.Modules
                     (int)(Game.GraphicsDevice.Viewport.Height - Scale(HotbarBackgroundRect.Height + 5)));
             origin.X += (int)Scale(3);
             origin.Y += (int)Scale(3);
-            for (int i = 0; i < Game.Client.Inventory.Hotbar.Length; i++)
+            for (int i = 0; i < Game.Client.Inventory.Hotbar.Count; i++)
             {
                 var item = Game.Client.Inventory.Hotbar[i];
                 if (item.Empty)
@@ -152,7 +152,7 @@ namespace TrueCraft.Client.Modules
                     (int)(Game.GraphicsDevice.Viewport.Height - Scale(HotbarBackgroundRect.Height + 5)));
             origin.X += (int)Scale(3);
             origin.Y += (int)Scale(3);
-            for (int i = 0; i < Game.Client.Inventory.Hotbar.Length; i++)
+            for (int i = 0; i < Game.Client.Inventory.Hotbar.Count; i++)
             {
                 var item = Game.Client.Inventory.Hotbar[i];
                 if (item.Empty)
@@ -172,7 +172,7 @@ namespace TrueCraft.Client.Modules
                     (int)(Game.GraphicsDevice.Viewport.Height - Scale(HotbarBackgroundRect.Height + 5)));
             origin.X += (int)Scale(3);
             origin.Y += (int)Scale(3);
-            for (int i = 0; i < Game.Client.Inventory.Hotbar.Length; i++)
+            for (int i = 0; i < Game.Client.Inventory.Hotbar.Count; i++)
             {
                 var item = Game.Client.Inventory.Hotbar[i];
                 if (item.Empty || item.Count == 1)

@@ -318,7 +318,7 @@ namespace TrueCraft.Client.Modules
         /// <param name="yOffset">The r-coordinate within the GUI's Texture of the first slot of the Window Area.</param>
         /// <param name="frame">The Rectangle which is filled with the GUI Texture.</param>
         /// <param name="stage"></param>
-        private void DrawWindowArea(IWindowArea area, int xOffset, int yOffset, Rectangle frame, RenderStage stage)
+        private void DrawWindowArea(ISlots area, int xOffset, int yOffset, Rectangle frame, RenderStage stage)
         {
             var mouse = Mouse.GetState().Position.ToVector2();
             var scale = new Point((int)(16 * Game.ScaleFactor * 2));
@@ -326,7 +326,7 @@ namespace TrueCraft.Client.Modules
                 Game.GraphicsDevice.Viewport.Width / 2 - Scale(frame.Width / 2) + Scale(xOffset)),
                 (int)(Game.GraphicsDevice.Viewport.Height / 2 - Scale(frame.Height / 2) + Scale(yOffset)));
 
-            for (int i = 0; i < area.Length; i++)
+            for (int i = 0; i < area.Count; i++)
             {
                 var item = area[i];
                 int x = (int)((i % area.Width) * Scale(18));

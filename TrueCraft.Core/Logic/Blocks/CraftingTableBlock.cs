@@ -39,7 +39,7 @@ namespace TrueCraft.Core.Logic.Blocks
             window.Disposed += (sender, e) =>
             {
                 var entityManager = user.Server.GetEntityManagerForWorld(world);
-                for (int i = 0; i < window.CraftingGrid.StartIndex + window.CraftingGrid.Length; i++)
+                for (int i = 0; i < window.CraftingGrid.StartIndex + window.CraftingGrid.Count; i++)
                 {
                     var item = window[i];
                     if (!item.Empty)

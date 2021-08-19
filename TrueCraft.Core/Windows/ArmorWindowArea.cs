@@ -7,7 +7,7 @@ using TrueCraft.API.Windows;
 
 namespace TrueCraft.Core.Windows
 {
-    public class ArmorWindowArea : WindowArea
+    public class ArmorWindowArea : Slots
     {
         public const int Footwear = 3;
         public const int Pants = 2;
@@ -37,9 +37,9 @@ namespace TrueCraft.Core.Windows
             return base.IsValid(slot, index);
         }
 
-        public override int MoveOrMergeItem(int index, ItemStack slot, IWindowArea from)
+        public override int MoveOrMergeItem(int index, ItemStack slot, ISlots from)
         {
-            for (int i = 0; i < Length; i++)
+            for (int i = 0; i < Count; i++)
             {
                 if (IsValid(slot, i))
                 {

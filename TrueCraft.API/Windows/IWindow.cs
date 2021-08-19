@@ -21,7 +21,7 @@ namespace TrueCraft.API.Windows
         event EventHandler<WindowChangeEventArgs> WindowChange;
 
         IRemoteClient Client { get; set; }
-        IWindowArea[] WindowAreas { get; }
+        ISlots[] WindowAreas { get; }
         sbyte ID { get; set; }
         string Name { get; }
 

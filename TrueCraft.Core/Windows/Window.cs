@@ -11,7 +11,7 @@ namespace TrueCraft.Core.Windows
 {
     public abstract class Window : IWindow, IDisposable, IEventSubject
     {
-        public abstract IWindowArea[] WindowAreas { get; }
+        public abstract ISlots[] WindowAreas { get; }
 
         public event EventHandler<WindowChangeEventArgs> WindowChange;
 
@@ -44,17 +44,17 @@ namespace TrueCraft.Core.Windows
         /// <param name="index">The index of the area the item is coming from</param>
         /// <param name="slot">The item being moved</param>
         /// <returns>The area to place the item into</returns>
-        protected abstract IWindowArea GetLinkedArea(int index, ItemStack slot);
+        protected abstract ISlots GetLinkedArea(int index, ItemStack slot);
         public abstract void CopyToInventory(IWindow inventoryWindow);
 
         /// <summary>
         /// Gets the window area to handle this index and adjust index accordingly
         /// </summary>
-        protected IWindowArea GetArea(ref int index)
+        protected ISlots GetArea(ref int index)
         {
             foreach (var area in WindowAreas)
             {
-                if (area.StartIndex <= index && area.StartIndex + area.Length > index)
+                if (area.StartIndex <= index && area.StartIndex + area.Count > index)
                 {
                     index = index - area.StartIndex;
                     return area;
@@ -71,7 +71,7 @@ namespace TrueCraft.Core.Windows
             for (int i = 0; i < WindowAreas.Length; i++)
             {
                 var area = WindowAreas[i];
-                if (index >= area.StartIndex && index < area.StartIndex + area.Length)
+                if (index >= area.StartIndex && index < area.StartIndex + area.Count)
                     return i;
             }
             throw new IndexOutOfRangeException();
@@ -81,7 +81,7 @@ namespace TrueCraft.Core.Windows
         {
             get 
             {
-                return WindowAreas.Sum(a => a.Length);
+                return WindowAreas.Sum(a => a.Count);
             }
         }
 
@@ -89,10 +89,10 @@ namespace TrueCraft.Core.Windows
 
         public virtual ItemStack[] GetSlots()
         {
-            int length = WindowAreas.Sum(area => area.Length);
+            int length = WindowAreas.Sum(area => area.Count);
             var slots = new ItemStack[length];
             foreach (var windowArea in WindowAreas)
-                Array.Copy(windowArea.Items, 0, slots, windowArea.StartIndex, windowArea.Length);
+                Array.Copy(windowArea.Items, 0, slots, windowArea.StartIndex, windowArea.Count);
             return slots;
         }
 
@@ -100,8 +100,8 @@ namespace TrueCraft.Core.Windows
         {
             foreach (var windowArea in WindowAreas)
             {
-                if (windowArea.StartIndex < slots.Length && windowArea.StartIndex + windowArea.Length <= slots.Length)
-                    Array.Copy(slots, windowArea.StartIndex, windowArea.Items, 0, windowArea.Length);
+                if (windowArea.StartIndex < slots.Length && windowArea.StartIndex + windowArea.Count <= slots.Length)
+                    Array.Copy(slots, windowArea.StartIndex, windowArea.Items, 0, windowArea.Count);
             }
         }
 
@@ -111,7 +111,7 @@ namespace TrueCraft.Core.Windows
             {
                 foreach (var area in WindowAreas)
                 {
-                    if (index >= area.StartIndex && index < area.StartIndex + area.Length)
+                    if (index >= area.StartIndex && index < area.StartIndex + area.Count)
                         return area[index - area.StartIndex];
                 }
                 throw new IndexOutOfRangeException();
@@ -120,7 +120,7 @@ namespace TrueCraft.Core.Windows
             {
                 foreach (var area in WindowAreas)
                 {
-                    if (index >= area.StartIndex && index < area.StartIndex + area.Length)
+                    if (index >= area.StartIndex && index < area.StartIndex + area.Count)
                     {
                         var eventArgs = new WindowChangeEventArgs(index, value);
                         OnWindowChange(eventArgs);

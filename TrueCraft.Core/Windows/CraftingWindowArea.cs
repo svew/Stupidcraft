@@ -4,7 +4,7 @@ using TrueCraft.API.Logic;
 
 namespace TrueCraft.Core.Windows
 {
-    public class CraftingWindowArea : WindowArea, ICraftingArea
+    public class CraftingWindowArea : Slots, ICraftingArea
     {
         public static readonly int CraftingOutput = 0;
 

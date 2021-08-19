@@ -3,7 +3,7 @@ using TrueCraft.API.Logic;
 
 namespace TrueCraft.API.Windows
 {
-    public interface ICraftingArea : IWindowArea
+    public interface ICraftingArea : ISlots
     {
         /// <summary>
         /// Gets the Item Stack at location x,y in the input area.

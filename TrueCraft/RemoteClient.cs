@@ -518,7 +518,7 @@ namespace TrueCraft
                 foreach (var c in notified)
                     c.QueuePacket(new EntityEquipmentPacket(Entity.EntityID, 0, SelectedItem.ID, SelectedItem.Metadata));
             }
-            if (e.SlotIndex >= InventoryWindow.ArmorIndex && e.SlotIndex < InventoryWindow.ArmorIndex + InventoryWindow.Armor.Length)
+            if (e.SlotIndex >= InventoryWindow.ArmorIndex && e.SlotIndex < InventoryWindow.ArmorIndex + InventoryWindow.Armor.Count)
             {
                 short slot = (short)(4 - (e.SlotIndex - InventoryWindow.ArmorIndex));
                 var notified = Server.GetEntityManagerForWorld(World).ClientsForEntity(Entity);

@@ -16,20 +16,20 @@ namespace TrueCraft.Core.Windows
             {
                 WindowAreas = new[]
                 {
-                    new WindowArea(ChestIndex, 2 * ChestLength, ChestWidth, 2 * ChestHeight), // Chest
-                    new WindowArea(DoubleMainIndex, InventoryWindow.InventoryLength,
+                    new Slots(ChestIndex, 2 * ChestLength, ChestWidth, 2 * ChestHeight), // Chest
+                    new Slots(DoubleMainIndex, InventoryWindow.InventoryLength,
                              InventoryWindow.InventoryWidth, InventoryWindow.InventoryHeight), // Main inventory
-                    new WindowArea(DoubleHotbarIndex, 9, 9, 1) // Hotbar TODO hard-coded constants
+                    new Slots(DoubleHotbarIndex, 9, 9, 1) // Hotbar TODO hard-coded constants
                 };
             }
             else
             {
                 WindowAreas = new[]
                 {
-                    new WindowArea(ChestIndex, ChestLength, ChestWidth, ChestHeight), // Chest
-                    new WindowArea(MainIndex, InventoryWindow.InventoryLength,
+                    new Slots(ChestIndex, ChestLength, ChestWidth, ChestHeight), // Chest
+                    new Slots(MainIndex, InventoryWindow.InventoryLength,
                              InventoryWindow.InventoryWidth, InventoryWindow.InventoryHeight), // Main inventory
-                    new WindowArea(HotbarIndex, 9, 9, 1) // Hotbar TODO hard-coded constants
+                    new Slots(HotbarIndex, 9, 9, 1) // Hotbar TODO hard-coded constants
                 };
             }
             inventory.MainInventory.CopyTo(MainInventory);
@@ -47,7 +47,7 @@ namespace TrueCraft.Core.Windows
             };
             foreach (var area in WindowAreas)
                 area.WindowChange += (s, e) => OnWindowChange(new WindowChangeEventArgs(
-                    (s as WindowArea).StartIndex + e.SlotIndex, e.Value));
+                    (s as Slots).StartIndex + e.SlotIndex, e.Value));
         }
 
         public const int ChestIndex = 0;
@@ -63,7 +63,7 @@ namespace TrueCraft.Core.Windows
 
         public bool DoubleChest { get; }
 
-        public override IWindowArea[] WindowAreas { get; }
+        public override ISlots[] WindowAreas { get; }
 
         private bool Copying { get; set; }
 
@@ -85,7 +85,7 @@ namespace TrueCraft.Core.Windows
             }
         }
 
-        public IWindowArea ChestInventory
+        public ISlots ChestInventory
         {
             get
             {
@@ -93,7 +93,7 @@ namespace TrueCraft.Core.Windows
             }
         }
 
-        public IWindowArea MainInventory
+        public ISlots MainInventory
         {
             get
             {
@@ -101,7 +101,7 @@ namespace TrueCraft.Core.Windows
             }
         }
 
-        public IWindowArea Hotbar
+        public ISlots Hotbar
         {
             get
             {
@@ -113,7 +113,7 @@ namespace TrueCraft.Core.Windows
         {
             get
             {
-                return ChestInventory.Length;
+                return ChestInventory.Count;
             }
         }
 
@@ -126,7 +126,7 @@ namespace TrueCraft.Core.Windows
             Copying = false;
         }
 
-        protected override IWindowArea GetLinkedArea(int index, ItemStack slot)
+        protected override ISlots GetLinkedArea(int index, ItemStack slot)
         {
             if (index == 0)
                 return Hotbar;

@@ -16,12 +16,12 @@ namespace TrueCraft.Core.Windows
                 {
                     new CraftingWindowArea(craftingRepository, CraftingOutputIndex, 2, 2),
                     new ArmorWindowArea(ArmorIndex),
-                    new WindowArea(MainIndex, InventoryLength, InventoryWidth, InventoryHeight), // Main inventory
-                    new WindowArea(HotbarIndex, 9, 9, 1) // Hotbar
+                    new Slots(MainIndex, InventoryLength, InventoryWidth, InventoryHeight), // Main inventory
+                    new Slots(HotbarIndex, 9, 9, 1) // Hotbar
                 };
             foreach (var area in WindowAreas)
                 area.WindowChange += (s, e) => OnWindowChange(new WindowChangeEventArgs(
-                    (s as WindowArea).StartIndex + e.SlotIndex, e.Value));
+                    (s as Slots).StartIndex + e.SlotIndex, e.Value));
         }
 
         #region Variables
@@ -71,26 +71,26 @@ namespace TrueCraft.Core.Windows
             }
         }
 
-        public override IWindowArea[] WindowAreas { get; }
+        public override ISlots[] WindowAreas { get; }
 
         #region Properties
 
-        public IWindowArea CraftingGrid 
+        public ISlots CraftingGrid 
         {
             get { return WindowAreas[0]; }
         }
 
-        public IWindowArea Armor
+        public ISlots Armor
         {
             get { return WindowAreas[1]; }
         }
 
-        public IWindowArea MainInventory
+        public ISlots MainInventory
         {
             get { return WindowAreas[2]; }
         }
 
-        public IWindowArea Hotbar
+        public ISlots Hotbar
         {
             get { return WindowAreas[3]; }
         }
@@ -104,7 +104,7 @@ namespace TrueCraft.Core.Windows
             // This space intentionally left blank
         }
 
-        protected override IWindowArea GetLinkedArea(int index, ItemStack slot)
+        protected override ISlots GetLinkedArea(int index, ItemStack slot)
         {
             if (index == 0 || index == 1 || index == 3)
                 return MainInventory;

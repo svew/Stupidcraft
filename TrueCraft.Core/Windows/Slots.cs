@@ -7,13 +7,22 @@ using TrueCraft.API;
 
 namespace TrueCraft.Core.Windows
 {
-    public class WindowArea : IWindowArea
+    /// <summary>
+    /// Represents a collection of related Slots.
+    /// </summary>
+    /// <remarks>
+    /// This collection is used on both the client and server.  Both
+    /// must be synchronized.  On the client side, this will be the
+    /// backing store for the various different areas of dialogs such
+    /// as for inventory, crafting, furnaces, etc.
+    /// </remarks>
+    public class Slots : ISlots
     {
-        public WindowArea(int startIndex, int length, int width, int height)
+        public Slots(int startIndex, int length, int width, int height)
         {
             StartIndex = startIndex;
-            Length = length;
-            Items = new ItemStack[Length];
+            Count = length;
+            Items = new ItemStack[Count];
             Width = width;
             Height = height;
             for (int i = 0; i < Items.Length; i++)
@@ -21,7 +30,7 @@ namespace TrueCraft.Core.Windows
         }
 
         public int StartIndex { get; }
-        public int Length { get; }
+        public int Count { get; }
         public virtual int Width { get; }
         public virtual int Height { get; }
         public ItemStack[] Items { get; }
@@ -43,13 +52,13 @@ namespace TrueCraft.Core.Windows
             }
         }
 
-        public virtual int MoveOrMergeItem(int index, ItemStack item, IWindowArea from)
+        public virtual int MoveOrMergeItem(int index, ItemStack item, ISlots from)
         {
             int emptyIndex = -1;
             //var maximumStackSize = Item.GetMaximumStackSize(new ItemDescriptor(item.Id, item.Metadata));
             // TODO
             var maximumStackSize = 64;
-            for (int i = 0; i < Length; i++)
+            for (int i = 0; i < Count; i++)
             {
                 if (this[i].Empty && emptyIndex == -1)
                     emptyIndex = i;
@@ -90,9 +99,9 @@ namespace TrueCraft.Core.Windows
             return true;
         }
 
-        public void CopyTo(IWindowArea area)
+        public void CopyTo(ISlots area)
         {
-            for (int i = 0; i < area.Length && i < Length; i++)
+            for (int i = 0; i < area.Count && i < Count; i++)
                 area[i] = this[i];
         }
 
