@@ -17,5 +17,10 @@ namespace TrueCraft.API.Windows
             Value = value;
             Handled = false;
         }
+
+        public override string ToString()
+        {
+            return $"(SlotIndex: {SlotIndex}; Value={Value}; Handled={Handled})";
+        }
     }
 }

@@ -48,5 +48,10 @@ namespace TrueCraft.Core.Networking.Packets
                 stream.WriteInt16(Metadata);
             }
         }
+
+        public override string ToString()
+        {
+            return $"(WindowID={WindowID}; SlotIndex={SlotIndex}; ItemID={ItemID}; Count={Count}; Metadata={Metadata})";
+        }
     }
 }
