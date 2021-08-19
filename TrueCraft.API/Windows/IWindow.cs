@@ -12,7 +12,8 @@ namespace TrueCraft.API.Windows
         Inventory = -1,
         Chest = 0,
         CraftingBench = 1,
-        Furnace = 2
+        Furnace = 2,
+        Dispenser = 3
     }
 
     public interface IWindow : IDisposable, IEventSubject
