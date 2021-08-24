@@ -117,8 +117,8 @@ namespace TrueCraft.Client.Modules
 
                 case WindowType.Chest:
                     int len = Game.Client.CurrentWindow.Length2;
-                    Texture2D texture = (len == ChestWindow.ChestLength ? _chest : _doubleChest);
-                    Rectangle chestRect = (len == ChestWindow.ChestLength ? _chestWindowRect : _doubleChestWindowRect);
+                    Texture2D texture = (len == ChestWindowContent.ChestLength ? _chest : _doubleChest);
+                    Rectangle chestRect = (len == ChestWindowContent.ChestLength ? _chestWindowRect : _doubleChestWindowRect);
 
                     SpriteBatch.Draw(texture,
                         new Vector2(Game.GraphicsDevice.Viewport.Width / 2 - Scale(chestRect.Width / 2),
@@ -225,8 +225,10 @@ namespace TrueCraft.Client.Modules
             if (id == -1)
                 id = 0;
             var item = ItemStack.EmptyStack;
+
             if (SelectedSlot > -1)
                 item = Game.Client.CurrentWindow[SelectedSlot];
+
             var packet = new ClickWindowPacket(id, SelectedSlot, e.Button == MouseButton.Right,
                 0, Keyboard.GetState().IsKeyDown(Keys.LeftShift) || Keyboard.GetState().IsKeyDown(Keys.RightShift),
                 item.ID, item.Count, item.Metadata);
@@ -238,7 +240,7 @@ namespace TrueCraft.Client.Modules
             {
                 var backup = Game.Client.CurrentWindow.GetSlots();
                 var staging = (ItemStack)HeldItem.Clone();
-                Window.HandleClickPacket(packet, Game.Client.CurrentWindow, ref staging);
+                WindowContent.HandleClickPacket(packet, Game.Client.CurrentWindow, ref staging);
                 HeldItem = staging;
                 Game.Client.CurrentWindow.SetSlots(backup);
             }
@@ -273,26 +275,27 @@ namespace TrueCraft.Client.Modules
         private void DrawInventoryWindow(RenderStage stage)
         {
             // TODO fix hard-coded constants
-            DrawWindowArea(Game.Client.Inventory.MainInventory, 8, 84, InventoryWindowRect, stage);
-            DrawWindowArea(Game.Client.Inventory.Hotbar, 8, 142, InventoryWindowRect, stage);
-            DrawWindowArea(Game.Client.Inventory.CraftingGrid, 88, 26, InventoryWindowRect, stage);
-            DrawWindowArea(Game.Client.Inventory.Armor, 8, 8, InventoryWindowRect, stage);
+            InventoryWindowContent window = (InventoryWindowContent)Game.Client.CurrentWindow;
+            DrawWindowArea(window.CraftingGrid, InventoryWindowContent.CraftingOutputIndex, 88, 26, InventoryWindowRect, stage);
+            DrawWindowArea(window.Armor, InventoryWindowContent.ArmorIndex, 8, 8, InventoryWindowRect, stage);
+            DrawWindowArea(window.MainInventory, InventoryWindowContent.MainIndex, 8, 84, InventoryWindowRect, stage);
+            DrawWindowArea(window.Hotbar, InventoryWindowContent.HotbarIndex, 8, 142, InventoryWindowRect, stage);
         }
 
         private void DrawCraftingWindow(RenderStage stage)
         {
             // TODO fix hard-coded constants
-            var window = (CraftingBenchWindow)Game.Client.CurrentWindow;
-            DrawWindowArea(window.CraftingGrid, 29, 16, CraftingWindowRect, stage);
-            DrawWindowArea(window.MainInventory, 8, 84, CraftingWindowRect, stage);
-            DrawWindowArea(window.Hotbar, 8, 142, CraftingWindowRect, stage);
+            var window = (CraftingBenchWindowContent)Game.Client.CurrentWindow;
+            DrawWindowArea(window.CraftingGrid, CraftingBenchWindowContent.CraftingOutputIndex, 29, 16, CraftingWindowRect, stage);
+            DrawWindowArea(window.MainInventory, CraftingBenchWindowContent.MainIndex, 8, 84, CraftingWindowRect, stage);
+            DrawWindowArea(window.Hotbar, CraftingBenchWindowContent.HotbarIndex, 8, 142, CraftingWindowRect, stage);
         }
 
         private void DrawChestWindow(RenderStage stage)
         {
-            ChestWindow window = (ChestWindow)Game.Client.CurrentWindow;
+            ChestWindowContent window = (ChestWindowContent)Game.Client.CurrentWindow;
             int len = window.Length2;
-            bool bSingleChest = len == ChestWindow.ChestLength;
+            bool bSingleChest = len == ChestWindowContent.ChestLength;
             Rectangle rect = bSingleChest ? _chestWindowRect : _doubleChestWindowRect;
 
             // TODO fix hard-coded constants
@@ -305,20 +308,22 @@ namespace TrueCraft.Client.Modules
             //   58: the number of pixels from the top of the Player's Inventory to the top of the
             //       Hotbar inventory.
             int yPlayerInventory = bSingleChest ? 84 : 140;
-            DrawWindowArea(window.ChestInventory, 8, 18, rect, stage);
-            DrawWindowArea(window.MainInventory, 8, yPlayerInventory, rect, stage);
-            DrawWindowArea(window.Hotbar, 8, yPlayerInventory + 58, rect, stage);
+
+            DrawWindowArea(window.ChestInventory, ChestWindowContent.ChestIndex, 8, 18, rect, stage);
+            DrawWindowArea(window.MainInventory, window.MainIndex, 8, yPlayerInventory, rect, stage);
+            DrawWindowArea(window.Hotbar, window.HotbarIndex, 8, yPlayerInventory + 58, rect, stage);
         }
 
         /// <summary>
         /// Draws the contents of one Window Area.
         /// </summary>
         /// <param name="area">The contents of this Window Area will be drawn.</param>
+        /// <param name="startIndex"></param>
         /// <param name="xOffset">The x-coordinate within the GUI's Texture of the first slot of the Window Area.</param>
         /// <param name="yOffset">The r-coordinate within the GUI's Texture of the first slot of the Window Area.</param>
         /// <param name="frame">The Rectangle which is filled with the GUI Texture.</param>
         /// <param name="stage"></param>
-        private void DrawWindowArea(ISlots area, int xOffset, int yOffset, Rectangle frame, RenderStage stage)
+        private void DrawWindowArea(ISlots area, int startIndex, int xOffset, int yOffset, Rectangle frame, RenderStage stage)
         {
             var mouse = Mouse.GetState().Position.ToVector2();
             var scale = new Point((int)(16 * Game.ScaleFactor * 2));
@@ -331,7 +336,7 @@ namespace TrueCraft.Client.Modules
                 var item = area[i];
                 int x = (int)((i % area.Width) * Scale(18));
                 int y = (int)((i / area.Width) * Scale(18));
-                if (area is CraftingWindowArea)
+                if (area is CraftingWindowContent)
                 {
                     // yes I know this is a crappy hack
                     if (i == 0)
@@ -359,7 +364,7 @@ namespace TrueCraft.Client.Modules
                 var rect = new Rectangle(position, scale);
                 if (stage == RenderStage.Sprites && rect.Contains(mouse))
                 {
-                    SelectedSlot = (short)(area.StartIndex + i);
+                    SelectedSlot = (short)(startIndex + i);
                     SpriteBatch.Draw(Game.White1x1, rect, new Color(Color.White, 150));
                 }
 

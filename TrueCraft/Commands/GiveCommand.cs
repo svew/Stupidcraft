@@ -3,6 +3,7 @@ using System.Linq;
 using TrueCraft.Core.Windows;
 using TrueCraft.API;
 using TrueCraft.API.Networking;
+using TrueCraft.API.Windows;
 
 namespace TrueCraft.Commands
 {
@@ -83,7 +84,7 @@ namespace TrueCraft.Commands
             }
 
             string username = receivingPlayer.Username;
-            var inventory = receivingPlayer.Inventory as InventoryWindow;
+            IInventoryWindowContent inventory = receivingPlayer.InventoryWindowContent;
             if (inventory == null) return false;
 
             while (count > 0)

@@ -112,6 +112,7 @@ namespace TrueCraft.Core.Entities
                 {
                     var playerEntity = player as PlayerEntity;
                     playerEntity.OnPickUpItem(this);
+                    // TODO BUG: what if the player only has room for a partial pickup?
                     entityManager.DespawnEntity(this);
                 }
             }

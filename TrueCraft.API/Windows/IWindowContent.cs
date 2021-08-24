@@ -16,17 +16,17 @@ namespace TrueCraft.API.Windows
         Dispenser = 3
     }
 
-    public interface IWindow : IDisposable, IEventSubject
+    public interface IWindowContent : IDisposable, IEventSubject
     {
         event EventHandler<WindowChangeEventArgs> WindowChange;
 
         IRemoteClient Client { get; set; }
-        ISlots[] WindowAreas { get; }
+
         sbyte ID { get; set; }
         string Name { get; }
 
         /// <summary>
-        /// Gets the type of the implementing IWindow.
+        /// Gets the type of the Window for which this stores the content.
         /// </summary>
         WindowType Type { get; }
 
@@ -37,21 +37,22 @@ namespace TrueCraft.API.Windows
         short[] ReadOnlySlots { get; }
 
         /// <summary>
-        /// Call this to "shift+click" an item from one area to another.
-        /// </summary>
-        void MoveToAlternateArea(int index);
-        /// <summary>
         /// Gets an array of all slots in this window. Suitable for sending to clients over the network.
         /// </summary>
         ItemStack[] GetSlots();
+
         void SetSlots(ItemStack[] slots);
+
         /// <summary>
-        /// Adds the specified item stack to this window, merging with established slots as neccessary.
+        /// Moves as many as possible of the specified ItemStack to another area of the Window Content.
         /// </summary>
-        bool PickUpStack(ItemStack slot);
-        /// <summary>
-        /// Copy the contents of this window back into an inventory window after changes have been made.
-        /// </summary>
-        void CopyToInventory(IWindow inventoryWindow);
+        /// <param name="index">The index within the overall Window Content from
+        /// which we are to move the ItemStack</param>
+        /// <returns>
+        /// An ItemStack containing any leftover items that would not fit.
+        /// If all given Items fit in these Slots, then ItemStack.EmptyStack will
+        /// be returned.
+        /// </returns>
+        ItemStack MoveItemStack(int index);
     }
 }

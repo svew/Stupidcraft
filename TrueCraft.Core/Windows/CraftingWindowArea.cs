@@ -4,16 +4,14 @@ using TrueCraft.API.Logic;
 
 namespace TrueCraft.Core.Windows
 {
-    public class CraftingWindowArea : Slots, ICraftingArea
+    public class CraftingWindowContent : Slots, ICraftingArea
     {
         public static readonly int CraftingOutput = 0;
 
         private ICraftingRepository _repository;
 
-        public bool Process { get; set; }
-
-        public CraftingWindowArea(ICraftingRepository repository, int startIndex, int width, int height)
-            : base(startIndex, width * height + 1, width, height)
+        public CraftingWindowContent(ICraftingRepository repository, int width, int height)
+            : base(width * height + 1, width, height)
         {
             _repository = repository;
             WindowChange += HandleWindowChange;

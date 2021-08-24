@@ -10,52 +10,54 @@ using TrueCraft.API.Server;
 
 namespace TrueCraft.Core.Windows
 {
-    public class FurnaceWindow : Window
+    public class FurnaceWindowContent : WindowContent
     {
-        public IItemRepository ItemRepository { get; set; }
         public IEventScheduler EventScheduler { get; set; }
         public GlobalVoxelCoordinates Coordinates { get; }
-        
-        public FurnaceWindow(IEventScheduler scheduler, GlobalVoxelCoordinates coordinates,
-            IItemRepository itemRepository, InventoryWindow inventory)
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="mainInventory"></param>
+        /// <param name="hotBar"></param>
+        /// <param name="scheduler"></param>
+        /// <param name="coordinates"></param>
+        /// <param name="itemRepository"></param>
+        public FurnaceWindowContent(ISlots mainInventory, ISlots hotBar,
+            IEventScheduler scheduler, GlobalVoxelCoordinates coordinates,
+            IItemRepository itemRepository) :
+            base(
+                new[]
+                {
+                    new Slots(1, 1, 1),  // Ingredients
+                    new Slots(1, 1, 1),  // Fuel
+                    new Slots(1, 1, 1),  // Output
+                    mainInventory,
+                    hotBar
+                },
+                itemRepository
+                )
         {
-            ItemRepository = itemRepository;
             EventScheduler = scheduler;
             Coordinates = coordinates;
-
-            WindowAreas = new[]
-                {
-                    new Slots(IngredientIndex, 1, 1, 1),
-                    new Slots(FuelIndex, 1, 1, 1),
-                    new Slots(OutputIndex, 1, 1, 1),
-                    new Slots(MainIndex, 27, 9, 3),
-                    new Slots(HotbarIndex, 9, 9, 1)
-                };
-            inventory.MainInventory.CopyTo(MainInventory);
-            inventory.Hotbar.CopyTo(Hotbar);
-            foreach (var area in WindowAreas)
-                area.WindowChange += (s, e) => OnWindowChange(new WindowChangeEventArgs(
-                    (s as Slots).StartIndex + e.SlotIndex, e.Value));
-            Copying = false;
-            inventory.WindowChange += (sender, e) =>
-            {
-                if (Copying) return;
-                if ((e.SlotIndex >= InventoryWindow.MainIndex && e.SlotIndex < InventoryWindow.MainIndex + inventory.MainInventory.Count)
-                    || (e.SlotIndex >= InventoryWindow.HotbarIndex && e.SlotIndex < InventoryWindow.HotbarIndex + inventory.Hotbar.Count))
-                {
-                    inventory.MainInventory.CopyTo(MainInventory);
-                    inventory.Hotbar.CopyTo(Hotbar);
-                }
-            };
         }
 
-        private bool Copying { get; set; }
+        // Indices of the area within the Furnace
+        // Note that these are the same values as the slot
+        // indices only because the areas contain a single slot.
+        // They are conceptually different.
+        private const int IngredientAreaIndex = 0;
+        private const int FuelAreaIndex = 1;
+        private const int OutputAreaIndex = 2;
+        private const int MainAreaIndex = 3;
+        private const int HotbarAreaIndex = 4;
 
+        // Slot Indices within the overall Furnace
         public const short IngredientIndex = 0;
         public const short FuelIndex = 1;
         public const short OutputIndex = 2;
         public const short MainIndex = 3;
-        public const short HotbarIndex = 30;
+        public const short HotbarIndex = 30;    // TODO: implicitly hard-codes the size of the main inventory
 
         public override string Name
         {
@@ -77,54 +79,42 @@ namespace TrueCraft.Core.Windows
         {
             get
             {
-                return new[] { OutputIndex };
+                return new[] { (short)OutputIndex };
             }
         }
 
-        public override ISlots[] WindowAreas { get; }
-
         public ISlots Ingredient 
         {
-            get { return WindowAreas[0]; }
+            get { return SlotAreas[IngredientAreaIndex]; }
         }
 
         public ISlots Fuel
         {
-            get { return WindowAreas[1]; }
+            get { return SlotAreas[FuelAreaIndex]; }
         }
 
         public ISlots Output
         {
-            get { return WindowAreas[2]; }
+            get { return SlotAreas[OutputAreaIndex]; }
         }
 
         public ISlots MainInventory
         {
-            get { return WindowAreas[3]; }
+            get { return SlotAreas[MainAreaIndex]; }
         }
 
         public ISlots Hotbar
         {
-            get { return WindowAreas[4]; }
+            get { return SlotAreas[HotbarAreaIndex]; }
         }
 
         public override ItemStack[] GetSlots()
         {
-            var relevantAreas = new[] { Ingredient, Fuel, Output };
-            int length = relevantAreas.Sum(area => area.Count);
-            var slots = new ItemStack[length];
-            foreach (var windowArea in relevantAreas)
-                Array.Copy(windowArea.Items, 0, slots, windowArea.StartIndex, windowArea.Count);
-            return slots;
-        }
-
-        public override void CopyToInventory(IWindow inventoryWindow)
-        {
-            var window = (InventoryWindow)inventoryWindow;
-            Copying = true;
-            MainInventory.CopyTo(window.MainInventory);
-            Hotbar.CopyTo(window.Hotbar);
-            Copying = false;
+            ItemStack[] rv = new ItemStack[3];
+            rv[0] = Ingredient[0];
+            rv[1] = Fuel[0];
+            rv[2] = Output[0];
+            return rv;
         }
 
         protected override ISlots GetLinkedArea(int index, ItemStack slot)
@@ -134,20 +124,70 @@ namespace TrueCraft.Core.Windows
             return Hotbar;
         }
 
-        public override bool PickUpStack(ItemStack slot)
+        /// <inheritdoc />
+        public override ItemStack MoveItemStack(int index)
         {
-            var area = MainInventory;
-            foreach (var item in Hotbar.Items)
+            int sourceAreaIndex = GetAreaIndex(index);
+            ItemStack remaining = this[index];
+
+            switch(sourceAreaIndex)
             {
-                if (item.Empty || (slot.ID == item.ID && slot.Metadata == item.Metadata))
-                    //&& item.Count + slot.Count < Item.GetMaximumStackSize(new ItemDescriptor(item.Id, item.Metadata)))) // TODO
-                {
-                    area = Hotbar;
+                case IngredientAreaIndex:
+                case FuelAreaIndex:
+                case OutputAreaIndex:
+                    remaining = MoveToInventory(remaining);
                     break;
-                }
+
+                case MainAreaIndex:
+                case HotbarAreaIndex:
+                    remaining = MoveToFurnace(remaining);
+                    break;
+
+                default:
+                    throw new ApplicationException();
             }
-            int index = area.MoveOrMergeItem(-1, slot, null);
-            return index != -1;
+
+            return remaining;
+        }
+
+        private ItemStack MoveToInventory(ItemStack source)
+        {
+            ItemStack remaining = MainInventory.StoreItemStack(source, true);
+
+            if (!remaining.Empty)
+                remaining = Hotbar.StoreItemStack(remaining, false);
+
+            if (!remaining.Empty)
+                remaining = MainInventory.StoreItemStack(remaining, false);
+
+            return remaining;
+        }
+
+        private ItemStack MoveToFurnace(ItemStack source)
+        {
+            ItemStack remaining = source;
+            IItemProvider provider = ItemRepository.GetItemProvider(source.ID);
+
+            if (provider is IBurnableItem)
+            {
+                remaining = Fuel.StoreItemStack(remaining, false);
+                if (remaining.Empty)
+                    return ItemStack.EmptyStack;
+            }
+
+            if (provider is ISmeltableItem)
+            {
+                remaining = Ingredient.StoreItemStack(remaining, false);
+                if (remaining.Empty)
+                    return ItemStack.EmptyStack;
+            }
+
+            return remaining;
+        }
+
+        public override ItemStack StoreItemStack(ItemStack slot, bool topUpOnly)
+        {
+            throw new NotImplementedException();
         }
     }
 }

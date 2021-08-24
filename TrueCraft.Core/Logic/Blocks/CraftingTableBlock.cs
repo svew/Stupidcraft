@@ -5,6 +5,8 @@ using TrueCraft.API.World;
 using TrueCraft.API.Networking;
 using TrueCraft.Core.Windows;
 using TrueCraft.Core.Entities;
+using TrueCraft.API.Windows;
+using TrueCraft.API.Entities;
 
 namespace TrueCraft.Core.Logic.Blocks
 {
@@ -34,17 +36,23 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override bool BlockRightClicked(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
         {
-            var window = new CraftingBenchWindow(user.Server.CraftingRepository, (InventoryWindow)user.Inventory);
+#if DEBUG
+            if (WhoAmI.Answer == IAm.Client)
+                throw new ApplicationException("Illegal client-side call detected.");
+#endif
+            CraftingBenchWindowContent window = new CraftingBenchWindowContent(user.Inventory, user.Hotbar,
+                user.Server.CraftingRepository, user.Server.ItemRepository);
             user.OpenWindow(window);
             window.Disposed += (sender, e) =>
             {
+                // TODO BUG: this does not appear to be called (Items do not spawn, and remain in 2x2 (3x3?) Crafting Grid for next opening).
                 var entityManager = user.Server.GetEntityManagerForWorld(world);
-                for (int i = 0; i < window.CraftingGrid.StartIndex + window.CraftingGrid.Count; i++)
+                ItemStack[] inputs = window.ClearInputs();
+                foreach(ItemStack item in inputs)
                 {
-                    var item = window[i];
                     if (!item.Empty)
                     {
-                        var entity = new ItemEntity((Vector3)(descriptor.Coordinates + Vector3i.Up), item);
+                        IEntity entity = new ItemEntity((Vector3)(descriptor.Coordinates + Vector3i.Up), item);
                         entityManager.SpawnEntity(entity);
                     }
                 }

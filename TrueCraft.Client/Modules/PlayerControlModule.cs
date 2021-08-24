@@ -84,7 +84,7 @@ namespace TrueCraft.Client.Modules
                     return true;
 
                 case Keys.E:
-                    Game.Client.CurrentWindow = Game.Client.Inventory;
+                    Game.Client.CurrentWindow = Game.Client.InventoryWindowContent;
                     return true;
 
                 case Keys.Space:
@@ -253,7 +253,7 @@ namespace TrueCraft.Client.Modules
                     Digging = true;
                     return true;
                 case MouseButton.Right:
-                    var item = Game.Client.Inventory.Hotbar[Game.Client.HotbarSelection];
+                    var item = Game.Client.Hotbar[Game.Client.HotbarSelection];
                         Game.Client.QueuePacket(new PlayerBlockPlacementPacket(
                         Game.HighlightedBlock.X, (sbyte)Game.HighlightedBlock.Y, Game.HighlightedBlock.Z,
                         Game.HighlightedBlockFace, item.ID, item.Count, item.Metadata));
@@ -271,7 +271,7 @@ namespace TrueCraft.Client.Modules
             short damage;
             Game.EndDigging = Game.StartDigging.AddMilliseconds(
                 BlockProvider.GetHarvestTime(block,
-                    Game.Client.Inventory.Hotbar[Game.Client.HotbarSelection].ID, out damage));
+                    Game.Client.Hotbar[Game.Client.HotbarSelection].ID, out damage));
             Game.Client.QueuePacket(new PlayerDiggingPacket(
                 PlayerDiggingPacket.Action.StartDigging,
                 Game.TargetBlock.X, (sbyte)Game.TargetBlock.Y, Game.TargetBlock.Z,
@@ -317,7 +317,7 @@ namespace TrueCraft.Client.Modules
                 digging = true;
             if (gamePad.IsConnected && gamePad.Triggers.Left > 0.5f && GamePadState.Triggers.Left < 0.5f)
             {
-                var item = Game.Client.Inventory.Hotbar[Game.Client.HotbarSelection];
+                var item = Game.Client.Hotbar[Game.Client.HotbarSelection];
                 Game.Client.QueuePacket(new PlayerBlockPlacementPacket(
                     Game.HighlightedBlock.X, (sbyte)Game.HighlightedBlock.Y, Game.HighlightedBlock.Z,
                     Game.HighlightedBlockFace, item.ID, item.Count, item.Metadata));

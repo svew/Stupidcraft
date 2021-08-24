@@ -6,31 +6,27 @@ using TrueCraft.API.Windows;
 using TrueCraft.API;
 using TrueCraft.API.Networking;
 using TrueCraft.Core.Networking.Packets;
+using TrueCraft.API.Logic;
 
 namespace TrueCraft.Core.Windows
 {
-    public abstract class Window : IWindow, IDisposable, IEventSubject
+    public abstract class WindowContent : IWindowContent, IDisposable, IEventSubject
     {
-        public abstract ISlots[] WindowAreas { get; }
+        protected WindowContent(ISlots[] slotAreas, IItemRepository itemRepository)
+        {
+            SlotAreas = slotAreas;
+            this.ItemRepository = itemRepository;
+        }
+
+        protected ISlots[] SlotAreas { get; }
+
+        public IItemRepository ItemRepository { get; }
 
         public event EventHandler<WindowChangeEventArgs> WindowChange;
 
         public bool IsDisposed { get; private set; }
 
         public IRemoteClient Client { get; set; }
-
-        public virtual void MoveToAlternateArea(int index)
-        {
-            int fromIndex = GetAreaIndex(index);
-            var from = GetArea(ref index);
-            var slot = from[index];
-            if (slot.Empty)
-                return;
-            var to = GetLinkedArea(fromIndex, slot);
-            int destination = to.MoveOrMergeItem(index, slot, from);
-            if (WindowChange != null && destination != -1)
-                WindowChange(this, new WindowChangeEventArgs(destination + to.StartIndex, slot));
-        }
                 
         public sbyte ID { get; set; }
         public abstract string Name { get; }
@@ -45,20 +41,24 @@ namespace TrueCraft.Core.Windows
         /// <param name="slot">The item being moved</param>
         /// <returns>The area to place the item into</returns>
         protected abstract ISlots GetLinkedArea(int index, ItemStack slot);
-        public abstract void CopyToInventory(IWindow inventoryWindow);
 
         /// <summary>
         /// Gets the window area to handle this index and adjust index accordingly
         /// </summary>
+        /// <param name="index">Input: the slot index within the overall window content.
+        /// Output:  the slot index within the "Area".</param>
+        /// <returns>The ISlots which contains the input index.</returns>
         protected ISlots GetArea(ref int index)
         {
-            foreach (var area in WindowAreas)
+            int startIndex = 0;
+            foreach (var area in SlotAreas)
             {
-                if (area.StartIndex <= index && area.StartIndex + area.Count > index)
+                if (startIndex <= index && startIndex + area.Count > index)
                 {
-                    index = index - area.StartIndex;
+                    index = index - startIndex;
                     return area;
                 }
+                startIndex += area.Count;
             }
             throw new IndexOutOfRangeException();
         }
@@ -66,13 +66,17 @@ namespace TrueCraft.Core.Windows
         /// <summary>
         /// Gets the index of the appropriate area from the WindowAreas array.
         /// </summary>
+        /// <param name="index">The index of the slot within the overall window content.</param>
+        /// <returns>The index of the "window area" within the window.</returns>
         protected int GetAreaIndex(int index)
         {
-            for (int i = 0; i < WindowAreas.Length; i++)
+            int startIndex = 0;
+            for (int i = 0; i < SlotAreas.Length; i++)
             {
-                var area = WindowAreas[i];
-                if (index >= area.StartIndex && index < area.StartIndex + area.Count)
+                var area = SlotAreas[i];
+                if (index >= startIndex && index < startIndex + area.Count)
                     return i;
+                startIndex += area.Count;
             }
             throw new IndexOutOfRangeException();
         }
@@ -81,7 +85,7 @@ namespace TrueCraft.Core.Windows
         {
             get 
             {
-                return WindowAreas.Sum(a => a.Count);
+                return SlotAreas.Sum(a => a.Count);
             }
         }
 
@@ -89,19 +93,25 @@ namespace TrueCraft.Core.Windows
 
         public virtual ItemStack[] GetSlots()
         {
-            int length = WindowAreas.Sum(area => area.Count);
+            int length = SlotAreas.Sum(area => area.Count);
             var slots = new ItemStack[length];
-            foreach (var windowArea in WindowAreas)
-                Array.Copy(windowArea.Items, 0, slots, windowArea.StartIndex, windowArea.Count);
+            int startIndex = 0;
+            foreach (var windowArea in SlotAreas)
+            {
+                Array.Copy(windowArea.Items, 0, slots, startIndex, windowArea.Count);
+                startIndex += windowArea.Count;
+            }
             return slots;
         }
 
         public virtual void SetSlots(ItemStack[] slots)
         {
-            foreach (var windowArea in WindowAreas)
+            int startIndex = 0;
+            foreach (var windowArea in SlotAreas)
             {
-                if (windowArea.StartIndex < slots.Length && windowArea.StartIndex + windowArea.Count <= slots.Length)
-                    Array.Copy(slots, windowArea.StartIndex, windowArea.Items, 0, windowArea.Count);
+                if (startIndex < slots.Length && startIndex + windowArea.Count <= slots.Length)
+                    Array.Copy(slots, startIndex, windowArea.Items, 0, windowArea.Count);
+                startIndex += windowArea.Count;
             }
         }
 
@@ -109,34 +119,36 @@ namespace TrueCraft.Core.Windows
         {
             get
             {
-                foreach (var area in WindowAreas)
+                int startIndex = 0;
+                foreach (var area in SlotAreas)
                 {
-                    if (index >= area.StartIndex && index < area.StartIndex + area.Count)
-                        return area[index - area.StartIndex];
+                    if (index >= startIndex && index < startIndex + area.Count)
+                        return area[index - startIndex];
+                    startIndex += area.Count;
                 }
-                throw new IndexOutOfRangeException();
+                throw new IndexOutOfRangeException($"{nameof(index)} = {index} is outside the valid range of [0,{SlotAreas.Sum((a) => a.Count )})");
             }
             set
             {
-                foreach (var area in WindowAreas)
+                int startIndex = 0;
+                foreach (var area in SlotAreas)
                 {
-                    if (index >= area.StartIndex && index < area.StartIndex + area.Count)
+                    if (index >= startIndex && index < startIndex + area.Count)
                     {
                         var eventArgs = new WindowChangeEventArgs(index, value);
                         OnWindowChange(eventArgs);
                         if (!eventArgs.Handled)
-                            area[index - area.StartIndex] = value;
+                            area[index - startIndex] = value;
                         return;
                     }
+                    startIndex += area.Count;
                 }
                 throw new IndexOutOfRangeException();
             }
         }
 
-        public virtual bool PickUpStack(ItemStack slot)
-        {
-            throw new NotSupportedException();
-        }
+        /// <inheritdoc />
+        public abstract ItemStack StoreItemStack(ItemStack slot, bool topUpOnly);
 
         protected internal virtual void OnWindowChange(WindowChangeEventArgs e)
         {
@@ -148,9 +160,9 @@ namespace TrueCraft.Core.Windows
 
         public virtual void Dispose()
         {
-            for (int i = 0; i < WindowAreas.Length; i++)
+            for (int i = 0; i < SlotAreas.Length; i++)
             {
-                WindowAreas[i].Dispose();
+                SlotAreas[i].Dispose();
             }
             WindowChange = null;
             if (Disposed != null)
@@ -164,7 +176,7 @@ namespace TrueCraft.Core.Windows
             get { return new short[0]; }
         }
 
-        public static void HandleClickPacket(ClickWindowPacket packet, IWindow window, ref ItemStack itemStaging)
+        public static void HandleClickPacket(ClickWindowPacket packet, IWindowContent window, ref ItemStack itemStaging)
         {
             if (packet.SlotIndex >= window.Length || packet.SlotIndex < 0)
                 return;
@@ -185,7 +197,7 @@ namespace TrueCraft.Core.Windows
             {
                 if (packet.Shift)
                 {
-                    window.MoveToAlternateArea(packet.SlotIndex);
+                    window.MoveItemStack(packet.SlotIndex);
                 }
                 else
                 {
@@ -247,5 +259,8 @@ namespace TrueCraft.Core.Windows
                 }
             }
         }
+
+        /// <inheritdoc />
+        public abstract ItemStack MoveItemStack(int index);
     }
 }

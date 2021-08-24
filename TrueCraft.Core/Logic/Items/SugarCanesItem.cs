@@ -27,7 +27,7 @@ namespace TrueCraft.Core.Logic.Items
             {
                 world.SetBlockID(coordinates, SugarcaneBlock.BlockID);
                 item.Count--;
-                user.Inventory[user.SelectedSlot] = item;
+                user.Hotbar[user.SelectedSlot] = item;
                 user.Server.BlockRepository.GetBlockProvider(SugarcaneBlock.BlockID).BlockPlaced(
                     new BlockDescriptor { Coordinates = coordinates }, face, world, user);
             }

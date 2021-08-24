@@ -107,6 +107,7 @@ namespace TrueCraft.Core.Logic.Blocks
 
             if (!object.ReferenceEquals(adjacent, null))
             {
+                // TODO LATER: this assumes that chests cannot be placed next to each other.
                 // Ensure that chests are always opened in the same arrangement
                 if (adjacent.X < self.X ||
                     adjacent.Z < self.Z)
@@ -117,7 +118,8 @@ namespace TrueCraft.Core.Logic.Blocks
                 }
             }
 
-            var window = new ChestWindow((InventoryWindow)user.Inventory, !object.ReferenceEquals(adjacent, null));
+            var window = new ChestWindowContent(user.Inventory, user.Hotbar,
+                !object.ReferenceEquals(adjacent, null), ItemRepository);
             // Add items
             var entity = world.GetTileEntity(self);
             if (entity != null)
@@ -137,7 +139,7 @@ namespace TrueCraft.Core.Logic.Blocks
                     foreach (var item in (NbtList)entity["Items"])
                     {
                         var slot = ItemStack.FromNbt((NbtCompound)item);
-                        window.ChestInventory[slot.Index + ChestWindow.DoubleChestSecondaryIndex] = slot;
+                        window.ChestInventory[slot.Index + ChestWindowContent.DoubleChestSecondaryIndex] = slot;
                     }
                 }
             }
@@ -150,14 +152,14 @@ namespace TrueCraft.Core.Logic.Blocks
                         var item = window.ChestInventory.Items[i];
                         if (!item.Empty)
                         {
-                            if (i < ChestWindow.DoubleChestSecondaryIndex)
+                            if (i < ChestWindowContent.DoubleChestSecondaryIndex)
                             {
                                 item.Index = i;
                                 entitySelf.Add(item.ToNbt());
                             }
                             else
                             {
-                                item.Index = i - ChestWindow.DoubleChestSecondaryIndex;
+                                item.Index = i - ChestWindowContent.DoubleChestSecondaryIndex;
                                 entityAdjacent.Add(item.ToNbt());
                             }
                         }

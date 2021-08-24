@@ -24,10 +24,32 @@ namespace TrueCraft.API.Networking
         /// The entity associated with this client.
         /// </summary>
         IEntity Entity { get; }
+
         /// <summary>
-        /// This client's inventory.
+        /// This client's main inventory.
         /// </summary>
-        IWindow Inventory { get; }
+        ISlots Inventory { get; }
+
+        /// <summary>
+        /// This client's HotBar slots.
+        /// </summary>
+        ISlots Hotbar { get; }
+
+        /// <summary>
+        /// This client's Armor slots.
+        /// </summary>
+        ISlots Armor { get; }
+
+        /// <summary>
+        /// Gets this client's Crafting Grid.
+        /// </summary>
+        ISlots CraftingGrid { get; }
+
+        /// <summary>
+        /// Gets the IWindowContent representing the player's inventory, hotbar, crafting grid, and armor.
+        /// </summary>
+        IInventoryWindowContent InventoryWindowContent { get; }
+
         /// <summary>
         /// The username of the connected client. May be null if not yet ascertained.
         /// </summary>
@@ -88,6 +110,6 @@ namespace TrueCraft.API.Networking
         /// Opens a window on the client. This sends the appropriate packets and tracks
         /// this window as the currently open window.
         /// </summary>
-        void OpenWindow(IWindow window);
+        void OpenWindow(IWindowContent window);
     }
 }

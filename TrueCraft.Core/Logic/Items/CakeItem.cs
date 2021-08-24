@@ -31,7 +31,7 @@ namespace TrueCraft.Core.Logic.Items
             {
                 world.SetBlockID(coordinates, CakeBlock.BlockID);
                 item.Count--;
-                user.Inventory[user.SelectedSlot] = item;
+                user.Hotbar[user.SelectedSlot] = item;
             }
         }
     }

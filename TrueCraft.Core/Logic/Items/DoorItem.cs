@@ -58,7 +58,7 @@ namespace TrueCraft.Core.Logic.Items
             world.SetMetadata(top, (byte)(direction | DoorFlags.Upper));
             user.Server.BlockUpdatesEnabled = true;
             item.Count--;
-            user.Inventory[user.SelectedSlot] = item;
+            user.Hotbar[user.SelectedSlot] = item;
         }
     }
 

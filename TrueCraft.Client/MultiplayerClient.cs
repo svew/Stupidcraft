@@ -42,9 +42,15 @@ namespace TrueCraft.Client
         public PhysicsEngine Physics { get; set; }
         public bool LoggedIn { get; internal set; }
         public int EntityID { get; internal set; }
-        public InventoryWindow Inventory { get; set; }
+
+        public InventoryWindowContent InventoryWindowContent { get; }
+        public ISlots Inventory { get; private set; }
+        public ISlots Hotbar { get; private set; }
+        public ISlots Armor { get; }
+        public ISlots CraftingGrid { get; }
+
         public int Health { get; set; }
-        public IWindow CurrentWindow { get; set; }
+        public IWindowContent CurrentWindow { get; set; }
         public ICraftingRepository CraftingRepository { get; set; }
 
         public bool Connected
@@ -82,7 +88,7 @@ namespace TrueCraft.Client
             PacketHandlers = new PacketHandler[0x100];
             Handlers.PacketHandlers.RegisterHandlers(this);
             World = new ReadOnlyWorld();
-            Inventory = new InventoryWindow(null);
+
             var repo = new BlockRepository();
             repo.DiscoverBlockProviders();
             World.World.BlockRepository = repo;
@@ -94,6 +100,12 @@ namespace TrueCraft.Client
             var crafting = new CraftingRepository();
             CraftingRepository = crafting;
             crafting.DiscoverRecipes();
+
+            Inventory = new Slots(27, 9, 3);   // TODO hard-coded constants
+            Hotbar = new Slots(9, 9, 1);       // TODO hard-coded constants
+            Armor = new ArmorSlots();
+            CraftingGrid = new CraftingWindowContent(CraftingRepository, 2, 2);   // TODO Hard-coded constants
+            InventoryWindowContent = new InventoryWindowContent(Inventory, Hotbar, Armor, CraftingGrid);
         }
 
         public void RegisterPacketHandler(byte packetId, PacketHandler handler)
@@ -364,6 +376,8 @@ namespace TrueCraft.Client
                 _socketPool = null;
                 Inventory?.Dispose();
                 Inventory = null;
+                Hotbar?.Dispose();
+                Hotbar = null;
                 CurrentWindow?.Dispose();
                 CurrentWindow = null;
             }

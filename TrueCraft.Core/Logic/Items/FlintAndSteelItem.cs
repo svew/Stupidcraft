@@ -33,7 +33,7 @@ namespace TrueCraft.Core.Logic.Items
                 slot.Metadata += 1;
                 if (slot.Metadata >= Uses)
                     slot.Count = 0; // Destroy item
-                user.Inventory[user.SelectedSlot] = slot;
+                user.Hotbar[user.SelectedSlot] = slot;
             }
         }
     }

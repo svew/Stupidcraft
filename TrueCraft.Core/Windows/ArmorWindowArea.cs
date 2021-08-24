@@ -7,14 +7,14 @@ using TrueCraft.API.Windows;
 
 namespace TrueCraft.Core.Windows
 {
-    public class ArmorWindowArea : Slots
+    public class ArmorSlots : Slots
     {
         public const int Footwear = 3;
         public const int Pants = 2;
         public const int Chestplate = 1;
         public const int Headgear = 0;
 
-        public ArmorWindowArea(int startIndex) : base(startIndex, 4, 1, 4)
+        public ArmorSlots() : base(4, 1, 4)
         {
         }
 
@@ -37,21 +37,37 @@ namespace TrueCraft.Core.Windows
             return base.IsValid(slot, index);
         }
 
-        public override int MoveOrMergeItem(int index, ItemStack slot, ISlots from)
+        //public override int MoveOrMergeItem(int index, ItemStack slot, ISlots from)
+        //{
+        //    for (int i = 0; i < Count; i++)
+        //    {
+        //        if (IsValid(slot, i))
+        //        {
+        //            if (this[i].Empty)
+        //            {
+        //                this[i] = slot;
+        //                from[index] = ItemStack.EmptyStack;
+        //                return i;
+        //            }
+        //        }
+        //    }
+        //    return -1;
+        //}
+
+        public override ItemStack StoreItemStack(ItemStack item, bool topUpOnly)
         {
-            for (int i = 0; i < Count; i++)
-            {
-                if (IsValid(slot, i))
+            if (item.Empty)
+                return ItemStack.EmptyStack;
+
+            ItemStack remaining = item;
+            for (int j = 0; j < Count; j ++)
+                if (IsValid(item, j) && this[j].Empty)
                 {
-                    if (this[i].Empty)
-                    {
-                        this[i] = slot;
-                        from[index] = ItemStack.EmptyStack;
-                        return i;
-                    }
+                    this[j] = item;
+                    return ItemStack.EmptyStack;
                 }
-            }
-            return -1;
+
+            return item;
         }
     }
 }

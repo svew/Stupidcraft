@@ -206,13 +206,13 @@ namespace TrueCraft
                 client.QueuePacket(new EntityEquipmentPacket(entity.EntityID,
                         0, spawnedClient.SelectedItem.ID, spawnedClient.SelectedItem.Metadata));
                 client.QueuePacket(new EntityEquipmentPacket(entity.EntityID,
-                        4, spawnedClient.InventoryWindow.Armor[0].ID, spawnedClient.InventoryWindow.Armor[0].Metadata));
+                        4, spawnedClient.Armor[0].ID, spawnedClient.Armor[0].Metadata));
                 client.QueuePacket(new EntityEquipmentPacket(entity.EntityID,
-                        3, spawnedClient.InventoryWindow.Armor[1].ID, spawnedClient.InventoryWindow.Armor[1].Metadata));
+                        3, spawnedClient.Armor[1].ID, spawnedClient.Armor[1].Metadata));
                 client.QueuePacket(new EntityEquipmentPacket(entity.EntityID,
-                        2, spawnedClient.InventoryWindow.Armor[2].ID, spawnedClient.InventoryWindow.Armor[2].Metadata));
+                        2, spawnedClient.Armor[2].ID, spawnedClient.Armor[2].Metadata));
                 client.QueuePacket(new EntityEquipmentPacket(entity.EntityID,
-                        1, spawnedClient.InventoryWindow.Armor[3].ID, spawnedClient.InventoryWindow.Armor[3].Metadata));
+                        1, spawnedClient.Armor[3].ID, spawnedClient.Armor[3].Metadata));
             }
         }
 

@@ -65,13 +65,13 @@ namespace TrueCraft.Core.Logic.Blocks
         }
 
         protected static Dictionary<GlobalVoxelCoordinates, FurnaceEventSubject> TrackedFurnaces { get; set; }
-        protected static Dictionary<GlobalVoxelCoordinates, List<IWindow>> TrackedFurnaceWindows { get; set; }
+        protected static Dictionary<GlobalVoxelCoordinates, List<IWindowContent>> TrackedFurnaceWindows { get; set; }
 
         public FurnaceBlock()
         {
             // TODO: Why are static members initialized in an instance constructor???
             TrackedFurnaces = new Dictionary<GlobalVoxelCoordinates, FurnaceEventSubject>();
-            TrackedFurnaceWindows = new Dictionary<GlobalVoxelCoordinates, List<IWindow>>();
+            TrackedFurnaceWindows = new Dictionary<GlobalVoxelCoordinates, List<IWindowContent>>();
         }
 
         private NbtCompound CreateTileEntity()
@@ -177,8 +177,9 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override bool BlockRightClicked(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
         {
-            var window = new FurnaceWindow(user.Server.Scheduler, descriptor.Coordinates,
-                             user.Server.ItemRepository, (InventoryWindow)user.Inventory);
+            var window = new FurnaceWindowContent(user.Inventory, user.Hotbar,
+                             user.Server.Scheduler, descriptor.Coordinates,
+                             user.Server.ItemRepository);
 
             var state = GetState(world, descriptor.Coordinates);
             for (int i = 0; i < state.Items.Length; i++)
@@ -186,7 +187,7 @@ namespace TrueCraft.Core.Logic.Blocks
 
             user.OpenWindow(window);
             if (!TrackedFurnaceWindows.ContainsKey(descriptor.Coordinates))
-                TrackedFurnaceWindows[descriptor.Coordinates] = new List<IWindow>();
+                TrackedFurnaceWindows[descriptor.Coordinates] = new List<IWindowContent>();
             TrackedFurnaceWindows[descriptor.Coordinates].Add(window);
             window.Disposed += (sender, e) => TrackedFurnaceWindows.Remove(descriptor.Coordinates);
             UpdateWindows(descriptor.Coordinates, state);
@@ -203,9 +204,9 @@ namespace TrueCraft.Core.Logic.Blocks
         {
             if (Handling)
                 return;
-            var window = sender as FurnaceWindow;
+            var window = sender as FurnaceWindowContent;
             var index = e.SlotIndex;
-            if (index >= FurnaceWindow.MainIndex)
+            if (index >= FurnaceWindowContent.MainIndex)  // TODO: this test is dependent upon internal implementation of the FurnaceWindowContent
                 return;
 
             Handling = true;
@@ -237,9 +238,9 @@ namespace TrueCraft.Core.Logic.Blocks
             if (TrackedFurnaces.ContainsKey(coords))
                 return;
 
-            var inputStack = state.Items[FurnaceWindow.IngredientIndex];
-            var fuelStack = state.Items[FurnaceWindow.FuelIndex];
-            var outputStack = state.Items[FurnaceWindow.OutputIndex];
+            var inputStack = state.Items[FurnaceWindowContent.IngredientIndex];
+            var fuelStack = state.Items[FurnaceWindowContent.FuelIndex];
+            var outputStack = state.Items[FurnaceWindowContent.OutputIndex];
 
             var input = itemRepository.GetItemProvider(inputStack.ID) as ISmeltableItem;
             var fuel = itemRepository.GetItemProvider(fuelStack.ID) as IBurnableItem;
@@ -265,7 +266,7 @@ namespace TrueCraft.Core.Logic.Blocks
                     // We can definitely start
                     state.BurnTimeRemaining = state.BurnTimeTotal = (short)(fuel.BurnTime.TotalSeconds * 20);
                     state.CookTime = 0;
-                    state.Items[FurnaceWindow.FuelIndex].Count--;
+                    state.Items[FurnaceWindowContent.FuelIndex].Count--;
                     SetState(world, coords, state);
                     world.SetBlockID(coords, LitFurnaceBlock.BlockID);
                     var subject = new FurnaceEventSubject();
@@ -290,8 +291,8 @@ namespace TrueCraft.Core.Logic.Blocks
 
             var state = GetState(world, coords);
 
-            var inputStack = state.Items[FurnaceWindow.IngredientIndex];
-            var outputStack = state.Items[FurnaceWindow.OutputIndex];
+            var inputStack = state.Items[FurnaceWindowContent.IngredientIndex];
+            var outputStack = state.Items[FurnaceWindowContent.OutputIndex];
 
             var input = itemRepository.GetItemProvider(inputStack.ID) as ISmeltableItem;
 
@@ -326,8 +327,8 @@ namespace TrueCraft.Core.Logic.Blocks
                         outputStack = input.SmeltingOutput;
                     else if (outputStack.CanMerge(input.SmeltingOutput))
                         outputStack.Count += input.SmeltingOutput.Count;
-                    state.Items[FurnaceWindow.OutputIndex] = outputStack;
-                    state.Items[FurnaceWindow.IngredientIndex].Count--;
+                    state.Items[FurnaceWindowContent.OutputIndex] = outputStack;
+                    state.Items[FurnaceWindowContent.IngredientIndex].Count--;
                 }
             }
 

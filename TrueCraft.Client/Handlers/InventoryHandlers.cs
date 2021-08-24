@@ -5,7 +5,6 @@ using TrueCraft.API.Windows;
 using TrueCraft.API;
 using TrueCraft.Core.Windows;
 using TrueCraft.Core.Logic;
-using TrueCraft.API.Logic;
 
 namespace TrueCraft.Client.Handlers
 {
@@ -15,7 +14,7 @@ namespace TrueCraft.Client.Handlers
         {
             var packet = (WindowItemsPacket)_packet;
             if (packet.WindowID == 0)
-                client.Inventory.SetSlots(packet.Items);
+                client.InventoryWindowContent.SetSlots(packet.Items);
             else
                 client.CurrentWindow.SetSlots(packet.Items);
         }
@@ -23,9 +22,9 @@ namespace TrueCraft.Client.Handlers
         public static void HandleSetSlot(IPacket _packet, MultiplayerClient client)
         {
             var packet = (SetSlotPacket)_packet;
-            IWindow window = null;
+            IWindowContent window = null;
             if (packet.WindowID == 0)
-                window = client.Inventory;
+                window = client.InventoryWindowContent;
             else
                 window = client.CurrentWindow;
             if (window != null)
@@ -40,15 +39,18 @@ namespace TrueCraft.Client.Handlers
         public static void HandleOpenWindowPacket(IPacket _packet, MultiplayerClient client)
         {
             var packet = (OpenWindowPacket)_packet;
-            IWindow window = null;
+            IWindowContent window = null;
             switch (packet.Type)
             {
                 case WindowType.CraftingBench:
-                    window = new CraftingBenchWindow(client.CraftingRepository, client.Inventory);
+                    window = new CraftingBenchWindowContent(client.Inventory, client.Hotbar,
+                        client.CraftingRepository, BlockProvider.ItemRepository);
                     break;
 
                 case WindowType.Chest:
-                    window = new ChestWindow(client.Inventory, packet.TotalSlots == 2 * ChestWindow.ChestLength);
+                    window = new ChestWindowContent(client.Inventory, client.Hotbar,
+                        packet.TotalSlots == 2 * ChestWindowContent.ChestLength,
+                        BlockProvider.ItemRepository);
                     break;
             }
 

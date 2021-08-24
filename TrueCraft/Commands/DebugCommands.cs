@@ -358,18 +358,20 @@ namespace TrueCraft.Commands
                 if (arguments[0] == "hotbar")
                 {
                     // Discard hotbar items
-                    for (short i = 36; i <= 44; i++)
-                    {
-                        client.Inventory[i] = ItemStack.EmptyStack;
-                    }
+                    for (short i = 0; i <client.Hotbar.Count; i++)
+                        client.Hotbar[i] = ItemStack.EmptyStack;
                 }
                 else if (arguments[0] == "all")
                 {
                     // Discard all inventory items, including armor and crafting area contents
-                    for (short i = 0; i <= 44; i++)
-                    {
+                    for (int i = 0; i < client.Hotbar.Count; i++)
+                        client.Hotbar[i] = ItemStack.EmptyStack;
+                    for (int i = 0; i < client.Inventory.Count; i++)
                         client.Inventory[i] = ItemStack.EmptyStack;
-                    }
+                    for (int i = 0; i < client.Armor.Count; i++)
+                        client.Armor[i] = ItemStack.EmptyStack;
+                    for (int i = 0; i < client.CraftingGrid.Count; i++)
+                        client.CraftingGrid[i] = ItemStack.EmptyStack;
                 }
                 else
                 {
@@ -380,7 +382,7 @@ namespace TrueCraft.Commands
             else
             {
                 // Discards selected item.
-                client.Inventory[client.SelectedSlot] = ItemStack.EmptyStack;
+                client.Hotbar[client.SelectedSlot] = ItemStack.EmptyStack;
             }
         }
 
@@ -480,7 +482,22 @@ namespace TrueCraft.Commands
                 Help(client, alias, arguments);
                 return;
             }
-            client.QueuePacket(new WindowItemsPacket(0, client.Inventory.GetSlots()));
+            // TODO: The original behaviour was to resend all 4 sub-areas of the
+            //   Player's main inventory window:
+            //      - Armor
+            //      - 2x2 crafting grid
+            //      - player's inventory
+            //      - hotbar.
+            // This now sends just the Player's Inventory and hotbar.
+            // It is not clear which is correct.
+            ItemStack[] items = new ItemStack[client.Inventory.Count + client.Hotbar.Count];
+            int idx = 0;
+            int j;
+            for (j = 0; j < client.Inventory.Count; j++, idx ++)
+                items[idx] = client.Inventory[j];
+            for (j = 0; j < client.Hotbar.Count; j++, idx++)
+                items[idx] = client.Hotbar[j];
+            client.QueuePacket(new WindowItemsPacket(0, items));
         }
 
         public override void Help(IRemoteClient client, string alias, string[] arguments)

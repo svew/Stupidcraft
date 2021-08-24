@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using TrueCraft.API.Windows;
 using TrueCraft.API;
+using TrueCraft.API.Logic;
 
 namespace TrueCraft.Core.Windows
 {
@@ -18,9 +19,8 @@ namespace TrueCraft.Core.Windows
     /// </remarks>
     public class Slots : ISlots
     {
-        public Slots(int startIndex, int length, int width, int height)
+        public Slots(int length, int width, int height)
         {
-            StartIndex = startIndex;
             Count = length;
             Items = new ItemStack[Count];
             Width = width;
@@ -29,7 +29,6 @@ namespace TrueCraft.Core.Windows
                 Items[i] = ItemStack.EmptyStack;
         }
 
-        public int StartIndex { get; }
         public int Count { get; }
         public virtual int Width { get; }
         public virtual int Height { get; }
@@ -52,42 +51,65 @@ namespace TrueCraft.Core.Windows
             }
         }
 
-        public virtual int MoveOrMergeItem(int index, ItemStack item, ISlots from)
+        //public virtual int MoveOrMergeItem(int index, ItemStack item, ISlots from)
+        //{
+        //    int emptyIndex = -1;
+        //    //var maximumStackSize = Item.GetMaximumStackSize(new ItemDescriptor(item.Id, item.Metadata));
+        //    // TODO
+        //    var maximumStackSize = 64;
+        //    for (int i = 0; i < Count; i++)
+        //    {
+        //        if (this[i].Empty && emptyIndex == -1)
+        //            emptyIndex = i;
+        //        else if (this[i].ID == item.ID &&
+        //            this[i].Metadata == item.Metadata &&
+        //            this[i].Count < maximumStackSize)
+        //        {
+        //            // Merging takes precedence over empty slots
+        //            emptyIndex = -1;
+        //            if (from != null)
+        //                from[index] = ItemStack.EmptyStack;
+        //            if (this[i].Count + item.Count > maximumStackSize)
+        //            {
+        //                item = new ItemStack(item.ID, (sbyte)(item.Count - (maximumStackSize - this[i].Count)),
+        //                    item.Metadata, item.Nbt);
+        //                this[i] = new ItemStack(item.ID, (sbyte)maximumStackSize, item.Metadata, item.Nbt);
+        //                continue;
+        //            }
+        //            this[i] = new ItemStack(item.ID, (sbyte)(this[i].Count + item.Count), item.Metadata);
+        //            return i;
+        //        }
+        //    }
+        //    if (emptyIndex != -1)
+        //    {
+        //        if (from != null)
+        //            from[index] = ItemStack.EmptyStack;
+        //        this[emptyIndex] = item;
+        //    }
+        //    return emptyIndex;
+        //}
+
+        public virtual ItemStack StoreItemStack(ItemStack item, bool topUpOnly)
         {
-            int emptyIndex = -1;
-            //var maximumStackSize = Item.GetMaximumStackSize(new ItemDescriptor(item.Id, item.Metadata));
-            // TODO
-            var maximumStackSize = 64;
-            for (int i = 0; i < Count; i++)
+            int j = 0;
+            int jul = this.Count;
+            ItemStack remaining = item;
+            //IItemProvider provider = Server.ItemRepository.GetItemProvider(item.ID);
+            int maxStack = 64;   //  TODO: we need access to the ItemRepository to determine this.
+            while (j < jul && !remaining.Empty)
             {
-                if (this[i].Empty && emptyIndex == -1)
-                    emptyIndex = i;
-                else if (this[i].ID == item.ID &&
-                    this[i].Metadata == item.Metadata &&
-                    this[i].Count < maximumStackSize)
+                if (this[j].CanMerge(remaining) && this[j].Count < maxStack)
                 {
-                    // Merging takes precedence over empty slots
-                    emptyIndex = -1;
-                    if (from != null)
-                        from[index] = ItemStack.EmptyStack;
-                    if (this[i].Count + item.Count > maximumStackSize)
-                    {
-                        item = new ItemStack(item.ID, (sbyte)(item.Count - (maximumStackSize - this[i].Count)),
-                            item.Metadata, item.Nbt);
-                        this[i] = new ItemStack(item.ID, (sbyte)maximumStackSize, item.Metadata, item.Nbt);
-                        continue;
-                    }
-                    this[i] = new ItemStack(item.ID, (sbyte)(this[i].Count + item.Count), item.Metadata);
-                    return i;
+                    sbyte num = (sbyte)Math.Min(remaining.Count, maxStack - this[j].Count);
+                    this[j] = new ItemStack(this[j].ID, (sbyte)(this[j].Count + num), this[j].Metadata, this[j].Nbt);
+                    remaining = remaining.Count > num ?
+                        new ItemStack(remaining.ID, (sbyte)(remaining.Count - num), remaining.Metadata, remaining.Nbt) :
+                        ItemStack.EmptyStack;
                 }
+                j++;
             }
-            if (emptyIndex != -1)
-            {
-                if (from != null)
-                    from[index] = ItemStack.EmptyStack;
-                this[emptyIndex] = item;
-            }
-            return emptyIndex;
+
+            return remaining;
         }
 
         /// <summary>

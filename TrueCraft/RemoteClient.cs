@@ -32,10 +32,16 @@ namespace TrueCraft
         {
             _loadedChunks = new HashSet<GlobalChunkCoordinates>();
             Server = server;
-            Inventory = new InventoryWindow(server.CraftingRepository);
-            InventoryWindow.WindowChange += HandleWindowChange;
-            SelectedSlot = InventoryWindow.HotbarIndex;
-            CurrentWindow = InventoryWindow;
+
+            Inventory = new Slots(27, 9, 3);   // TODO hard-coded constants.
+            Hotbar = new Slots(9, 9, 1);       // TODO hard-coded constants.
+            Armor = new ArmorSlots();
+            CraftingGrid = new CraftingWindowContent(server.CraftingRepository, 2, 2);   // TODO hard-coded constants
+            InventoryWindowContent = new InventoryWindowContent(Inventory, Hotbar, Armor, CraftingGrid);
+
+            SelectedSlot = 0;
+
+            CurrentWindow = null;
             ItemStaging = ItemStack.EmptyStack;
             KnownEntities = new List<IEntity>();
             Disconnected = false;
@@ -63,10 +69,36 @@ namespace TrueCraft
         public bool LoggedIn { get; internal set; }
         public IMultiplayerServer Server { get; }
         public IWorld World { get; internal set; }
-        public IWindow Inventory { get; }
+
+        /// <summary>
+        /// Gets the Player's Inventory.
+        /// </summary>
+        public ISlots Inventory { get; }
+
+        /// <summary>
+        /// Gets the Player's Hotbar
+        /// </summary>
+        public ISlots Hotbar { get; }
+
+        /// <summary>
+        /// Gets the Player's Armor
+        /// </summary>
+        public ISlots Armor { get; }
+
+        /// <summary>
+        /// Gets the Player's Crafting Grid.
+        /// </summary>
+        public ISlots CraftingGrid { get;  }
+
+        /// <summary>
+        /// Gets or sets the selected index in the Hotbar
+        /// </summary>
+        /// <remarks>This index is relative to the Hotbar.  i.e the
+        /// first slot in the Hotbar is at index zero.</remarks>
         public short SelectedSlot { get; internal set; }
+
         public ItemStack ItemStaging { get; set; }
-        public IWindow CurrentWindow { get; internal set; }
+        public IWindowContent CurrentWindow { get; internal set; }
         public bool EnableLogging { get; set; }
         public DateTime ExpectedDigComplete { get; set; }
 
@@ -117,29 +149,60 @@ namespace TrueCraft
 
         void HandlePickUpItem(object sender, EntityEventArgs e)
         {
-            var packet = new CollectItemPacket(e.Entity.EntityID, Entity.EntityID);
+            IPacket packet = new CollectItemPacket(e.Entity.EntityID, Entity.EntityID);
+
+            // TODO: won't this client be in the set manager.ClientsForEntity,
+            //       resulting in sending this packet twice to the client picking
+            //       up the items.
+            // TODO: Should this packet even be sent to the originating client?
+            //       It's used to provide the pickup animation.
             QueuePacket(packet);
-            var manager = Server.GetEntityManagerForWorld(World);
-            foreach (var client in manager.ClientsForEntity(Entity))
+            IEntityManager manager = Server.GetEntityManagerForWorld(World);
+            foreach (IRemoteClient client in manager.ClientsForEntity(Entity))
                 client.QueuePacket(packet);
-            Inventory.PickUpStack((e.Entity as ItemEntity).Item);
+
+            ItemStack toPickUp = ((ItemEntity)e.Entity).Item;
+            ItemStack remaining = PickUpStack(toPickUp);
+
+            if (remaining != toPickUp)
+            {
+                manager.DespawnEntity(e.Entity);
+                if (!remaining.Empty)
+                    manager.SpawnEntity(new ItemEntity(e.Entity.Position, remaining));
+            }
+        }
+
+        /// <summary>
+        /// Picks up as many as possible of the given ItemStack
+        /// </summary>
+        /// <param name="item">The ItemStack to pick up.</param>
+        /// <returns>The remaining Items after picking up.</returns>
+        private ItemStack PickUpStack(ItemStack item)
+        {
+            IItemProvider provider = Server.ItemRepository.GetItemProvider(item.ID);
+            ItemStack remaining = Inventory.StoreItemStack(item, false);
+
+            if (!remaining.Empty)
+                remaining = Hotbar.StoreItemStack(remaining, false);
+
+            if (!remaining.Empty)
+                remaining = Inventory.StoreItemStack(remaining, false);
+
+            return remaining;
         }
 
         public ItemStack SelectedItem
         {
             get
             {
-                return Inventory[SelectedSlot];
+                return Hotbar[SelectedSlot];
             }
         }
 
-        public InventoryWindow InventoryWindow
-        {
-            get
-            {
-                return Inventory as InventoryWindow;
-            }
-        }
+        /// <summary>
+        /// Gets the contents of the player's inventory window.
+        /// </summary>
+        public IInventoryWindowContent InventoryWindowContent { get; }
 
         internal int ChunkRadius { get; set; }
 
@@ -168,7 +231,7 @@ namespace TrueCraft
                     nbt.RootTag["position"][0].DoubleValue,
                     nbt.RootTag["position"][1].DoubleValue,
                     nbt.RootTag["position"][2].DoubleValue);
-                Inventory.SetSlots(((NbtList)nbt.RootTag["inventory"]).Select(t => ItemStack.FromNbt(t as NbtCompound)).ToArray());
+                InventoryWindowContent.SetSlots(((NbtList)nbt.RootTag["inventory"]).Select(t => ItemStack.FromNbt(t as NbtCompound)).ToArray());
                 (Entity as PlayerEntity).Health = nbt.RootTag["health"].ShortValue;
                 Entity.Yaw = nbt.RootTag["yaw"].FloatValue;
                 Entity.Pitch = nbt.RootTag["pitch"].FloatValue;
@@ -201,7 +264,7 @@ namespace TrueCraft
                     }),
                     // TODO BUG: this saves the items in the Crafting area as part of the player's inventory.
                     //           They should be dropped when the player closes the window.
-                    new NbtList("inventory", Inventory.GetSlots().Select(s => s.ToNbt())),
+                    new NbtList("inventory", InventoryWindowContent.GetSlots().Select(s => s.ToNbt())),
                     new NbtShort("health", (Entity as PlayerEntity).Health),
                     new NbtFloat("yaw", Entity.Yaw),
                     new NbtFloat("pitch", Entity.Pitch),
@@ -210,7 +273,7 @@ namespace TrueCraft
             nbt.SaveToFile(path, NbtCompression.ZLib);
         }
 
-        public void OpenWindow(IWindow window)
+        public void OpenWindow(IWindowContent window)
         {
             CurrentWindow = window;
             window.Client = this;
@@ -225,9 +288,10 @@ namespace TrueCraft
         {
             if (!clientInitiated)
                 QueuePacket(new CloseWindowPacket(CurrentWindow.ID));
-            CurrentWindow.CopyToInventory(Inventory);
+
+            CurrentWindow.WindowChange -= HandleWindowChange;
             CurrentWindow.Dispose();
-            CurrentWindow = InventoryWindow;
+            CurrentWindow = null;
         }
 
         public void Log(string message, params object[] parameters)
@@ -504,9 +568,9 @@ namespace TrueCraft
 
         void HandleWindowChange(object sender, WindowChangeEventArgs e)
         {
-            if (!(sender is InventoryWindow))
+            if (!(sender is InventoryWindowContent))
             {
-                QueuePacket(new SetSlotPacket((sender as IWindow).ID, (short)e.SlotIndex, e.Value.ID, e.Value.Count, e.Value.Metadata));
+                QueuePacket(new SetSlotPacket((sender as IWindowContent).ID, (short)e.SlotIndex, e.Value.ID, e.Value.Count, e.Value.Metadata));
                 return;
             }
 
@@ -518,9 +582,10 @@ namespace TrueCraft
                 foreach (var c in notified)
                     c.QueuePacket(new EntityEquipmentPacket(Entity.EntityID, 0, SelectedItem.ID, SelectedItem.Metadata));
             }
-            if (e.SlotIndex >= InventoryWindow.ArmorIndex && e.SlotIndex < InventoryWindow.ArmorIndex + InventoryWindow.Armor.Count)
+            if (Core.Windows.InventoryWindowContent.IsArmorIndex(e.SlotIndex))
             {
-                short slot = (short)(4 - (e.SlotIndex - InventoryWindow.ArmorIndex));
+                // TODO Hard-coded constant (4)
+                short slot = (short)(4 - (e.SlotIndex - Core.Windows.InventoryWindowContent.ArmorIndex));
                 var notified = Server.GetEntityManagerForWorld(World).ClientsForEntity(Entity);
                 foreach (var c in notified)
                     c.QueuePacket(new EntityEquipmentPacket(Entity.EntityID, slot, e.Value.ID, e.Value.Metadata));

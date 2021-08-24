@@ -33,7 +33,7 @@ namespace TrueCraft.Core.Logic.Items
                     var meta = world.GetMetadata(coordinates);
                     if (meta == 0) // Is source block?
                     {
-                        user.Inventory[user.SelectedSlot] = new ItemStack(WaterBucketItem.ItemID);
+                        user.Hotbar[user.SelectedSlot] = new ItemStack(WaterBucketItem.ItemID);
                         world.SetBlockID(coordinates, 0);
                     }
                 }
@@ -42,7 +42,7 @@ namespace TrueCraft.Core.Logic.Items
                     var meta = world.GetMetadata(coordinates);
                     if (meta == 0) // Is source block?
                     {
-                        user.Inventory[user.SelectedSlot] = new ItemStack(LavaBucketItem.ItemID);
+                        user.Hotbar[user.SelectedSlot] = new ItemStack(LavaBucketItem.ItemID);
                         world.SetBlockID(coordinates, 0);
                     }
                 }
@@ -62,7 +62,7 @@ namespace TrueCraft.Core.Logic.Items
                         var liquidProvider = world.BlockRepository.GetBlockProvider(blockType);
                         liquidProvider.BlockPlaced(new BlockDescriptor { Coordinates = coordinates }, face, world, user);
                     }
-                    user.Inventory[user.SelectedSlot] = new ItemStack(BucketItem.ItemID);
+                    user.Hotbar[user.SelectedSlot] = new ItemStack(BucketItem.ItemID);
                 }
             }
         }

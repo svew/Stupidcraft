@@ -202,7 +202,7 @@ namespace TrueCraft.Handlers
                 return;
             }
             var staging = (ItemStack)client.ItemStaging.Clone();
-            Window.HandleClickPacket(packet, window, ref staging);
+            WindowContent.HandleClickPacket(packet, window, ref staging);
             client.ItemStaging = staging;
             if (packet.SlotIndex >= window.Length || packet.SlotIndex < 0)
                 return;
@@ -220,7 +220,7 @@ namespace TrueCraft.Handlers
         {
             var packet = (ChangeHeldItemPacket)_packet;
             var client = (RemoteClient)_client;
-            client.SelectedSlot = (short)(packet.Slot + InventoryWindow.HotbarIndex);
+            client.SelectedSlot = (short)(packet.Slot + InventoryWindowContent.HotbarIndex);
             var notified = server.GetEntityManagerForWorld(client.World).ClientsForEntity(client.Entity);
             foreach (var c in notified)
                 c.QueuePacket(new EntityEquipmentPacket(client.Entity.EntityID, 0, client.SelectedItem.ID, client.SelectedItem.Metadata));

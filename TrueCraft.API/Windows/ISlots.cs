@@ -13,18 +13,6 @@ namespace TrueCraft.API.Windows
         event EventHandler<WindowChangeEventArgs> WindowChange;
 
         /// <summary>
-        /// Gets the index (within the parent Window) of the first slot
-        /// in this Window Area.
-        /// </summary>
-        /// <remarks>
-        /// The parent Window contains a collection of Window Area objects.
-        /// The parent Window has an indexer that indexes all Window Area
-        /// objects within itself.  This StartIndex property indicates
-        /// where this Window Area lies within the parent Window's indices.
-        /// </remarks>
-        int StartIndex { get; }
-
-        /// <summary>
         /// Gets the total number of slots within the Window Area.
         /// </summary>
         /// <remarks>
@@ -62,6 +50,21 @@ namespace TrueCraft.API.Windows
         // than copying back and forth for the various windows.
         void CopyTo(ISlots area);
 
-        int MoveOrMergeItem(int index, ItemStack item, ISlots from);
+        //int MoveOrMergeItem(int index, ItemStack item, ISlots from);
+
+        /// <summary>
+        /// Adds the given ItemStack to these slots, merging with established slots if possible.
+        /// </summary>
+        /// <param name="items">The ItemStack to merge into these Slots.</param>
+        /// <param name="topUpOnly">True if only partially filled slots should be topped up.
+        /// No empty slots will be used.
+        /// False to use an empty slot, if some Items do not fit into an already
+        /// used Slot.</param>
+        /// <returns>
+        /// An ItemStack containing any leftover items that would not fit.
+        /// If all given Items fit in these Slots, then ItemStack.EmptyStack will
+        /// be returned.
+        /// </returns>
+        ItemStack StoreItemStack(ItemStack item, bool topUpOnly);
     }
 }
