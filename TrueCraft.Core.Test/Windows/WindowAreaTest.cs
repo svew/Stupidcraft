@@ -21,20 +21,6 @@ namespace TrueCraft.Core.Test.Windows
             area[0] = ItemStack.EmptyStack;
             Assert.IsTrue(called);
         }
-
-        [Test]
-        public void TestCopyTo()
-        {
-            var area1 = new Slots(10, 10, 1);
-            var area2 = new Slots(10, 10, 1);
-            area1[0] = new ItemStack(10);
-            area1[1] = new ItemStack(20);
-            area1[2] = new ItemStack(30);
-            area1.CopyTo(area2);
-            Assert.AreEqual(area1[0], area2[0]);
-            Assert.AreEqual(area1[1], area2[1]);
-            Assert.AreEqual(area1[2], area2[2]);
-        }
     }
 }
 

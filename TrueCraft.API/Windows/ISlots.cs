@@ -46,12 +46,6 @@ namespace TrueCraft.API.Windows
         /// <returns></returns>
         ItemStack this[int index] { get; set; }
 
-        // TODO: remove CopyTo by using references to the collections rather
-        // than copying back and forth for the various windows.
-        void CopyTo(ISlots area);
-
-        //int MoveOrMergeItem(int index, ItemStack item, ISlots from);
-
         /// <summary>
         /// Adds the given ItemStack to these slots, merging with established slots if possible.
         /// </summary>

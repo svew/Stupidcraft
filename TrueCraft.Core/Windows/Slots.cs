@@ -83,12 +83,6 @@ namespace TrueCraft.Core.Windows
             return true;
         }
 
-        public void CopyTo(ISlots area)
-        {
-            for (int i = 0; i < area.Count && i < Count; i++)
-                area[i] = this[i];
-        }
-
         protected internal virtual void OnWindowChange(WindowChangeEventArgs e)
         {
             if (WindowChange != null)
