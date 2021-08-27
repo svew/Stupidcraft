@@ -70,5 +70,12 @@ namespace TrueCraft.Core.Networking.Packets
                 stream.WriteInt16(Metadata);
             }
         }
+
+        #region object overrides
+        public override string ToString()
+        {
+            return $"(WindowID={WindowID}; Slot={SlotIndex}; RightClick={RightClick}; Shift={Shift}; ItemID={ItemID})";
+        }
+        #endregion
     }
 }
