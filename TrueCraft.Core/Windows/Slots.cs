@@ -51,44 +51,6 @@ namespace TrueCraft.Core.Windows
             }
         }
 
-        //public virtual int MoveOrMergeItem(int index, ItemStack item, ISlots from)
-        //{
-        //    int emptyIndex = -1;
-        //    //var maximumStackSize = Item.GetMaximumStackSize(new ItemDescriptor(item.Id, item.Metadata));
-        //    // TODO
-        //    var maximumStackSize = 64;
-        //    for (int i = 0; i < Count; i++)
-        //    {
-        //        if (this[i].Empty && emptyIndex == -1)
-        //            emptyIndex = i;
-        //        else if (this[i].ID == item.ID &&
-        //            this[i].Metadata == item.Metadata &&
-        //            this[i].Count < maximumStackSize)
-        //        {
-        //            // Merging takes precedence over empty slots
-        //            emptyIndex = -1;
-        //            if (from != null)
-        //                from[index] = ItemStack.EmptyStack;
-        //            if (this[i].Count + item.Count > maximumStackSize)
-        //            {
-        //                item = new ItemStack(item.ID, (sbyte)(item.Count - (maximumStackSize - this[i].Count)),
-        //                    item.Metadata, item.Nbt);
-        //                this[i] = new ItemStack(item.ID, (sbyte)maximumStackSize, item.Metadata, item.Nbt);
-        //                continue;
-        //            }
-        //            this[i] = new ItemStack(item.ID, (sbyte)(this[i].Count + item.Count), item.Metadata);
-        //            return i;
-        //        }
-        //    }
-        //    if (emptyIndex != -1)
-        //    {
-        //        if (from != null)
-        //            from[index] = ItemStack.EmptyStack;
-        //        this[emptyIndex] = item;
-        //    }
-        //    return emptyIndex;
-        //}
-
         public virtual ItemStack StoreItemStack(ItemStack item, bool topUpOnly)
         {
             int j = 0;
