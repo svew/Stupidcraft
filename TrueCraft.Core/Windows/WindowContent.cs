@@ -91,6 +91,10 @@ namespace TrueCraft.Core.Windows
 
         public virtual int Length2 { get { return Length; } }
 
+        /// <summary>
+        /// Gets a copy of each of the ItemStack instances in this Window Content
+        /// </summary>
+        /// <returns>An array containing copies of every ItemStack.</returns>
         public virtual ItemStack[] GetSlots()
         {
             int length = SlotAreas.Sum(area => area.Count);
@@ -98,7 +102,8 @@ namespace TrueCraft.Core.Windows
             int startIndex = 0;
             foreach (var windowArea in SlotAreas)
             {
-                Array.Copy(windowArea.Items, 0, slots, startIndex, windowArea.Count);
+                for (int j = 0, jul = windowArea.Count; j < jul; j++)
+                    slots[startIndex + j] = windowArea[j];
                 startIndex += windowArea.Count;
             }
             return slots;
@@ -107,11 +112,13 @@ namespace TrueCraft.Core.Windows
         public virtual void SetSlots(ItemStack[] slots)
         {
             int startIndex = 0;
-            foreach (var windowArea in SlotAreas)
+            for (int i = 0, iul = SlotAreas.Length; i < iul; i ++)
             {
-                if (startIndex < slots.Length && startIndex + windowArea.Count <= slots.Length)
-                    Array.Copy(slots, startIndex, windowArea.Items, 0, windowArea.Count);
-                startIndex += windowArea.Count;
+                ISlots s = SlotAreas[i];
+                int jul = s.Count;
+                for (int j = 0; j < jul; j++)
+                    s[j] = slots[startIndex + j];
+                startIndex += jul;
             }
         }
 

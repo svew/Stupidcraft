@@ -147,9 +147,9 @@ namespace TrueCraft.Core.Logic.Blocks
                 {
                     var entitySelf = new NbtList("Items", NbtTagType.Compound);
                     var entityAdjacent = new NbtList("Items", NbtTagType.Compound);
-                    for (int i = 0; i < window.ChestInventory.Items.Length; i++)
+                    for (int i = 0, iul = window.ChestInventory.Count; i < iul; i++)
                     {
-                        var item = window.ChestInventory.Items[i];
+                        var item = window.ChestInventory[i];
                         if (!item.Empty)
                         {
                             if (i < ChestWindowContent.DoubleChestSecondaryIndex)

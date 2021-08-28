@@ -307,6 +307,23 @@ namespace TrueCraft.API
         }
 
         /// <summary>
+        /// Gets an ItemStack with a reduced number of items in it.
+        /// </summary>
+        /// <param name="n">The number of Items to remove from the ItemStack.</param>
+        /// <returns>An ItemStack with the specified number of fewer items in it.</returns>
+        public ItemStack GetReducedStack(int n)
+        {
+#if DEBUG
+            if (n > Count)
+                throw new ArgumentOutOfRangeException($"This ItemStack only contains {Count} items.  It cannot be reduced by {n}.");
+#endif
+            if (Count - n > 0)
+                return new ItemStack(ID, (sbyte)(Count - n), Metadata, Nbt);
+            else
+                return EmptyStack;
+        }
+
+        /// <summary>
         /// Determines whether this item stack can merge with another.
         /// </summary>
         /// <param name="other">The other item stack.</param>

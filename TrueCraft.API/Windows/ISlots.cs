@@ -32,11 +32,6 @@ namespace TrueCraft.API.Windows
         int Height { get; }
 
         /// <summary>
-        /// Gets the Array containing the ItemStack objects in this Window Area.
-        /// </summary>
-        ItemStack[] Items { get; }
-
-        /// <summary>
         /// Gets or sets the ItemStack at the given index within this Window Area.
         /// </summary>
         /// <param name="index">The index within this Window Area.  The first

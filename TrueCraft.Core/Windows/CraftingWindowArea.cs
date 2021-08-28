@@ -34,9 +34,9 @@ namespace TrueCraft.Core.Windows
                 }
             }
             if (current == null)
-                Items[CraftingOutput] = ItemStack.EmptyStack;
+                this[CraftingOutput] = ItemStack.EmptyStack;
             else
-                Items[CraftingOutput] = current.Output;
+                this[CraftingOutput] = current.Output;
         }
 
         private void RemoveItemFromOutput(ICraftingRecipe recipe)
@@ -60,7 +60,10 @@ namespace TrueCraft.Core.Windows
             // Remove items
             for (int _x = 0; _x < recipe.Pattern.Width; _x++)
                 for (int _y = 0; _y < recipe.Pattern.Height; _y++)
-                    Items[(y + _y) * Width + (x + _x) + 1].Count -= recipe.Pattern[_x, _y].Count;
+                {
+                    int idx = (y + _y) * Width + (x + _x) + 1;
+                    this[idx] = this[idx].GetReducedStack(recipe.Pattern[_x, _y].Count);
+                }
         }
 
 

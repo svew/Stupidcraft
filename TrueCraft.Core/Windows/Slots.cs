@@ -22,29 +22,30 @@ namespace TrueCraft.Core.Windows
         public Slots(int length, int width, int height)
         {
             Count = length;
-            Items = new ItemStack[Count];
+            _items = new ItemStack[Count];
             Width = width;
             Height = height;
-            for (int i = 0; i < Items.Length; i++)
-                Items[i] = ItemStack.EmptyStack;
+            for (int i = 0; i < _items.Length; i++)
+                _items[i] = ItemStack.EmptyStack;
         }
 
         public int Count { get; }
         public virtual int Width { get; }
         public virtual int Height { get; }
-        public ItemStack[] Items { get; }
+
+        private ItemStack[] _items;
 
         public virtual ItemStack this[int index]
         {
-            get { return Items[index]; }
+            get { return _items[index]; }
             set
             {
-                if (value == Items[index])
+                if (value == _items[index])
                     return;
 
                 if (IsValid(value, index))
                 {
-                    Items[index] = value;
+                    _items[index] = value;
                     OnWindowChange(new WindowChangeEventArgs(index, value));
                 }
             }

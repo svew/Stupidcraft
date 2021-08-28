@@ -63,5 +63,18 @@ namespace TrueCraft.API.Test
             Assert.AreEqual(count, actual.Count);
             Assert.AreEqual(metadata, actual.Metadata);
         }
+
+        [TestCase(3, 5, 7, 1)]
+        [TestCase(5, 7, 11, 2)]
+        public void GetReducedItemStack(short id, sbyte count, short metadata, sbyte reduction)
+        {
+            ItemStack item = new ItemStack(id, count, metadata);
+
+            ItemStack actual = item.GetReducedStack(reduction);
+
+            Assert.AreEqual(id, actual.ID);
+            Assert.AreEqual(count - reduction, actual.Count);
+            Assert.AreEqual(metadata, actual.Metadata);
+        }
     }
 }
