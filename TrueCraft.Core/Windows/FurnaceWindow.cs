@@ -189,5 +189,12 @@ namespace TrueCraft.Core.Windows
         {
             throw new NotImplementedException();
         }
+
+        protected override void OnWindowChange(WindowChangeEventArgs e)
+        {
+            // TODO restore this method to abstract; implement server-side and client-side
+            //      subclasses.
+            throw new NotImplementedException();
+        }
     }
 }

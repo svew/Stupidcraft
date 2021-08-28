@@ -18,8 +18,6 @@ namespace TrueCraft.API.Windows
 
     public interface IWindowContent : IDisposable, IEventSubject
     {
-        event EventHandler<WindowChangeEventArgs> WindowChange;
-
         IRemoteClient Client { get; set; }
 
         sbyte ID { get; set; }

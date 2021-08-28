@@ -281,7 +281,6 @@ namespace TrueCraft
             if (NextWindowID < 0) NextWindowID = 1;
             QueuePacket(new OpenWindowPacket(window.ID, window.Type, window.Name, (sbyte)window.Length2));
             QueuePacket(new WindowItemsPacket(window.ID, window.GetSlots()));
-            window.WindowChange += HandleWindowChange;
         }
 
         public void CloseWindow(bool clientInitiated = false)
@@ -289,7 +288,8 @@ namespace TrueCraft
             if (!clientInitiated)
                 QueuePacket(new CloseWindowPacket(CurrentWindow.ID));
 
-            CurrentWindow.WindowChange -= HandleWindowChange;
+            // TODO Something else instantiates the window and gives it to us.  Then, we destroy it?
+            //      Almost certainly the wrong action for a Chest.
             CurrentWindow.Dispose();
             CurrentWindow = null;
         }
@@ -566,31 +566,32 @@ namespace TrueCraft
                 _loadedChunks.Remove(position);
         }
 
-        void HandleWindowChange(object sender, WindowChangeEventArgs e)
-        {
-            if (!(sender is InventoryWindowContent))
-            {
-                QueuePacket(new SetSlotPacket((sender as IWindowContent).ID, (short)e.SlotIndex, e.Value.ID, e.Value.Count, e.Value.Metadata));
-                return;
-            }
+        // TODO: move the various parts of this to the appropriate server-side WindowContent sub-class.
+        //void HandleWindowChange(object sender, WindowChangeEventArgs e)
+        //{
+        //    if (!(sender is InventoryWindowContent))
+        //    {
+        //        QueuePacket(new SetSlotPacket((sender as IWindowContent).ID, (short)e.SlotIndex, e.Value.ID, e.Value.Count, e.Value.Metadata));
+        //        return;
+        //    }
 
-            QueuePacket(new SetSlotPacket(0, (short)e.SlotIndex, e.Value.ID, e.Value.Count, e.Value.Metadata));
+        //    QueuePacket(new SetSlotPacket(0, (short)e.SlotIndex, e.Value.ID, e.Value.Count, e.Value.Metadata));
 
-            if (e.SlotIndex == SelectedSlot)
-            {
-                var notified = Server.GetEntityManagerForWorld(World).ClientsForEntity(Entity);
-                foreach (var c in notified)
-                    c.QueuePacket(new EntityEquipmentPacket(Entity.EntityID, 0, SelectedItem.ID, SelectedItem.Metadata));
-            }
-            if (Core.Windows.InventoryWindowContent.IsArmorIndex(e.SlotIndex))
-            {
-                // TODO Hard-coded constant (4)
-                short slot = (short)(4 - (e.SlotIndex - Core.Windows.InventoryWindowContent.ArmorIndex));
-                var notified = Server.GetEntityManagerForWorld(World).ClientsForEntity(Entity);
-                foreach (var c in notified)
-                    c.QueuePacket(new EntityEquipmentPacket(Entity.EntityID, slot, e.Value.ID, e.Value.Metadata));
-            }
-        }
+        //    if (e.SlotIndex == SelectedSlot)
+        //    {
+        //        var notified = Server.GetEntityManagerForWorld(World).ClientsForEntity(Entity);
+        //        foreach (var c in notified)
+        //            c.QueuePacket(new EntityEquipmentPacket(Entity.EntityID, 0, SelectedItem.ID, SelectedItem.Metadata));
+        //    }
+        //    if (Core.Windows.InventoryWindowContent.IsArmorIndex(e.SlotIndex))
+        //    {
+        //        // TODO Hard-coded constant (4)
+        //        short slot = (short)(4 - (e.SlotIndex - Core.Windows.InventoryWindowContent.ArmorIndex));
+        //        var notified = Server.GetEntityManagerForWorld(World).ClientsForEntity(Entity);
+        //        foreach (var c in notified)
+        //            c.QueuePacket(new EntityEquipmentPacket(Entity.EntityID, slot, e.Value.ID, e.Value.Metadata));
+        //    }
+        //}
 
         private static ChunkDataPacket CreatePacket(IChunk chunk)
         {

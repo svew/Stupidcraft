@@ -151,5 +151,11 @@ namespace TrueCraft.Core.Windows
 
             return remaining;
         }
+
+        protected override void OnWindowChange(WindowChangeEventArgs e)
+        {
+            // TODO restore to abstract; implement client and server versions.
+            throw new NotImplementedException();
+        }
     }
 }

@@ -194,12 +194,13 @@ namespace TrueCraft.Core.Logic.Blocks
 
             // TODO: Set window progress appropriately
 
-            window.WindowChange += (sender, e) => FurnaceWindowChanged(sender, e, world);
+            //window.WindowChange += (sender, e) => FurnaceWindowChanged(sender, e, world);
             return false;
         }
 
         private bool Handling = false;
 
+        // TODO Move to OnWindowChanged - separate into Client- and Server-side methods.
         protected void FurnaceWindowChanged(object sender, WindowChangeEventArgs e, IWorld world)
         {
             if (Handling)

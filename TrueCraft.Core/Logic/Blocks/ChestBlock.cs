@@ -143,43 +143,44 @@ namespace TrueCraft.Core.Logic.Blocks
                     }
                 }
             }
-            window.WindowChange += (sender, e) =>
-                {
-                    var entitySelf = new NbtList("Items", NbtTagType.Compound);
-                    var entityAdjacent = new NbtList("Items", NbtTagType.Compound);
-                    for (int i = 0, iul = window.ChestInventory.Count; i < iul; i++)
-                    {
-                        var item = window.ChestInventory[i];
-                        if (!item.Empty)
-                        {
-                            if (i < ChestWindowContent.DoubleChestSecondaryIndex)
-                            {
-                                item.Index = i;
-                                entitySelf.Add(item.ToNbt());
-                            }
-                            else
-                            {
-                                item.Index = i - ChestWindowContent.DoubleChestSecondaryIndex;
-                                entityAdjacent.Add(item.ToNbt());
-                            }
-                        }
-                    }
-                    var newEntity = world.GetTileEntity(self);
-                    if (newEntity == null)
-                        newEntity = new NbtCompound(new[] { entitySelf });
-                    else
-                        newEntity["Items"] = entitySelf;
-                    world.SetTileEntity(self, newEntity);
-                    if (!object.ReferenceEquals(adjacent, null))
-                    {
-                        newEntity = world.GetTileEntity(adjacent);
-                        if (newEntity == null)
-                            newEntity = new NbtCompound(new[] { entityAdjacent });
-                        else
-                            newEntity["Items"] = entityAdjacent;
-                        world.SetTileEntity(adjacent, newEntity);
-                    }
-                };
+            // TODO: Should be server-side only.
+            //window.WindowChange += (sender, e) =>
+            //    {
+            //        var entitySelf = new NbtList("Items", NbtTagType.Compound);
+            //        var entityAdjacent = new NbtList("Items", NbtTagType.Compound);
+            //        for (int i = 0, iul = window.ChestInventory.Count; i < iul; i++)
+            //        {
+            //            var item = window.ChestInventory[i];
+            //            if (!item.Empty)
+            //            {
+            //                if (i < ChestWindowContent.DoubleChestSecondaryIndex)
+            //                {
+            //                    item.Index = i;
+            //                    entitySelf.Add(item.ToNbt());
+            //                }
+            //                else
+            //                {
+            //                    item.Index = i - ChestWindowContent.DoubleChestSecondaryIndex;
+            //                    entityAdjacent.Add(item.ToNbt());
+            //                }
+            //            }
+            //        }
+            //        var newEntity = world.GetTileEntity(self);
+            //        if (newEntity == null)
+            //            newEntity = new NbtCompound(new[] { entitySelf });
+            //        else
+            //            newEntity["Items"] = entitySelf;
+            //        world.SetTileEntity(self, newEntity);
+            //        if (!object.ReferenceEquals(adjacent, null))
+            //        {
+            //            newEntity = world.GetTileEntity(adjacent);
+            //            if (newEntity == null)
+            //                newEntity = new NbtCompound(new[] { entityAdjacent });
+            //            else
+            //                newEntity["Items"] = entityAdjacent;
+            //            world.SetTileEntity(adjacent, newEntity);
+            //        }
+            //    };
             user.OpenWindow(window);
             return false;
         }

@@ -22,8 +22,6 @@ namespace TrueCraft.Core.Windows
 
         public IItemRepository ItemRepository { get; }
 
-        public event EventHandler<WindowChangeEventArgs> WindowChange;
-
         public bool IsDisposed { get; private set; }
 
         public IRemoteClient Client { get; set; }
@@ -157,17 +155,18 @@ namespace TrueCraft.Core.Windows
         /// <inheritdoc />
         public abstract ItemStack StoreItemStack(ItemStack slot, bool topUpOnly);
 
-        protected internal virtual void OnWindowChange(WindowChangeEventArgs e)
-        {
-            if (WindowChange != null)
-                WindowChange(this, e);
-        }
+        /// <summary>
+        /// Subclasses must implement this method to handle changes to the Window Content.
+        /// </summary>
+        /// <param name="e"></param>
+        /// <remarks>Subclasses implement this to send (or not) the appropriate packets
+        /// to the counterparty.</remarks>
+        protected abstract void OnWindowChange(WindowChangeEventArgs e);
 
         public event EventHandler Disposed;
 
         public virtual void Dispose()
         {
-            WindowChange = null;
             if (Disposed != null)
                 Disposed(this, null);
             Client = null;

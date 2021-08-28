@@ -135,5 +135,11 @@ namespace TrueCraft.Core.Windows
 
             return MainInventory.StoreItemStack(remaining, false);
         }
+
+        protected override void OnWindowChange(WindowChangeEventArgs e)
+        {
+            // TODO retore to abstract; implement client & server versions
+            throw new NotImplementedException();
+        }
     }
 }
