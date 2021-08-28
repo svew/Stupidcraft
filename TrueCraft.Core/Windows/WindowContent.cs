@@ -160,10 +160,6 @@ namespace TrueCraft.Core.Windows
 
         public virtual void Dispose()
         {
-            for (int i = 0; i < SlotAreas.Length; i++)
-            {
-                SlotAreas[i].Dispose();
-            }
             WindowChange = null;
             if (Disposed != null)
                 Disposed(this, null);

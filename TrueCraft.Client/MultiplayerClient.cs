@@ -374,9 +374,7 @@ namespace TrueCraft.Client
                 Disconnect();
                 _socketPool?.Dispose();
                 _socketPool = null;
-                Inventory?.Dispose();
                 Inventory = null;
-                Hotbar?.Dispose();
                 Hotbar = null;
                 CurrentWindow?.Dispose();
                 CurrentWindow = null;

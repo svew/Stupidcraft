@@ -16,10 +16,8 @@ namespace TrueCraft.Core.Test.Windows
             Assert.AreEqual(new ItemStack(10), area[0]);
             area[1] = new ItemStack(20);
             Assert.AreEqual(new ItemStack(20), area[1]);
-            bool called = false;
-            area.WindowChange += (sender, e) => called = true;
+
             area[0] = ItemStack.EmptyStack;
-            Assert.IsTrue(called);
         }
     }
 }

@@ -14,11 +14,11 @@ namespace TrueCraft.Core.Windows
             : base(width * height + 1, width, height)
         {
             _repository = repository;
-            WindowChange += HandleWindowChange;
         }
 
-        private void HandleWindowChange(object sender, WindowChangeEventArgs e)
+        protected override void OnWindowChange(WindowChangeEventArgs e)
         {
+            // TODO: this should be different code server- and client-side.
             if (_repository == null)
                 return;
 

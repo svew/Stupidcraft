@@ -33,7 +33,6 @@ namespace TrueCraft.Core.Windows
         public virtual int Width { get; }
         public virtual int Height { get; }
         public ItemStack[] Items { get; }
-        public event EventHandler<WindowChangeEventArgs> WindowChange;
 
         public virtual ItemStack this[int index]
         {
@@ -83,15 +82,8 @@ namespace TrueCraft.Core.Windows
             return true;
         }
 
-        protected internal virtual void OnWindowChange(WindowChangeEventArgs e)
+        protected virtual void OnWindowChange(WindowChangeEventArgs e)
         {
-            if (WindowChange != null)
-                WindowChange(this, e);
-        }
-
-        public virtual void Dispose()
-        {
-            WindowChange = null;
         }
     }
 }
