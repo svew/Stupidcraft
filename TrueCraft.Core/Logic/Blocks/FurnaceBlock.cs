@@ -34,6 +34,7 @@ namespace TrueCraft.Core.Logic.Blocks
 
             public void Dispose()
             {
+                // TODO: if anything subscribes to the Disposed event, we'll get infinite recursion...
                 if (Disposed != null)
                     Dispose();
             }
