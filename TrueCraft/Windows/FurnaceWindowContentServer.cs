@@ -1,16 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using TrueCraft.API.Windows;
-using TrueCraft.API.Logic;
 using TrueCraft.API;
-using TrueCraft.API.World;
+using TrueCraft.API.Logic;
 using TrueCraft.API.Server;
+using TrueCraft.API.Windows;
+using TrueCraft.API.World;
+using TrueCraft.Core.Windows;
 
-namespace TrueCraft.Core.Windows
+namespace TrueCraft.Windows
 {
-    public class FurnaceWindowContent : WindowContent
+    public class FurnaceWindowContentServer : WindowContent
     {
         public IEventScheduler EventScheduler { get; set; }
         public GlobalVoxelCoordinates Coordinates { get; }
@@ -23,20 +21,11 @@ namespace TrueCraft.Core.Windows
         /// <param name="scheduler"></param>
         /// <param name="coordinates"></param>
         /// <param name="itemRepository"></param>
-        public FurnaceWindowContent(ISlots mainInventory, ISlots hotBar,
+        public FurnaceWindowContentServer(ISlots mainInventory, ISlots hotBar,
             IEventScheduler scheduler, GlobalVoxelCoordinates coordinates,
             IItemRepository itemRepository) :
-            base(
-                new[]
-                {
-                    new Slots(1, 1, 1),  // Ingredients
-                    new Slots(1, 1, 1),  // Fuel
-                    new Slots(1, 1, 1),  // Output
-                    mainInventory,
-                    hotBar
-                },
-                itemRepository
-                )
+            base(FurnaceWindowConstants.Areas(mainInventory, hotBar),
+                itemRepository)
         {
             EventScheduler = scheduler;
             Coordinates = coordinates;
@@ -46,18 +35,18 @@ namespace TrueCraft.Core.Windows
         // Note that these are the same values as the slot
         // indices only because the areas contain a single slot.
         // They are conceptually different.
-        private const int IngredientAreaIndex = 0;
-        private const int FuelAreaIndex = 1;
-        private const int OutputAreaIndex = 2;
-        private const int MainAreaIndex = 3;
-        private const int HotbarAreaIndex = 4;
+        //private const int IngredientAreaIndex = 0;
+        //private const int FuelAreaIndex = 1;
+        //private const int OutputAreaIndex = 2;
+        //private const int MainAreaIndex = 3;
+        //private const int HotbarAreaIndex = 4;
 
         // Slot Indices within the overall Furnace
-        public const short IngredientIndex = 0;
-        public const short FuelIndex = 1;
-        public const short OutputIndex = 2;
-        public const short MainIndex = 3;
-        public const short HotbarIndex = 30;    // TODO: implicitly hard-codes the size of the main inventory
+        //public const short IngredientIndex = 0;
+        //public const short FuelIndex = 1;
+        private const short OutputIndex = 2;
+        //public const short MainIndex = 3;
+        //public const short HotbarIndex = 30;    // TODO: implicitly hard-codes the size of the main inventory
 
         public override string Name
         {
@@ -85,27 +74,27 @@ namespace TrueCraft.Core.Windows
 
         public ISlots Ingredient 
         {
-            get { return SlotAreas[IngredientAreaIndex]; }
+            get { return SlotAreas[(int)FurnaceWindowConstants.AreaIndices.Ingredient]; }
         }
 
         public ISlots Fuel
         {
-            get { return SlotAreas[FuelAreaIndex]; }
+            get { return SlotAreas[(int)FurnaceWindowConstants.AreaIndices.Fuel]; }
         }
 
         public ISlots Output
         {
-            get { return SlotAreas[OutputAreaIndex]; }
+            get { return SlotAreas[(int)FurnaceWindowConstants.AreaIndices.Output]; }
         }
 
         public ISlots MainInventory
         {
-            get { return SlotAreas[MainAreaIndex]; }
+            get { return SlotAreas[(int)FurnaceWindowConstants.AreaIndices.Main]; }
         }
 
         public ISlots Hotbar
         {
-            get { return SlotAreas[HotbarAreaIndex]; }
+            get { return SlotAreas[(int)FurnaceWindowConstants.AreaIndices.Hotbar]; }
         }
 
         public override ItemStack[] GetSlots()
@@ -119,7 +108,7 @@ namespace TrueCraft.Core.Windows
 
         protected override ISlots GetLinkedArea(int index, ItemStack slot)
         {
-            if (index < MainIndex)
+            if (index < (int)FurnaceWindowConstants.AreaIndices.Main)
                 return MainInventory;
             return Hotbar;
         }
@@ -127,19 +116,19 @@ namespace TrueCraft.Core.Windows
         /// <inheritdoc />
         public override ItemStack MoveItemStack(int index)
         {
-            int sourceAreaIndex = GetAreaIndex(index);
+            FurnaceWindowConstants.AreaIndices sourceAreaIndex = (FurnaceWindowConstants.AreaIndices)GetAreaIndex(index);
             ItemStack remaining = this[index];
 
             switch(sourceAreaIndex)
             {
-                case IngredientAreaIndex:
-                case FuelAreaIndex:
-                case OutputAreaIndex:
+                case FurnaceWindowConstants.AreaIndices.Ingredient:
+                case FurnaceWindowConstants.AreaIndices.Fuel:
+                case FurnaceWindowConstants.AreaIndices.Output:
                     remaining = MoveToInventory(remaining);
                     break;
 
-                case MainAreaIndex:
-                case HotbarAreaIndex:
+                case FurnaceWindowConstants.AreaIndices.Main:
+                case FurnaceWindowConstants.AreaIndices.Hotbar:
                     remaining = MoveToFurnace(remaining);
                     break;
 
@@ -192,8 +181,25 @@ namespace TrueCraft.Core.Windows
 
         protected override void OnWindowChange(WindowChangeEventArgs e)
         {
-            // TODO restore this method to abstract; implement server-side and client-side
-            //      subclasses.
+            // TODO
+            throw new NotImplementedException();
+        }
+
+        protected override void HandleLeftClick()
+        {
+            // TODO
+            throw new NotImplementedException();
+        }
+
+        protected override void HandleShiftLeftClick()
+        {
+            // TODO
+            throw new NotImplementedException();
+        }
+
+        protected override void HandleRightClick()
+        {
+            // TODO
             throw new NotImplementedException();
         }
     }

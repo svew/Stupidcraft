@@ -4,10 +4,11 @@ using TrueCraft.API.Logic;
 using TrueCraft.API;
 using TrueCraft.Core.Logic;
 using TrueCraft.Core.Logic.Items;
+using TrueCraft.Core.Windows;
 
-namespace TrueCraft.Core.Windows
+namespace TrueCraft.Client.Windows
 {
-    public class InventoryWindowContent : WindowContent, IInventoryWindowContent
+    public class InventoryWindowContentServer : WindowContent, IInventoryWindowContent
     {
         /// <summary>
         /// 
@@ -16,54 +17,14 @@ namespace TrueCraft.Core.Windows
         /// <param name="hotBar"></param>
         /// <param name="armor"></param>
         /// <param name="craftingGrid"></param>
-        public InventoryWindowContent(ISlots mainInventory, ISlots hotBar,
-            ISlots armor, ISlots craftingGrid) : base(
-            new[]
-                {
-                    craftingGrid,
-                    armor,
-                    mainInventory,
-                    hotBar
-                },
-            BlockProvider.ItemRepository)
+        public InventoryWindowContentServer(ISlots mainInventory, ISlots hotBar,
+            ISlots armor, ISlots craftingGrid) :
+            base(InventoryWindowConstants.Areas(mainInventory, hotBar, armor, craftingGrid),
+               BlockProvider.ItemRepository)
         {
         }
 
-        #region Variables
-        private enum AreaIndex
-        {
-            Crafting = 0,
-            Armor = 1,
-            Main = 2,
-            Hotbar = 3
-        }
-
-        public const int InventoryWidth = 9;
-        public const int InventoryHeight = 3;
-        public const int InventoryLength = InventoryWidth * InventoryHeight;
-
-        public const short HotbarIndex = 36;
-        public const short HotbarLength = 9;
-
-        public const short CraftingGridIndex = 1;
-        public const short CraftingOutputIndex = 0;
-        public const short ArmorIndex = 5;
-        public const short MainIndex = 9;
-
-        public static bool IsPlayerInventorySlot(int slotIndex)
-        {
-            return slotIndex >= MainIndex && slotIndex < MainIndex + InventoryLength;
-        }
-
-        public static bool IsHotbarIndex(int slotIndex)
-        {
-            return slotIndex >= HotbarIndex && slotIndex < HotbarIndex + HotbarLength;
-        }
-
-        public static bool IsArmorIndex(int slotIndex)
-        {
-            return slotIndex >= ArmorIndex && slotIndex < ArmorIndex + 4;   // TODO hard-coded constant
-        }
+        #region Properties
 
         public override string Name
         {
@@ -85,21 +46,17 @@ namespace TrueCraft.Core.Windows
         {
             get
             {
-                return new[] { CraftingOutputIndex };
+                return new[] { InventoryWindowConstants.CraftingOutputIndex };
             }
         }
 
-        #region Properties
+        public ISlots CraftingGrid { get => SlotAreas[(int)InventoryWindowConstants.AreaIndices.Crafting]; }
 
-        public ISlots CraftingGrid { get => SlotAreas[(int)AreaIndex.Crafting]; }
+        public ISlots Armor { get => SlotAreas[(int)InventoryWindowConstants.AreaIndices.Armor]; }
 
-        public ISlots Armor { get => SlotAreas[(int)AreaIndex.Armor]; }
+        public ISlots MainInventory { get => SlotAreas[(int)InventoryWindowConstants.AreaIndices.Main]; }
 
-        public ISlots MainInventory { get => SlotAreas[(int)AreaIndex.Main]; }
-
-        public ISlots Hotbar { get => SlotAreas[(int)AreaIndex.Hotbar]; }
-
-        #endregion
+        public ISlots Hotbar { get => SlotAreas[(int)InventoryWindowConstants.AreaIndices.Hotbar]; }
 
         #endregion
 
@@ -130,16 +87,16 @@ namespace TrueCraft.Core.Windows
 
         public override ItemStack MoveItemStack(int index)
         {
-            AreaIndex src = (AreaIndex)GetAreaIndex(index);
+            InventoryWindowConstants.AreaIndices src = (InventoryWindowConstants.AreaIndices)GetAreaIndex(index);
 
             switch (src)
             {
-                case AreaIndex.Crafting:
-                case AreaIndex.Armor:
+                case InventoryWindowConstants.AreaIndices.Crafting:
+                case InventoryWindowConstants.AreaIndices.Armor:
                     return MoveToInventory(index);
 
-                case AreaIndex.Main:
-                case AreaIndex.Hotbar:
+                case InventoryWindowConstants.AreaIndices.Main:
+                case InventoryWindowConstants.AreaIndices.Hotbar:
                     return MoveFromInventory(index);
 
                 default:
@@ -178,7 +135,25 @@ namespace TrueCraft.Core.Windows
 
         protected override void OnWindowChange(WindowChangeEventArgs e)
         {
-            // TODO restore to abstract & implement client & server versions.
+            // TODO
+            throw new NotImplementedException();
+        }
+
+        protected override void HandleLeftClick()
+        {
+            // TODO
+            throw new NotImplementedException();
+        }
+
+        protected override void HandleShiftLeftClick()
+        {
+            // TODO
+            throw new NotImplementedException();
+        }
+
+        protected override void HandleRightClick()
+        {
+            // TODO
             throw new NotImplementedException();
         }
     }

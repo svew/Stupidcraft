@@ -4,47 +4,22 @@ using TrueCraft.Core.Windows;
 using TrueCraft.API;
 using TrueCraft.API.Logic;
 
-namespace TrueCraft.Core.Windows
+namespace TrueCraft.Client.Windows
 {
-    public class ChestWindowContent : WindowContent
+    public class ChestWindowContentClient : WindowContentClient
     {
-        public ChestWindowContent(ISlots mainInventory, ISlots hotBar, bool doubleChest,
+
+        public ChestWindowContentClient(ISlots mainInventory, ISlots hotBar, bool doubleChest,
             IItemRepository itemRepository):
-            base(
-                doubleChest ?
-                new[]
-                {
-                    new Slots(2 * ChestLength, ChestWidth, 2 * ChestHeight), // Chest
-                    mainInventory,
-                    hotBar
-                }:
-                new[]
-                {
-                    new Slots(ChestLength, ChestWidth, ChestHeight), // Chest
-                    mainInventory,
-                    hotBar
-                },
-                itemRepository
-                )
+            base(ChestWindowConstants.Areas(mainInventory, hotBar, doubleChest),
+                itemRepository)
         {
             DoubleChest = doubleChest;
         }
 
-        private const int ChestAreaIndex = 0;
-        private const int MainAreaIndex = 1;
-        private const int HotbarAreaIndex = 2;
-
-        public const int ChestIndex = 0;
-        private const int ChestWidth = 9;
-        private const int ChestHeight = 3;
-        public const int ChestLength = ChestWidth * ChestHeight;
-
-        public const int DoubleChestSecondaryIndex = 27;
-        private const int _MainIndex = 27;
-        private const int _HotbarIndex = 54;
-        private const int _DoubleMainIndex = 54;
-        private const int _DoubleHotbarIndex = 81;
-
+        /// <summary>
+        /// Gets whether or not this Chest is a double Chest.
+        /// </summary>
         public bool DoubleChest { get; }
 
         public override string Name
@@ -69,7 +44,7 @@ namespace TrueCraft.Core.Windows
         {
             get
             {
-                return SlotAreas[ChestAreaIndex];
+                return SlotAreas[(int)ChestWindowConstants.AreaIndices.ChestArea];
             }
         }
 
@@ -77,15 +52,7 @@ namespace TrueCraft.Core.Windows
         {
             get
             {
-                return SlotAreas[MainAreaIndex];
-            }
-        }
-
-        public int MainIndex
-        {
-            get
-            {
-                return DoubleChest ? _DoubleMainIndex : _MainIndex;
+                return SlotAreas[(int)ChestWindowConstants.AreaIndices.MainArea];
             }
         }
 
@@ -93,15 +60,7 @@ namespace TrueCraft.Core.Windows
         {
             get
             {
-                return SlotAreas[HotbarAreaIndex];
-            }
-        }
-
-        public int HotbarIndex
-        {
-            get
-            {
-                return DoubleChest ? _DoubleHotbarIndex : _HotbarIndex;
+                return SlotAreas[(int)ChestWindowConstants.AreaIndices.HotBarArea];
             }
         }
 
@@ -116,7 +75,7 @@ namespace TrueCraft.Core.Windows
         /// <inheritdoc/>
         protected override ISlots GetLinkedArea(int index, ItemStack slot)
         {
-            if (index == ChestAreaIndex)
+            if (index == (int)ChestWindowConstants.AreaIndices.ChestArea)
                 return Hotbar;
             else
                 return ChestInventory;
@@ -130,10 +89,10 @@ namespace TrueCraft.Core.Windows
         /// <inheritdoc />
         public override ItemStack MoveItemStack(int index)
         {
-            int srcAreaIdx = GetAreaIndex(index);
+            ChestWindowConstants.AreaIndices srcAreaIdx = (ChestWindowConstants.AreaIndices)GetAreaIndex(index);
             ItemStack remaining = this[index];
 
-            if (srcAreaIdx == ChestAreaIndex)
+            if (srcAreaIdx == ChestWindowConstants.AreaIndices.ChestArea)
                 return MoveItemStackToPlayer(remaining);
             else
                 return ChestInventory.StoreItemStack(remaining, false);
@@ -154,7 +113,28 @@ namespace TrueCraft.Core.Windows
 
         protected override void OnWindowChange(WindowChangeEventArgs e)
         {
-            // TODO restore to abstract; implement client and server versions.
+            // TODO 
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        protected override void HandleLeftClick()
+        {
+            // TODO 
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        protected override void HandleShiftLeftClick()
+        {
+            // TODO 
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        protected override void HandleRightClick()
+        {
+            // TODO 
             throw new NotImplementedException();
         }
     }

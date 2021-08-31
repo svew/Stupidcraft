@@ -5,36 +5,22 @@ using System.Text;
 using TrueCraft.API.Windows;
 using TrueCraft.API.Logic;
 using TrueCraft.API;
+using TrueCraft.Core.Windows;
 
-namespace TrueCraft.Core.Windows
+namespace TrueCraft.Windows
 {
     public class CraftingBenchWindowContent : WindowContent
     {
         public CraftingBenchWindowContent(ISlots mainInventory, ISlots hotBar,
             ICraftingRepository craftingRepository, IItemRepository itemRepository) :
-            base(
-                new[]
-                {
-                new CraftingWindowContent(craftingRepository, 3, 3),
-                mainInventory,
-                hotBar
-                },
+            base(CraftingBenchWindowConstants.Areas(mainInventory, hotBar, craftingRepository),
                 itemRepository)
         {
         }
 
         #region Variables
-        private enum AreaIndex
-        {
-            Crafting = 0,
-            Main = 1,
-            Hotbar = 2
-        }
 
-        public const short HotbarIndex = 37;
-        public const short CraftingGridIndex = 1;
-        public const short CraftingOutputIndex = 0;
-        public const short MainIndex = 10;
+        private const short CraftingOutputIndex = 0;
 
         public override string Name
         {
@@ -78,11 +64,11 @@ namespace TrueCraft.Core.Windows
 
         #region Properties
 
-        public ISlots CraftingGrid { get => SlotAreas[(int)AreaIndex.Crafting]; }
+        public ISlots CraftingGrid { get => SlotAreas[(int)CraftingBenchWindowConstants.AreaIndices.Crafting]; }
 
-        public ISlots MainInventory { get => SlotAreas[(int)AreaIndex.Main]; }
+        public ISlots MainInventory { get => SlotAreas[(int)CraftingBenchWindowConstants.AreaIndices.Main]; }
 
-        public ISlots Hotbar { get => SlotAreas[(int)AreaIndex.Hotbar]; }
+        public ISlots Hotbar { get => SlotAreas[(int)CraftingBenchWindowConstants.AreaIndices.Hotbar]; }
 
         #endregion
 
@@ -100,7 +86,7 @@ namespace TrueCraft.Core.Windows
 
         protected override ISlots GetLinkedArea(int index, ItemStack slot)
         {
-            if (index < MainIndex)
+            if (index < (int)CraftingBenchWindowConstants.AreaIndices.Main)
                 return MainInventory;
             return Hotbar;
         }
@@ -116,8 +102,8 @@ namespace TrueCraft.Core.Windows
             if (remaining.Empty)
                 return ItemStack.EmptyStack;
 
-            AreaIndex srcAreaIdx = (AreaIndex)GetAreaIndex(index);
-            if (srcAreaIdx == AreaIndex.Crafting)
+            CraftingBenchWindowConstants.AreaIndices srcAreaIdx = (CraftingBenchWindowConstants.AreaIndices)GetAreaIndex(index);
+            if (srcAreaIdx == CraftingBenchWindowConstants.AreaIndices.Crafting)
                 return MoveToInventory(index);
             else
                 return CraftingGrid.StoreItemStack(remaining, false);
@@ -138,7 +124,25 @@ namespace TrueCraft.Core.Windows
 
         protected override void OnWindowChange(WindowChangeEventArgs e)
         {
-            // TODO retore to abstract; implement client & server versions
+            // TODO
+            throw new NotImplementedException();
+        }
+
+        protected override void HandleLeftClick()
+        {
+            // TODO
+            throw new NotImplementedException();
+        }
+
+        protected override void HandleShiftLeftClick()
+        {
+            // TODO
+            throw new NotImplementedException();
+        }
+
+        protected override void HandleRightClick()
+        {
+            // TODO
             throw new NotImplementedException();
         }
     }

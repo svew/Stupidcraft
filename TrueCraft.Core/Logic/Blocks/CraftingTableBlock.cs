@@ -38,7 +38,7 @@ namespace TrueCraft.Core.Logic.Blocks
         {
 #if DEBUG
             if (WhoAmI.Answer == IAm.Client)
-                throw new ApplicationException("Illegal client-side call detected.");
+                throw new ApplicationException(Strings.SERVER_CODE_ON_CLIENT);
 #endif
             CraftingBenchWindowContent window = new CraftingBenchWindowContent(user.Inventory, user.Hotbar,
                 user.Server.CraftingRepository, user.Server.ItemRepository);

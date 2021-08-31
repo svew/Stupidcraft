@@ -87,6 +87,10 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override bool BlockRightClicked(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
         {
+#if DEBUG
+            if (WhoAmI.Answer == IAm.Client)
+                throw new ApplicationException(Strings.SERVER_CODE_ON_CLIENT);
+#endif
             GlobalVoxelCoordinates adjacent = null; // No adjacent chest
             GlobalVoxelCoordinates self = descriptor.Coordinates;
             for (int i = 0; i < AdjacentBlocks.Length; i++)
