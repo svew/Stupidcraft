@@ -19,5 +19,10 @@ namespace TrueCraft.Client.Windows
         {
             return new FurnaceWindowContentClient(mainInventory, hotBar, scheduler, coordinates, itemRepository);
         }
+
+        public IWindowContent NewChestWindowContent(ISlots mainInventory, ISlots hotBar, bool doubleChest, IItemRepository itemRepository)
+        {
+            return new ChestWindowContentClient(mainInventory, hotBar, doubleChest, itemRepository);
+        }
     }
 }

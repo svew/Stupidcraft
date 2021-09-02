@@ -12,6 +12,9 @@ namespace TrueCraft.Core.Windows
             IEventScheduler scheduler, GlobalVoxelCoordinates coordinates,
             IItemRepository itemRepository);
 
+        IWindowContent NewChestWindowContent(ISlots mainInventory, ISlots hotBar,
+            bool doubleChest, IItemRepository itemRepository);
+
         // TODO methods for creating other types of Window Content.
     }
 }

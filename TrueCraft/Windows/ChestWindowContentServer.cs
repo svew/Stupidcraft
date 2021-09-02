@@ -6,7 +6,7 @@ using TrueCraft.API.Logic;
 
 namespace TrueCraft.Windows
 {
-    public class ChestWindowContentServer : WindowContent
+    public class ChestWindowContentServer : WindowContent, IChestWindowContent
     {
         public ChestWindowContentServer(ISlots mainInventory, ISlots hotBar, bool doubleChest,
             IItemRepository itemRepository):
@@ -47,7 +47,7 @@ namespace TrueCraft.Windows
             }
         }
 
-        public ISlots MainInventory
+        public override ISlots MainInventory
         {
             get
             {
@@ -55,12 +55,17 @@ namespace TrueCraft.Windows
             }
         }
 
-        public ISlots Hotbar
+        public override ISlots Hotbar
         {
             get
             {
                 return SlotAreas[(int)ChestWindowConstants.AreaIndices.HotBarArea];
             }
+        }
+
+        public override bool IsPlayerInventorySlot(int slotIndex)
+        {
+            return slotIndex >= ChestInventory.Count;
         }
 
         public override int Length2
