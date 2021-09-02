@@ -8,7 +8,7 @@ using TrueCraft.Core.Windows;
 
 namespace TrueCraft.Windows
 {
-    public class FurnaceWindowContentServer : WindowContent
+    public class FurnaceWindowContentServer : WindowContent, IFurnaceWindowContent
     {
         public IEventScheduler EventScheduler { get; set; }
         public GlobalVoxelCoordinates Coordinates { get; }
@@ -32,21 +32,7 @@ namespace TrueCraft.Windows
         }
 
         // Indices of the area within the Furnace
-        // Note that these are the same values as the slot
-        // indices only because the areas contain a single slot.
-        // They are conceptually different.
-        //private const int IngredientAreaIndex = 0;
-        //private const int FuelAreaIndex = 1;
-        //private const int OutputAreaIndex = 2;
-        //private const int MainAreaIndex = 3;
-        //private const int HotbarAreaIndex = 4;
-
-        // Slot Indices within the overall Furnace
-        //public const short IngredientIndex = 0;
-        //public const short FuelIndex = 1;
         private const short OutputIndex = 2;
-        //public const short MainIndex = 3;
-        //public const short HotbarIndex = 30;    // TODO: implicitly hard-codes the size of the main inventory
 
         public override string Name
         {
@@ -87,12 +73,12 @@ namespace TrueCraft.Windows
             get { return SlotAreas[(int)FurnaceWindowConstants.AreaIndices.Output]; }
         }
 
-        public ISlots MainInventory
+        public override ISlots MainInventory
         {
             get { return SlotAreas[(int)FurnaceWindowConstants.AreaIndices.Main]; }
         }
 
-        public ISlots Hotbar
+        public override ISlots Hotbar
         {
             get { return SlotAreas[(int)FurnaceWindowConstants.AreaIndices.Hotbar]; }
         }

@@ -1,4 +1,5 @@
 ﻿using System;
+using TrueCraft.API.Logic;
 using TrueCraft.API.Networking;
 
 namespace TrueCraft.API.Windows
@@ -35,6 +36,26 @@ namespace TrueCraft.API.Windows
         short[] ReadOnlySlots { get; }
 
         /// <summary>
+        /// Gets a reference to the collection of slots that contaings the
+        /// Player's main inventory.
+        /// </summary>
+        ISlots MainInventory { get; }
+
+        /// <summary>
+        /// Gets the slots of the Player's Hotbar.
+        /// </summary>
+        ISlots Hotbar { get; }
+
+        /// <summary>
+        /// Gets whether or not the given index represents a slot within the Main Inventory
+        /// or the Hotbar.
+        /// </summary>
+        /// <param name="slotIndex">The Slot Index to check.</param>
+        /// <returns>True if the given Slot Index is part of either the Main Inventory
+        /// or the Hotbar.</returns>
+        bool IsPlayerInventorySlot(int slotIndex);
+
+        /// <summary>
         /// Gets an array of all slots in this window. Suitable for sending to clients over the network.
         /// </summary>
         ItemStack[] GetSlots();
@@ -52,5 +73,7 @@ namespace TrueCraft.API.Windows
         /// be returned.
         /// </returns>
         ItemStack MoveItemStack(int index);
+
+        IItemRepository ItemRepository { get; }
     }
 }

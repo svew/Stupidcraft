@@ -31,6 +31,12 @@ namespace TrueCraft.Core.Windows
 
         public abstract WindowType Type { get; }
 
+        public abstract ISlots MainInventory { get; }
+
+        public abstract ISlots Hotbar { get; }
+
+        public abstract bool IsPlayerInventorySlot(int slotIndex);
+
         /// <summary>
         /// When shift-clicking items between areas, this method is used
         /// to determine which area links to which.

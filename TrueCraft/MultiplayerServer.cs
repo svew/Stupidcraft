@@ -86,6 +86,7 @@ namespace TrueCraft
         public MultiplayerServer()
         {
             TrueCraft.Core.WhoAmI.Answer = Core.IAm.Server;
+            TrueCraft.Core.Windows.WindowContentFactory.Init(new TrueCraft.Windows.WindowContentFactory());
             var reader = new PacketReader();
             PacketReader = reader;
             Clients = new List<IRemoteClient>();
@@ -95,17 +96,21 @@ namespace TrueCraft
             EntityManagers = new List<IEntityManager>();
             LogProviders = new List<ILogProvider>();
             Scheduler = new EventScheduler(this);
+
             var blockRepository = new BlockRepository();
             blockRepository.DiscoverBlockProviders();
             BlockRepository = blockRepository;
+
             var itemRepository = new ItemRepository();
             itemRepository.DiscoverItemProviders();
             ItemRepository = itemRepository;
             BlockProvider.ItemRepository = ItemRepository;
             BlockProvider.BlockRepository = BlockRepository;
+
             var craftingRepository = new CraftingRepository();
             craftingRepository.DiscoverRecipes();
             CraftingRepository = craftingRepository;
+
             PendingBlockUpdates = new Queue<BlockUpdate>();
             EnableClientLogging = false;
             QueryProtocol = new TrueCraft.QueryProtocol(this);
