@@ -87,14 +87,21 @@ namespace TrueCraft.Client.Windows
             get { return SlotAreas[(int)FurnaceWindowConstants.AreaIndices.Output]; }
         }
 
-        public ISlots MainInventory
+        public override ISlots MainInventory
         {
             get { return SlotAreas[(int)FurnaceWindowConstants.AreaIndices.Main]; }
         }
 
-        public ISlots Hotbar
+        public override ISlots Hotbar
         {
             get { return SlotAreas[(int)FurnaceWindowConstants.AreaIndices.Hotbar]; }
+        }
+
+        public override bool IsPlayerInventorySlot(int slotIndex)
+        {
+            // NOTE: hard-coded assumption that Fuel, Ingredient, and Output
+            // are all a single slot.  Seems like a pretty robust assumption.
+            return slotIndex >= 3;
         }
 
         public override ItemStack[] GetSlots()
