@@ -43,7 +43,7 @@ namespace TrueCraft.Client
         public bool LoggedIn { get; internal set; }
         public int EntityID { get; internal set; }
 
-        public InventoryWindowContent InventoryWindowContent { get; }
+        public IWindowContent InventoryWindowContent { get; }
         public ISlots Inventory { get; private set; }
         public ISlots Hotbar { get; private set; }
         public ISlots Armor { get; }
@@ -104,8 +104,9 @@ namespace TrueCraft.Client
             Inventory = new Slots(27, 9, 3);   // TODO hard-coded constants
             Hotbar = new Slots(9, 9, 1);       // TODO hard-coded constants
             Armor = new ArmorSlots();
+            WindowContentFactory factory = new WindowContentFactory();
             CraftingGrid = new CraftingWindowContent(CraftingRepository, 2, 2);   // TODO Hard-coded constants
-            InventoryWindowContent = new InventoryWindowContent(Inventory, Hotbar, Armor, CraftingGrid);
+            InventoryWindowContent = factory.NewInventoryWindowContent(Inventory, Hotbar, Armor, CraftingGrid);
         }
 
         public void RegisterPacketHandler(byte packetId, PacketHandler handler)

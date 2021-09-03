@@ -15,6 +15,16 @@ namespace TrueCraft.Core.Windows
             _impl = impl;
         }
 
+        public IWindowContent NewInventoryWindowContent(ISlots mainInventory, ISlots hotBar,
+            ISlots armor, ISlots craftingGrid)
+        {
+#if DEBUG
+            if (_impl == null)
+                throw new ApplicationException("WindowContentFactory not initialized.");
+#endif
+            return _impl.NewInventoryWindowContent(mainInventory, hotBar, armor, craftingGrid);
+        }
+
         public IWindowContent NewFurnaceWindowContent(ISlots mainInventory, ISlots hotBar,
             IEventScheduler scheduler, GlobalVoxelCoordinates coordinates,
             IItemRepository itemRepository)

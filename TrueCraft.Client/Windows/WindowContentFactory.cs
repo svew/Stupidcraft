@@ -13,6 +13,12 @@ namespace TrueCraft.Client.Windows
         {
         }
 
+        public IWindowContent NewInventoryWindowContent(ISlots mainInventory, ISlots hotBar,
+            ISlots armor, ISlots craftingGrid)
+        {
+            return new InventoryWindowContentClient(mainInventory, hotBar, armor, craftingGrid);
+        }
+
         public IWindowContent NewFurnaceWindowContent(ISlots mainInventory, ISlots hotBar,
             IEventScheduler scheduler, GlobalVoxelCoordinates coordinates,
             IItemRepository itemRepository)

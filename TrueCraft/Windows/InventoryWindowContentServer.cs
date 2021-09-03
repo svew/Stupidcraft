@@ -6,7 +6,7 @@ using TrueCraft.Core.Logic;
 using TrueCraft.Core.Logic.Items;
 using TrueCraft.Core.Windows;
 
-namespace TrueCraft.Client.Windows
+namespace TrueCraft.Windows
 {
     public class InventoryWindowContentServer : WindowContent, IInventoryWindowContent
     {
@@ -54,9 +54,15 @@ namespace TrueCraft.Client.Windows
 
         public ISlots Armor { get => SlotAreas[(int)InventoryWindowConstants.AreaIndices.Armor]; }
 
-        public ISlots MainInventory { get => SlotAreas[(int)InventoryWindowConstants.AreaIndices.Main]; }
+        public override ISlots MainInventory { get => SlotAreas[(int)InventoryWindowConstants.AreaIndices.Main]; }
 
-        public ISlots Hotbar { get => SlotAreas[(int)InventoryWindowConstants.AreaIndices.Hotbar]; }
+        public override ISlots Hotbar { get => SlotAreas[(int)InventoryWindowConstants.AreaIndices.Hotbar]; }
+
+        public override bool IsPlayerInventorySlot(int slotIndex)
+        {
+            return slotIndex >= SlotAreas[(int)InventoryWindowConstants.AreaIndices.Crafting].Count +
+                SlotAreas[(int)InventoryWindowConstants.AreaIndices.Armor].Count;
+        }
 
         #endregion
 

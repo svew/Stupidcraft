@@ -36,8 +36,9 @@ namespace TrueCraft
             Inventory = new Slots(27, 9, 3);   // TODO hard-coded constants.
             Hotbar = new Slots(9, 9, 1);       // TODO hard-coded constants.
             Armor = new ArmorSlots();
+            WindowContentFactory factory = new WindowContentFactory();
             CraftingGrid = new CraftingWindowContent(server.CraftingRepository, 2, 2);   // TODO hard-coded constants
-            InventoryWindowContent = new InventoryWindowContent(Inventory, Hotbar, Armor, CraftingGrid);
+            InventoryWindowContent = (IInventoryWindowContent)factory.NewInventoryWindowContent(Inventory, Hotbar, Armor, CraftingGrid);
 
             SelectedSlot = 0;
 
