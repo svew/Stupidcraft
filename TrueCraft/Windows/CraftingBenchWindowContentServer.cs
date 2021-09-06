@@ -9,9 +9,9 @@ using TrueCraft.Core.Windows;
 
 namespace TrueCraft.Windows
 {
-    public class CraftingBenchWindowContent : WindowContent
+    public class CraftingBenchWindowContentServer : WindowContent, ICraftingBenchWindowContent
     {
-        public CraftingBenchWindowContent(ISlots mainInventory, ISlots hotBar,
+        public CraftingBenchWindowContentServer(ISlots mainInventory, ISlots hotBar,
             ICraftingRepository craftingRepository, IItemRepository itemRepository) :
             base(CraftingBenchWindowConstants.Areas(mainInventory, hotBar, craftingRepository),
                 itemRepository)
@@ -66,9 +66,14 @@ namespace TrueCraft.Windows
 
         public ISlots CraftingGrid { get => SlotAreas[(int)CraftingBenchWindowConstants.AreaIndices.Crafting]; }
 
-        public ISlots MainInventory { get => SlotAreas[(int)CraftingBenchWindowConstants.AreaIndices.Main]; }
+        public override ISlots MainInventory { get => SlotAreas[(int)CraftingBenchWindowConstants.AreaIndices.Main]; }
 
-        public ISlots Hotbar { get => SlotAreas[(int)CraftingBenchWindowConstants.AreaIndices.Hotbar]; }
+        public override ISlots Hotbar { get => SlotAreas[(int)CraftingBenchWindowConstants.AreaIndices.Hotbar]; }
+
+        public override bool IsPlayerInventorySlot(int slotIndex)
+        {
+            return slotIndex >= CraftingGrid.Count;
+        }
 
         #endregion
 

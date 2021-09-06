@@ -30,5 +30,11 @@ namespace TrueCraft.Client.Windows
         {
             return new ChestWindowContentClient(mainInventory, hotBar, doubleChest, itemRepository);
         }
+
+        public IWindowContent NewCraftingBenchWindowContent(ISlots mainInventory, ISlots hotBar,
+            ICraftingRepository craftingRepository, IItemRepository itemRepository)
+        {
+            return new CraftingBenchWindowContentClient(mainInventory, hotBar, craftingRepository, itemRepository);
+        }
     }
 }

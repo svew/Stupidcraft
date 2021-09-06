@@ -45,5 +45,15 @@ namespace TrueCraft.Core.Windows
 #endif
             return _impl.NewChestWindowContent(mainInventory, hotBar, doubleChest, itemRepository);
         }
+
+        public IWindowContent NewCraftingBenchWindowContent(ISlots mainInventory, ISlots hotBar,
+            ICraftingRepository craftingRepository, IItemRepository itemRepository)
+        {
+#if DEBUG
+            if (_impl == null)
+                throw new ApplicationException("WindowContentFactory not initialized.");
+#endif
+            return _impl.NewCraftingBenchWindowContent(mainInventory, hotBar, craftingRepository, itemRepository);
+        }
     }
 }

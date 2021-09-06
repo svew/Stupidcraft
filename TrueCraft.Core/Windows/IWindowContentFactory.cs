@@ -18,6 +18,7 @@ namespace TrueCraft.Core.Windows
         IWindowContent NewChestWindowContent(ISlots mainInventory, ISlots hotBar,
             bool doubleChest, IItemRepository itemRepository);
 
-        // TODO methods for creating other types of Window Content.
+        IWindowContent NewCraftingBenchWindowContent(ISlots mainInventory, ISlots hotBar,
+            ICraftingRepository craftingRepository, IItemRepository itemRepository);
     }
 }
