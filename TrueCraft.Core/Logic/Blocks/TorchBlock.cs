@@ -115,7 +115,7 @@ namespace TrueCraft.Core.Logic.Blocks
                 else
                 {
                     item.Count--;
-                    user.Inventory[user.SelectedSlot] = item;
+                    user.Hotbar[user.SelectedSlot] = item;
                 }
             }
         }

@@ -40,7 +40,7 @@ namespace TrueCraft.Handlers
                     inventory.Count--;
                     var item = new ItemEntity(client.Entity.Position + new Vector3(0, PlayerEntity.Height, 0), spawned);
                     item.Velocity = MathHelper.RotateY(Vector3.Forwards, MathHelper.DegreesToRadians(client.Entity.Yaw)) * 0.5;
-                    client.Inventory[client.SelectedSlot] = inventory;
+                    client.Hotbar[client.SelectedSlot] = inventory;
                     server.GetEntityManagerForWorld(client.World).SpawnEntity(item);
                     break;
                 case PlayerDiggingPacket.Action.StartDigging:
@@ -101,7 +101,7 @@ namespace TrueCraft.Handlers
                                     slot.Metadata += damage;
                                     if (slot.Metadata >= tool.Uses)
                                         slot.Count = 0; // Destroy item
-                                    client.Inventory[client.SelectedSlot] = slot;
+                                    client.Hotbar[client.SelectedSlot] = slot;
                                 }
                             }
                         }
@@ -220,7 +220,7 @@ namespace TrueCraft.Handlers
         {
             var packet = (ChangeHeldItemPacket)_packet;
             var client = (RemoteClient)_client;
-            client.SelectedSlot = (short)(packet.Slot + InventoryWindowContent.HotbarIndex);
+            client.SelectedSlot = packet.Slot;
             var notified = server.GetEntityManagerForWorld(client.World).ClientsForEntity(client.Entity);
             foreach (var c in notified)
                 c.QueuePacket(new EntityEquipmentPacket(client.Entity.EntityID, 0, client.SelectedItem.ID, client.SelectedItem.Metadata));
