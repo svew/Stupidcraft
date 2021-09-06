@@ -67,7 +67,7 @@ namespace TrueCraft.Client
             set
             {
                 hotbarSelection = value;
-                QueuePacket(new ChangeHeldItemPacket() { Slot = (short)value });
+                QueuePacket(new ChangeHeldItemPacket((short)value));
             }
         }
 
