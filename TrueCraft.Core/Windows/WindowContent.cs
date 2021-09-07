@@ -179,43 +179,39 @@ namespace TrueCraft.Core.Windows
             IsDisposed = true;
         }
 
-        public virtual short[] ReadOnlySlots
-        {
-            get { return new short[0]; }
-        }
+        /// <inheritdoc />
+        public abstract bool IsOutputSlot(int slotIndex);
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="right"></param>
-        /// <param name="shift"></param>
-        public virtual void HandleClick(bool right, bool shift)
+        /// <inheritdoc />
+        public virtual bool HandleClick(int slotIndex, bool right, bool shift, ref ItemStack itemStaging)
         {
             if (right)
             {
                 if (shift)
-                    HandleShiftRightClick();
+                    return HandleShiftRightClick(slotIndex, ref itemStaging);
                 else
-                    HandleRightClick();
+                    return HandleRightClick(slotIndex, ref itemStaging);
             }
             else
             {
                 if (shift)
-                    HandleShiftLeftClick();
+                    return HandleShiftLeftClick(slotIndex, ref itemStaging);
                 else
-                    HandleLeftClick();
+                    return HandleLeftClick(slotIndex, ref itemStaging);
             }
         }
 
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="slotIndex"></param>
+        /// <param name="itemStaging"></param>
         /// <remarks>
         /// With nothing in hand, picks up entire stack.
         /// With something in hand, swaps with entire (incompatible) stack.
         /// With something in hand, places as much as possible in compatible stack.
         /// </remarks>
-        protected abstract void HandleLeftClick();
+        protected abstract bool HandleLeftClick(int slotIndex, ref ItemStack itemStaging);
 
         /// <summary>
         /// 
@@ -224,7 +220,7 @@ namespace TrueCraft.Core.Windows
         /// Whether or not you have something in hand, moves entire stack.
         /// Target of move is dependent upon which window is displayed.
         /// </remarks>
-        protected abstract void HandleShiftLeftClick();
+        protected abstract bool HandleShiftLeftClick(int slotIndex, ref ItemStack itemStaging);
 
         /// <summary>
         /// 
@@ -235,7 +231,7 @@ namespace TrueCraft.Core.Windows
         /// With something in hand, places one item in a compatible slot.
         /// For a slot with something different in it, swaps the entire stack.
         /// </remarks>
-        protected abstract void HandleRightClick();
+        protected abstract bool HandleRightClick(int slotIndex, ref ItemStack itemStaging);
 
         /// <summary>
         /// 
@@ -243,9 +239,9 @@ namespace TrueCraft.Core.Windows
         /// <remarks>
         /// Acts the same as Shift-Left-Click.
         /// </remarks>
-        protected virtual void HandleShiftRightClick()
+        protected virtual bool HandleShiftRightClick(int slotIndex, ref ItemStack itemStaging)
         {
-            HandleShiftLeftClick();
+            return HandleShiftLeftClick(slotIndex, ref itemStaging);
         }
 
         //public static void HandleClickPacket(ClickWindowPacket packet, IWindowContent window, ref ItemStack itemStaging)

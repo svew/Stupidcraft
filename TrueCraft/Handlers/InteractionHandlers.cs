@@ -13,6 +13,7 @@ using TrueCraft.Core.Logic.Blocks;
 using System.Linq;
 using TrueCraft.Core.Logic.Items;
 using TrueCraft.Core.Logic;
+using TrueCraft.API.Windows;
 
 namespace TrueCraft.Handlers
 {
@@ -178,7 +179,16 @@ namespace TrueCraft.Handlers
         {
             var packet = (ClickWindowPacket)_packet;
             var client = (RemoteClient)_client;
-            var window = client.CurrentWindow;
+            IWindowContent window = client.CurrentWindow;
+
+            // Confirm expected Window ID
+            if (packet.WindowID != window.ID)
+            {
+                server.Log(API.Logging.LogCategory.Notice, "Invalid window number received {0}; expected {1}", packet.WindowID, window.ID);
+                server.DisconnectClient(_client);
+                return;
+            }
+
             if (packet.SlotIndex == -999)
             {
                 // Throwing item
@@ -201,12 +211,21 @@ namespace TrueCraft.Handlers
                 server.GetEntityManagerForWorld(client.World).SpawnEntity(item);
                 return;
             }
-            var staging = (ItemStack)client.ItemStaging.Clone();
-            WindowContent.HandleClickPacket(packet, window, ref staging);
-            client.ItemStaging = staging;
+
+            // Confirm reasonable slot index.
             if (packet.SlotIndex >= window.Length || packet.SlotIndex < 0)
+            {
+                server.Log(API.Logging.LogCategory.Notice, "Illegal slot number received {0} in not in the set -999, [0, {1})", packet.SlotIndex, window.Length);
+                server.DisconnectClient(_client);
                 return;
-            client.QueuePacket(new WindowItemsPacket(packet.WindowID, window.GetSlots()));
+            }
+
+            // TODO confirm prior content of Slot
+
+            ItemStack staging = client.ItemStaging;
+            window.HandleClick(packet.SlotIndex, packet.RightClick, packet.Shift, ref staging);
+            client.ItemStaging = staging;
+            client.QueuePacket(new TransactionStatusPacket(packet.WindowID, packet.TransactionID, true));
         }
 
         public static void HandleCloseWindowPacket(IPacket _packet, IRemoteClient _client, IMultiplayerServer server)

@@ -121,19 +121,24 @@ namespace TrueCraft.Windows
             throw new NotImplementedException();
         }
 
-        protected override void HandleLeftClick()
+        public override bool IsOutputSlot(int slotIndex)
+        {
+            return false;
+        }
+
+        protected override bool HandleLeftClick(int slotIndex, ref ItemStack itemStaging)
         {
             // TODO
             throw new NotImplementedException();
         }
 
-        protected override void HandleShiftLeftClick()
+        protected override bool HandleShiftLeftClick(int slotIndex, ref ItemStack itemStaging)
         {
             // TODO
             throw new NotImplementedException();
         }
 
-        protected override void HandleRightClick()
+        protected override bool HandleRightClick(int slotIndex, ref ItemStack itemStaging)
         {
             // TODO
             throw new NotImplementedException();

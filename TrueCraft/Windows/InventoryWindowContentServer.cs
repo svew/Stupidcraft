@@ -42,12 +42,9 @@ namespace TrueCraft.Windows
             }
         }
 
-        public override short[] ReadOnlySlots
+        public override bool IsOutputSlot(int slotIndex)
         {
-            get
-            {
-                return new[] { InventoryWindowConstants.CraftingOutputIndex };
-            }
+            return slotIndex == InventoryWindowConstants.CraftingOutputIndex;
         }
 
         public ISlots CraftingGrid { get => SlotAreas[(int)InventoryWindowConstants.AreaIndices.Crafting]; }
@@ -145,19 +142,95 @@ namespace TrueCraft.Windows
             throw new NotImplementedException();
         }
 
-        protected override void HandleLeftClick()
+        /// <inheritdoc />
+        protected override bool HandleLeftClick(int slotIndex, ref ItemStack itemStaging)
+        {
+            if (IsOutputSlot(slotIndex))
+            {
+                if (!itemStaging.Empty)
+                {
+                    if (itemStaging.CanMerge(this[slotIndex]))
+                    {
+                        // The mouse pointer has some items in it, and they
+                        // are compatible with the output
+                        sbyte maxItems = BlockProvider.ItemRepository.GetItemProvider(itemStaging.ID).MaximumStack;
+                        int totalItems = itemStaging.Count + this[slotIndex].Count;
+                        if (totalItems > maxItems)
+                        {   // There are too many items, so the mouse pointer
+                            // becomes a full stack, and the output slot retains the
+                            // remaining items.
+                            itemStaging = new ItemStack(itemStaging.ID, maxItems, itemStaging.Metadata, itemStaging.Nbt);
+                            this[slotIndex] = new ItemStack(itemStaging.ID, (sbyte)(totalItems - maxItems), itemStaging.Metadata, itemStaging.Nbt);
+                            return true;
+                        }
+                        else
+                        {   // There's enough room to pick up everything, so do it.
+                            itemStaging = new ItemStack(itemStaging.ID, (sbyte)totalItems, itemStaging.Metadata, itemStaging.Nbt);
+                            this[slotIndex] = ItemStack.EmptyStack;
+                            return true;
+                        }
+                    }
+                    else
+                    {   // The mouse pointer contains an item incompatible with
+                        // the output, so we cannot complete this operation.
+                        return false;
+                    }
+                }
+                else
+                {
+                    // If the mouse pointer is empty, just pick up everything.
+                    itemStaging = this[slotIndex];
+                    this[slotIndex] = ItemStack.EmptyStack;
+                    return true;
+                }
+            }
+
+            if (!itemStaging.Empty)
+            {
+                // Is the slot compatible
+                if (itemStaging.CanMerge(this[slotIndex]))
+                {
+                    // How many Items can be placed?
+                    sbyte maxItems = BlockProvider.ItemRepository.GetItemProvider(itemStaging.ID).MaximumStack;
+                    int totalItems = itemStaging.Count + this[slotIndex].Count;
+                    ItemStack old = this[slotIndex];
+                    if (totalItems > maxItems)
+                    {   // Fill the Slot to the max, retaining remaining items.
+                        this[slotIndex] = new ItemStack(old.ID, maxItems, old.Metadata, old.Nbt);
+                        itemStaging = new ItemStack(itemStaging.ID, (sbyte)(totalItems - maxItems), itemStaging.Metadata, itemStaging.Nbt);
+                        return true;
+                    }
+                    else
+                    {   // Place all items, the mouse pointer becomes empty.
+                        this[slotIndex] = new ItemStack(old.ID, (sbyte)totalItems, old.Metadata, old.Nbt);
+                        itemStaging = ItemStack.EmptyStack;
+                        return true;
+                    }
+                }
+                else
+                {   // The slot is not compatible with the mouse pointer, so
+                    // swap them.
+                    ItemStack tmp = itemStaging;
+                    itemStaging = this[slotIndex];
+                    this[slotIndex] = tmp;
+                    return true;
+                }
+            }
+            else
+            {   // The mouse pointer is empty, so pick up everything.
+                itemStaging = this[slotIndex];
+                this[slotIndex] = ItemStack.EmptyStack;
+                return true;
+            }
+        }
+
+        protected override bool HandleShiftLeftClick(int slotIndex, ref ItemStack itemStaging)
         {
             // TODO
             throw new NotImplementedException();
         }
 
-        protected override void HandleShiftLeftClick()
-        {
-            // TODO
-            throw new NotImplementedException();
-        }
-
-        protected override void HandleRightClick()
+        protected override bool HandleRightClick(int slotIndex, ref ItemStack itemStaging)
         {
             // TODO
             throw new NotImplementedException();

@@ -64,12 +64,9 @@ namespace TrueCraft.Client.Windows
             }
         }
 
-        public override short[] ReadOnlySlots
+        public override bool IsOutputSlot(int slotIndex)
         {
-            get
-            {
-                return new[] { (short)OutputIndex };
-            }
+            return slotIndex == OutputIndex;
         }
 
         public ISlots Ingredient 
@@ -192,19 +189,19 @@ namespace TrueCraft.Client.Windows
             throw new NotImplementedException();
         }
 
-        protected override void HandleLeftClick()
+        protected override bool HandleLeftClick(int slotIndex, ref ItemStack itemStaging)
         {
             // TODO
             throw new NotImplementedException();
         }
 
-        protected override void HandleShiftLeftClick()
+        protected override bool HandleShiftLeftClick(int slotIndex, ref ItemStack itemStaging)
         {
             // TODO
             throw new NotImplementedException();
         }
 
-        protected override void HandleRightClick()
+        protected override bool HandleRightClick(int slotIndex, ref ItemStack itemStaging)
         {
             // TODO
             throw new NotImplementedException();
