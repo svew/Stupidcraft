@@ -5,6 +5,7 @@ using TrueCraft.API.Windows;
 using TrueCraft.API;
 using TrueCraft.Core.Windows;
 using TrueCraft.Core.Logic;
+using TrueCraft.Client.Windows;
 
 namespace TrueCraft.Client.Handlers
 {
@@ -43,13 +44,13 @@ namespace TrueCraft.Client.Handlers
             switch (packet.Type)
             {
                 case WindowType.CraftingBench:
-                    window = new CraftingBenchWindowContent(client.Inventory, client.Hotbar,
+                    window = new CraftingBenchWindowContentClient(client.Inventory, client.Hotbar,
                         client.CraftingRepository, BlockProvider.ItemRepository);
                     break;
 
                 case WindowType.Chest:
-                    window = new ChestWindowContent(client.Inventory, client.Hotbar,
-                        packet.TotalSlots == 2 * ChestWindowContent.ChestLength,
+                    window = new ChestWindowContentClient(client.Inventory, client.Hotbar,
+                        packet.TotalSlots == 2 * ChestWindowConstants.ChestLength,
                         BlockProvider.ItemRepository);
                     break;
             }
