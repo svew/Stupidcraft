@@ -16,11 +16,16 @@ namespace TrueCraft.Client.Windows
             base(CraftingBenchWindowConstants.Areas(mainInventory, hotBar, craftingRepository),
                 itemRepository)
         {
+            CraftingOutputIndex = 0;
+            MainIndex = CraftingOutputIndex + 10;   // TODO hard-coded length of crafting area.
+            HotbarIndex = MainIndex + hotBar.Count;
         }
 
         #region Variables
 
-        private const short CraftingOutputIndex = 0;
+        public int CraftingOutputIndex { get; }
+        public int MainIndex { get; }
+        public int HotbarIndex { get; }
 
         public override string Name
         {

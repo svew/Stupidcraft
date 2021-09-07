@@ -15,12 +15,20 @@ namespace TrueCraft.Client.Windows
                 itemRepository)
         {
             DoubleChest = doubleChest;
+
+            ChestIndex = 0;
+            MainIndex = ChestIndex + ChestInventory.Count;
+            HotbarIndex = MainIndex + mainInventory.Count;
         }
 
         /// <summary>
         /// Gets whether or not this Chest is a double Chest.
         /// </summary>
         public bool DoubleChest { get; }
+
+        public int ChestIndex { get; }
+        public int MainIndex { get; }
+        public int HotbarIndex { get; }
 
         public override string Name
         {

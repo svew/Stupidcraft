@@ -22,7 +22,16 @@ namespace TrueCraft.Client.Windows
             base(InventoryWindowConstants.Areas(mainInventory, hotBar, armor, craftingGrid),
                BlockProvider.ItemRepository)
         {
+            CraftingOutputIndex = 0;
+            ArmorIndex = CraftingOutputIndex + craftingGrid.Count;
+            MainIndex = ArmorIndex + armor.Count;
+            HotbarIndex = MainIndex + mainInventory.Count;
         }
+
+        public int CraftingOutputIndex { get; }
+        public int ArmorIndex { get; }
+        public int MainIndex { get; }
+        public int HotbarIndex { get; }
 
         #region Properties
 
