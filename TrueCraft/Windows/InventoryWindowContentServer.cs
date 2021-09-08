@@ -8,7 +8,7 @@ using TrueCraft.Core.Windows;
 
 namespace TrueCraft.Windows
 {
-    public class InventoryWindowContentServer : WindowContent, IInventoryWindowContent
+    public class InventoryWindowContentServer : WindowContentServer, IInventoryWindowContent
     {
         /// <summary>
         /// 

@@ -9,7 +9,7 @@ using TrueCraft.Core.Windows;
 
 namespace TrueCraft.Windows
 {
-    public class CraftingBenchWindowContentServer : WindowContent, ICraftingBenchWindowContent
+    public class CraftingBenchWindowContentServer : WindowContentServer, ICraftingBenchWindowContent
     {
         public CraftingBenchWindowContentServer(ISlots mainInventory, ISlots hotBar,
             ICraftingRepository craftingRepository, IItemRepository itemRepository) :

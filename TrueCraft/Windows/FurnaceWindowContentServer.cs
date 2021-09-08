@@ -9,7 +9,7 @@ using TrueCraft.Core.Windows;
 
 namespace TrueCraft.Windows
 {
-    public class FurnaceWindowContentServer : WindowContent, IFurnaceWindowContent
+    public class FurnaceWindowContentServer : WindowContentServer, IFurnaceWindowContent
     {
         public IEventScheduler EventScheduler { get; set; }
         public GlobalVoxelCoordinates Coordinates { get; }

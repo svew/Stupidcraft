@@ -23,6 +23,7 @@ using TrueCraft.API.Logging;
 using TrueCraft.API.Logic;
 using TrueCraft.Exceptions;
 using TrueCraft.Profiling;
+using TrueCraft.Windows;
 
 namespace TrueCraft
 {
@@ -36,7 +37,7 @@ namespace TrueCraft
             Inventory = new Slots(27, 9, 3);   // TODO hard-coded constants.
             Hotbar = new Slots(9, 9, 1);       // TODO hard-coded constants.
             Armor = new ArmorSlots();
-            WindowContentFactory factory = new WindowContentFactory();
+            Windows.WindowContentFactory factory = new Windows.WindowContentFactory();
             CraftingGrid = new CraftingWindowContent(server.CraftingRepository, 2, 2);   // TODO hard-coded constants
             InventoryWindowContent = (IInventoryWindowContent)factory.NewInventoryWindowContent(Inventory, Hotbar, Armor, CraftingGrid);
 
@@ -99,7 +100,9 @@ namespace TrueCraft
         public short SelectedSlot { get; internal set; }
 
         public ItemStack ItemStaging { get; set; }
-        public IWindowContent CurrentWindow { get; internal set; }
+
+        public IWindowContentServer CurrentWindow { get; internal set; }
+
         public bool EnableLogging { get; set; }
         public DateTime ExpectedDigComplete { get; set; }
 
@@ -276,7 +279,7 @@ namespace TrueCraft
 
         public void OpenWindow(IWindowContent window)
         {
-            CurrentWindow = window;
+            CurrentWindow = (IWindowContentServer)window;
             window.Client = this;
             window.ID = NextWindowID++;
             if (NextWindowID < 0) NextWindowID = 1;

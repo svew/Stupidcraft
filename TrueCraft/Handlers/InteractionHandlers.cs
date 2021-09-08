@@ -14,6 +14,7 @@ using System.Linq;
 using TrueCraft.Core.Logic.Items;
 using TrueCraft.Core.Logic;
 using TrueCraft.API.Windows;
+using TrueCraft.Windows;
 
 namespace TrueCraft.Handlers
 {
@@ -179,7 +180,7 @@ namespace TrueCraft.Handlers
         {
             var packet = (ClickWindowPacket)_packet;
             var client = (RemoteClient)_client;
-            IWindowContent window = client.CurrentWindow;
+            IWindowContentServer window = client.CurrentWindow;
 
             // Confirm expected Window ID
             if (packet.WindowID != window.ID)

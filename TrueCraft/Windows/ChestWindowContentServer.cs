@@ -6,7 +6,7 @@ using TrueCraft.API.Logic;
 
 namespace TrueCraft.Windows
 {
-    public class ChestWindowContentServer : WindowContent, IChestWindowContent
+    public class ChestWindowContentServer : WindowContentServer, IChestWindowContent
     {
         public ChestWindowContentServer(ISlots mainInventory, ISlots hotBar, bool doubleChest,
             IItemRepository itemRepository):
