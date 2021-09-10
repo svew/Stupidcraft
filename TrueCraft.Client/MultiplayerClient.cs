@@ -20,6 +20,7 @@ using TrueCraft.Core.Windows;
 using TrueCraft.API.Windows;
 using TrueCraft.API.Logic;
 using TrueCraft.API.World;
+using TrueCraft.Client.Windows;
 
 namespace TrueCraft.Client
 {
@@ -43,14 +44,16 @@ namespace TrueCraft.Client
         public bool LoggedIn { get; internal set; }
         public int EntityID { get; internal set; }
 
-        public IWindowContent InventoryWindowContent { get; }
+        public IWindowContentClient InventoryWindowContent { get; }
         public ISlots Inventory { get; private set; }
         public ISlots Hotbar { get; private set; }
         public ISlots Armor { get; }
         public ISlots CraftingGrid { get; }
 
         public int Health { get; set; }
-        public IWindowContent CurrentWindow { get; set; }
+
+        public IWindowContentClient CurrentWindow { get; set; }
+
         public ICraftingRepository CraftingRepository { get; set; }
 
         public bool Connected
@@ -104,9 +107,9 @@ namespace TrueCraft.Client
             Inventory = new Slots(27, 9, 3);   // TODO hard-coded constants
             Hotbar = new Slots(9, 9, 1);       // TODO hard-coded constants
             Armor = new ArmorSlots();
-            WindowContentFactory factory = new WindowContentFactory();
+            Windows.WindowContentFactory factory = new Windows.WindowContentFactory();
             CraftingGrid = new CraftingWindowContent(CraftingRepository, 2, 2);   // TODO Hard-coded constants
-            InventoryWindowContent = factory.NewInventoryWindowContent(Inventory, Hotbar, Armor, CraftingGrid);
+            InventoryWindowContent = (IWindowContentClient)factory.NewInventoryWindowContent(Inventory, Hotbar, Armor, CraftingGrid);
         }
 
         public void RegisterPacketHandler(byte packetId, PacketHandler handler)

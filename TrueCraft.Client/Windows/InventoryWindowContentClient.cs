@@ -5,6 +5,8 @@ using TrueCraft.API;
 using TrueCraft.Core.Logic;
 using TrueCraft.Core.Logic.Items;
 using TrueCraft.Core.Windows;
+using TrueCraft.Client.Handlers;
+using TrueCraft.Client.Modules;
 
 namespace TrueCraft.Client.Windows
 {
@@ -151,19 +153,110 @@ namespace TrueCraft.Client.Windows
             throw new NotImplementedException();
         }
 
-        protected override bool HandleLeftClick(int slotIndex, ref ItemStack itemStaging)
+        protected override ActionConfirmation HandleLeftClick(int slotIndex, IHeldItem heldItem)
+        {
+            ItemStack inHand = heldItem.HeldItem;
+
+            if (IsOutputSlot(slotIndex))
+            {
+                if (!inHand.Empty)
+                {
+                    if (inHand.CanMerge(this[slotIndex]))
+                    {
+                        // The mouse pointer has some items in it, and they
+                        // are compatible with the output
+                        sbyte maxItems = BlockProvider.ItemRepository.GetItemProvider(inHand.ID).MaximumStack;
+                        int totalItems = inHand.Count + this[slotIndex].Count;
+                        if (totalItems > maxItems)
+                        {   // There are too many items, so the mouse pointer
+                            // becomes a full stack, and the output slot retains the
+                            // remaining items.
+                            return ActionConfirmation.GetActionConfirmation(() =>
+                            {
+                                heldItem.HeldItem = new ItemStack(inHand.ID, maxItems, inHand.Metadata, inHand.Nbt);
+                                this[slotIndex] = new ItemStack(inHand.ID, (sbyte)(totalItems - maxItems), inHand.Metadata, inHand.Nbt);
+
+                            });
+                        }
+                        else
+                        {   // There's enough room to pick up everything, so do it.
+                            return ActionConfirmation.GetActionConfirmation(() =>
+                            {
+                                heldItem.HeldItem = new ItemStack(inHand.ID, (sbyte)totalItems, inHand.Metadata, inHand.Nbt);
+                                this[slotIndex] = ItemStack.EmptyStack;
+                            });
+                        }
+                    }
+                    else
+                    {   // The mouse pointer contains an item incompatible with
+                        // the output, so we cannot complete this operation.
+                        return null;
+                    }
+                }
+                else
+                {
+                    // If the mouse pointer is empty, just pick up everything.
+                    return ActionConfirmation.GetActionConfirmation(() =>
+                    {
+                        heldItem.HeldItem = this[slotIndex];
+                        this[slotIndex] = ItemStack.EmptyStack;
+                    });
+                }
+            }
+
+            if (!inHand.Empty)
+            {
+                // Is the slot compatible
+                if (inHand.CanMerge(this[slotIndex]))
+                {
+                    // How many Items can be placed?
+                    sbyte maxItems = BlockProvider.ItemRepository.GetItemProvider(inHand.ID).MaximumStack;
+                    int totalItems = inHand.Count + this[slotIndex].Count;
+                    ItemStack old = this[slotIndex];
+                    if (totalItems > maxItems)
+                    {   // Fill the Slot to the max, retaining remaining items.
+                        return ActionConfirmation.GetActionConfirmation(() =>
+                        {
+                            this[slotIndex] = new ItemStack(old.ID, maxItems, old.Metadata, old.Nbt);
+                            heldItem.HeldItem = new ItemStack(inHand.ID, (sbyte)(totalItems - maxItems), inHand.Metadata, inHand.Nbt);
+                        });
+                    }
+                    else
+                    {   // Place all items, the mouse pointer becomes empty.
+                        return ActionConfirmation.GetActionConfirmation(() =>
+                        {
+                            this[slotIndex] = new ItemStack(old.ID, (sbyte)totalItems, old.Metadata, old.Nbt);
+                            heldItem.HeldItem = ItemStack.EmptyStack;
+                        });
+                    }
+                }
+                else
+                {   // The slot is not compatible with the mouse pointer, so
+                    // swap them.
+                    return ActionConfirmation.GetActionConfirmation(() =>
+                    {
+                        heldItem.HeldItem = this[slotIndex];
+                        this[slotIndex] = inHand;
+                    });
+                }
+            }
+            else
+            {   // The mouse pointer is empty, so pick up everything.
+                return ActionConfirmation.GetActionConfirmation(() =>
+                {
+                    heldItem.HeldItem = this[slotIndex];
+                    this[slotIndex] = ItemStack.EmptyStack;
+                });
+            }
+        }
+
+        protected override ActionConfirmation HandleShiftLeftClick(int slotIndex, IHeldItem heldItem)
         {
             // TODO
             throw new NotImplementedException();
         }
 
-        protected override bool HandleShiftLeftClick(int slotIndex, ref ItemStack itemStaging)
-        {
-            // TODO
-            throw new NotImplementedException();
-        }
-
-        protected override bool HandleRightClick(int slotIndex, ref ItemStack itemStaging)
+        protected override ActionConfirmation HandleRightClick(int slotIndex, IHeldItem heldItem)
         {
             // TODO
             throw new NotImplementedException();

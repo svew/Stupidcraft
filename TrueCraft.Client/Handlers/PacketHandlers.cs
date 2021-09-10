@@ -27,6 +27,7 @@ namespace TrueCraft.Client.Handlers
             client.RegisterPacketHandler(new SetSlotPacket().ID, InventoryHandlers.HandleSetSlot);
             client.RegisterPacketHandler(new CloseWindowPacket().ID, InventoryHandlers.HandleCloseWindowPacket);
             client.RegisterPacketHandler(new OpenWindowPacket().ID, InventoryHandlers.HandleOpenWindowPacket);
+            client.RegisterPacketHandler(new TransactionStatusPacket().ID, InventoryHandlers.HandleTransactionStatusPacket);
         }
 
         public static void HandleChatMessage(IPacket _packet, MultiplayerClient client)

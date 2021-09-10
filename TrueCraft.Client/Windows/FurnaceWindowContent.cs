@@ -4,6 +4,8 @@ using TrueCraft.API.Logic;
 using TrueCraft.API.Server;
 using TrueCraft.API.Windows;
 using TrueCraft.API.World;
+using TrueCraft.Client.Handlers;
+using TrueCraft.Client.Modules;
 using TrueCraft.Core.Windows;
 
 namespace TrueCraft.Client.Windows
@@ -189,19 +191,19 @@ namespace TrueCraft.Client.Windows
             throw new NotImplementedException();
         }
 
-        protected override bool HandleLeftClick(int slotIndex, ref ItemStack itemStaging)
+        protected override ActionConfirmation HandleLeftClick(int slotIndex, IHeldItem heldItem)
         {
             // TODO
             throw new NotImplementedException();
         }
 
-        protected override bool HandleShiftLeftClick(int slotIndex, ref ItemStack itemStaging)
+        protected override ActionConfirmation HandleShiftLeftClick(int slotIndex, IHeldItem heldItem)
         {
             // TODO
             throw new NotImplementedException();
         }
 
-        protected override bool HandleRightClick(int slotIndex, ref ItemStack itemStaging)
+        protected override ActionConfirmation HandleRightClick(int slotIndex, IHeldItem heldItem)
         {
             // TODO
             throw new NotImplementedException();

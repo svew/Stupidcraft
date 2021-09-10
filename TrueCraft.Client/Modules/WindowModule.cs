@@ -14,6 +14,8 @@ using TrueCraft.Core.Logic.Blocks;
 using TrueCraft.Core.Logging;
 using TrueCraft.API.Logging;
 using TrueCraft.Client.Windows;
+using TrueCraft.Client.Handlers;
+using TrueCraft.API.Networking;
 
 namespace TrueCraft.Client.Modules
 {
@@ -218,6 +220,22 @@ namespace TrueCraft.Client.Modules
             return base.MouseMove(gameTime, e);
         }
 
+        private class MyHeldItem : IHeldItem
+        {
+            private readonly WindowModule _module;
+
+            public MyHeldItem(WindowModule module)
+            {
+                _module = module;
+            }
+
+            public ItemStack HeldItem
+            {
+                get => _module.HeldItem;
+                set { _module.HeldItem = value; }
+            }
+        }
+
         public override bool MouseButtonDown(GameTime gameTime, MouseButtonEventArgs e)
         {
             if (Game.Client.CurrentWindow == null)
@@ -230,22 +248,20 @@ namespace TrueCraft.Client.Modules
             if (SelectedSlot > -1)
                 item = Game.Client.CurrentWindow[SelectedSlot];
 
-            var packet = new ClickWindowPacket(id, SelectedSlot, e.Button == MouseButton.Right,
-                0, Keyboard.GetState().IsKeyDown(Keys.LeftShift) || Keyboard.GetState().IsKeyDown(Keys.RightShift),
-                item.ID, item.Count, item.Metadata);
-            if (packet.SlotIndex == -999)
-            {
-                // Special case (throwing item) TODO
-            }
-            else
-            {
-                var backup = Game.Client.CurrentWindow.GetSlots();
-                var staging = (ItemStack)HeldItem.Clone();
-                WindowContent.HandleClickPacket(packet, Game.Client.CurrentWindow, ref staging);
-                HeldItem = staging;
-                Game.Client.CurrentWindow.SetSlots(backup);
-            }
+            bool rightClick = (e.Button == MouseButton.Right);
+            bool shiftClick = Keyboard.GetState().IsKeyDown(Keys.LeftShift) || Keyboard.GetState().IsKeyDown(Keys.RightShift);
+
+            ActionConfirmation action;
+            action = Game.Client.CurrentWindow.HandleClick(SelectedSlot,
+                rightClick, shiftClick, new MyHeldItem(this));
+            if (object.ReferenceEquals(action, null))
+                return true;
+            ActionList.Add(action);
+
+            IPacket packet = new ClickWindowPacket(id, SelectedSlot, rightClick,
+                action.ActionNumber, shiftClick, item.ID, item.Count, item.Metadata);
             Game.Client.QueuePacket(packet);
+
             return true;
         }
 
