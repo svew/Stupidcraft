@@ -35,22 +35,24 @@ namespace TrueCraft.API.Test
         }
 
         [TestCase(5)]
+        [TestCase(-1)]
         public void Test_Ctor_id(short id)
         {
             ItemStack actual = new ItemStack(id);
 
             Assert.AreEqual(id, actual.ID);
-            Assert.AreEqual(1, actual.Count);
+            Assert.AreEqual(id != -1 ? 1 : 0, actual.Count);
             Assert.AreEqual(0, actual.Metadata);
         }
 
         [TestCase(3, 5)]
+        [TestCase(-1, 11)]
         public void Test_Ctor_id_count(short id, sbyte count)
         {
             ItemStack actual = new ItemStack(id, count);
 
             Assert.AreEqual(id, actual.ID);
-            Assert.AreEqual(count, actual.Count);
+            Assert.AreEqual(id != -1 ? count : 0, actual.Count);
             Assert.AreEqual(0, actual.Metadata);
         }
 
