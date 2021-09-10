@@ -29,6 +29,14 @@ namespace TrueCraft.Core.Logic
                 world.SetBlockID(coords, 0);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="descriptor"></param>
+        /// <param name="face"></param>
+        /// <param name="world"></param>
+        /// <param name="user"></param>
+        /// <returns>True if the right-click has been handled; false otherwise.</returns>
         public virtual bool BlockRightClicked(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
         {
             return true;

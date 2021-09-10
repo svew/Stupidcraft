@@ -61,7 +61,8 @@ namespace TrueCraft.Core.Logic.Blocks
                     }
                 }
             };
-            return false;
+
+            return true;
         }
 
         public override Tuple<int, int> GetTextureMap(byte metadata)
