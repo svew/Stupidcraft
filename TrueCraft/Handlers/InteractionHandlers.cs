@@ -226,9 +226,9 @@ namespace TrueCraft.Handlers
             // TODO confirm prior content of Slot
 
             ItemStack staging = client.ItemStaging;
-            window.HandleClick(packet.SlotIndex, packet.RightClick, packet.Shift, ref staging);
+            bool accepted = window.HandleClick(packet.SlotIndex, packet.RightClick, packet.Shift, ref staging);
             client.ItemStaging = staging;
-            client.QueuePacket(new TransactionStatusPacket(packet.WindowID, packet.TransactionID, true));
+            client.QueuePacket(new TransactionStatusPacket(packet.WindowID, packet.TransactionID, accepted));
         }
 
         public static void HandleCloseWindowPacket(IPacket _packet, IRemoteClient _client, IMultiplayerServer server)
