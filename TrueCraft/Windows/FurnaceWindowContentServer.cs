@@ -170,12 +170,6 @@ namespace TrueCraft.Windows
             throw new NotImplementedException();
         }
 
-        protected override void OnWindowChange(WindowChangeEventArgs e)
-        {
-            // TODO
-            throw new NotImplementedException();
-        }
-
         protected override bool HandleLeftClick(int slotIndex, ref ItemStack itemStaging)
         {
             // TODO

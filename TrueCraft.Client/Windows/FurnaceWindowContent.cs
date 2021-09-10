@@ -185,12 +185,6 @@ namespace TrueCraft.Client.Windows
             throw new NotImplementedException();
         }
 
-        protected override void OnWindowChange(WindowChangeEventArgs e)
-        {
-            // TODO
-            throw new NotImplementedException();
-        }
-
         protected override ActionConfirmation HandleLeftClick(int slotIndex, IHeldItem heldItem)
         {
             // TODO

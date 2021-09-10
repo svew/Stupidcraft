@@ -126,12 +126,6 @@ namespace TrueCraft.Client.Windows
             return remaining;
         }
 
-        protected override void OnWindowChange(WindowChangeEventArgs e)
-        {
-            // TODO 
-            throw new NotImplementedException();
-        }
-
         public override bool IsOutputSlot(int slotIndex)
         {
             return false;

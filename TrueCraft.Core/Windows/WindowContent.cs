@@ -151,10 +151,7 @@ namespace TrueCraft.Core.Windows
                 {
                     if (index >= startIndex && index < startIndex + area.Count)
                     {
-                        var eventArgs = new WindowChangeEventArgs(index, value);
-                        OnWindowChange(eventArgs);
-                        if (!eventArgs.Handled)
-                            area[index - startIndex] = value;
+                        area[index - startIndex] = value;
                         return;
                     }
                     startIndex += area.Count;
@@ -165,14 +162,6 @@ namespace TrueCraft.Core.Windows
 
         /// <inheritdoc />
         public abstract ItemStack StoreItemStack(ItemStack slot, bool topUpOnly);
-
-        /// <summary>
-        /// Subclasses must implement this method to handle changes to the Window Content.
-        /// </summary>
-        /// <param name="e"></param>
-        /// <remarks>Subclasses implement this to send (or not) the appropriate packets
-        /// to the counterparty.</remarks>
-        protected abstract void OnWindowChange(WindowChangeEventArgs e);
 
         public event EventHandler Disposed;
 
