@@ -101,7 +101,19 @@ namespace TrueCraft
 
         public ItemStack ItemStaging { get; set; }
 
-        public IWindowContentServer CurrentWindow { get; internal set; }
+        private IWindowContentServer _currentWindow;
+
+        public IWindowContentServer CurrentWindow
+        {
+            get
+            {
+                return _currentWindow ?? (IWindowContentServer)InventoryWindowContent;
+            }
+            internal set
+            {
+                _currentWindow = value;
+            }
+        }
 
         public bool EnableLogging { get; set; }
         public DateTime ExpectedDigComplete { get; set; }
