@@ -248,37 +248,37 @@ namespace TrueCraft.Core.Logic.Blocks
         private bool Handling = false;
 
         // TODO Move to OnWindowChanged - separate into Client- and Server-side methods.
-        protected void FurnaceWindowChanged(object sender, WindowChangeEventArgs e, IWorld world)
-        {
-            if (Handling)
-                return;
-            IFurnaceWindowContent window = sender as IFurnaceWindowContent;
-            int index = e.SlotIndex;
-            if (window.IsPlayerInventorySlot(index))
-                return;
+        //protected void FurnaceWindowChanged(object sender, WindowChangeEventArgs e, IWorld world)
+        //{
+        //    if (Handling)
+        //        return;
+        //    IFurnaceWindowContent window = sender as IFurnaceWindowContent;
+        //    int index = e.SlotIndex;
+        //    if (window.IsPlayerInventorySlot(index))
+        //        return;
 
-            Handling = true;
-            e.Handled = true;
-            window[index] = e.Value;
+        //    Handling = true;
+        //    e.Handled = true;
+        //    window[index] = e.Value;
 
-            var state = GetState(world, window.Coordinates);
+        //    var state = GetState(world, window.Coordinates);
 
-            state.Ingredient = window[0];  // TODO hard-coded indices
-            state.Fuel = window[1];
-            state.Output = window[2];
+        //    state.Ingredient = window[0];  // TODO hard-coded indices
+        //    state.Fuel = window[1];
+        //    state.Output = window[2];
 
-            SetState(world, window.Coordinates, state);
+        //    SetState(world, window.Coordinates, state);
 
-            Handling = true;
+        //    Handling = true;
 
-            if (!TrackedFurnaces.ContainsKey(window.Coordinates))
-            {
-                // Set up the initial state
-                TryInitializeFurnace(state, window.EventScheduler, world, window.Coordinates, window.ItemRepository);
-            }
+        //    if (!TrackedFurnaces.ContainsKey(window.Coordinates))
+        //    {
+        //        // Set up the initial state
+        //        TryInitializeFurnace(state, window.EventScheduler, world, window.Coordinates, window.ItemRepository);
+        //    }
 
-            Handling = false;
-        }
+        //    Handling = false;
+        //}
 
         private void TryInitializeFurnace(FurnaceState state, IEventScheduler scheduler, IWorld world,
                                           GlobalVoxelCoordinates coords, IItemRepository itemRepository)

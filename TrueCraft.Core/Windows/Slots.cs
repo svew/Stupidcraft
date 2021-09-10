@@ -44,10 +44,7 @@ namespace TrueCraft.Core.Windows
                     return;
 
                 if (IsValid(value, index))
-                {
                     _items[index] = value;
-                    OnWindowChange(new WindowChangeEventArgs(index, value));
-                }
             }
         }
 
@@ -81,10 +78,6 @@ namespace TrueCraft.Core.Windows
         protected virtual bool IsValid(ItemStack slot, int index)
         {
             return true;
-        }
-
-        protected virtual void OnWindowChange(WindowChangeEventArgs e)
-        {
         }
     }
 }

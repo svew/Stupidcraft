@@ -16,28 +16,28 @@ namespace TrueCraft.Core.Windows
             _repository = repository;
         }
 
-        protected override void OnWindowChange(WindowChangeEventArgs e)
-        {
-            // TODO: this should be different code server- and client-side.
-            if (_repository == null)
-                return;
+        //protected override void OnWindowChange(WindowChangeEventArgs e)
+        //{
+        //    // TODO: this should be different code server- and client-side.
+        //    if (_repository == null)
+        //        return;
 
-            CraftingPattern inputPattern = CraftingPattern.GetCraftingPattern(this);
+        //    CraftingPattern inputPattern = CraftingPattern.GetCraftingPattern(this);
 
-            ICraftingRecipe current = _repository.GetRecipe(inputPattern);
-            if (e.SlotIndex == CraftingOutput)
-            {
-                if (e.Value.Empty && current != null) // Item picked up
-                {
-                    RemoveItemFromOutput(current);
-                    current = _repository.GetRecipe(inputPattern);
-                }
-            }
-            if (current == null)
-                this[CraftingOutput] = ItemStack.EmptyStack;
-            else
-                this[CraftingOutput] = current.Output;
-        }
+        //    ICraftingRecipe current = _repository.GetRecipe(inputPattern);
+        //    if (e.SlotIndex == CraftingOutput)
+        //    {
+        //        if (e.Value.Empty && current != null) // Item picked up
+        //        {
+        //            RemoveItemFromOutput(current);
+        //            current = _repository.GetRecipe(inputPattern);
+        //        }
+        //    }
+        //    if (current == null)
+        //        this[CraftingOutput] = ItemStack.EmptyStack;
+        //    else
+        //        this[CraftingOutput] = current.Output;
+        //}
 
         private void RemoveItemFromOutput(ICraftingRecipe recipe)
         {
