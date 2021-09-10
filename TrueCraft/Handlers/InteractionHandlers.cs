@@ -147,7 +147,9 @@ namespace TrueCraft.Handlers
                     position += MathHelper.BlockFaceToCoordinates(packet.Face);
                     var oldID = client.World.GetBlockID(position);
                     var oldMeta = client.World.GetMetadata(position);
+                    // TODO: BlockChangePacket should have new ID & metadata, not old; Naming issue?
                     client.QueuePacket(new BlockChangePacket(position.X, (sbyte)position.Y, position.Z, (sbyte)oldID, (sbyte)oldMeta));
+                    // TODO: why send SetSlot when there is no change??
                     client.QueuePacket(new SetSlotPacket(0, client.SelectedSlot, client.SelectedItem.ID, client.SelectedItem.Count, client.SelectedItem.Metadata));
                     return;
                 }
