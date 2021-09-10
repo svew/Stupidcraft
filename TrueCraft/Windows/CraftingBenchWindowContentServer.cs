@@ -78,10 +78,17 @@ namespace TrueCraft.Windows
 
         public override ItemStack[] GetSlots()
         {
-            int jul = CraftingGrid.Count;
-            ItemStack[] rv = new ItemStack[jul];
-            for (int j = 0; j < jul; j++)
-                rv[j] = CraftingGrid[j];
+            ItemStack[] rv = new ItemStack[this.Length];
+            int slotIndex = 0;
+            for (int j = 0; j < SlotAreas.Length; j ++)
+            {
+                ISlots area = SlotAreas[j];
+                for (int k = 0; k < area.Count; k ++)
+                {
+                    rv[slotIndex] = area[k];
+                    slotIndex++;
+                }
+            }
 
             return rv;
         }
