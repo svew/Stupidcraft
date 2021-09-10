@@ -169,7 +169,6 @@ namespace TrueCraft.Client.Windows
                             {
                                 heldItem.HeldItem = new ItemStack(inHand.ID, maxItems, inHand.Metadata, inHand.Nbt);
                                 this[slotIndex] = new ItemStack(inHand.ID, (sbyte)(totalItems - maxItems), inHand.Metadata, inHand.Nbt);
-
                             });
                         }
                         else
@@ -219,7 +218,7 @@ namespace TrueCraft.Client.Windows
                     {   // Place all items, the mouse pointer becomes empty.
                         return ActionConfirmation.GetActionConfirmation(() =>
                         {
-                            this[slotIndex] = new ItemStack(old.ID, (sbyte)totalItems, old.Metadata, old.Nbt);
+                            this[slotIndex] = new ItemStack(heldItem.HeldItem.ID, (sbyte)totalItems, heldItem.HeldItem.Metadata, heldItem.HeldItem.Nbt);
                             heldItem.HeldItem = ItemStack.EmptyStack;
                         });
                     }
