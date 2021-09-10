@@ -72,7 +72,7 @@ namespace TrueCraft.API
         public ItemStack(short id) : this()
         {
             _Id = id;
-            _Count = 1;
+            _Count = (sbyte)(id != -1 ? 1 : 0);
             Metadata = 0;
             Nbt = null;
             Index = 0;
@@ -85,7 +85,7 @@ namespace TrueCraft.API
         /// <param name="count">The item count for the item stack.</param>
         public ItemStack(short id, sbyte count) : this(id)
         {
-            Count = count;
+            _Count = (sbyte)(id != -1 ? count : 0);
         }
 
         /// <summary>
