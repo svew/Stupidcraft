@@ -115,6 +115,11 @@ namespace TrueCraft.Core.Windows
 
         public virtual void SetSlots(ItemStack[] slots)
         {
+            // NOTE: The sent items for the Main Inventory and Hotbar should
+            //    agree with what the client already has.
+            // TODO: Should this be regarded as an opportunity to check for bugs
+            //    causing disagreements?  OR as an opportunity to correct
+            //    any disagreements?
             int startIndex = 0;
             for (int i = 0, iul = SlotAreas.Length; i < iul; i ++)
             {
