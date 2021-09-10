@@ -196,7 +196,7 @@ namespace TrueCraft.Windows
                     }
                     else
                     {   // Place all items, the mouse pointer becomes empty.
-                        this[slotIndex] = new ItemStack(old.ID, (sbyte)totalItems, old.Metadata, old.Nbt);
+                        this[slotIndex] = new ItemStack(itemStaging.ID, (sbyte)totalItems, itemStaging.Metadata, itemStaging.Nbt);
                         itemStaging = ItemStack.EmptyStack;
                         return true;
                     }
