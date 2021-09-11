@@ -20,8 +20,8 @@ namespace TrueCraft.Launcher.Singleplayer
         {
             if (!Directory.Exists(Paths.Worlds))
                 Directory.CreateDirectory(Paths.Worlds);
-            BlockRepository = new BlockRepository();
-            BlockRepository.DiscoverBlockProviders();
+            BlockRepository = BlockRepository.Get();
+
             var directories = Directory.GetDirectories(Paths.Worlds);
             var saves = new List<World>();
             foreach (var d in directories)

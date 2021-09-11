@@ -8,20 +8,23 @@ using TrueCraft.API;
 using TrueCraft.Core.World;
 using TrueCraft.Core.Logic.Blocks;
 using System.Diagnostics;
+using TrueCraft.API.Logic;
 
 namespace TrueCraft.Core.Test.Lighting
 {
     [TestFixture]
     public class WorldLighterTest
     {
+        private IBlockRepository GetBlockRepository()
+        {
+            // TODO Update to a Mock
+            return BlockRepository.Get();
+        }
+
         [Test]
         public void TestBasicLighting()
         {
-            var repository = new BlockRepository();
-            repository.RegisterBlockProvider(new GrassBlock());
-            repository.RegisterBlockProvider(new DirtBlock());
-            repository.RegisterBlockProvider(new AirBlock());
-            repository.RegisterBlockProvider(new BedrockBlock());
+            var repository = GetBlockRepository();
             var world = new TrueCraft.Core.World.World("TEST", new FlatlandGenerator());
             world.BlockRepository = repository;
             var lighter = new WorldLighting(world, repository);
@@ -57,11 +60,7 @@ namespace TrueCraft.Core.Test.Lighting
         [Test]
         public void TestShortPropegation()
         {
-            var repository = new BlockRepository();
-            repository.RegisterBlockProvider(new GrassBlock());
-            repository.RegisterBlockProvider(new DirtBlock());
-            repository.RegisterBlockProvider(new AirBlock());
-            repository.RegisterBlockProvider(new BedrockBlock());
+            var repository = GetBlockRepository();
             var world = new TrueCraft.Core.World.World("TEST", new FlatlandGenerator());
             world.BlockRepository = repository;
             var lighter = new WorldLighting(world, repository);
@@ -93,11 +92,7 @@ namespace TrueCraft.Core.Test.Lighting
         [Test]
         public void TestFarPropegation()
         {
-            var repository = new BlockRepository();
-            repository.RegisterBlockProvider(new GrassBlock());
-            repository.RegisterBlockProvider(new DirtBlock());
-            repository.RegisterBlockProvider(new AirBlock());
-            repository.RegisterBlockProvider(new BedrockBlock());
+            var repository = GetBlockRepository();
             var world = new TrueCraft.Core.World.World("TEST", new FlatlandGenerator());
             world.BlockRepository = repository;
             var lighter = new WorldLighting(world, repository);
@@ -143,11 +138,7 @@ namespace TrueCraft.Core.Test.Lighting
         [Test]
         public void TestFarPropegationx2()
         {
-            var repository = new BlockRepository();
-            repository.RegisterBlockProvider(new GrassBlock());
-            repository.RegisterBlockProvider(new DirtBlock());
-            repository.RegisterBlockProvider(new AirBlock());
-            repository.RegisterBlockProvider(new BedrockBlock());
+            var repository = GetBlockRepository();
             var world = new TrueCraft.Core.World.World("TEST", new FlatlandGenerator());
             world.BlockRepository = repository;
             var lighter = new WorldLighting(world, repository);
@@ -242,12 +233,7 @@ namespace TrueCraft.Core.Test.Lighting
         [Test]
         public void TestLeavesAndEtc()
         {
-            var repository = new BlockRepository();
-            repository.RegisterBlockProvider(new GrassBlock());
-            repository.RegisterBlockProvider(new DirtBlock());
-            repository.RegisterBlockProvider(new AirBlock());
-            repository.RegisterBlockProvider(new BedrockBlock());
-            repository.RegisterBlockProvider(new LeavesBlock());
+            var repository = GetBlockRepository();
             var world = new TrueCraft.Core.World.World("TEST", new FlatlandGenerator());
             world.BlockRepository = repository;
             var lighter = new WorldLighting(world, repository);

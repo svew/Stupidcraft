@@ -61,13 +61,8 @@ namespace TrueCraft.Core.Test.Physics
 
         private IBlockPhysicsProvider GetBlockRepository()
         {
-            var repository = new BlockRepository();
-            repository.RegisterBlockProvider(new AirBlock());
-            repository.RegisterBlockProvider(new StoneBlock());
-            repository.RegisterBlockProvider(new GrassBlock());
-            repository.RegisterBlockProvider(new DirtBlock());
-            repository.RegisterBlockProvider(new BedrockBlock());
-            return repository;
+            // TODO: Update this to a Mock.
+            return BlockRepository.Get();
         }
 
         [Test]

@@ -97,9 +97,7 @@ namespace TrueCraft
             LogProviders = new List<ILogProvider>();
             Scheduler = new EventScheduler(this);
 
-            var blockRepository = new BlockRepository();
-            blockRepository.DiscoverBlockProviders();
-            BlockRepository = blockRepository;
+            BlockRepository = TrueCraft.Core.Logic.BlockRepository.Get();
 
             var itemRepository = new ItemRepository();
             itemRepository.DiscoverItemProviders();

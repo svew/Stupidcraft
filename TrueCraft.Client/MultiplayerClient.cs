@@ -92,11 +92,9 @@ namespace TrueCraft.Client
             Handlers.PacketHandlers.RegisterHandlers(this);
             World = new ReadOnlyWorld();
 
-            var repo = new BlockRepository();
-            repo.DiscoverBlockProviders();
-            World.World.BlockRepository = repo;
+            World.World.BlockRepository = BlockRepository.Get();
             World.World.ChunkProvider = new EmptyGenerator();
-            Physics = new PhysicsEngine(World.World, repo);
+            Physics = new PhysicsEngine(World.World, BlockRepository.Get());
             _socketPool = new SocketAsyncEventArgsPool(100, 200, 65536);
             connected = 0;
             Health = 20;

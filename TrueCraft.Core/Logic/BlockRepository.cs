@@ -12,6 +12,28 @@ namespace TrueCraft.Core.Logic
     {
         private readonly IBlockProvider[] BlockProviders = new IBlockProvider[0x100];
 
+        private static BlockRepository _singleton;
+
+        private BlockRepository()
+        {
+
+        }
+
+        /// <summary>
+        /// Gets the single instance of the BlockRepository.
+        /// </summary>
+        /// <returns>The BlockRepository.</returns>
+        public static BlockRepository Get()
+        {
+            if (object.ReferenceEquals(_singleton, null))
+            {
+                _singleton = new BlockRepository();
+                _singleton.DiscoverBlockProviders();
+            }
+
+            return _singleton;
+        }
+
         public IBlockProvider GetBlockProvider(byte id)
         {
             return BlockProviders[id];
@@ -25,6 +47,8 @@ namespace TrueCraft.Core.Logic
         public void DiscoverBlockProviders()
         {
             var providerTypes = new List<Type>();
+            // TODO: this can only enumerate loaded assemblies.  It cannot
+            //   load unknown assemblies, such as those containing extended (mod) blocks.
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 foreach (var type in assembly.GetTypes().Where(t =>
