@@ -47,10 +47,10 @@ namespace TrueCraft.Core.Test.Logic
 
         protected void ResetMocks()
         {
-            World.ResetCalls();
-            Server.ResetCalls();
-            EntityManager.ResetCalls();
-            User.ResetCalls();
+            World.Invocations.Clear();
+            Server.Invocations.Clear();
+            EntityManager.Invocations.Clear();
+            User.Invocations.Clear();
         }
 
         [Test]
