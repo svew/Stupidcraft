@@ -31,9 +31,7 @@ namespace TrueCraft.Core.Test.Logic
             EntityManager = new Mock<IEntityManager>();
             User = new Mock<IRemoteClient>();
             BlockRepository = new Mock<IBlockRepository>();
-            var itemRepository = new ItemRepository();
             BlockProvider.BlockRepository = BlockRepository.Object;
-            BlockProvider.ItemRepository = itemRepository;
 
             User.SetupGet(u => u.World).Returns(World.Object);
             User.SetupGet(u => u.Server).Returns(Server.Object);

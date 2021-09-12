@@ -99,10 +99,8 @@ namespace TrueCraft
 
             BlockRepository = TrueCraft.Core.Logic.BlockRepository.Get();
 
-            var itemRepository = new ItemRepository();
-            itemRepository.DiscoverItemProviders();
-            ItemRepository = itemRepository;
-            BlockProvider.ItemRepository = ItemRepository;
+            ItemRepository = TrueCraft.Core.Logic.ItemRepository.Get();
+
             BlockProvider.BlockRepository = BlockRepository;
 
             var craftingRepository = new CraftingRepository();

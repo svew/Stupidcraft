@@ -20,7 +20,9 @@ namespace TrueCraft.Core.Logic
     public abstract class BlockProvider : IItemProvider, IBlockProvider
     {
         public static IBlockRepository BlockRepository { get; set; }
-        public static IItemRepository ItemRepository { get; set; }
+
+        [Obsolete("Use ItemRepository.Get() instead")]
+        public static IItemRepository ItemRepository { get => TrueCraft.Core.Logic.ItemRepository.Get(); }
 
         public virtual void BlockLeftClicked(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
         {

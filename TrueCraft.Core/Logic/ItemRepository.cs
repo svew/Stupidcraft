@@ -10,12 +10,25 @@ namespace TrueCraft.Core.Logic
 {
     public class ItemRepository : IItemRepository
     {
-        public ItemRepository()
+        private readonly List<IItemProvider> ItemProviders;
+
+        private static ItemRepository _singleton;
+
+        private ItemRepository()
         {
             ItemProviders = new List<IItemProvider>();
         }
 
-        private readonly List<IItemProvider> ItemProviders = new List<IItemProvider>();
+        public static IItemRepository Get()
+        {
+            if (object.ReferenceEquals(_singleton, null))
+            {
+                _singleton = new ItemRepository();
+                _singleton.DiscoverItemProviders();
+            }
+
+            return _singleton;
+        }
 
         public IItemProvider GetItemProvider(short id)
         {
@@ -44,9 +57,11 @@ namespace TrueCraft.Core.Logic
             ItemProviders.Insert(i + 1, provider);
         }
 
-        public void DiscoverItemProviders()
+        private void DiscoverItemProviders()
         {
             var providerTypes = new List<Type>();
+            // TODO: This can only enumerate currently loaded assemblies.
+            //  Thus, it will be unable to discover any extensions/mods.
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 foreach (var type in assembly.GetTypes().Where(t =>
