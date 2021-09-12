@@ -54,6 +54,7 @@ namespace TrueCraft.Client
 
         public IWindowContentClient CurrentWindow { get; set; }
 
+        [Obsolete("Use TrueCraft.Core.Logic.CraftingRepository.Get() instead.")]
         public ICraftingRepository CraftingRepository { get; set; }
 
         public bool Connected
@@ -98,9 +99,7 @@ namespace TrueCraft.Client
             _socketPool = new SocketAsyncEventArgsPool(100, 200, 65536);
             connected = 0;
             Health = 20;
-            var crafting = new CraftingRepository();
-            CraftingRepository = crafting;
-            crafting.DiscoverRecipes();
+            CraftingRepository = TrueCraft.Core.Logic.CraftingRepository.Get();
 
             Inventory = new Slots(27, 9, 3);   // TODO hard-coded constants
             Hotbar = new Slots(9, 9, 1);       // TODO hard-coded constants

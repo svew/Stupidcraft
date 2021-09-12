@@ -14,9 +14,27 @@ namespace TrueCraft.Core.Logic
 {
     public class CraftingRepository : ICraftingRepository
     {
-        private readonly List<ICraftingRecipe> Recipes = new List<ICraftingRecipe>();
+        private readonly List<ICraftingRecipe> _recipes;
 
-        public void DiscoverRecipes()
+        private static CraftingRepository _singleton;
+
+        private CraftingRepository()
+        {
+            _recipes = new List<ICraftingRecipe>();
+        }
+
+        public static ICraftingRepository Get()
+        {
+            if (object.ReferenceEquals(_singleton, null))
+            {
+                _singleton = new CraftingRepository();
+                _singleton.DiscoverRecipes();
+            }
+
+            return _singleton;
+        }
+
+        private void DiscoverRecipes()
         {
             XmlDocument doc = new XmlDocument();
 
@@ -35,12 +53,12 @@ namespace TrueCraft.Core.Logic
             XmlNode truecraft = doc.ChildNodes.OfType<XmlNode>().Where<XmlNode>(n => n.LocalName == "truecraft").First<XmlNode>();
             XmlNode recipes = truecraft.ChildNodes.OfType<XmlNode>().Where<XmlNode>(n => n.LocalName == "recipes").First<XmlNode>();
             foreach (XmlNode recipe in recipes.ChildNodes)
-                Recipes.Add(new CraftingRecipe(recipe));
+                _recipes.Add(new CraftingRecipe(recipe));
         }
 
         public ICraftingRecipe GetRecipe(CraftingPattern pattern)
         {
-            foreach (ICraftingRecipe r in Recipes)
+            foreach (ICraftingRecipe r in _recipes)
                 if (r.Pattern == pattern)
                     return r;
 

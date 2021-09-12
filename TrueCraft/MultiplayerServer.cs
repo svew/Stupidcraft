@@ -41,7 +41,10 @@ namespace TrueCraft
         public IEventScheduler Scheduler { get; private set; }
         public IBlockRepository BlockRepository { get; private set; }
         public IItemRepository ItemRepository { get; private set; }
+
+        [Obsolete("Use TrueCraft.Core.Logic.CraftingRepository.Get() instead.")]
         public ICraftingRepository CraftingRepository { get; private set; }
+
         public bool EnableClientLogging { get; set; }
         public IPEndPoint EndPoint { get; private set; }
 
@@ -103,9 +106,7 @@ namespace TrueCraft
 
             BlockProvider.BlockRepository = BlockRepository;
 
-            var craftingRepository = new CraftingRepository();
-            craftingRepository.DiscoverRecipes();
-            CraftingRepository = craftingRepository;
+            CraftingRepository = TrueCraft.Core.Logic.CraftingRepository.Get();
 
             PendingBlockUpdates = new Queue<BlockUpdate>();
             EnableClientLogging = false;
