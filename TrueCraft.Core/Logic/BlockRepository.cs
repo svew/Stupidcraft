@@ -19,12 +19,15 @@ namespace TrueCraft.Core.Logic
 
         }
 
-        internal static BlockRepository Init(IDiscover discover)
+        internal static IRegisterBlockProvider Init(IDiscover discover)
         {
-#if DEBUG
+            // Creating a new Single Player World requires an initialized
+            // Block Provider.  Starting an existing world must also initialize
+            // the Block Provider.  Thus, we cannot guarantee only one call to
+            // this method.  Subsequent calls are ignored.
             if (!(object.ReferenceEquals(_singleton, null)))
-                throw new ApplicationException("Multiple calls to BlockRepository.Init detected.");
-#endif
+                return _singleton;
+
             _singleton = new BlockRepository();
             discover.DiscoverBlockProviders(_singleton);
             return _singleton;

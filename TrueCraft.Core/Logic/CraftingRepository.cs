@@ -23,12 +23,11 @@ namespace TrueCraft.Core.Logic
             _recipes = new List<ICraftingRecipe>();
         }
 
-        internal static CraftingRepository Init(IDiscover discover)
+        internal static IRegisterRecipe Init(IDiscover discover)
         {
-#if DEBUG
             if (!object.ReferenceEquals(_singleton, null))
-                throw new ApplicationException("Multiple calls to CraftingRepository.Init detected.");
-#endif
+                return _singleton;
+
             _singleton = new CraftingRepository();
             discover.DiscoverRecipes(_singleton);
 

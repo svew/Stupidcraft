@@ -21,10 +21,9 @@ namespace TrueCraft.Core.Logic
 
         internal static IRegisterItemProvider Init(IDiscover discover)
         {
-#if DEBUG
             if (!object.ReferenceEquals(_singleton, null))
-                throw new ApplicationException("Multiple calls to ItemRepository.Init detected.");
-#endif
+                return _singleton;
+
             _singleton = new ItemRepository();
             discover.DiscoverItemProviders(_singleton);
 
