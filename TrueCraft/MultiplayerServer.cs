@@ -100,6 +100,9 @@ namespace TrueCraft
             LogProviders = new List<ILogProvider>();
             Scheduler = new EventScheduler(this);
 
+            Discover discover = new Discover();
+            discover.DoDiscovery();
+
             BlockRepository = TrueCraft.Core.Logic.BlockRepository.Get();
 
             ItemRepository = TrueCraft.Core.Logic.ItemRepository.Get();

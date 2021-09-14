@@ -12,10 +12,5 @@ namespace TrueCraft.API.Logic
         /// if the block ID in question has no corresponding block provider.
         /// </summary>
         IBlockProvider GetBlockProvider(byte id);
-        /// <summary>
-        /// Registers a new block provider. This overrides any existing block providers that use the
-        /// same block ID.
-        /// </summary>
-        void RegisterBlockProvider(IBlockProvider provider);
     }
 }

@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using TrueCraft.Core;
 using System.Threading;
 using System.Reflection;
+using TrueCraft.Core.Logic;
 
 namespace TrueCraft.Client
 {

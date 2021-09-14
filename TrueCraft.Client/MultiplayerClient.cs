@@ -93,6 +93,9 @@ namespace TrueCraft.Client
             Handlers.PacketHandlers.RegisterHandlers(this);
             World = new ReadOnlyWorld();
 
+            Discover discover = new Discover();
+            discover.DoDiscovery();
+
             World.World.BlockRepository = BlockRepository.Get();
             World.World.ChunkProvider = new EmptyGenerator();
             Physics = new PhysicsEngine(World.World, BlockRepository.Get());

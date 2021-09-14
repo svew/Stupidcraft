@@ -12,10 +12,5 @@ namespace TrueCraft.API.Logic
         /// if the item ID in question has no corresponding block provider.
         /// </summary>
         IItemProvider GetItemProvider(short id);
-        /// <summary>
-        /// Registers a new item provider. This overrides any existing item providers that use the
-        /// same item ID.
-        /// </summary>
-        void RegisterItemProvider(IItemProvider provider);
     }
 }

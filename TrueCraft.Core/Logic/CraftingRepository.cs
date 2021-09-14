@@ -12,7 +12,7 @@ using System.Reflection;
 
 namespace TrueCraft.Core.Logic
 {
-    public class CraftingRepository : ICraftingRepository
+    public class CraftingRepository : ICraftingRepository, IRegisterRecipe
     {
         private readonly List<ICraftingRecipe> _recipes;
 
@@ -23,37 +23,26 @@ namespace TrueCraft.Core.Logic
             _recipes = new List<ICraftingRecipe>();
         }
 
-        public static ICraftingRepository Get()
+        internal static CraftingRepository Init(IDiscover discover)
         {
-            if (object.ReferenceEquals(_singleton, null))
-            {
-                _singleton = new CraftingRepository();
-                _singleton.DiscoverRecipes();
-            }
+#if DEBUG
+            if (!object.ReferenceEquals(_singleton, null))
+                throw new ApplicationException("Multiple calls to CraftingRepository.Init detected.");
+#endif
+            _singleton = new CraftingRepository();
+            discover.DiscoverRecipes(_singleton);
 
             return _singleton;
         }
 
-        private void DiscoverRecipes()
+        public static ICraftingRepository Get()
         {
-            XmlDocument doc = new XmlDocument();
+#if DEBUG
+            if (object.ReferenceEquals(_singleton, null))
+                throw new ApplicationException("Call to CraftingRepository.Get without initialization.");
+#endif
 
-            Assembly api = AppDomain.CurrentDomain.GetAssemblies().Where<Assembly>(a => a.Location.EndsWith("TrueCraft.API.dll")).First<Assembly>();  // TODO do without Linq
-            using (Stream xsd = api.GetManifestResourceStream("TrueCraft.API.Assets.TrueCraft.xsd"))
-                doc.Schemas.Add(XmlSchema.Read(xsd, null));
-
-            using (Stream sz = this.GetType().Assembly.GetManifestResourceStream("TrueCraft.Core.Assets.TrueCraft.xml.gz"))
-            using (Stream s = new GZipStream(sz, CompressionMode.Decompress))
-            using (XmlReader xmlr = XmlReader.Create(s))
-            {
-                doc.Load(xmlr);
-                doc.Validate(null);
-            }
-
-            XmlNode truecraft = doc.ChildNodes.OfType<XmlNode>().Where<XmlNode>(n => n.LocalName == "truecraft").First<XmlNode>();
-            XmlNode recipes = truecraft.ChildNodes.OfType<XmlNode>().Where<XmlNode>(n => n.LocalName == "recipes").First<XmlNode>();
-            foreach (XmlNode recipe in recipes.ChildNodes)
-                _recipes.Add(new CraftingRecipe(recipe));
+            return _singleton;
         }
 
         public ICraftingRecipe GetRecipe(CraftingPattern pattern)
@@ -63,6 +52,11 @@ namespace TrueCraft.Core.Logic
                     return r;
 
             return null;
+        }
+
+        public void RegisterRecipe(ICraftingRecipe recipe)
+        {
+            _recipes.Add(recipe);
         }
     }
 }

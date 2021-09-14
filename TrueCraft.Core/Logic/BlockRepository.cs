@@ -8,15 +8,26 @@ using TrueCraft.API.World;
 
 namespace TrueCraft.Core.Logic
 {
-    public class BlockRepository : IBlockRepository, IBlockPhysicsProvider
+    public class BlockRepository : IBlockRepository, IBlockPhysicsProvider, IRegisterBlockProvider
     {
         private readonly IBlockProvider[] BlockProviders = new IBlockProvider[0x100];
 
-        private static BlockRepository _singleton;
+        private static BlockRepository _singleton = null;
 
         private BlockRepository()
         {
 
+        }
+
+        internal static BlockRepository Init(IDiscover discover)
+        {
+#if DEBUG
+            if (!(object.ReferenceEquals(_singleton, null)))
+                throw new ApplicationException("Multiple calls to BlockRepository.Init detected.");
+#endif
+            _singleton = new BlockRepository();
+            discover.DiscoverBlockProviders(_singleton);
+            return _singleton;
         }
 
         /// <summary>
@@ -25,12 +36,10 @@ namespace TrueCraft.Core.Logic
         /// <returns>The BlockRepository.</returns>
         public static BlockRepository Get()
         {
+#if DEBUG
             if (object.ReferenceEquals(_singleton, null))
-            {
-                _singleton = new BlockRepository();
-                _singleton.DiscoverBlockProviders();
-            }
-
+                throw new ApplicationException("Call to BlockRepository.Get without initialization.");
+#endif
             return _singleton;
         }
 
@@ -39,32 +48,12 @@ namespace TrueCraft.Core.Logic
             return BlockProviders[id];
         }
 
+        /// <inheritdoc />
         public void RegisterBlockProvider(IBlockProvider provider)
         {
             BlockProviders[provider.ID] = provider;
         }
 
-        public void DiscoverBlockProviders()
-        {
-            var providerTypes = new List<Type>();
-            // TODO: this can only enumerate loaded assemblies.  It cannot
-            //   load unknown assemblies, such as those containing extended (mod) blocks.
-            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
-            {
-                foreach (var type in assembly.GetTypes().Where(t =>
-                    typeof(IBlockProvider).IsAssignableFrom(t) && !t.IsAbstract))
-                {
-                    providerTypes.Add(type);
-                }
-            }
-
-            providerTypes.ForEach(t =>
-            {
-                var instance = (IBlockProvider)Activator.CreateInstance(t);
-                RegisterBlockProvider(instance);
-            });
-        }
-            
         public BoundingBox? GetBoundingBox(IWorld world, GlobalVoxelCoordinates coordinates)
         {
             // TODO: Block-specific bounding boxes

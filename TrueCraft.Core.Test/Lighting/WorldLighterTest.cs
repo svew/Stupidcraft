@@ -17,7 +17,7 @@ namespace TrueCraft.Core.Test.Lighting
     {
         private IBlockRepository GetBlockRepository()
         {
-            // TODO Update to a Mock
+            // TODO Update so that unit tests do not depend upon a global singleton.
             return BlockRepository.Get();
         }
 
