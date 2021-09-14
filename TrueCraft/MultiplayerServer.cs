@@ -372,14 +372,13 @@ namespace TrueCraft
         {
             try
             {
+                if (args.SocketError != SocketError.Success)
+                    return;
+
                 var client = new RemoteClient(this, PacketReader, PacketHandlers, args.AcceptSocket);
 
                 lock (ClientLock)
                     Clients.Add(client);
-            }
-            catch
-            {
-                // Who cares
             }
             finally
             {
