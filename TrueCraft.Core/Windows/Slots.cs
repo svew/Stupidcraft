@@ -5,6 +5,7 @@ using System.Text;
 using TrueCraft.API.Windows;
 using TrueCraft.API;
 using TrueCraft.API.Logic;
+using TrueCraft.Core.Logic;
 
 namespace TrueCraft.Core.Windows
 {
@@ -21,6 +22,10 @@ namespace TrueCraft.Core.Windows
     {
         public Slots(int length, int width, int height)
         {
+#if DEBUG
+            if (length < width * height)
+                throw new ArgumentException($"{nameof(length)} must be equal to or greater than {nameof(width)} times {nameof(height)}");
+#endif
             Count = length;
             _items = new ItemStack[Count];
             Width = width;
@@ -48,27 +53,58 @@ namespace TrueCraft.Core.Windows
             }
         }
 
-        public virtual ItemStack StoreItemStack(ItemStack item, bool topUpOnly)
+        public virtual ItemStack StoreItemStack(ItemStack items, bool topUpOnly)
         {
+            if (items.Empty)
+                return items;
+
+            // Are there compatible slot(s) that already contain something?
             int j = 0;
             int jul = this.Count;
-            ItemStack remaining = item;
-            //IItemProvider provider = Server.ItemRepository.GetItemProvider(item.ID);
-            int maxStack = 64;   //  TODO: we need access to the ItemRepository to determine this.
+            ItemStack remaining = items;
             while (j < jul && !remaining.Empty)
             {
-                if (this[j].CanMerge(remaining) && this[j].Count < maxStack)
-                {
-                    sbyte num = (sbyte)Math.Min(remaining.Count, maxStack - this[j].Count);
-                    this[j] = new ItemStack(this[j].ID, (sbyte)(this[j].Count + num), this[j].Metadata, this[j].Nbt);
-                    remaining = remaining.Count > num ?
-                        new ItemStack(remaining.ID, (sbyte)(remaining.Count - num), remaining.Metadata, remaining.Nbt) :
-                        ItemStack.EmptyStack;
-                }
+                while (j < jul && this[j].Empty)
+                    j++;
+                if (j == jul)
+                    break;
+
+                remaining = StoreInSlot(j, remaining);
                 j++;
             }
 
-            return remaining;
+            if (topUpOnly || remaining.Empty)
+                return remaining;
+
+            // Store any remaining items in the first empty slot.
+            j = 0;
+            while (j < jul && !this[j].Empty)
+                j++;
+            if (j == jul)
+                return remaining;
+
+            return StoreInSlot(j, remaining);
+        }
+
+        /// <summary>
+        /// Stores as much as possible of the given items in the specified index.
+        /// </summary>
+        /// <param name="index">Which slot to store the items in.</param>
+        /// <param name="items">The items to store.</param>
+        /// <returns>Any items remaining after as many as possible have been stored.</returns>
+        private ItemStack StoreInSlot(int index, ItemStack items)
+        {
+            if (!this[index].CanMerge(items))
+                return items;
+
+            int maxStack = ItemRepository.Get().GetItemProvider(items.ID).MaximumStack;
+
+            ItemStack curContent = this[index];
+            int numToStore = Math.Min(maxStack - curContent.Count, items.Count);
+            this[index] = new ItemStack(items.ID, (sbyte)(curContent.Count + numToStore), items.Metadata, items.Nbt);
+            return (numToStore < items.Count) ?
+                new ItemStack(items.ID, (sbyte)(items.Count - numToStore), items.Metadata, items.Nbt) :
+                ItemStack.EmptyStack;
         }
 
         /// <summary>

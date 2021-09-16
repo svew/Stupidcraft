@@ -2,6 +2,7 @@ using System;
 using NUnit.Framework;
 using TrueCraft.Core.Logic;
 using TrueCraft.Core.Logic.Blocks;
+using TrueCraft.Core.Logic.Items;
 
 namespace TrueCraft.Core.Test
 {
@@ -33,6 +34,7 @@ namespace TrueCraft.Core.Test
                 repository.RegisterItemProvider(new StoneBlock()); // Item ID 1
                 repository.RegisterItemProvider(new GrassBlock()); // Item ID 2
                 repository.RegisterItemProvider(new DirtBlock());  // Item ID 3
+                repository.RegisterItemProvider(new SnowballItem());
             }
 
             public void DiscoverRecipes(IRegisterRecipe repository)
