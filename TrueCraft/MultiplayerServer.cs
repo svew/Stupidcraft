@@ -416,8 +416,8 @@ namespace TrueCraft
                     {
                         // This space intentionally left blank
                     }
-                    if (Time.ElapsedMilliseconds >= limit)
-                        Log(LogCategory.Warning, "Lighting queue is backed up");
+                    //if (Time.ElapsedMilliseconds >= limit)
+                    //    Log(LogCategory.Warning, "Lighting queue is backed up");
                 }
                 Profiler.Done();
             }

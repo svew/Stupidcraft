@@ -92,48 +92,26 @@ namespace TrueCraft.Windows
         {
             InventoryWindowConstants.AreaIndices src = (InventoryWindowConstants.AreaIndices)GetAreaIndex(index);
 
-            switch (src)
+            if (src == InventoryWindowConstants.AreaIndices.Main)
             {
-                case InventoryWindowConstants.AreaIndices.Crafting:
-                case InventoryWindowConstants.AreaIndices.Armor:
-                    return MoveToInventory(index);
-
-                case InventoryWindowConstants.AreaIndices.Main:
-                case InventoryWindowConstants.AreaIndices.Hotbar:
-                    return MoveFromInventory(index);
-
-                default:
-                    throw new ApplicationException();
+                return Hotbar.StoreItemStack(this[index], false);
             }
-        }
-
-        private ItemStack MoveToInventory(int index)
-        {
-            ItemStack remaining = MainInventory.StoreItemStack(this[index], true);
-
-            if (!remaining.Empty)
-                Hotbar.StoreItemStack(remaining, false);
-
-            if (!remaining.Empty)
-                MainInventory.StoreItemStack(remaining, false);
-
-            return remaining;
-        }
-
-        private ItemStack MoveFromInventory(int index)
-        {
-            ItemStack remaining = this[index];
-            if (remaining.Empty)
-                return ItemStack.EmptyStack;
-
-            IItemProvider provider = ItemRepository.GetItemProvider(remaining.ID);
-
-            if (provider is ArmorItem)
-                remaining = Armor.StoreItemStack(remaining, false);
+            else if (src == InventoryWindowConstants.AreaIndices.Hotbar)
+            {
+                return MainInventory.StoreItemStack(this[index], false);
+            }
             else
-                remaining = CraftingGrid.StoreItemStack(remaining, false);
+            {
+                ItemStack remaining = MainInventory.StoreItemStack(this[index], true);
+                if (remaining.Empty)
+                    return remaining;
 
-            return remaining;
+                remaining = Hotbar.StoreItemStack(remaining, false);
+                if (remaining.Empty)
+                    return remaining;
+
+                return MainInventory.StoreItemStack(remaining, false);
+            }
         }
 
         /// <inheritdoc />
@@ -220,8 +198,8 @@ namespace TrueCraft.Windows
 
         protected override bool HandleShiftLeftClick(int slotIndex, ref ItemStack itemStaging)
         {
-            // TODO
-            throw new NotImplementedException();
+            this[slotIndex] = MoveItemStack(slotIndex);
+            return true;
         }
 
         protected override bool HandleRightClick(int slotIndex, ref ItemStack itemStaging)
