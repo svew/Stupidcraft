@@ -40,8 +40,10 @@ namespace TrueCraft.Core.Test
 
             public void DiscoverRecipes(IRegisterRecipe repository)
             {
-                XmlDocument doc= new XmlDocument();
-                doc.LoadXml(@"<recipe>
+                string[] recipeXML = new string[]
+                {
+                    // Sticks
+                    @"<recipe>
       <pattern>
         <r>
           <c>
@@ -61,10 +63,136 @@ namespace TrueCraft.Core.Test
         <count>4</count>
       </output>
     </recipe>
-");
-                XmlNode sticks = doc.DocumentElement;
+",
+                    // Stone shovel
+                    @"<recipe>
+      <pattern>
+        <r>
+          <c>
+            <id>4</id>
+            <count>1</count>
+          </c>
+        </r>
+        <r>
+          <c>
+            <id>280</id>
+            <count>1</count>
+          </c>
+        </r>
+        <r>
+          <c>
+            <id>280</id>
+            <count>1</count>
+          </c>
+        </r>
+      </pattern>
+      <output>
+        <id>273</id>
+        <count>1</count>
+      </output>
+    </recipe>
+",
+                    // Stone Hoe
+                    @"<recipe>
+      <pattern>
+        <r>
+          <c>
+            <id>4</id>
+            <count>1</count>
+          </c>
+          <c>
+            <id>4</id>
+            <count>1</count>
+          </c>
+        </r>
+        <r>
+          <c>
+            <id>-1</id>
+            <count>1</count>
+          </c>
+          <c>
+            <id>280</id>
+            <count>1</count>
+          </c>
+        </r>
+        <r>
+          <c>
+            <id>-1</id>
+            <count>1</count>
+          </c>
+          <c>
+            <id>280</id>
+            <count>1</count>
+          </c>
+        </r>
+      </pattern>
+      <output>
+        <id>291</id>
+        <count>1</count>
+      </output>
+    </recipe>
+",
+                    // Stone PickAxe
+                    @"<recipe>
+      <pattern>
+        <r>
+          <c>
+            <id>4</id>
+            <count>1</count>
+          </c>
+          <c>
+            <id>4</id>
+            <count>1</count>
+          </c>
+          <c>
+            <id>4</id>
+            <count>1</count>
+          </c>
+        </r>
+        <r>
+          <c>
+            <id>-1</id>
+            <count>1</count>
+          </c>
+          <c>
+            <id>280</id>
+            <count>1</count>
+          </c>
+          <c>
+            <id>-1</id>
+            <count>1</count>
+          </c>
+        </r>
+        <r>
+          <c>
+            <id>-1</id>
+            <count>1</count>
+          </c>
+          <c>
+            <id>280</id>
+            <count>1</count>
+          </c>
+          <c>
+            <id>-1</id>
+            <count>1</count>
+          </c>
+        </r>
+      </pattern>
+      <output>
+        <id>274</id>
+        <count>1</count>
+      </output>
+    </recipe>"
+                };
 
-                repository.RegisterRecipe(new CraftingRecipe(sticks));
+                for (int j = 0; j < recipeXML.Length; j ++)
+                {
+                    XmlDocument doc= new XmlDocument();
+                    doc.LoadXml(recipeXML[j]);
+                    XmlNode item = doc.DocumentElement;
+
+                    repository.RegisterRecipe(new CraftingRecipe(item));
+                }
             }
         }
 
