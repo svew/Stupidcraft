@@ -111,7 +111,11 @@ namespace TrueCraft.Core.Test.Windows
 
             Assert.NotNull(area[0]);
             Assert.AreEqual(StickItem.ItemID, area[0].ID);
-            Assert.AreEqual(8, area[0].Count);
+
+            // Note: play-testing on Beta 1.7.3 indicates it only shows
+            // one recipe's worth of output even when multiple inputs are
+            // placed.
+            Assert.AreEqual(4, area[0].Count);
         }
 
         [Test]
