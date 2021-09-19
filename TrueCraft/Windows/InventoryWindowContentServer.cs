@@ -20,7 +20,7 @@ namespace TrueCraft.Windows
         public InventoryWindowContentServer(ISlots mainInventory, ISlots hotBar,
             ISlots armor, ISlots craftingGrid) :
             base(InventoryWindowConstants.Areas(mainInventory, hotBar, armor, craftingGrid),
-               BlockProvider.ItemRepository)
+               TrueCraft.Core.Logic.ItemRepository.Get())
         {
         }
 
@@ -125,7 +125,7 @@ namespace TrueCraft.Windows
                     {
                         // The mouse pointer has some items in it, and they
                         // are compatible with the output
-                        sbyte maxItems = BlockProvider.ItemRepository.GetItemProvider(itemStaging.ID).MaximumStack;
+                        sbyte maxItems = ItemRepository.GetItemProvider(itemStaging.ID).MaximumStack;
                         int totalItems = itemStaging.Count + this[slotIndex].Count;
                         if (totalItems > maxItems)
                         {   // There are too many items, so the mouse pointer
@@ -163,7 +163,7 @@ namespace TrueCraft.Windows
                 if (itemStaging.CanMerge(this[slotIndex]))
                 {
                     // How many Items can be placed?
-                    sbyte maxItems = BlockProvider.ItemRepository.GetItemProvider(itemStaging.ID).MaximumStack;
+                    sbyte maxItems = ItemRepository.GetItemProvider(itemStaging.ID).MaximumStack;
                     int totalItems = itemStaging.Count + this[slotIndex].Count;
                     ItemStack old = this[slotIndex];
                     if (totalItems > maxItems)
