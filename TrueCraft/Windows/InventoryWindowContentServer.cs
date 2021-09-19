@@ -47,7 +47,7 @@ namespace TrueCraft.Windows
             return slotIndex == InventoryWindowConstants.CraftingOutputIndex;
         }
 
-        public ISlots CraftingGrid { get => SlotAreas[(int)InventoryWindowConstants.AreaIndices.Crafting]; }
+        public ICraftingArea CraftingGrid { get => (ICraftingArea)SlotAreas[(int)InventoryWindowConstants.AreaIndices.Crafting]; }
 
         public ISlots Armor { get => SlotAreas[(int)InventoryWindowConstants.AreaIndices.Armor]; }
 
@@ -204,8 +204,81 @@ namespace TrueCraft.Windows
 
         protected override bool HandleRightClick(int slotIndex, ref ItemStack itemStaging)
         {
-            // TODO
-            throw new NotImplementedException();
+            if (IsOutputSlot(slotIndex))
+            {
+                ItemStack output = this[slotIndex];
+                if (output.Empty)
+                    // It looks odd, but beta 1.7.3 client really does send a
+                    // window click packet, and the server responds with
+                    // accepted = true.  This is a No-Op.
+                    return true;
+
+                // If the item is not compatible with the hand, do nothing
+                if (!itemStaging.CanMerge(output))
+                    // It looks odd, but beta 1.7.3 client really does send a
+                    // window click packet, and the server responds with
+                    // accepted = true.  This is a No-Op.
+                    return true;
+
+                // Pick up one Recipe's worth of output.
+                // Q: do we have room for it?
+                IItemProvider itemInOutput = ItemRepository.GetItemProvider(output.ID);
+                int maxHandStack = itemInOutput.MaximumStack;
+
+                if (!output.Empty && itemStaging.CanMerge(output) && itemStaging.Count + output.Count <= maxHandStack)
+                {
+                    output = CraftingGrid.TakeOutput();
+                    itemStaging = new ItemStack(output.ID, (sbyte)(output.Count + itemStaging.Count),
+                        output.Metadata, output.Nbt);
+                    return true;
+                }
+
+                return true;
+            }
+
+            if (!itemStaging.Empty)
+            {
+                if (this[slotIndex].CanMerge(itemStaging))
+                {
+                    // The hand holds something, and the slot contents are compatible, place one item.
+                    int maxStack = ItemRepository.GetItemProvider(itemStaging.ID).MaximumStack;
+                    if (maxStack > this[slotIndex].Count)
+                    {
+                        this[slotIndex] = new ItemStack(itemStaging.ID, (sbyte)(this[slotIndex].Count + 1), itemStaging.Metadata, itemStaging.Nbt);
+                        itemStaging = itemStaging.GetReducedStack(1);
+                        return true;
+                    }
+                    // Right-clicking on a full compatible slot is a No-Op.
+                    // The Beta 1.7.3 client does send a Window Click and it
+                    // is acknowledged by the server.
+                    return true;
+                }
+                else
+                {
+                    // The slot contents are not compatible with the items in hand.
+                    // Swap them.
+                    ItemStack tmp = this[slotIndex];
+                    this[slotIndex] = itemStaging;
+                    itemStaging = tmp;
+                    return true;
+                }
+            }
+            else
+            {
+                // If the hand is empty, pick up half the stack.
+                ItemStack slotContent = this[slotIndex];
+                if (slotContent.Empty)
+                    // Right-clicking an empty hand on an empty slot is a No-Op.
+                    // Beta 1.7.3 does send a Window Click and it is acknowledged
+                    // by the server.
+                    return true;
+
+                int numToPickUp = slotContent.Count;
+                numToPickUp = numToPickUp / 2 + (numToPickUp & 0x0001);
+                itemStaging = new ItemStack(slotContent.ID, (sbyte)numToPickUp, slotContent.Metadata, slotContent.Nbt);
+                this[slotIndex] = slotContent.GetReducedStack(numToPickUp);
+                return true;
+            }
         }
     }
 }

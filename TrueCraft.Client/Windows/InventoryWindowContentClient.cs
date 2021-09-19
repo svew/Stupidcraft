@@ -58,7 +58,7 @@ namespace TrueCraft.Client.Windows
             return slotIndex == InventoryWindowConstants.CraftingOutputIndex;
         }
 
-        public ISlots CraftingGrid { get => SlotAreas[(int)InventoryWindowConstants.AreaIndices.Crafting]; }
+        public ICraftingArea CraftingGrid { get => (ICraftingArea)SlotAreas[(int)InventoryWindowConstants.AreaIndices.Crafting]; }
 
         public ISlots Armor { get => SlotAreas[(int)InventoryWindowConstants.AreaIndices.Armor]; }
 
@@ -225,15 +225,89 @@ namespace TrueCraft.Client.Windows
         {
             return ActionConfirmation.GetActionConfirmation(() =>
             {
-                Console.WriteLine("Client: moving Item stack");   // debugging
                 this[slotIndex] = MoveItemStack(slotIndex);
             });
         }
 
         protected override ActionConfirmation HandleRightClick(int slotIndex, IHeldItem heldItem)
         {
-            // TODO
-            throw new NotImplementedException();
+            if (IsOutputSlot(slotIndex))
+            {
+                ItemStack output = this[slotIndex];
+
+                // Clicking on an empty output, or an output which cannot
+                // be merged with the items in hand is a No-Op.
+                // Packet-sniffing shows that Beta 1.7.3 does send a Window Click
+                // Packet to the server.  The client can be compatible without
+                // bothering the server with such No-Ops.
+                if (output.Empty || !heldItem.HeldItem.CanMerge(output))
+                    return null;
+
+                // If we have room for it, pick up one Recipe's worth of output.
+                IItemProvider itemInOutput = ItemRepository.GetItemProvider(output.ID);
+                int maxHandStack = itemInOutput.MaximumStack;
+
+                if (!output.Empty && heldItem.HeldItem.CanMerge(output) && heldItem.HeldItem.Count + output.Count <= maxHandStack)
+                {
+                    return ActionConfirmation.GetActionConfirmation(() =>
+                    {
+                        output = CraftingGrid.TakeOutput();
+                        heldItem.HeldItem = new ItemStack(output.ID, (sbyte)(output.Count + heldItem.HeldItem.Count),
+                            output.Metadata, output.Nbt);
+                    });
+                }
+
+                // No room to pick up a compatible stack is a No-Op.
+                // The client can be compatible without bothering the server
+                // with a No-Op.
+                return null;
+            }
+
+            if (!heldItem.HeldItem.Empty)
+            {
+                // If the hand is full, and the slot contents are not compatible, swap them.
+                if (this[slotIndex].CanMerge(heldItem.HeldItem))
+                {
+                    // The hand holds something, and the slot contents are compatible, place one item.
+                    int maxStack = ItemRepository.GetItemProvider(heldItem.HeldItem.ID).MaximumStack;
+                    if (maxStack > this[slotIndex].Count)
+                        return ActionConfirmation.GetActionConfirmation(() =>
+                        {
+                        this[slotIndex] = new ItemStack(heldItem.HeldItem.ID, (sbyte)(this[slotIndex].Count + 1), heldItem.HeldItem.Metadata, heldItem.HeldItem.Nbt);
+                        heldItem.HeldItem = heldItem.HeldItem.GetReducedStack(1);
+                        });
+
+                    // Right-clicking on a full compatible slot is a No-Op.
+                    // The client can be compatible without bothering the server for No-Ops.
+                    return null;
+                }
+                else
+                {
+                    return ActionConfirmation.GetActionConfirmation(() =>
+                    {
+                        ItemStack tmp = this[slotIndex];
+                        this[slotIndex] = heldItem.HeldItem;
+                        heldItem.HeldItem = tmp;
+                    });
+                }
+            }
+            else
+            {
+                // If the hand is empty, pick up half the stack.
+                ItemStack slotContent = this[slotIndex];
+                if (slotContent.Empty)
+                    // Right-clicking an empty hand on an empty slot is a No-Op.
+                    // The client can be compatible without sending No-Op window clicks.
+                    return null;
+
+                return ActionConfirmation.GetActionConfirmation(() =>
+                {
+                    int numToPickUp = slotContent.Count;
+                    numToPickUp = numToPickUp / 2 + (numToPickUp & 0x0001);
+                    heldItem.HeldItem = new ItemStack(slotContent.ID, (sbyte)numToPickUp, slotContent.Metadata, slotContent.Nbt);
+                    this[slotIndex] = slotContent.GetReducedStack(numToPickUp);
+                });
+            }
         }
     }
 }
