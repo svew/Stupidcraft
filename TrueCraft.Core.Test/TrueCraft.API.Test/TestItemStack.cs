@@ -23,6 +23,12 @@ namespace TrueCraft.API.Test
             <count>1</count>
             <metadata>4</metadata>
           </c>")]
+        // Test that Count is set to 0 for Empty Stacks
+        [TestCase(-1, 0, 0, 
+            @"<c>
+            <id>-1</id>
+            <count>1</count>
+          </c>")]
         public void Test_Ctor_xml(short expectedID, sbyte expectedCount, short expectedMetadata, string xml)
         {
             XmlDocument doc = new XmlDocument();
