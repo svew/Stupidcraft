@@ -223,6 +223,26 @@ namespace TrueCraft.Client.Windows
 
         protected override ActionConfirmation HandleShiftLeftClick(int slotIndex, IHeldItem heldItem)
         {
+                if (IsOutputSlot(slotIndex))
+                {
+                    ItemStack output = this[slotIndex];
+                    if (output.Empty)
+                        // This is a No-Op.
+                        return null;
+
+                    return ActionConfirmation.GetActionConfirmation(() =>
+                    {
+                        // Q: What if we craft 4 sticks, but only have room for 2?
+                        // Play-testing this in Beta 1.7.3 shows that the excess sticks
+                        // simply disappeared.
+
+                        output = this[slotIndex];
+                        ItemStack remaining = StoreItemStack(output);
+                        if (remaining.Count != output.Count)
+                            CraftingGrid.TakeOutput();
+                    });
+                }
+
             return ActionConfirmation.GetActionConfirmation(() =>
             {
                 this[slotIndex] = MoveItemStack(slotIndex);

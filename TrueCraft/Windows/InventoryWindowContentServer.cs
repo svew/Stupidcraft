@@ -198,6 +198,24 @@ namespace TrueCraft.Windows
 
         protected override bool HandleShiftLeftClick(int slotIndex, ref ItemStack itemStaging)
         {
+            if (IsOutputSlot(slotIndex))
+            {
+                ItemStack output = this[slotIndex];
+                if (output.Empty)
+                    // This is a No-Op.
+                    return true;
+
+                // Q: What if we craft 4 sticks, but only have room for 2?
+                // Play-testing this in Beta 1.7.3 shows that the excess sticks
+                // simply disappeared.
+
+                ItemStack remaining = StoreItemStack(output);
+                if (remaining.Count != output.Count)
+                    CraftingGrid.TakeOutput();
+
+                return true;
+            }
+
             this[slotIndex] = MoveItemStack(slotIndex);
             return true;
         }

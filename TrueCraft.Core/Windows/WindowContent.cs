@@ -160,6 +160,28 @@ namespace TrueCraft.Core.Windows
             }
         }
 
+        /// <summary>
+        /// Stores the given stack of items in the Player's inventory.
+        /// </summary>
+        /// <param name="stack">The items to store.</param>
+        /// <returns>Any leftover items that could not be fit into the Inventory.</returns>
+        protected virtual ItemStack StoreItemStack(ItemStack stack)
+        {
+            ItemStack remaining = Hotbar.StoreItemStack(stack, true);
+            if (remaining.Empty)
+                return remaining;
+
+            remaining = MainInventory.StoreItemStack(remaining, true);
+            if (remaining.Empty)
+                return remaining;
+
+            remaining = Hotbar.StoreItemStack(remaining, false);
+            if (remaining.Empty)
+                return remaining;
+
+            return MainInventory.StoreItemStack(remaining, false);
+        }
+
         /// <inheritdoc />
         public abstract ItemStack StoreItemStack(ItemStack slot, bool topUpOnly);
 
