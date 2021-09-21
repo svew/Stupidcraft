@@ -128,31 +128,33 @@ namespace TrueCraft.Windows
                         sbyte maxItems = ItemRepository.GetItemProvider(itemStaging.ID).MaximumStack;
                         int totalItems = itemStaging.Count + this[slotIndex].Count;
                         if (totalItems > maxItems)
-                        {   // There are too many items, so the mouse pointer
-                            // becomes a full stack, and the output slot retains the
-                            // remaining items.
-                            itemStaging = new ItemStack(itemStaging.ID, maxItems, itemStaging.Metadata, itemStaging.Nbt);
-                            this[slotIndex] = new ItemStack(itemStaging.ID, (sbyte)(totalItems - maxItems), itemStaging.Metadata, itemStaging.Nbt);
+                        {   // There are too many items, so this is a No-Op.
+                            // It is assumed that this will follow the pattern of
+                            // sending a Window Click packet and responding
+                            // with accepted = true;
                             return true;
                         }
                         else
-                        {   // There's enough room to pick up everything, so do it.
+                        {   // There's enough room to pick some up, so pick up o
+                            // Recipe's worth.
                             itemStaging = new ItemStack(itemStaging.ID, (sbyte)totalItems, itemStaging.Metadata, itemStaging.Nbt);
-                            this[slotIndex] = ItemStack.EmptyStack;
+                            CraftingGrid.TakeOutput();
                             return true;
                         }
                     }
                     else
                     {   // The mouse pointer contains an item incompatible with
-                        // the output, so we cannot complete this operation.
-                        return false;
+                        // the output, so this is a No-Op.
+                        // Play-testing Beta 1.7.3 with tcpdump shows that the client
+                        // sends a Window Click Packet, and the server responds
+                        // with accepted = true, even though it is a No-Op
+                        return true;
                     }
                 }
                 else
                 {
-                    // If the mouse pointer is empty, just pick up everything.
-                    itemStaging = this[slotIndex];
-                    this[slotIndex] = ItemStack.EmptyStack;
+                    // The mouse pointer is empty.  Take one Recipe worth of output
+                    itemStaging = CraftingGrid.TakeOutput();
                     return true;
                 }
             }

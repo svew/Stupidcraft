@@ -140,21 +140,18 @@ namespace TrueCraft.Client.Windows
                         sbyte maxItems = ItemRepository.GetItemProvider(inHand.ID).MaximumStack;
                         int totalItems = inHand.Count + this[slotIndex].Count;
                         if (totalItems > maxItems)
-                        {   // There are too many items, so the mouse pointer
-                            // becomes a full stack, and the output slot retains the
-                            // remaining items.
-                            return ActionConfirmation.GetActionConfirmation(() =>
-                            {
-                                heldItem.HeldItem = new ItemStack(inHand.ID, maxItems, inHand.Metadata, inHand.Nbt);
-                                this[slotIndex] = new ItemStack(inHand.ID, (sbyte)(totalItems - maxItems), inHand.Metadata, inHand.Nbt);
-                            });
+                        {   // There are too many items.  This is a No-OP.
+                            // The client can be compatible by not bothering
+                            // the server with a No-Op.
+                            return null;
                         }
                         else
-                        {   // There's enough room to pick up everything, so do it.
+                        {   // There's enough room to pick some up, so pick up o
+                            // Recipe's worth.
                             return ActionConfirmation.GetActionConfirmation(() =>
                             {
                                 heldItem.HeldItem = new ItemStack(inHand.ID, (sbyte)totalItems, inHand.Metadata, inHand.Nbt);
-                                this[slotIndex] = ItemStack.EmptyStack;
+                                CraftingGrid.TakeOutput();
                             });
                         }
                     }
@@ -169,8 +166,7 @@ namespace TrueCraft.Client.Windows
                     // If the mouse pointer is empty, just pick up everything.
                     return ActionConfirmation.GetActionConfirmation(() =>
                     {
-                        heldItem.HeldItem = this[slotIndex];
-                        this[slotIndex] = ItemStack.EmptyStack;
+                        heldItem.HeldItem = CraftingGrid.TakeOutput();
                     });
                 }
             }
