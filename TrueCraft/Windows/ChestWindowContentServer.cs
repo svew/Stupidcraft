@@ -161,8 +161,26 @@ namespace TrueCraft.Windows
 
         protected override bool HandleShiftLeftClick(int slotIndex, ref ItemStack itemStaging)
         {
-            // TODO
-            throw new NotImplementedException();
+            ChestWindowConstants.AreaIndices srcArea = (ChestWindowConstants.AreaIndices)GetAreaIndex(slotIndex);
+
+            if (srcArea == ChestWindowConstants.AreaIndices.ChestArea)
+            {
+                ItemStack remaining = Hotbar.StoreItemStack(this[slotIndex], true);
+                remaining = MainInventory.StoreItemStack(remaining, true);
+                remaining = Hotbar.StoreItemStack(remaining, false);
+                remaining = MainInventory.StoreItemStack(remaining, false);
+                this[slotIndex] = remaining;
+
+                return true;
+            }
+            else
+            {
+                ItemStack remaining = this[slotIndex];
+                remaining = ChestInventory.StoreItemStack(remaining, true);
+                this[slotIndex] = ChestInventory.StoreItemStack(remaining, false);
+
+                return true;
+            }
         }
 
         protected override bool HandleRightClick(int slotIndex, ref ItemStack itemStaging)

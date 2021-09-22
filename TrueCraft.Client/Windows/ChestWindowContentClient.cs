@@ -189,8 +189,27 @@ namespace TrueCraft.Client.Windows
         /// <inheritdoc />
         protected override ActionConfirmation HandleShiftLeftClick(int slotIndex, IHeldItem heldItem)
         {
-            // TODO 
-            throw new NotImplementedException();
+            ChestWindowConstants.AreaIndices srcArea = (ChestWindowConstants.AreaIndices)GetAreaIndex(slotIndex);
+
+            if (srcArea == ChestWindowConstants.AreaIndices.ChestArea)
+            {
+                return ActionConfirmation.GetActionConfirmation(() =>
+                {
+                    ItemStack remaining = Hotbar.StoreItemStack(this[slotIndex], true);
+                    remaining = MainInventory.StoreItemStack(remaining, true);
+                    remaining = Hotbar.StoreItemStack(remaining, false);
+                    this[slotIndex] = MainInventory.StoreItemStack(remaining, false);
+                });
+            }
+            else
+            {
+                return ActionConfirmation.GetActionConfirmation(() =>
+                {
+                    ItemStack remaining = this[slotIndex];
+                    remaining = ChestInventory.StoreItemStack(remaining, true);
+                    this[slotIndex] = ChestInventory.StoreItemStack(remaining, false);
+                });
+            }
         }
 
         /// <inheritdoc />
