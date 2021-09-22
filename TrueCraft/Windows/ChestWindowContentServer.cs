@@ -122,8 +122,41 @@ namespace TrueCraft.Windows
 
         protected override bool HandleLeftClick(int slotIndex, ref ItemStack itemStaging)
         {
-            // TODO
-            throw new NotImplementedException();
+            if (itemStaging.Empty)
+            {
+                itemStaging = this[slotIndex];
+                this[slotIndex] = ItemStack.EmptyStack;
+                return true;
+            }
+            else
+            {
+                if (this[slotIndex].Empty)
+                {
+                    this[slotIndex] = itemStaging;
+                    itemStaging = ItemStack.EmptyStack;
+                    return true;
+                }
+
+                if (itemStaging.CanMerge(this[slotIndex]))
+                {
+                    int maxStack = ItemRepository.GetItemProvider(itemStaging.ID).MaximumStack;
+                    int numToPlace = Math.Min(maxStack - this[slotIndex].Count, itemStaging.Count);
+                    if (numToPlace > 0)
+                    {
+                        ItemStack slot = this[slotIndex];
+                        this[slotIndex] = new ItemStack(slot.ID, (sbyte)(slot.Count + numToPlace), slot.Metadata, slot.Nbt);
+                        itemStaging = itemStaging.GetReducedStack(numToPlace);
+                    }
+                    return true;
+                }
+                else
+                {
+                    ItemStack tmp = this[slotIndex];
+                    this[slotIndex] = itemStaging;
+                    itemStaging = tmp;
+                    return true;
+                }
+            }
         }
 
         protected override bool HandleShiftLeftClick(int slotIndex, ref ItemStack itemStaging)

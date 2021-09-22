@@ -134,8 +134,56 @@ namespace TrueCraft.Client.Windows
         /// <inheritdoc />
         protected override ActionConfirmation HandleLeftClick(int slotIndex, IHeldItem heldItem)
         {
-            // TODO 
-            throw new NotImplementedException();
+            if (heldItem.HeldItem.Empty)
+            {
+                // If the slot is also empty, this is a No-Op.
+                // The client can be compatible without bothering the server about this.
+                if (this[slotIndex].Empty)
+                    return null;
+
+                return ActionConfirmation.GetActionConfirmation(() =>
+                {
+                    heldItem.HeldItem = this[slotIndex];
+                    this[slotIndex] = ItemStack.EmptyStack;
+                });
+            }
+            else
+            {
+                if (this[slotIndex].Empty)
+                {
+                    return ActionConfirmation.GetActionConfirmation(() =>
+                    {
+                        this[slotIndex] = heldItem.HeldItem;
+                        heldItem.HeldItem = ItemStack.EmptyStack;
+                    });
+                }
+
+                if (heldItem.HeldItem.CanMerge(this[slotIndex]))
+                {
+                    int maxStack = ItemRepository.GetItemProvider(heldItem.HeldItem.ID).MaximumStack;
+                    int numToPlace = Math.Min(maxStack - this[slotIndex].Count, heldItem.HeldItem.Count);
+                    if (numToPlace > 0)
+                        return ActionConfirmation.GetActionConfirmation(() =>
+                        {
+                            ItemStack slot = this[slotIndex];
+                            this[slotIndex] = new ItemStack(slot.ID, (sbyte)(slot.Count + numToPlace), slot.Metadata, slot.Nbt);
+                            heldItem.HeldItem = heldItem.HeldItem.GetReducedStack(numToPlace);
+                        });
+
+                    // Left-clicking on a full slot is a No-Op.
+                    // The client can be compatible without bothering the server here.
+                    return null;
+                }
+                else
+                {
+                    return ActionConfirmation.GetActionConfirmation(() =>
+                    {
+                        ItemStack tmp = this[slotIndex];
+                        this[slotIndex] = heldItem.HeldItem;
+                        heldItem.HeldItem = tmp;
+                    });
+                }
+            }
         }
 
         /// <inheritdoc />
