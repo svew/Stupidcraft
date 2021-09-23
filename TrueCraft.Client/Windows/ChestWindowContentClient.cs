@@ -215,8 +215,56 @@ namespace TrueCraft.Client.Windows
         /// <inheritdoc />
         protected override ActionConfirmation HandleRightClick(int slotIndex, IHeldItem heldItem)
         {
-            // TODO 
-            throw new NotImplementedException();
+            ItemStack stack = this[slotIndex];
+            if (!heldItem.HeldItem.Empty)
+            {
+                if (stack.CanMerge(heldItem.HeldItem))
+                {
+                    int maxStack = ItemRepository.GetItemProvider(heldItem.HeldItem.ID).MaximumStack;
+                    if (stack.Count < maxStack)
+                    {
+                        return ActionConfirmation.GetActionConfirmation(() =>
+                        {
+                            ItemStack held = heldItem.HeldItem;
+                            this[slotIndex] = new ItemStack(held.ID, (sbyte)(stack.Count + 1), held.Metadata, held.Nbt);
+                            heldItem.HeldItem = held.GetReducedStack(1);
+                        });
+                    }
+                    else
+                    {
+                        // Right-click on compatible, but maxed-out stack.
+                        // This is a No-Op.  There is no need for a compatible
+                        // client to bother the server about this.
+                        return null;
+                    }
+                }
+                else
+                {
+                    // Right-click on an incompatible slot => exchange stacks.
+                    return ActionConfirmation.GetActionConfirmation(() =>
+                    {
+                        this[slotIndex] = heldItem.HeldItem;
+                        heldItem.HeldItem = stack;
+                    });
+                }
+            }
+            else
+            {
+                // Right-clicking an empty hand on an empty slot is a No-Op.
+                // This is a No-Op.  There is no need for a compatible
+                // client to bother the server about this.
+                if (stack.Empty)
+                    return null;
+
+                return ActionConfirmation.GetActionConfirmation(() =>
+                {
+                    int cnt = stack.Count;
+                    int numToPickUp = cnt / 2 + (cnt & 0x0001);
+
+                    heldItem.HeldItem = new ItemStack(stack.ID, (sbyte)numToPickUp, stack.Metadata, stack.Nbt);
+                    this[slotIndex] = stack.GetReducedStack(numToPickUp);
+                });
+            }
         }
     }
 }

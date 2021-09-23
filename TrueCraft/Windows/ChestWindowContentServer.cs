@@ -185,8 +185,51 @@ namespace TrueCraft.Windows
 
         protected override bool HandleRightClick(int slotIndex, ref ItemStack itemStaging)
         {
-            // TODO
-            throw new NotImplementedException();
+            ItemStack stack = this[slotIndex];
+            if (!itemStaging.Empty)
+            {
+                if (stack.CanMerge(itemStaging))
+                {
+                    int maxStack = ItemRepository.GetItemProvider(itemStaging.ID).MaximumStack;
+                    if (stack.Count < maxStack)
+                    {
+                        this[slotIndex] = new ItemStack(itemStaging.ID, (sbyte)(stack.Count + 1), itemStaging.Metadata, itemStaging.Nbt);
+                        itemStaging = itemStaging.GetReducedStack(1);
+                        return true;
+                    }
+                    else
+                    {
+                        // Right-click on compatible, but maxed-out stack.
+                        // This is a No-Op.  
+                        // It is assumed that the server will return accepted=true in
+                        // this case (similarly to such cases in the Inventory Window).
+                        return true;
+                    }
+                }
+                else
+                {
+                    // Right-click on an incompatible slot => exchange stacks.
+                    this[slotIndex] = itemStaging;
+                    itemStaging = stack;
+                    return true;
+                }
+            }
+            else
+            {
+                // Right-clicking an empty hand on an empty slot is a No-Op.
+                // It is assumed that the server will return accepted=true in
+                // this case (similarly to such cases in the Inventory Window).
+                if (stack.Empty)
+                    return true;
+
+                int cnt = stack.Count;
+                int numToPickUp = cnt / 2 + (cnt & 0x0001);
+
+                itemStaging = new ItemStack(stack.ID, (sbyte)numToPickUp, stack.Metadata, stack.Nbt);
+                this[slotIndex] = stack.GetReducedStack(numToPickUp);
+
+                return true;
+            }
         }
     }
 }
