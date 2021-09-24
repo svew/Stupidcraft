@@ -90,10 +90,18 @@ namespace TrueCraft.Windows
 
         public override ItemStack[] GetSlots()
         {
-            ItemStack[] rv = new ItemStack[3];
+            ItemStack[] rv = new ItemStack[this.Length];
             rv[0] = Ingredient[0];
             rv[1] = Fuel[0];
             rv[2] = Output[0];
+
+            int index = 3;
+            for (int j = 0, jul= MainInventory.Count; j < jul; j ++, index ++)
+                rv[index] = MainInventory[j];
+
+            for (int j = 0, jul = Hotbar.Count; j < jul; j++, index++)
+                rv[index] = Hotbar[j];
+
             return rv;
         }
 

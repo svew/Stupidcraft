@@ -99,11 +99,8 @@ namespace TrueCraft.Client.Windows
 
         public override ItemStack[] GetSlots()
         {
-            ItemStack[] rv = new ItemStack[3];
-            rv[0] = Ingredient[0];
-            rv[1] = Fuel[0];
-            rv[2] = Output[0];
-            return rv;
+            // TODO: this function should not be needed client-side.
+            throw new NotImplementedException();
         }
 
         protected override ISlots GetLinkedArea(int index, ItemStack slot)
