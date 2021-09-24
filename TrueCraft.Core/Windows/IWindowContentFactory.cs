@@ -16,7 +16,8 @@ namespace TrueCraft.Core.Windows
             IItemRepository itemRepository);
 
         IWindowContent NewChestWindowContent(ISlots mainInventory, ISlots hotBar,
-            bool doubleChest, IItemRepository itemRepository);
+            IWorld world, GlobalVoxelCoordinates chestLocation,
+            GlobalVoxelCoordinates otherHalfLocation, IItemRepository itemRepository);
 
         IWindowContent NewCraftingBenchWindowContent(ISlots mainInventory, ISlots hotBar,
             ICraftingRepository craftingRepository, IItemRepository itemRepository);

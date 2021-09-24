@@ -37,13 +37,16 @@ namespace TrueCraft.Core.Windows
         }
 
 
-        public IWindowContent NewChestWindowContent(ISlots mainInventory, ISlots hotBar, bool doubleChest, IItemRepository itemRepository)
+        public IWindowContent NewChestWindowContent(ISlots mainInventory, ISlots hotBar,
+            IWorld world, GlobalVoxelCoordinates chestLocation,
+            GlobalVoxelCoordinates otherHalfLocation, IItemRepository itemRepository)
         {
 #if DEBUG
             if (_impl == null)
                 throw new ApplicationException("WindowContentFactory not initialized.");
 #endif
-            return _impl.NewChestWindowContent(mainInventory, hotBar, doubleChest, itemRepository);
+            return _impl.NewChestWindowContent(mainInventory, hotBar, world, chestLocation,
+                otherHalfLocation, itemRepository);
         }
 
         public IWindowContent NewCraftingBenchWindowContent(ISlots mainInventory, ISlots hotBar,

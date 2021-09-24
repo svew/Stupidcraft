@@ -3,17 +3,23 @@ using TrueCraft.API.Windows;
 using TrueCraft.Core.Windows;
 using TrueCraft.API;
 using TrueCraft.API.Logic;
+using TrueCraft.API.World;
 
 namespace TrueCraft.Windows
 {
     public class ChestWindowContentServer : WindowContentServer, IChestWindowContent
     {
-        public ChestWindowContentServer(ISlots mainInventory, ISlots hotBar, bool doubleChest,
+        public ChestWindowContentServer(ISlots mainInventory, ISlots hotBar,
+            IWorld world,
+            GlobalVoxelCoordinates location, GlobalVoxelCoordinates otherHalf,
             IItemRepository itemRepository):
-            base(ChestWindowConstants.Areas(mainInventory, hotBar, doubleChest),
+            base(new ISlots[] {
+                new ChestSlots(world, location, otherHalf),
+                mainInventory, hotBar
+                },
                 itemRepository)
         {
-            DoubleChest = doubleChest;
+            DoubleChest = otherHalf is not null;
         }
 
         /// <summary>

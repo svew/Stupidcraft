@@ -125,7 +125,7 @@ namespace TrueCraft.Core.Logic.Blocks
 
             WindowContentFactory factory = new WindowContentFactory();
             IChestWindowContent window = (IChestWindowContent)factory.NewChestWindowContent(user.Inventory, user.Hotbar,
-                !object.ReferenceEquals(adjacent, null), ItemRepository);
+                world, self, adjacent, ItemRepository);
             // TODO: the indexer of ChestInventory will ultimately send a SetSlot
             //   packet.  Instead of sending 50+ Set Slot Packets, this should be a
             //   single Window Items packet.
