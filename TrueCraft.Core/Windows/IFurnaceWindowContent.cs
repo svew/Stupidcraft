@@ -12,12 +12,5 @@ namespace TrueCraft.Core.Windows
         ISlots Fuel { get; }
 
         ISlots Output { get; }
-
-        /// <summary>
-        /// Gets the location of the Furnace.
-        /// </summary>
-        GlobalVoxelCoordinates Coordinates { get; }
-
-        IEventScheduler EventScheduler { get; }
     }
 }

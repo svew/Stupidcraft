@@ -23,7 +23,7 @@ namespace TrueCraft.Client.Windows
             IEventScheduler scheduler, GlobalVoxelCoordinates coordinates,
             IItemRepository itemRepository)
         {
-            return new FurnaceWindowContentClient(mainInventory, hotBar, scheduler, coordinates, itemRepository);
+            return new FurnaceWindowContentClient(mainInventory, hotBar, itemRepository);
         }
 
         public IWindowContent NewChestWindowContent(ISlots mainInventory, ISlots hotBar,
