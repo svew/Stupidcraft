@@ -154,10 +154,8 @@ namespace TrueCraft.Client
             Client.Connect(EndPoint);
 
             BlockProvider.BlockRepository = BlockRepository;
-            var itemRepository = new ItemRepository();
-            itemRepository.DiscoverItemProviders();
-            ItemRepository = itemRepository;
-            BlockProvider.ItemRepository = ItemRepository;
+
+            ItemRepository = TrueCraft.Core.Logic.ItemRepository.Get();
 
             IconRenderer.CreateBlocks(this, BlockRepository);
 

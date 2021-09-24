@@ -13,6 +13,8 @@ using TrueCraft.Core.Logic.Blocks;
 using System.Linq;
 using TrueCraft.Core.Logic.Items;
 using TrueCraft.Core.Logic;
+using TrueCraft.API.Windows;
+using TrueCraft.Windows;
 
 namespace TrueCraft.Handlers
 {
@@ -40,7 +42,7 @@ namespace TrueCraft.Handlers
                     inventory.Count--;
                     var item = new ItemEntity(client.Entity.Position + new Vector3(0, PlayerEntity.Height, 0), spawned);
                     item.Velocity = MathHelper.RotateY(Vector3.Forwards, MathHelper.DegreesToRadians(client.Entity.Yaw)) * 0.5;
-                    client.Inventory[client.SelectedSlot] = inventory;
+                    client.Hotbar[client.SelectedSlot] = inventory;
                     server.GetEntityManagerForWorld(client.World).SpawnEntity(item);
                     break;
                 case PlayerDiggingPacket.Action.StartDigging:
@@ -101,7 +103,7 @@ namespace TrueCraft.Handlers
                                     slot.Metadata += damage;
                                     if (slot.Metadata >= tool.Uses)
                                         slot.Count = 0; // Destroy item
-                                    client.Inventory[client.SelectedSlot] = slot;
+                                    client.Hotbar[client.SelectedSlot] = slot;
                                 }
                             }
                         }
@@ -145,7 +147,9 @@ namespace TrueCraft.Handlers
                     position += MathHelper.BlockFaceToCoordinates(packet.Face);
                     var oldID = client.World.GetBlockID(position);
                     var oldMeta = client.World.GetMetadata(position);
+                    // TODO: BlockChangePacket should have new ID & metadata, not old; Naming issue?
                     client.QueuePacket(new BlockChangePacket(position.X, (sbyte)position.Y, position.Z, (sbyte)oldID, (sbyte)oldMeta));
+                    // TODO: why send SetSlot when there is no change??
                     client.QueuePacket(new SetSlotPacket(0, client.SelectedSlot, client.SelectedItem.ID, client.SelectedItem.Count, client.SelectedItem.Metadata));
                     return;
                 }
@@ -178,7 +182,16 @@ namespace TrueCraft.Handlers
         {
             var packet = (ClickWindowPacket)_packet;
             var client = (RemoteClient)_client;
-            var window = client.CurrentWindow;
+            IWindowContentServer window = client.CurrentWindow;
+
+            // Confirm expected Window ID
+            if (packet.WindowID != window.ID)
+            {
+                server.Log(API.Logging.LogCategory.Notice, "Invalid window number received {0}; expected {1}", packet.WindowID, window.ID);
+                server.DisconnectClient(_client);
+                return;
+            }
+
             if (packet.SlotIndex == -999)
             {
                 // Throwing item
@@ -201,12 +214,21 @@ namespace TrueCraft.Handlers
                 server.GetEntityManagerForWorld(client.World).SpawnEntity(item);
                 return;
             }
-            var staging = (ItemStack)client.ItemStaging.Clone();
-            WindowContent.HandleClickPacket(packet, window, ref staging);
-            client.ItemStaging = staging;
+
+            // Confirm reasonable slot index.
             if (packet.SlotIndex >= window.Length || packet.SlotIndex < 0)
+            {
+                server.Log(API.Logging.LogCategory.Notice, "Illegal slot number received {0} in not in the set -999, [0, {1})", packet.SlotIndex, window.Length);
+                server.DisconnectClient(_client);
                 return;
-            client.QueuePacket(new WindowItemsPacket(packet.WindowID, window.GetSlots()));
+            }
+
+            // TODO confirm prior content of Slot
+
+            ItemStack staging = client.ItemStaging;
+            bool accepted = window.HandleClick(packet.SlotIndex, packet.RightClick, packet.Shift, ref staging);
+            client.ItemStaging = staging;
+            client.QueuePacket(new TransactionStatusPacket(packet.WindowID, packet.TransactionID, accepted));
         }
 
         public static void HandleCloseWindowPacket(IPacket _packet, IRemoteClient _client, IMultiplayerServer server)
@@ -220,7 +242,7 @@ namespace TrueCraft.Handlers
         {
             var packet = (ChangeHeldItemPacket)_packet;
             var client = (RemoteClient)_client;
-            client.SelectedSlot = (short)(packet.Slot + InventoryWindowContent.HotbarIndex);
+            client.SelectedSlot = packet.Slot;
             var notified = server.GetEntityManagerForWorld(client.World).ClientsForEntity(client.Entity);
             foreach (var c in notified)
                 c.QueuePacket(new EntityEquipmentPacket(client.Entity.EntityID, 0, client.SelectedItem.ID, client.SelectedItem.Metadata));

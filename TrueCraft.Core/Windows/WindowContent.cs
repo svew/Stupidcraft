@@ -22,8 +22,6 @@ namespace TrueCraft.Core.Windows
 
         public IItemRepository ItemRepository { get; }
 
-        public event EventHandler<WindowChangeEventArgs> WindowChange;
-
         public bool IsDisposed { get; private set; }
 
         public IRemoteClient Client { get; set; }
@@ -32,6 +30,12 @@ namespace TrueCraft.Core.Windows
         public abstract string Name { get; }
 
         public abstract WindowType Type { get; }
+
+        public abstract ISlots MainInventory { get; }
+
+        public abstract ISlots Hotbar { get; }
+
+        public abstract bool IsPlayerInventorySlot(int slotIndex);
 
         /// <summary>
         /// When shift-clicking items between areas, this method is used
@@ -91,6 +95,10 @@ namespace TrueCraft.Core.Windows
 
         public virtual int Length2 { get { return Length; } }
 
+        /// <summary>
+        /// Gets a copy of each of the ItemStack instances in this Window Content
+        /// </summary>
+        /// <returns>An array containing copies of every ItemStack.</returns>
         public virtual ItemStack[] GetSlots()
         {
             int length = SlotAreas.Sum(area => area.Count);
@@ -98,7 +106,8 @@ namespace TrueCraft.Core.Windows
             int startIndex = 0;
             foreach (var windowArea in SlotAreas)
             {
-                Array.Copy(windowArea.Items, 0, slots, startIndex, windowArea.Count);
+                for (int j = 0, jul = windowArea.Count; j < jul; j++)
+                    slots[startIndex + j] = windowArea[j];
                 startIndex += windowArea.Count;
             }
             return slots;
@@ -106,12 +115,19 @@ namespace TrueCraft.Core.Windows
 
         public virtual void SetSlots(ItemStack[] slots)
         {
+            // NOTE: The sent items for the Main Inventory and Hotbar should
+            //    agree with what the client already has.
+            // TODO: Should this be regarded as an opportunity to check for bugs
+            //    causing disagreements?  OR as an opportunity to correct
+            //    any disagreements?
             int startIndex = 0;
-            foreach (var windowArea in SlotAreas)
+            for (int i = 0, iul = SlotAreas.Length; i < iul; i ++)
             {
-                if (startIndex < slots.Length && startIndex + windowArea.Count <= slots.Length)
-                    Array.Copy(slots, startIndex, windowArea.Items, 0, windowArea.Count);
-                startIndex += windowArea.Count;
+                ISlots s = SlotAreas[i];
+                int jul = s.Count;
+                for (int j = 0; j < jul; j++)
+                    s[j] = slots[startIndex + j];
+                startIndex += jul;
             }
         }
 
@@ -135,10 +151,7 @@ namespace TrueCraft.Core.Windows
                 {
                     if (index >= startIndex && index < startIndex + area.Count)
                     {
-                        var eventArgs = new WindowChangeEventArgs(index, value);
-                        OnWindowChange(eventArgs);
-                        if (!eventArgs.Handled)
-                            area[index - startIndex] = value;
+                        area[index - startIndex] = value;
                         return;
                     }
                     startIndex += area.Count;
@@ -147,118 +160,127 @@ namespace TrueCraft.Core.Windows
             }
         }
 
+        /// <summary>
+        /// Stores the given stack of items in the Player's inventory.
+        /// </summary>
+        /// <param name="stack">The items to store.</param>
+        /// <returns>Any leftover items that could not be fit into the Inventory.</returns>
+        protected virtual ItemStack StoreItemStack(ItemStack stack)
+        {
+            ItemStack remaining = Hotbar.StoreItemStack(stack, true);
+            if (remaining.Empty)
+                return remaining;
+
+            remaining = MainInventory.StoreItemStack(remaining, true);
+            if (remaining.Empty)
+                return remaining;
+
+            remaining = Hotbar.StoreItemStack(remaining, false);
+            if (remaining.Empty)
+                return remaining;
+
+            return MainInventory.StoreItemStack(remaining, false);
+        }
+
         /// <inheritdoc />
         public abstract ItemStack StoreItemStack(ItemStack slot, bool topUpOnly);
-
-        protected internal virtual void OnWindowChange(WindowChangeEventArgs e)
-        {
-            if (WindowChange != null)
-                WindowChange(this, e);
-        }
 
         public event EventHandler Disposed;
 
         public virtual void Dispose()
         {
-            for (int i = 0; i < SlotAreas.Length; i++)
-            {
-                SlotAreas[i].Dispose();
-            }
-            WindowChange = null;
             if (Disposed != null)
                 Disposed(this, null);
             Client = null;
             IsDisposed = true;
         }
 
-        public virtual short[] ReadOnlySlots
-        {
-            get { return new short[0]; }
-        }
+        /// <inheritdoc />
+        public abstract bool IsOutputSlot(int slotIndex);
 
-        public static void HandleClickPacket(ClickWindowPacket packet, IWindowContent window, ref ItemStack itemStaging)
-        {
-            if (packet.SlotIndex >= window.Length || packet.SlotIndex < 0)
-                return;
-            var existing = window[packet.SlotIndex];
-            if (window.ReadOnlySlots.Contains(packet.SlotIndex))
-            {
-                if (itemStaging.ID == existing.ID || itemStaging.Empty)
-                {
-                    if (itemStaging.Empty)
-                        itemStaging = existing;
-                    else
-                        itemStaging.Count += existing.Count;
-                    window[packet.SlotIndex] = ItemStack.EmptyStack;
-                }
-                return;
-            }
-            if (itemStaging.Empty) // Picking up something
-            {
-                if (packet.Shift)
-                {
-                    window.MoveItemStack(packet.SlotIndex);
-                }
-                else
-                {
-                    if (packet.RightClick)
-                    {
-                        sbyte mod = (sbyte)(existing.Count % 2);
-                        existing.Count /= 2;
-                        itemStaging = existing;
-                        itemStaging.Count += mod;
-                        window[packet.SlotIndex] = existing;
-                    }
-                    else
-                    {
-                        itemStaging = window[packet.SlotIndex];
-                        window[packet.SlotIndex] = ItemStack.EmptyStack;
-                    }
-                }
-            }
-            else // Setting something down
-            {
-                if (existing.Empty) // Replace empty slot
-                {
-                    if (packet.RightClick)
-                    {
-                        var newItem = (ItemStack)itemStaging.Clone();
-                        newItem.Count = 1;
-                        itemStaging.Count--;
-                        window[packet.SlotIndex] = newItem;
-                    }
-                    else
-                    {
-                        window[packet.SlotIndex] = itemStaging;
-                        itemStaging = ItemStack.EmptyStack;
-                    }
-                }
-                else
-                {
-                    if (existing.CanMerge(itemStaging)) // Merge items
-                    {
-                        // TODO: Consider the maximum stack size
-                        if (packet.RightClick)
-                        {
-                            existing.Count++;
-                            itemStaging.Count--;
-                            window[packet.SlotIndex] = existing;
-                        }
-                        else
-                        {
-                            existing.Count += itemStaging.Count;
-                            window[packet.SlotIndex] = existing;
-                            itemStaging = ItemStack.EmptyStack;
-                        }
-                    }
-                    else // Swap items
-                    {
-                        window[packet.SlotIndex] = itemStaging;
-                        itemStaging = existing;
-                    }
-                }
-            }
-        }
+        //public static void HandleClickPacket(ClickWindowPacket packet, IWindowContent window, ref ItemStack itemStaging)
+        //{
+        //    if (packet.SlotIndex >= window.Length || packet.SlotIndex < 0)
+        //        return;
+        //    var existing = window[packet.SlotIndex];
+        //    if (window.ReadOnlySlots.Contains(packet.SlotIndex))
+        //    {
+        //        if (itemStaging.ID == existing.ID || itemStaging.Empty)
+        //        {
+        //            if (itemStaging.Empty)
+        //                itemStaging = existing;
+        //            else
+        //                itemStaging.Count += existing.Count;
+        //            window[packet.SlotIndex] = ItemStack.EmptyStack;
+        //        }
+        //        return;
+        //    }
+        //    if (itemStaging.Empty) // Picking up something
+        //    {
+        //        if (packet.Shift)
+        //        {
+        //            window.MoveItemStack(packet.SlotIndex);
+        //        }
+        //        else
+        //        {
+        //            if (packet.RightClick)
+        //            {
+        //                sbyte mod = (sbyte)(existing.Count % 2);
+        //                existing.Count /= 2;
+        //                itemStaging = existing;
+        //                itemStaging.Count += mod;
+        //                window[packet.SlotIndex] = existing;
+        //            }
+        //            else
+        //            {
+        //                itemStaging = window[packet.SlotIndex];
+        //                window[packet.SlotIndex] = ItemStack.EmptyStack;
+        //            }
+        //        }
+        //    }
+        //    else // Setting something down
+        //    {
+        //        if (existing.Empty) // Replace empty slot
+        //        {
+        //            if (packet.RightClick)
+        //            {
+        //                var newItem = (ItemStack)itemStaging.Clone();
+        //                newItem.Count = 1;
+        //                itemStaging.Count--;
+        //                window[packet.SlotIndex] = newItem;
+        //            }
+        //            else
+        //            {
+        //                window[packet.SlotIndex] = itemStaging;
+        //                itemStaging = ItemStack.EmptyStack;
+        //            }
+        //        }
+        //        else
+        //        {
+        //            if (existing.CanMerge(itemStaging)) // Merge items
+        //            {
+        //                // TODO: Consider the maximum stack size
+        //                if (packet.RightClick)
+        //                {
+        //                    existing.Count++;
+        //                    itemStaging.Count--;
+        //                    window[packet.SlotIndex] = existing;
+        //                }
+        //                else
+        //                {
+        //                    existing.Count += itemStaging.Count;
+        //                    window[packet.SlotIndex] = existing;
+        //                    itemStaging = ItemStack.EmptyStack;
+        //                }
+        //            }
+        //            else // Swap items
+        //            {
+        //                window[packet.SlotIndex] = itemStaging;
+        //                itemStaging = existing;
+        //            }
+        //        }
+        //    }
+        //}
 
         /// <inheritdoc />
         public abstract ItemStack MoveItemStack(int index);

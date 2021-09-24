@@ -53,7 +53,10 @@ namespace TrueCraft.API
             _Id = short.Parse(idNode.InnerText);
 
             XmlNode countNode = idNode.NextSibling;
-            _Count = sbyte.Parse(countNode.InnerText);
+            if (_Id != -1)
+                _Count = sbyte.Parse(countNode.InnerText);
+            else
+                _Count = 0;
 
             XmlNode metadataNode = countNode.NextSibling;
             if (!object.ReferenceEquals(metadataNode, null))
@@ -72,7 +75,7 @@ namespace TrueCraft.API
         public ItemStack(short id) : this()
         {
             _Id = id;
-            _Count = 1;
+            _Count = (sbyte)(id != -1 ? 1 : 0);
             Metadata = 0;
             Nbt = null;
             Index = 0;
@@ -85,7 +88,7 @@ namespace TrueCraft.API
         /// <param name="count">The item count for the item stack.</param>
         public ItemStack(short id, sbyte count) : this(id)
         {
-            Count = count;
+            _Count = (sbyte)(id != -1 ? count : 0);
         }
 
         /// <summary>
@@ -304,6 +307,23 @@ namespace TrueCraft.API
             {
                 return new ItemStack(-1);
             }
+        }
+
+        /// <summary>
+        /// Gets an ItemStack with a reduced number of items in it.
+        /// </summary>
+        /// <param name="n">The number of Items to remove from the ItemStack.</param>
+        /// <returns>An ItemStack with the specified number of fewer items in it.</returns>
+        public ItemStack GetReducedStack(int n)
+        {
+#if DEBUG
+            if (n > Count)
+                throw new ArgumentOutOfRangeException($"This ItemStack only contains {Count} items.  It cannot be reduced by {n}.");
+#endif
+            if (Count - n > 0)
+                return new ItemStack(ID, (sbyte)(Count - n), Metadata, Nbt);
+            else
+                return EmptyStack;
         }
 
         /// <summary>

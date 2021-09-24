@@ -38,11 +38,15 @@ namespace TrueCraft.Core.Logic.Blocks
         {
 #if DEBUG
             if (WhoAmI.Answer == IAm.Client)
-                throw new ApplicationException("Illegal client-side call detected.");
+                throw new ApplicationException(Strings.SERVER_CODE_ON_CLIENT);
 #endif
-            CraftingBenchWindowContent window = new CraftingBenchWindowContent(user.Inventory, user.Hotbar,
+            IWindowContentFactory factory = new WindowContentFactory();
+            ICraftingBenchWindowContent window = (ICraftingBenchWindowContent)
+                factory.NewCraftingBenchWindowContent(user.Inventory, user.Hotbar,
                 user.Server.CraftingRepository, user.Server.ItemRepository);
             user.OpenWindow(window);
+
+            // TODO: this should be called in response to Close Window packet, not Disposed.
             window.Disposed += (sender, e) =>
             {
                 // TODO BUG: this does not appear to be called (Items do not spawn, and remain in 2x2 (3x3?) Crafting Grid for next opening).
@@ -57,7 +61,8 @@ namespace TrueCraft.Core.Logic.Blocks
                     }
                 }
             };
-            return false;
+
+            return true;
         }
 
         public override Tuple<int, int> GetTextureMap(byte metadata)

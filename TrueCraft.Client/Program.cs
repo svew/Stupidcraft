@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using TrueCraft.Core;
 using System.Threading;
 using System.Reflection;
+using TrueCraft.Core.Logic;
 
 namespace TrueCraft.Client
 {
@@ -15,6 +16,7 @@ namespace TrueCraft.Client
         public static void Main(string[] args)
         {
             WhoAmI.Answer = IAm.Client;
+            TrueCraft.Core.Windows.WindowContentFactory.Init(new TrueCraft.Client.Windows.WindowContentFactory());
 
             UserSettings.Local = new UserSettings();
             UserSettings.Local.Load();

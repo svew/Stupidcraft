@@ -13,15 +13,13 @@ namespace TrueCraft.Launcher.Singleplayer
     {
         public static Worlds Local { get; set; }
 
-        public BlockRepository BlockRepository { get; set; }
         public World[] Saves { get; set; }
 
         public void Load()
         {
             if (!Directory.Exists(Paths.Worlds))
                 Directory.CreateDirectory(Paths.Worlds);
-            BlockRepository = new BlockRepository();
-            BlockRepository.DiscoverBlockProviders();
+
             var directories = Directory.GetDirectories(Paths.Worlds);
             var saves = new List<World>();
             foreach (var d in directories)
@@ -49,7 +47,11 @@ namespace TrueCraft.Launcher.Singleplayer
                 s = MathHelper.Random.Next();
             }
             var world = new World(name, s, new StandardGenerator());
-            world.BlockRepository = BlockRepository;
+
+            Discover discover = new Discover();
+            discover.DoDiscovery();
+            world.BlockRepository = BlockRepository.Get();
+
             var safeName = name;
             foreach (var c in Path.GetInvalidFileNameChars())
                 safeName = safeName.Replace(c.ToString(), "");

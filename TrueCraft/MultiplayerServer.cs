@@ -41,7 +41,10 @@ namespace TrueCraft
         public IEventScheduler Scheduler { get; private set; }
         public IBlockRepository BlockRepository { get; private set; }
         public IItemRepository ItemRepository { get; private set; }
+
+        [Obsolete("Use TrueCraft.Core.Logic.CraftingRepository.Get() instead.")]
         public ICraftingRepository CraftingRepository { get; private set; }
+
         public bool EnableClientLogging { get; set; }
         public IPEndPoint EndPoint { get; private set; }
 
@@ -86,6 +89,7 @@ namespace TrueCraft
         public MultiplayerServer()
         {
             TrueCraft.Core.WhoAmI.Answer = Core.IAm.Server;
+            TrueCraft.Core.Windows.WindowContentFactory.Init(new TrueCraft.Windows.WindowContentFactory());
             var reader = new PacketReader();
             PacketReader = reader;
             Clients = new List<IRemoteClient>();
@@ -95,17 +99,18 @@ namespace TrueCraft
             EntityManagers = new List<IEntityManager>();
             LogProviders = new List<ILogProvider>();
             Scheduler = new EventScheduler(this);
-            var blockRepository = new BlockRepository();
-            blockRepository.DiscoverBlockProviders();
-            BlockRepository = blockRepository;
-            var itemRepository = new ItemRepository();
-            itemRepository.DiscoverItemProviders();
-            ItemRepository = itemRepository;
-            BlockProvider.ItemRepository = ItemRepository;
+
+            Discover discover = new Discover();
+            discover.DoDiscovery();
+
+            BlockRepository = TrueCraft.Core.Logic.BlockRepository.Get();
+
+            ItemRepository = TrueCraft.Core.Logic.ItemRepository.Get();
+
             BlockProvider.BlockRepository = BlockRepository;
-            var craftingRepository = new CraftingRepository();
-            craftingRepository.DiscoverRecipes();
-            CraftingRepository = craftingRepository;
+
+            CraftingRepository = TrueCraft.Core.Logic.CraftingRepository.Get();
+
             PendingBlockUpdates = new Queue<BlockUpdate>();
             EnableClientLogging = false;
             QueryProtocol = new TrueCraft.QueryProtocol(this);
@@ -367,14 +372,13 @@ namespace TrueCraft
         {
             try
             {
+                if (args.SocketError != SocketError.Success)
+                    return;
+
                 var client = new RemoteClient(this, PacketReader, PacketHandlers, args.AcceptSocket);
 
                 lock (ClientLock)
                     Clients.Add(client);
-            }
-            catch
-            {
-                // Who cares
             }
             finally
             {
@@ -412,8 +416,8 @@ namespace TrueCraft
                     {
                         // This space intentionally left blank
                     }
-                    if (Time.ElapsedMilliseconds >= limit)
-                        Log(LogCategory.Warning, "Lighting queue is backed up");
+                    //if (Time.ElapsedMilliseconds >= limit)
+                    //    Log(LogCategory.Warning, "Lighting queue is backed up");
                 }
                 Profiler.Done();
             }

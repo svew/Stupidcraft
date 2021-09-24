@@ -8,14 +8,36 @@ using TrueCraft.API.World;
 
 namespace TrueCraft.Core.Logic
 {
-    public class ItemRepository : IItemRepository
+    public class ItemRepository : IItemRepository, IRegisterItemProvider
     {
-        public ItemRepository()
+        private readonly List<IItemProvider> ItemProviders;
+
+        private static ItemRepository _singleton;
+
+        private ItemRepository()
         {
             ItemProviders = new List<IItemProvider>();
         }
 
-        private readonly List<IItemProvider> ItemProviders = new List<IItemProvider>();
+        internal static IRegisterItemProvider Init(IDiscover discover)
+        {
+            if (!object.ReferenceEquals(_singleton, null))
+                return _singleton;
+
+            _singleton = new ItemRepository();
+            discover.DiscoverItemProviders(_singleton);
+
+            return _singleton;
+        }
+
+        public static IItemRepository Get()
+        {
+#if DEBUG
+            if (object.ReferenceEquals(_singleton, null))
+                throw new ApplicationException("Call to ItemRepository.Get without initialization.");
+#endif
+            return _singleton;
+        }
 
         public IItemProvider GetItemProvider(short id)
         {
@@ -28,6 +50,7 @@ namespace TrueCraft.Core.Logic
             return null;
         }
 
+        /// <inheritdoc />
         public void RegisterItemProvider(IItemProvider provider)
         {
             int i;
@@ -42,25 +65,6 @@ namespace TrueCraft.Core.Logic
                     break;
             }
             ItemProviders.Insert(i + 1, provider);
-        }
-
-        public void DiscoverItemProviders()
-        {
-            var providerTypes = new List<Type>();
-            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
-            {
-                foreach (var type in assembly.GetTypes().Where(t =>
-                    typeof(IItemProvider).IsAssignableFrom(t) && !t.IsAbstract))
-                {
-                    providerTypes.Add(type);
-                }
-            }
-
-            providerTypes.ForEach(t =>
-            {
-                var instance = (IItemProvider)Activator.CreateInstance(t);
-                RegisterItemProvider(instance);
-            });
         }
     }
 }

@@ -100,7 +100,7 @@ namespace TrueCraft.Core.Logic.Blocks
                 world.SetBlockID(descriptor.Coordinates, BlockID);
                 world.SetMetadata(descriptor.Coordinates, (byte)direction);
                 item.Count--;
-                user.Inventory[user.SelectedSlot] = item;
+                user.Hotbar[user.SelectedSlot] = item;
             }
         }
     }

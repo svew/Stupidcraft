@@ -20,6 +20,7 @@ using TrueCraft.Core.Windows;
 using TrueCraft.API.Windows;
 using TrueCraft.API.Logic;
 using TrueCraft.API.World;
+using TrueCraft.Client.Windows;
 
 namespace TrueCraft.Client
 {
@@ -43,14 +44,17 @@ namespace TrueCraft.Client
         public bool LoggedIn { get; internal set; }
         public int EntityID { get; internal set; }
 
-        public InventoryWindowContent InventoryWindowContent { get; }
+        public IWindowContentClient InventoryWindowContent { get; }
         public ISlots Inventory { get; private set; }
         public ISlots Hotbar { get; private set; }
         public ISlots Armor { get; }
         public ISlots CraftingGrid { get; }
 
         public int Health { get; set; }
-        public IWindowContent CurrentWindow { get; set; }
+
+        public IWindowContentClient CurrentWindow { get; set; }
+
+        [Obsolete("Use TrueCraft.Core.Logic.CraftingRepository.Get() instead.")]
         public ICraftingRepository CraftingRepository { get; set; }
 
         public bool Connected
@@ -67,7 +71,7 @@ namespace TrueCraft.Client
             set
             {
                 hotbarSelection = value;
-                QueuePacket(new ChangeHeldItemPacket() { Slot = (short)value });
+                QueuePacket(new ChangeHeldItemPacket((short)value));
             }
         }
 
@@ -89,23 +93,23 @@ namespace TrueCraft.Client
             Handlers.PacketHandlers.RegisterHandlers(this);
             World = new ReadOnlyWorld();
 
-            var repo = new BlockRepository();
-            repo.DiscoverBlockProviders();
-            World.World.BlockRepository = repo;
+            Discover discover = new Discover();
+            discover.DoDiscovery();
+
+            World.World.BlockRepository = BlockRepository.Get();
             World.World.ChunkProvider = new EmptyGenerator();
-            Physics = new PhysicsEngine(World.World, repo);
+            Physics = new PhysicsEngine(World.World, BlockRepository.Get());
             _socketPool = new SocketAsyncEventArgsPool(100, 200, 65536);
             connected = 0;
             Health = 20;
-            var crafting = new CraftingRepository();
-            CraftingRepository = crafting;
-            crafting.DiscoverRecipes();
+            CraftingRepository = TrueCraft.Core.Logic.CraftingRepository.Get();
 
             Inventory = new Slots(27, 9, 3);   // TODO hard-coded constants
             Hotbar = new Slots(9, 9, 1);       // TODO hard-coded constants
             Armor = new ArmorSlots();
+            Windows.WindowContentFactory factory = new Windows.WindowContentFactory();
             CraftingGrid = new CraftingWindowContent(CraftingRepository, 2, 2);   // TODO Hard-coded constants
-            InventoryWindowContent = new InventoryWindowContent(Inventory, Hotbar, Armor, CraftingGrid);
+            InventoryWindowContent = (IWindowContentClient)factory.NewInventoryWindowContent(Inventory, Hotbar, Armor, CraftingGrid);
         }
 
         public void RegisterPacketHandler(byte packetId, PacketHandler handler)
@@ -374,9 +378,7 @@ namespace TrueCraft.Client
                 Disconnect();
                 _socketPool?.Dispose();
                 _socketPool = null;
-                Inventory?.Dispose();
                 Inventory = null;
-                Hotbar?.Dispose();
                 Hotbar = null;
                 CurrentWindow?.Dispose();
                 CurrentWindow = null;

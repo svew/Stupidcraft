@@ -17,14 +17,81 @@ namespace TrueCraft.Core.Logic.Blocks
     {
         protected class FurnaceState
         {
+            /// <summary>
+            /// Gets or sets the current number of ticks remaining for the
+            /// Furnace to be lit by the most recently consumed fuel item.
+            /// </summary>
             public short BurnTimeRemaining { get; set; }
-            public short BurnTimeTotal { get; set; }
-            public short CookTime { get; set; }
-            public ItemStack[] Items { get; set; }
 
-            public FurnaceState()
+            /// <summary>
+            /// Gets or sets the total number of ticks of burning provided by
+            /// the most recently consumed fuel item.
+            /// </summary>
+            public short BurnTimeTotal { get; set; }
+
+            /// <summary>
+            /// Gets or sets the number of ticks spent cooking the current Ingredient.
+            /// </summary>
+            public short CookTime { get; set; }
+
+            public ItemStack Ingredient { get; set; }
+
+            public ItemStack Fuel { get; set; }
+
+            public ItemStack Output { get; set; }
+
+            public NbtCompound ToNbt()
             {
-                Items = new ItemStack[3];
+                return new NbtCompound(new NbtTag[]
+                    {
+                        new NbtShort("BurnTime", BurnTimeRemaining),
+                        new NbtShort("BurnTotal", BurnTimeTotal),
+                        new NbtShort("CookTime", CookTime),
+                        new NbtList("Items", new[]
+                        {
+                            Ingredient.ToNbt(),
+                            Fuel.ToNbt(),
+                            Output.ToNbt()
+                        }, NbtTagType.Compound)
+                    });
+            }
+
+            public FurnaceState(NbtCompound tileEntity)
+            {
+                NbtShort burnTime = tileEntity.Get<NbtShort>("BurnTime");
+                NbtShort burnTotal = tileEntity.Get<NbtShort>("BurnTotal");
+                NbtShort cookTime = tileEntity.Get<NbtShort>("CookTime");
+
+                BurnTimeTotal = (short)(burnTotal?.Value ?? 0);
+                BurnTimeRemaining = (short)(burnTime?.Value ?? 0);
+                CookTime = (short)(cookTime?.Value ?? 200);
+
+                NbtList items = tileEntity.Get<NbtList>("Items");
+                int cnt = items?.Count ?? 0;
+                if (cnt >= 3)
+                {
+                    Ingredient = ItemStack.FromNbt(items.Get<NbtCompound>(0));
+                    Fuel = ItemStack.FromNbt(items.Get<NbtCompound>(1));
+                    Output = ItemStack.FromNbt(items.Get<NbtCompound>(2));
+                }
+                else if (cnt == 2)
+                {
+                    Ingredient = ItemStack.FromNbt(items.Get<NbtCompound>(0));
+                    Fuel = ItemStack.FromNbt(items.Get<NbtCompound>(1));
+                    Output = ItemStack.EmptyStack;
+                }
+                else if (cnt == 1)
+                {
+                    Ingredient = ItemStack.FromNbt(items.Get<NbtCompound>(0));
+                    Fuel = ItemStack.EmptyStack;
+                    Output = ItemStack.EmptyStack;
+                }
+                else
+                {
+                    Ingredient = ItemStack.EmptyStack;
+                    Fuel = ItemStack.EmptyStack;
+                    Output = ItemStack.EmptyStack;
+                }
             }
         }
 
@@ -34,6 +101,7 @@ namespace TrueCraft.Core.Logic.Blocks
 
             public void Dispose()
             {
+                // TODO: if anything subscribes to the Disposed event, we'll get infinite recursion...
                 if (Disposed != null)
                     Dispose();
             }
@@ -92,26 +160,13 @@ namespace TrueCraft.Core.Logic.Blocks
 
         private FurnaceState GetState(IWorld world, GlobalVoxelCoordinates coords)
         {
-            var tileEntity = world.GetTileEntity(coords);
-            if (tileEntity == null)
-                tileEntity = CreateTileEntity();
-            var burnTime = tileEntity.Get<NbtShort>("BurnTime");
-            var burnTotal = tileEntity.Get<NbtShort>("BurnTotal");
-            var cookTime = tileEntity.Get<NbtShort>("CookTime");
-            var state = new FurnaceState
-            {
-                BurnTimeTotal = burnTotal == null ? (short)0 : burnTotal.Value,
-                BurnTimeRemaining = burnTime == null ? (short)0 : burnTime.Value,
-                CookTime = cookTime == null ? (short)200 : cookTime.Value
-            };
-            var items = tileEntity.Get<NbtList>("Items");
-            if (items != null)
-            {
-                int i = 0;
-                foreach (var item in items)
-                    state.Items[i++] = ItemStack.FromNbt((NbtCompound)item);
-            }
-            return state;
+#if DEBUG
+            if (WhoAmI.Answer == IAm.Client)
+                throw new ApplicationException(Strings.SERVER_CODE_ON_CLIENT);
+#endif
+            NbtCompound tileEntity = world.GetTileEntity(coords) ?? CreateTileEntity();
+
+            return new FurnaceState(tileEntity);
         }
 
         private void UpdateWindows(GlobalVoxelCoordinates coords, FurnaceState state)
@@ -121,9 +176,9 @@ namespace TrueCraft.Core.Logic.Blocks
                 Handling = true;
                 foreach (var window in TrackedFurnaceWindows[coords])
                 {
-                    window[0] = state.Items[0];
-                    window[1] = state.Items[1];
-                    window[2] = state.Items[2];
+                    window[0] = state.Ingredient;  // TODO hard-coded indices.
+                    window[1] = state.Fuel;
+                    window[2] = state.Output;
 
                     window.Client.QueuePacket(new UpdateProgressPacket(
                         window.ID, UpdateProgressPacket.ProgressTarget.ItemCompletion, state.CookTime));
@@ -138,18 +193,7 @@ namespace TrueCraft.Core.Logic.Blocks
 
         private void SetState(IWorld world, GlobalVoxelCoordinates coords, FurnaceState state)
         {
-            world.SetTileEntity(coords, new NbtCompound(new NbtTag[]
-            {
-                new NbtShort("BurnTime", state.BurnTimeRemaining),
-                new NbtShort("BurnTotal", state.BurnTimeTotal),
-                new NbtShort("CookTime", state.CookTime),
-                new NbtList("Items", new[]
-                {
-                    state.Items[0].ToNbt(),
-                    state.Items[1].ToNbt(),
-                    state.Items[2].ToNbt()
-                }, NbtTagType.Compound)
-            }));
+            world.SetTileEntity(coords, state.ToNbt());
             UpdateWindows(coords, state);
         }
 
@@ -177,60 +221,64 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override bool BlockRightClicked(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
         {
-            var window = new FurnaceWindowContent(user.Inventory, user.Hotbar,
+#if DEBUG
+            if (WhoAmI.Answer == IAm.Client)
+                throw new ApplicationException(Strings.SERVER_CODE_ON_CLIENT);
+#endif
+            WindowContentFactory factory = new WindowContentFactory();
+            IWindowContent window = factory.NewFurnaceWindowContent(user.Inventory, user.Hotbar,
                              user.Server.Scheduler, descriptor.Coordinates,
                              user.Server.ItemRepository);
-
-            var state = GetState(world, descriptor.Coordinates);
-            for (int i = 0; i < state.Items.Length; i++)
-                window[i] = state.Items[i];
 
             user.OpenWindow(window);
             if (!TrackedFurnaceWindows.ContainsKey(descriptor.Coordinates))
                 TrackedFurnaceWindows[descriptor.Coordinates] = new List<IWindowContent>();
             TrackedFurnaceWindows[descriptor.Coordinates].Add(window);
             window.Disposed += (sender, e) => TrackedFurnaceWindows.Remove(descriptor.Coordinates);
+
+            FurnaceState state = GetState(world, descriptor.Coordinates);
             UpdateWindows(descriptor.Coordinates, state);
 
             // TODO: Set window progress appropriately
 
-            window.WindowChange += (sender, e) => FurnaceWindowChanged(sender, e, world);
+            //window.WindowChange += (sender, e) => FurnaceWindowChanged(sender, e, world);
             return false;
         }
 
         private bool Handling = false;
 
-        protected void FurnaceWindowChanged(object sender, WindowChangeEventArgs e, IWorld world)
-        {
-            if (Handling)
-                return;
-            var window = sender as FurnaceWindowContent;
-            var index = e.SlotIndex;
-            if (index >= FurnaceWindowContent.MainIndex)  // TODO: this test is dependent upon internal implementation of the FurnaceWindowContent
-                return;
+        // TODO Move to OnWindowChanged - separate into Client- and Server-side methods.
+        //protected void FurnaceWindowChanged(object sender, WindowChangeEventArgs e, IWorld world)
+        //{
+        //    if (Handling)
+        //        return;
+        //    IFurnaceWindowContent window = sender as IFurnaceWindowContent;
+        //    int index = e.SlotIndex;
+        //    if (window.IsPlayerInventorySlot(index))
+        //        return;
 
-            Handling = true;
-            e.Handled = true;
-            window[index] = e.Value;
+        //    Handling = true;
+        //    e.Handled = true;
+        //    window[index] = e.Value;
 
-            var state = GetState(world, window.Coordinates);
+        //    var state = GetState(world, window.Coordinates);
 
-            state.Items[0] = window[0];
-            state.Items[1] = window[1];
-            state.Items[2] = window[2];
+        //    state.Ingredient = window[0];  // TODO hard-coded indices
+        //    state.Fuel = window[1];
+        //    state.Output = window[2];
 
-            SetState(world, window.Coordinates, state);
+        //    SetState(world, window.Coordinates, state);
 
-            Handling = true;
+        //    Handling = true;
 
-            if (!TrackedFurnaces.ContainsKey(window.Coordinates))
-            {
-                // Set up the initial state
-                TryInitializeFurnace(state, window.EventScheduler, world, window.Coordinates, window.ItemRepository);
-            }
+        //    if (!TrackedFurnaces.ContainsKey(window.Coordinates))
+        //    {
+        //        // Set up the initial state
+        //        TryInitializeFurnace(state, window.EventScheduler, world, window.Coordinates, window.ItemRepository);
+        //    }
 
-            Handling = false;
-        }
+        //    Handling = false;
+        //}
 
         private void TryInitializeFurnace(FurnaceState state, IEventScheduler scheduler, IWorld world,
                                           GlobalVoxelCoordinates coords, IItemRepository itemRepository)
@@ -238,9 +286,9 @@ namespace TrueCraft.Core.Logic.Blocks
             if (TrackedFurnaces.ContainsKey(coords))
                 return;
 
-            var inputStack = state.Items[FurnaceWindowContent.IngredientIndex];
-            var fuelStack = state.Items[FurnaceWindowContent.FuelIndex];
-            var outputStack = state.Items[FurnaceWindowContent.OutputIndex];
+            ItemStack inputStack = state.Ingredient;
+            ItemStack fuelStack = state.Fuel;
+            ItemStack outputStack = state.Output;
 
             var input = itemRepository.GetItemProvider(inputStack.ID) as ISmeltableItem;
             var fuel = itemRepository.GetItemProvider(fuelStack.ID) as IBurnableItem;
@@ -264,9 +312,9 @@ namespace TrueCraft.Core.Logic.Blocks
                 if (outputStack.Empty || outputStack.CanMerge(input.SmeltingOutput))
                 {
                     // We can definitely start
-                    state.BurnTimeRemaining = state.BurnTimeTotal = (short)(fuel.BurnTime.TotalSeconds * 20);
+                    state.BurnTimeRemaining = state.BurnTimeTotal = (short)(fuel.BurnTime.TotalSeconds * 20);  // TODO Hard-coded constant for 20 ticks per second.
                     state.CookTime = 0;
-                    state.Items[FurnaceWindowContent.FuelIndex].Count--;
+                    state.Fuel = state.Fuel.GetReducedStack(1);
                     SetState(world, coords, state);
                     world.SetBlockID(coords, LitFurnaceBlock.BlockID);
                     var subject = new FurnaceEventSubject();
@@ -279,6 +327,7 @@ namespace TrueCraft.Core.Logic.Blocks
 
         private void UpdateFurnace(IEventScheduler scheduler, IWorld world, GlobalVoxelCoordinates coords, IItemRepository itemRepository)
         {
+            // TODO: Why remove it on update?
             if (TrackedFurnaces.ContainsKey(coords))
                 TrackedFurnaces.Remove(coords);
 
@@ -291,8 +340,8 @@ namespace TrueCraft.Core.Logic.Blocks
 
             var state = GetState(world, coords);
 
-            var inputStack = state.Items[FurnaceWindowContent.IngredientIndex];
-            var outputStack = state.Items[FurnaceWindowContent.OutputIndex];
+            var inputStack = state.Ingredient;
+            var outputStack = state.Output;
 
             var input = itemRepository.GetItemProvider(inputStack.ID) as ISmeltableItem;
 
@@ -327,8 +376,8 @@ namespace TrueCraft.Core.Logic.Blocks
                         outputStack = input.SmeltingOutput;
                     else if (outputStack.CanMerge(input.SmeltingOutput))
                         outputStack.Count += input.SmeltingOutput.Count;
-                    state.Items[FurnaceWindowContent.OutputIndex] = outputStack;
-                    state.Items[FurnaceWindowContent.IngredientIndex].Count--;
+                    state.Output = outputStack;
+                    state.Ingredient = state.Ingredient.GetReducedStack(1);
                 }
             }
 

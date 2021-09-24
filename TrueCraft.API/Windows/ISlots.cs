@@ -8,10 +8,8 @@ namespace TrueCraft.API.Windows
     /// <remarks>
     /// It represents a data storage that supports a window area on the GUI.
     /// </remarks>
-    public interface ISlots : IDisposable
+    public interface ISlots
     {
-        event EventHandler<WindowChangeEventArgs> WindowChange;
-
         /// <summary>
         /// Gets the total number of slots within the Window Area.
         /// </summary>
@@ -32,11 +30,6 @@ namespace TrueCraft.API.Windows
         /// in slots.
         /// </summary>
         int Height { get; }
-
-        /// <summary>
-        /// Gets the Array containing the ItemStack objects in this Window Area.
-        /// </summary>
-        ItemStack[] Items { get; }
 
         /// <summary>
         /// Gets or sets the ItemStack at the given index within this Window Area.

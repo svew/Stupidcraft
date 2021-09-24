@@ -5,6 +5,7 @@ using TrueCraft.API.Windows;
 using TrueCraft.API;
 using TrueCraft.Core.Windows;
 using TrueCraft.Core.Logic;
+using TrueCraft.Client.Windows;
 
 namespace TrueCraft.Client.Handlers
 {
@@ -39,17 +40,17 @@ namespace TrueCraft.Client.Handlers
         public static void HandleOpenWindowPacket(IPacket _packet, MultiplayerClient client)
         {
             var packet = (OpenWindowPacket)_packet;
-            IWindowContent window = null;
+            IWindowContentClient window = null;
             switch (packet.Type)
             {
                 case WindowType.CraftingBench:
-                    window = new CraftingBenchWindowContent(client.Inventory, client.Hotbar,
+                    window = new CraftingBenchWindowContentClient(client.Inventory, client.Hotbar,
                         client.CraftingRepository, BlockProvider.ItemRepository);
                     break;
 
                 case WindowType.Chest:
-                    window = new ChestWindowContent(client.Inventory, client.Hotbar,
-                        packet.TotalSlots == 2 * ChestWindowContent.ChestLength,
+                    window = new ChestWindowContentClient(client.Inventory, client.Hotbar,
+                        packet.TotalSlots == 2 * ChestWindowConstants.ChestLength,
                         BlockProvider.ItemRepository);
                     break;
             }
@@ -62,6 +63,17 @@ namespace TrueCraft.Client.Handlers
         public static void HandleCloseWindowPacket(IPacket _packet, MultiplayerClient client)
         {
             client.CurrentWindow = null;
+        }
+
+        public static void HandleTransactionStatusPacket(IPacket packet, MultiplayerClient client)
+        {
+            TransactionStatusPacket statusPacket = (TransactionStatusPacket)packet;
+            ActionConfirmation action = ActionList.Get(statusPacket.ActionNumber);
+
+            if (object.ReferenceEquals(action, null))
+                throw new ApplicationException($"Unexpected Action Number from server: {statusPacket.ActionNumber}");
+
+            action.TakeAction();
         }
     }
 }

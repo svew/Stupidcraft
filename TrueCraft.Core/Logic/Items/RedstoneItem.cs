@@ -30,7 +30,7 @@ namespace TrueCraft.Core.Logic.Items
             {
                 world.SetBlockID(coordinates, RedstoneDustBlock.BlockID);
                 item.Count--;
-                user.Inventory[user.SelectedSlot] = item;
+                user.Hotbar[user.SelectedSlot] = item;
             }
         }
     }

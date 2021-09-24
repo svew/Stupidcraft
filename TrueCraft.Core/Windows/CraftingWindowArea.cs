@@ -14,33 +14,50 @@ namespace TrueCraft.Core.Windows
             : base(width * height + 1, width, height)
         {
             _repository = repository;
-            WindowChange += HandleWindowChange;
         }
 
-        private void HandleWindowChange(object sender, WindowChangeEventArgs e)
+        public override ItemStack this[int index]
         {
-            if (_repository == null)
-                return;
-
-            CraftingPattern inputPattern = CraftingPattern.GetCraftingPattern(this);
-
-            ICraftingRecipe current = _repository.GetRecipe(inputPattern);
-            if (e.SlotIndex == CraftingOutput)
+            get => base[index];
+            set
             {
-                if (e.Value.Empty && current != null) // Item picked up
-                {
-                    RemoveItemFromOutput(current);
-                    current = _repository.GetRecipe(inputPattern);
-                }
+                base[index] = value;
+
+                if (index == 0)
+                    return;
+
+                UpdateOutput();
             }
-            if (current == null)
-                Items[CraftingOutput] = ItemStack.EmptyStack;
-            else
-                Items[CraftingOutput] = current.Output;
         }
 
-        private void RemoveItemFromOutput(ICraftingRecipe recipe)
+        private void UpdateOutput()
         {
+            CraftingPattern pattern = CraftingPattern.GetCraftingPattern(this);
+            this.Recipe = _repository.GetRecipe(pattern);
+            base[0] = this.Recipe?.Output ?? ItemStack.EmptyStack;
+        }
+
+        /// <inheritdoc />
+        public ICraftingRecipe Recipe { get; private set; }
+
+        /// <inheritdoc />
+        public ItemStack TakeOutput()
+        {
+            ItemStack rv = Recipe?.Output ?? ItemStack.EmptyStack;
+            if (rv.Empty)
+                return rv;
+
+            base[0] = base[0].GetReducedStack(rv.Count);
+            RemoveItemsFromInput();
+            UpdateOutput();
+
+            return rv;
+        }
+
+        private void RemoveItemsFromInput()
+        {
+            ICraftingRecipe recipe = Recipe;
+
             // Locate area on crafting bench
             int x, y = 0;
             for (x = 0; x < Width; x++)
@@ -60,7 +77,10 @@ namespace TrueCraft.Core.Windows
             // Remove items
             for (int _x = 0; _x < recipe.Pattern.Width; _x++)
                 for (int _y = 0; _y < recipe.Pattern.Height; _y++)
-                    Items[(y + _y) * Width + (x + _x) + 1].Count -= recipe.Pattern[_x, _y].Count;
+                {
+                    int idx = (y + _y) * Width + (x + _x) + 1;
+                    base[idx] = base[idx].GetReducedStack(recipe.Pattern[_x, _y].Count);
+                }
         }
 
 
