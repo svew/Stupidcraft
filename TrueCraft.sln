@@ -17,11 +17,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrueCraft.Launcher", "TrueC
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{6756B61E-5856-4CA7-90B5-6053763FE7BA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrueCraft.Core.Test", "TrueCraft.Core.Test\TrueCraft.Core.Test.csproj", "{BCFDCD93-C23E-49E6-9767-A887B3C2A709}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrueCraft.Core.Test", "Test\TrueCraft.Core.Test\TrueCraft.Core.Test.csproj", "{BCFDCD93-C23E-49E6-9767-A887B3C2A709}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrueCraft.Profiling", "TrueCraft.Profiling\TrueCraft.Profiling.csproj", "{BCA0E139-CF47-43B3-9DC9-D4611C0A2AAD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrueCraft.API.Test", "TrueCraft.Core.Test\TrueCraft.API.Test\TrueCraft.API.Test.csproj", "{90712322-5904-4BCE-8606-C662706B8EAE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrueCraft.API.Test", "Test\TrueCraft.API.Test\TrueCraft.API.Test.csproj", "{90712322-5904-4BCE-8606-C662706B8EAE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
