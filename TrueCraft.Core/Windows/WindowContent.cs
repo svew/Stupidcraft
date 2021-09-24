@@ -20,7 +20,7 @@ namespace TrueCraft.Core.Windows
 
         protected ISlots[] SlotAreas { get; }
 
-        public IItemRepository ItemRepository { get; }
+        protected IItemRepository ItemRepository { get; }
 
         public bool IsDisposed { get; private set; }
 

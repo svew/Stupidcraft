@@ -79,7 +79,5 @@ namespace TrueCraft.API.Windows
         /// be returned.
         /// </returns>
         ItemStack MoveItemStack(int index);
-
-        IItemRepository ItemRepository { get; }
     }
 }
