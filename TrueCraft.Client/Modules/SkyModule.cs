@@ -1,6 +1,8 @@
-﻿using Microsoft.Xna.Framework;
-using System;
+﻿using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+
+using TVector3 = TrueCraft.Core.Vector3;
 
 namespace TrueCraft.Client.Modules
 {
@@ -170,7 +172,7 @@ namespace TrueCraft.Client.Modules
 
             var position = Game.Camera.Position;
             var yaw = Game.Camera.Yaw;
-            Game.Camera.Position = TrueCraft.API.Vector3.Zero;
+            Game.Camera.Position = TVector3.Zero;
             Game.Camera.Yaw = 0;
             Game.Camera.ApplyTo(SkyPlaneEffect);
             Game.Camera.Yaw = yaw;

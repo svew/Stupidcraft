@@ -5,8 +5,6 @@ VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrueCraft", "TrueCraft\TrueCraft.csproj", "{C1C47EF5-2D8A-4231-AAA8-F651F52F480E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrueCraft.API", "TrueCraft.API\TrueCraft.API.csproj", "{FEE55B54-91B0-4325-A2C3-D576C0B7A81F}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrueCraft.Core", "TrueCraft.Core\TrueCraft.Core.csproj", "{FA4BE9A3-DBF0-4380-BA2B-FFAA71C4706D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "fNbt", "externals\fNbt\fNbt\fNbt.csproj", "{4488498D-976D-4DA3-BF72-109531AF0488}"
@@ -20,8 +18,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrueCraft.Core.Test", "Test\TrueCraft.Core.Test\TrueCraft.Core.Test.csproj", "{BCFDCD93-C23E-49E6-9767-A887B3C2A709}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrueCraft.Profiling", "TrueCraft.Profiling\TrueCraft.Profiling.csproj", "{BCA0E139-CF47-43B3-9DC9-D4611C0A2AAD}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrueCraft.API.Test", "Test\TrueCraft.API.Test\TrueCraft.API.Test.csproj", "{90712322-5904-4BCE-8606-C662706B8EAE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrueCraft.Test", "Test\TrueCraft.Test\TrueCraft.Test.csproj", "{036862A7-F64C-4609-9631-8DF0EC19A6F6}"
 EndProject
@@ -74,18 +70,6 @@ Global
 		{FA4BE9A3-DBF0-4380-BA2B-FFAA71C4706D}.Optimized Debug|Any CPU.Build.0 = Optimized Debug|Any CPU
 		{FA4BE9A3-DBF0-4380-BA2B-FFAA71C4706D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FA4BE9A3-DBF0-4380-BA2B-FFAA71C4706D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FEE55B54-91B0-4325-A2C3-D576C0B7A81F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FEE55B54-91B0-4325-A2C3-D576C0B7A81F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FEE55B54-91B0-4325-A2C3-D576C0B7A81F}.Optimized Debug|Any CPU.ActiveCfg = Optimized Debug|Any CPU
-		{FEE55B54-91B0-4325-A2C3-D576C0B7A81F}.Optimized Debug|Any CPU.Build.0 = Optimized Debug|Any CPU
-		{FEE55B54-91B0-4325-A2C3-D576C0B7A81F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FEE55B54-91B0-4325-A2C3-D576C0B7A81F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{90712322-5904-4BCE-8606-C662706B8EAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{90712322-5904-4BCE-8606-C662706B8EAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{90712322-5904-4BCE-8606-C662706B8EAE}.Optimized Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{90712322-5904-4BCE-8606-C662706B8EAE}.Optimized Debug|Any CPU.Build.0 = Debug|Any CPU
-		{90712322-5904-4BCE-8606-C662706B8EAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{90712322-5904-4BCE-8606-C662706B8EAE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{036862A7-F64C-4609-9631-8DF0EC19A6F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{036862A7-F64C-4609-9631-8DF0EC19A6F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{036862A7-F64C-4609-9631-8DF0EC19A6F6}.Optimized Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -95,7 +79,6 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{BCFDCD93-C23E-49E6-9767-A887B3C2A709} = {6756B61E-5856-4CA7-90B5-6053763FE7BA}
-		{90712322-5904-4BCE-8606-C662706B8EAE} = {6756B61E-5856-4CA7-90B5-6053763FE7BA}
 		{036862A7-F64C-4609-9631-8DF0EC19A6F6} = {6756B61E-5856-4CA7-90B5-6053763FE7BA}
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution

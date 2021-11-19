@@ -1,11 +1,8 @@
 ﻿using System;
-using TrueCraft.API;
-using TrueCraft.API.Logic;
-using TrueCraft.API.Server;
-using TrueCraft.API.Windows;
-using TrueCraft.API.World;
 using TrueCraft.Client.Handlers;
 using TrueCraft.Client.Modules;
+using TrueCraft.Core;
+using TrueCraft.Core.Logic;
 using TrueCraft.Core.Windows;
 
 namespace TrueCraft.Client.Windows

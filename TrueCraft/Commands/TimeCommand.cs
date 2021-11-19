@@ -1,6 +1,6 @@
 using System;
 using System.Linq;
-using TrueCraft.API.Networking;
+using TrueCraft.Core.Networking;
 using TrueCraft.Core.Networking.Packets;
 
 namespace TrueCraft.Commands

@@ -1,10 +1,8 @@
 ﻿using System;
-using TrueCraft.API.World;
-using TrueCraft.API;
 using System.Collections.Generic;
-using TrueCraft.Core.Entities;
 using TrueCraft.Core;
-using TrueCraft.API.AI;
+using TrueCraft.Core.AI;
+using TrueCraft.Core.World;
 
 namespace TrueCraft
 {

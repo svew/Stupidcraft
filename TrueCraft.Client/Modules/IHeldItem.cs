@@ -1,5 +1,5 @@
 using System;
-using TrueCraft.API;
+using TrueCraft.Core;
 
 namespace TrueCraft.Client.Modules
 {

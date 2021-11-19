@@ -1,4 +1,4 @@
-﻿using TrueCraft.API.Networking;
+﻿using TrueCraft.Core.Networking;
 
 namespace TrueCraft.Commands
 {

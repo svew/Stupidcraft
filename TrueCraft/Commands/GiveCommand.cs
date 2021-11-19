@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Linq;
+using TrueCraft.Core;
+using TrueCraft.Core.Networking;
 using TrueCraft.Core.Windows;
-using TrueCraft.API;
-using TrueCraft.API.Networking;
-using TrueCraft.API.Windows;
 
 namespace TrueCraft.Commands
 {

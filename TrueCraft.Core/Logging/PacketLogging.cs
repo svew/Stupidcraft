@@ -1,6 +1,5 @@
 ﻿using System;
-using TrueCraft.API.Networking;
-using TrueCraft.API.Logging;
+using TrueCraft.Core.Networking;
 
 namespace TrueCraft.Core.Logging
 {

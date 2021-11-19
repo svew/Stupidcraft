@@ -2,8 +2,7 @@ using System;
 using fNbt;
 using Moq;
 using NUnit.Framework;
-using TrueCraft.API;
-using TrueCraft.API.World;
+using TrueCraft.Core.World;
 using TrueCraft.Core.Windows;
 using TrueCraft.Windows;
 

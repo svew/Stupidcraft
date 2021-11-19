@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using TrueCraft.API.Server;
-using TrueCraft.API.Networking;
+using TrueCraft.Core.Server;
+using TrueCraft.Core.Networking;
 
 namespace TrueCraft.Commands
 {

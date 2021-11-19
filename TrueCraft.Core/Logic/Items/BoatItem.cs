@@ -1,7 +1,4 @@
 using System;
-using TrueCraft.API.Logic;
-using TrueCraft.API;
-using TrueCraft.Core.Logic.Blocks;
 
 namespace TrueCraft.Core.Logic.Items
 {

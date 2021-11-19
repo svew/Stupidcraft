@@ -1,15 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using TrueCraft.API;
-using TrueCraft.API.Networking;
-using TrueCraft.API.Entities;
+using TrueCraft.Core.Networking;
 using TrueCraft.Core.Networking.Packets;
-using TrueCraft.Core;
-using TrueCraft.API.Server;
-using TrueCraft.Core.Logic.Blocks;
-using TrueCraft.API.Physics;
+using TrueCraft.Core.Server;
+using TrueCraft.Core.Physics;
 
 namespace TrueCraft.Core.Entities
 {

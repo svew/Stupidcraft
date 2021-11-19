@@ -1,12 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using TrueCraft.API.Windows;
-using TrueCraft.API;
-using TrueCraft.API.Networking;
-using TrueCraft.Core.Networking.Packets;
-using TrueCraft.API.Logic;
+using TrueCraft.Core.Logic;
+using TrueCraft.Core.Networking;
 
 namespace TrueCraft.Core.Windows
 {

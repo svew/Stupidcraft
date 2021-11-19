@@ -1,10 +1,6 @@
 using System;
-using TrueCraft.Core.Windows;
 using NUnit.Framework;
-using TrueCraft.API;
-using TrueCraft.Core.Logic.Items;
-using TrueCraft.Core.Logic.Blocks;
-using TrueCraft.API.Logic;
+using TrueCraft.Core.Windows;
 
 namespace TrueCraft.Core.Test.Windows
 {

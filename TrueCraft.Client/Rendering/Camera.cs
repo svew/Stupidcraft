@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using TVector3 = TrueCraft.Core.Vector3;
 
 namespace TrueCraft.Client.Rendering
 {
@@ -14,7 +15,7 @@ namespace TrueCraft.Client.Rendering
         private float _fov, _nearZ, _farZ;
 
         // Position/rotation
-        private TrueCraft.API.Vector3 _position;
+        private TVector3 _position;
         private float _pitch, _yaw;
 
         // Dependent variables
@@ -61,7 +62,7 @@ namespace TrueCraft.Client.Rendering
         /// <summary>
         /// Gets or sets the position of this camera.
         /// </summary>
-        public TrueCraft.API.Vector3 Position
+        public TVector3 Position
         {
             get { return _position; }
             set { _position = value; _isDirty = true; }
@@ -93,7 +94,7 @@ namespace TrueCraft.Client.Rendering
         /// <param name="nearZ"></param>
         /// <param name="farZ"></param>
         public Camera(float aspectRatio, float fov, float nearZ, float farZ)
-            : this(aspectRatio, fov, nearZ, farZ, TrueCraft.API.Vector3.Zero, 0.0f, 0.0f)
+            : this(aspectRatio, fov, nearZ, farZ, TVector3.Zero, 0.0f, 0.0f)
         {
         }
 
@@ -107,7 +108,7 @@ namespace TrueCraft.Client.Rendering
         /// <param name="position"></param>
         /// <param name="pitch"></param>
         /// <param name="yaw"></param>
-        public Camera(float aspectRatio, float fov, float nearZ, float farZ, TrueCraft.API.Vector3 position, float pitch, float yaw)
+        public Camera(float aspectRatio, float fov, float nearZ, float farZ, TVector3 position, float pitch, float yaw)
         {
             AspectRatio = aspectRatio;
             Fov = fov;

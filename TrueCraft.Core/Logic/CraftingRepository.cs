@@ -1,14 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.IO.Compression;
-using System.Linq;
-using System.Xml;
-using System.Xml.Schema;
-using TrueCraft.API;
-using TrueCraft.API.Windows;
-using TrueCraft.API.Logic;
-using System.Reflection;
 
 namespace TrueCraft.Core.Logic
 {

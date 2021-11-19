@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using TrueCraft.API.Networking;
 using TrueCraft.Core.Networking;
 using TrueCraft.Core.Networking.Packets;
 using NUnit.Framework;

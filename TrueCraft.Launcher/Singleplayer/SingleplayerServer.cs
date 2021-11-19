@@ -1,10 +1,8 @@
 ﻿using System;
-using TrueCraft.Core.World;
-using TrueCraft.API.Logging;
 using System.Net;
 using TrueCraft.Core.Logging;
-using TrueCraft.API.World;
-using TrueCraft.API.Logic;
+using TrueCraft.Core.Logic;
+using TrueCraft.Core.World;
 
 namespace TrueCraft.Launcher.Singleplayer
 {

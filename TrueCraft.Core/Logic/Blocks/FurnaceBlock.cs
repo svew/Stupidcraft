@@ -1,13 +1,10 @@
 using System;
-using TrueCraft.API.Logic;
-using TrueCraft.API;
-using TrueCraft.API.Networking;
-using TrueCraft.API.World;
+using TrueCraft.Core.Networking;
+using TrueCraft.Core.World;
 using TrueCraft.Core.Windows;
-using TrueCraft.API.Windows;
 using System.Collections.Generic;
 using fNbt;
-using TrueCraft.API.Server;
+using TrueCraft.Core.Server;
 using TrueCraft.Core.Networking.Packets;
 using TrueCraft.Core.Entities;
 

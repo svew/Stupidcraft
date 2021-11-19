@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using TrueCraft.API.Networking;
-using TrueCraft.API.Server;
+using TrueCraft.Core.Networking;
+using TrueCraft.Core.Server;
 
 namespace TrueCraft.Commands
 {

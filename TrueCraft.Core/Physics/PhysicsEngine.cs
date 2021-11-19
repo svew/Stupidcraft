@@ -1,12 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using TrueCraft.Core.World;
-using TrueCraft.API.Entities;
-using TrueCraft.API.World;
-using TrueCraft.API;
-using TrueCraft.API.Physics;
+using TrueCraft.Core.Entities;
 
 namespace TrueCraft.Core.Physics
 {

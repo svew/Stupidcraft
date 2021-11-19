@@ -29,7 +29,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\externals\fNbt\fNbt\fNbt.csproj" />
-    <ProjectReference Include="..\TrueCraft.API\TrueCraft.API.csproj" />
     <ProjectReference Include="..\TrueCraft.Core\TrueCraft.Core.csproj" />
   </ItemGroup>
 

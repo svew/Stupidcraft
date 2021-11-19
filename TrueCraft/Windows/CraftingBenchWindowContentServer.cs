@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using TrueCraft.API.Windows;
-using TrueCraft.API.Logic;
-using TrueCraft.API;
+using TrueCraft.Core;
+using TrueCraft.Core.Logic;
 using TrueCraft.Core.Windows;
 
 namespace TrueCraft.Windows

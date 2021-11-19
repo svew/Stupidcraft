@@ -1,9 +1,8 @@
 ﻿using System;
-using TrueCraft.API.Networking;
-using TrueCraft.API.Server;
-using TrueCraft.API;
-using TrueCraft.Core.Networking.Packets;
 using TrueCraft.Core;
+using TrueCraft.Core.Networking;
+using TrueCraft.Core.Networking.Packets;
+using TrueCraft.Core.Server;
 
 namespace TrueCraft.Handlers
 {

@@ -1,7 +1,6 @@
 using System;
-using TrueCraft.API.World;
-using TrueCraft.Core.World;
 using NUnit.Framework;
+using TrueCraft.Core.World;
 
 
 namespace TrueCraft.Core.Test.World

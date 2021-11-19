@@ -1,8 +1,6 @@
 using System;
-using TrueCraft.API.Logic;
-using TrueCraft.API;
-using TrueCraft.API.World;
-using TrueCraft.API.Networking;
+using TrueCraft.Core.Networking;
+using TrueCraft.Core.World;
 
 namespace TrueCraft.Core.Logic.Blocks
 {

@@ -1,12 +1,9 @@
 ﻿using System;
+using System.Diagnostics;
 using NUnit.Framework;
 using TrueCraft.Core.TerrainGen;
-using TrueCraft.API;
 using TrueCraft.Core.AI;
-using TrueCraft.API.World;
 using TrueCraft.Core.World;
-using System.Linq;
-using System.Diagnostics;
 
 namespace TrueCraft.Core.Test.AI
 {

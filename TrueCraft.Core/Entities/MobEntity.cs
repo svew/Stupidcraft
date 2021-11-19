@@ -1,13 +1,9 @@
 ﻿using System;
-using TrueCraft.API.Networking;
+using TrueCraft.Core.Networking;
 using TrueCraft.Core.Networking.Packets;
-using TrueCraft.API.Entities;
-using TrueCraft.API;
-using TrueCraft.API.Server;
-using System.Linq;
-using TrueCraft.API.AI;
+using TrueCraft.Core.Server;
 using TrueCraft.Core.AI;
-using TrueCraft.API.Physics;
+using TrueCraft.Core.Physics;
 
 namespace TrueCraft.Core.Entities
 {

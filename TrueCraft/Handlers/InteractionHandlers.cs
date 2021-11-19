@@ -1,19 +1,15 @@
 ﻿using System;
-using TrueCraft.API.Networking;
-using TrueCraft.API.Server;
-using TrueCraft.Core.Networking.Packets;
-using TrueCraft.API;
-using TrueCraft.API.World;
-using TrueCraft.Core;
-using TrueCraft.Core.Windows;
-using TrueCraft.API.Logic;
-using TrueCraft.Core.Entities;
-using fNbt;
-using TrueCraft.Core.Logic.Blocks;
 using System.Linq;
-using TrueCraft.Core.Logic.Items;
+using fNbt;
+using TrueCraft.Core;
+using TrueCraft.Core.Entities;
 using TrueCraft.Core.Logic;
-using TrueCraft.API.Windows;
+using TrueCraft.Core.Logic.Blocks;
+using TrueCraft.Core.Logic.Items;
+using TrueCraft.Core.Networking;
+using TrueCraft.Core.Networking.Packets;
+using TrueCraft.Core.Server;
+using TrueCraft.Core.World;
 using TrueCraft.Windows;
 
 namespace TrueCraft.Handlers
@@ -187,7 +183,7 @@ namespace TrueCraft.Handlers
             // Confirm expected Window ID
             if (packet.WindowID != window.ID)
             {
-                server.Log(API.Logging.LogCategory.Notice, "Invalid window number received {0}; expected {1}", packet.WindowID, window.ID);
+                server.Log(Core.Logging.LogCategory.Notice, "Invalid window number received {0}; expected {1}", packet.WindowID, window.ID);
                 server.DisconnectClient(_client);
                 return;
             }
@@ -218,7 +214,7 @@ namespace TrueCraft.Handlers
             // Confirm reasonable slot index.
             if (packet.SlotIndex >= window.Length || packet.SlotIndex < 0)
             {
-                server.Log(API.Logging.LogCategory.Notice, "Illegal slot number received {0} in not in the set -999, [0, {1})", packet.SlotIndex, window.Length);
+                server.Log(Core.Logging.LogCategory.Notice, "Illegal slot number received {0} in not in the set -999, [0, {1})", packet.SlotIndex, window.Length);
                 server.DisconnectClient(_client);
                 return;
             }

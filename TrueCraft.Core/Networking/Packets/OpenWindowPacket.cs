@@ -1,6 +1,5 @@
 ﻿using System;
-using TrueCraft.API.Networking;
-using TrueCraft.API.Windows;
+using TrueCraft.Core.Windows;
 
 namespace TrueCraft.Core.Networking.Packets
 {

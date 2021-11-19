@@ -1,11 +1,10 @@
 ﻿using System;
-using TrueCraft.API.Networking;
-using TrueCraft.Core.Networking.Packets;
-using TrueCraft.API.Windows;
-using TrueCraft.API;
-using TrueCraft.Core.Windows;
-using TrueCraft.Core.Logic;
 using TrueCraft.Client.Windows;
+using TrueCraft.Core;
+using TrueCraft.Core.Logic;
+using TrueCraft.Core.Networking;
+using TrueCraft.Core.Networking.Packets;
+using TrueCraft.Core.Windows;
 
 namespace TrueCraft.Client.Handlers
 {

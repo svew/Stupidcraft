@@ -1,16 +1,13 @@
 ﻿using System;
-using TrueCraft.API.Logic;
-using TrueCraft.API.World;
-using TrueCraft.API;
-using TrueCraft.API.Networking;
+using TrueCraft.Core.World;
+using TrueCraft.Core.Networking;
 using TrueCraft.Core.Entities;
-using TrueCraft.API.Entities;
-using TrueCraft.API.Server;
+using TrueCraft.Core.Server;
 using TrueCraft.Core.Logic.Blocks;
 using System.Linq;
 using fNbt;
 using TrueCraft.Core.Logic.Items;
-using TrueCraft.API.Physics;
+using TrueCraft.Core.Physics;
 
 namespace TrueCraft.Core.Logic
 {

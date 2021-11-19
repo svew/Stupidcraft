@@ -1,6 +1,5 @@
 ﻿using System;
 using NUnit.Framework;
-using TrueCraft.API;
 
 namespace TrueCraft.Core.Test
 {

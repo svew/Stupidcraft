@@ -1,7 +1,4 @@
 ﻿using System;
-using TrueCraft.API.Networking;
-using TrueCraft.API;
-using TrueCraft.Core.Networking.Packets;
 
 namespace TrueCraft.Core.Entities
 {

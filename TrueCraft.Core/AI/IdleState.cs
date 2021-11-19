@@ -1,7 +1,7 @@
 ﻿using System;
-using TrueCraft.API.AI;
-using TrueCraft.API.Entities;
-using TrueCraft.API.Server;
+using TrueCraft.Core.AI;
+using TrueCraft.Core.Entities;
+using TrueCraft.Core.Server;
 
 namespace TrueCraft.Core.AI
 {

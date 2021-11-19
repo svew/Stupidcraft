@@ -1,10 +1,9 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using NUnit.Framework;
 using TrueCraft.Core.World;
-using TrueCraft.API.World;
-using System.IO;
-using System.Reflection;
 
 namespace TrueCraft.Core.Test.World
 {

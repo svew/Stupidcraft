@@ -4,9 +4,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using fNbt;
-using Ionic.Zlib;
-using TrueCraft.API;
-using TrueCraft.API.World;
 using TrueCraft.Core.Networking;
 
 namespace TrueCraft.Core.World

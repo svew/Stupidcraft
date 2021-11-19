@@ -1,11 +1,8 @@
 ﻿using System;
-using TrueCraft.API.AI;
-using TrueCraft.API.Entities;
-using TrueCraft.API.Server;
-using TrueCraft.API;
-using TrueCraft.API.World;
+using TrueCraft.Core.Entities;
+using TrueCraft.Core.Server;
+using TrueCraft.Core.World;
 using System.Threading.Tasks;
-using TrueCraft.API.Logic;
 
 namespace TrueCraft.Core.AI
 {

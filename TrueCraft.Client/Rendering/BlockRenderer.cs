@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Microsoft.Xna.Framework;
-using TrueCraft.API.Logic;
-using TrueCraft.API.World;
+using TrueCraft.Core.Logic;
 using TrueCraft.Core.World;
 
 namespace TrueCraft.Client.Rendering

@@ -1,14 +1,11 @@
 ﻿using System;
+using System.Diagnostics;
 using NUnit.Framework;
-using TrueCraft.API.World;
-using TrueCraft.Core.TerrainGen;
 using TrueCraft.Core.Lighting;
 using TrueCraft.Core.Logic;
-using TrueCraft.API;
-using TrueCraft.Core.World;
 using TrueCraft.Core.Logic.Blocks;
-using System.Diagnostics;
-using TrueCraft.API.Logic;
+using TrueCraft.Core.TerrainGen;
+using TrueCraft.Core.World;
 
 namespace TrueCraft.Core.Test.Lighting
 {

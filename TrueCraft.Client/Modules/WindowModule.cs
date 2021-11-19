@@ -1,21 +1,16 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using TrueCraft.Client.Rendering;
-using TrueCraft.Core.Logic.Items;
-using TrueCraft.API.Logic;
-using TrueCraft.Client.Input;
 using Microsoft.Xna.Framework.Input;
-using TrueCraft.Core.Networking.Packets;
-using TrueCraft.API.Windows;
-using System;
-using TrueCraft.API;
-using TrueCraft.Core.Windows;
-using TrueCraft.Core.Logic.Blocks;
-using TrueCraft.Core.Logging;
-using TrueCraft.API.Logging;
-using TrueCraft.Client.Windows;
 using TrueCraft.Client.Handlers;
-using TrueCraft.API.Networking;
+using TrueCraft.Client.Input;
+using TrueCraft.Client.Rendering;
+using TrueCraft.Client.Windows;
+using TrueCraft.Core;
+using TrueCraft.Core.Logic;
+using TrueCraft.Core.Networking;
+using TrueCraft.Core.Networking.Packets;
+using TrueCraft.Core.Windows;
 
 namespace TrueCraft.Client.Modules
 {

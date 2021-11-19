@@ -1,7 +1,7 @@
 ﻿using System;
-using TrueCraft.API.AI;
-using TrueCraft.API.World;
-using TrueCraft.API.Server;
+using TrueCraft.Core.AI;
+using TrueCraft.Core.Server;
+using TrueCraft.Core.World;
 
 namespace TrueCraft.Rules
 {

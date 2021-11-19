@@ -1,11 +1,9 @@
 ﻿using System;
-using TrueCraft.Core.World;
-using NUnit.Framework;
-using TrueCraft.API;
-using TrueCraft.Core.TerrainGen;
-using TrueCraft.API.World;
 using System.IO;
 using System.Reflection;
+using NUnit.Framework;
+using TrueCraft.Core.TerrainGen;
+using TrueCraft.Core.World;
 
 namespace TrueCraft.Core.Test.World
 {

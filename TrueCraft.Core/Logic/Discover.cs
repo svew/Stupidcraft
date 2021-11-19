@@ -6,7 +6,6 @@ using System.Linq;
 using System.Reflection;
 using System.Xml;
 using System.Xml.Schema;
-using TrueCraft.API.Logic;
 
 namespace TrueCraft.Core.Logic
 {
@@ -70,11 +69,11 @@ namespace TrueCraft.Core.Logic
         {
             XmlDocument doc = new XmlDocument();
 
-            Assembly api = AppDomain.CurrentDomain.GetAssemblies().Where<Assembly>(a => a.Location.EndsWith("TrueCraft.API.dll")).First<Assembly>();  // TODO do without Linq
-            using (Stream xsd = api.GetManifestResourceStream("TrueCraft.API.Assets.TrueCraft.xsd"))
+            Assembly thisAssembly = this.GetType().Assembly;
+            using (Stream xsd = thisAssembly.GetManifestResourceStream("TrueCraft.Core.Assets.TrueCraft.xsd"))
                 doc.Schemas.Add(XmlSchema.Read(xsd, null));
 
-            using (Stream sz = this.GetType().Assembly.GetManifestResourceStream("TrueCraft.Core.Assets.TrueCraft.xml.gz"))
+            using (Stream sz = thisAssembly.GetManifestResourceStream("TrueCraft.Core.Assets.TrueCraft.xml.gz"))
             using (Stream s = new GZipStream(sz, CompressionMode.Decompress))
             using (XmlReader xmlr = XmlReader.Create(s))
             {

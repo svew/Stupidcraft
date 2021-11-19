@@ -1,7 +1,4 @@
 using System;
-using TrueCraft.API.Server;
-using TrueCraft.API.Windows;
-using TrueCraft.API.World;
 
 namespace TrueCraft.Core.Windows
 {

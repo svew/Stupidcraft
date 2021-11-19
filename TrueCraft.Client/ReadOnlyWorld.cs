@@ -1,11 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using TrueCraft.API.World;
+using TrueCraft.Core;
 using TrueCraft.Core.World;
-using TrueCraft.API;
 
 namespace TrueCraft.Client
 {

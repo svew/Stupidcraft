@@ -1,7 +1,5 @@
 using System;
 using System.Xml;
-using TrueCraft.API;
-using TrueCraft.API.Logic;
 
 namespace TrueCraft.Core.Logic
 {

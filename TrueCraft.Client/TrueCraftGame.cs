@@ -4,21 +4,19 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Net;
+using System.Threading;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using TrueCraft.API;
-using TrueCraft.API.Logic;
-using TrueCraft.API.World;
 using TrueCraft.Core;
+using TrueCraft.Core.Logic;
 using TrueCraft.Core.Networking.Packets;
+using TrueCraft.Core.World;
 using TrueCraft.Client.Input;
 using TrueCraft.Client.Modules;
 using TrueCraft.Client.Rendering;
-using TVector3 = TrueCraft.API.Vector3;
-using XVector3 = Microsoft.Xna.Framework.Vector3;
-using TrueCraft.Core.Logic;
-using System.Threading;
+
+using TVector3 = TrueCraft.Core.Vector3;
 
 namespace TrueCraft.Client
 {

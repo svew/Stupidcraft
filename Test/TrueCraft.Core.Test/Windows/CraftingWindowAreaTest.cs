@@ -1,13 +1,10 @@
 ﻿using System;
-using TrueCraft.API.Logic;
-using TrueCraft.API.Windows;
-using TrueCraft.API;
+using Moq;
 using NUnit.Framework;
 using TrueCraft.Core.Logic;
 using TrueCraft.Core.Logic.Blocks;
 using TrueCraft.Core.Logic.Items;
 using TrueCraft.Core.Windows;
-using Moq;
 
 namespace TrueCraft.Core.Test.Windows
 {

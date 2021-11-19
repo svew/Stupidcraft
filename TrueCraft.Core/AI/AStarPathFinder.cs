@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using TrueCraft.API;
-using TrueCraft.API.World;
+using TrueCraft.Core;
+using TrueCraft.Core.World;
 using System.Diagnostics;
-using TrueCraft.API.Logic;
+using TrueCraft.Core.Logic;
 
 namespace TrueCraft.Core.AI
 {

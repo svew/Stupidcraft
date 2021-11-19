@@ -1,11 +1,10 @@
+using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using TrueCraft.Client.Input;
 using TrueCraft.Client.Rendering;
-using TrueCraft.API;
-using System;
-using System.Text;
+using TrueCraft.Core;
 
 namespace TrueCraft.Client.Modules
 {

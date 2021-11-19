@@ -1,15 +1,11 @@
 ﻿using System;
-using TrueCraft.Client.Rendering;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
-using TrueCraft.API;
-using System.Linq;
-using System.Threading;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using TrueCraft.Client.Events;
-using TrueCraft.API.World;
+using TrueCraft.Client.Rendering;
 using TrueCraft.Core.Lighting;
 using TrueCraft.Core.World;
 
@@ -66,18 +62,18 @@ namespace TrueCraft.Client.Modules
 
         void Game_Client_BlockChanged(object sender, BlockChangeEventArgs e)
         {
-            WorldLighting.EnqueueOperation(new TrueCraft.API.BoundingBox(
-                (API.Vector3)e.Position, (API.Vector3)(e.Position + Vector3i.One)), false);
-            WorldLighting.EnqueueOperation(new TrueCraft.API.BoundingBox(
-                (API.Vector3)e.Position, (API.Vector3)(e.Position + Vector3i.One)), true);
+            WorldLighting.EnqueueOperation(new TrueCraft.Core.BoundingBox(
+                (Core.Vector3)e.Position, (Core.Vector3)(e.Position + Vector3i.One)), false);
+            WorldLighting.EnqueueOperation(new TrueCraft.Core.BoundingBox(
+                (Core.Vector3)e.Position, (Core.Vector3)(e.Position + Vector3i.One)), true);
 
             // TODO What is the purpose of enqueuing an entire column after the block?
             //      Could it be related to the lighting height map adding 2 to the height?
             //      That would result in incorrect heights when placing blocks high above other blocks.
-            API.Vector3 posA = new API.Vector3(e.Position.X, 0, e.Position.Z);
-            API.Vector3 posB = new API.Vector3(e.Position.X + 1, World.Height, e.Position.Z + 1);
-            WorldLighting.EnqueueOperation(new TrueCraft.API.BoundingBox(posA, posB), true);
-            WorldLighting.EnqueueOperation(new TrueCraft.API.BoundingBox(posA, posB), false);
+            Core.Vector3 posA = new Core.Vector3(e.Position.X, 0, e.Position.Z);
+            Core.Vector3 posB = new Core.Vector3(e.Position.X + 1, World.Height, e.Position.Z + 1);
+            WorldLighting.EnqueueOperation(new TrueCraft.Core.BoundingBox(posA, posB), true);
+            WorldLighting.EnqueueOperation(new TrueCraft.Core.BoundingBox(posA, posB), false);
             for (int i = 0; i < 100; i++)
             {
                 if (!WorldLighting.TryLightNext())

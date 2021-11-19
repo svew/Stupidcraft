@@ -1,7 +1,7 @@
 using System;
 using fNbt;
-using TrueCraft.API;
-using TrueCraft.API.World;
+using TrueCraft.Core;
+using TrueCraft.Core.World;
 using TrueCraft.Core.Windows;
 
 namespace TrueCraft.Windows

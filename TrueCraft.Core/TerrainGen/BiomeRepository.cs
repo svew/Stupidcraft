@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using TrueCraft.API.World;
 using TrueCraft.Core.TerrainGen.Biomes;
-using TrueCraft.Core.TerrainGen.Noise;
-using System.Reflection;
+using TrueCraft.Core.World;
 
 namespace TrueCraft.Core.TerrainGen
 {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
-using TrueCraft.API.Networking;
-using TrueCraft.API;
+using TrueCraft.Core;
+using TrueCraft.Core.Networking;
 
 namespace TrueCraft.Commands
 {

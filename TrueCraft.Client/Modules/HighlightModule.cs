@@ -1,13 +1,11 @@
 ﻿using System;
 using Microsoft.Xna.Framework.Graphics;
-using TrueCraft.API.World;
 using TrueCraft.Client.Rendering;
 using Microsoft.Xna.Framework;
 using Matrix = Microsoft.Xna.Framework.Matrix;
 using XVector3 = Microsoft.Xna.Framework.Vector3;
-using TVector3 = TrueCraft.API.Vector3;
-using TRay = TrueCraft.API.Ray;
-using TrueCraft.Core.Logic.Blocks;
+using TVector3 = TrueCraft.Core.Vector3;
+using TRay = TrueCraft.Core.Ray;
 
 namespace TrueCraft.Client.Modules
 {

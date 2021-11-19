@@ -4,14 +4,12 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using TrueCraft.Client.Input;
 using Matrix = Microsoft.Xna.Framework.Matrix;
-using TVector3 = TrueCraft.API.Vector3;
+using TVector3 = TrueCraft.Core.Vector3;
 using XVector3 = Microsoft.Xna.Framework.Vector3;
-using TrueCraft.API;
 using TrueCraft.Core.Logic;
-using TrueCraft.Core.Networking.Packets;
 using TrueCraft.Core.Logic.Blocks;
-using TrueCraft.API.Logic;
-using TrueCraft.API.World;
+using TrueCraft.Core.Networking.Packets;
+using TrueCraft.Core.World;
 
 namespace TrueCraft.Client.Modules
 {
@@ -89,7 +87,7 @@ namespace TrueCraft.Client.Modules
 
                 case Keys.Space:
                     if (Math.Floor(Game.Client.Position.Y) == Game.Client.Position.Y)
-                        Game.Client.Velocity += TrueCraft.API.Vector3.Up * 0.3;
+                        Game.Client.Velocity += TrueCraft.Core.Vector3.Up * 0.3;
                     return true;
 
                 case Keys.D1:
@@ -194,7 +192,7 @@ namespace TrueCraft.Client.Modules
                     break;
                 case Buttons.A:
                     if (Math.Floor(Game.Client.Position.Y) == Game.Client.Position.Y)
-                        Game.Client.Velocity += TrueCraft.API.Vector3.Up * 0.3;
+                        Game.Client.Velocity += TVector3.Up * 0.3;
                     break;
             }
             return false;

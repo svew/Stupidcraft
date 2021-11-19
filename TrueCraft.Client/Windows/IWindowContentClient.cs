@@ -1,5 +1,5 @@
 using System;
-using TrueCraft.API.Windows;
+using TrueCraft.Core.Windows;
 using TrueCraft.Client.Handlers;
 using TrueCraft.Client.Modules;
 

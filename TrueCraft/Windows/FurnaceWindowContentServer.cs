@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Linq;
-using TrueCraft.API;
-using TrueCraft.API.Logic;
-using TrueCraft.API.Server;
-using TrueCraft.API.Windows;
-using TrueCraft.API.World;
+using TrueCraft.Core;
+using TrueCraft.Core.Logic;
+using TrueCraft.Core.World;
 using TrueCraft.Core.Windows;
+using TrueCraft.Core.Server;
 
 namespace TrueCraft.Windows
 {

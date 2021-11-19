@@ -1,6 +1,5 @@
 using System;
-using TrueCraft.API.Logic;
-using TrueCraft.API.Windows;
+using TrueCraft.Core.Logic;
 
 namespace TrueCraft.Core.Windows
 {

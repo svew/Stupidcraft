@@ -1,14 +1,12 @@
 ﻿using System;
-using NUnit.Framework;
-using TrueCraft.Core.TerrainGen;
-using TrueCraft.Core.Physics;
 using Moq;
-using TrueCraft.API.Entities;
-using TrueCraft.API.Physics;
-using TrueCraft.API;
-using TrueCraft.API.World;
+using NUnit.Framework;
+using TrueCraft.Core.Entities;
 using TrueCraft.Core.Logic;
 using TrueCraft.Core.Logic.Blocks;
+using TrueCraft.Core.Physics;
+using TrueCraft.Core.TerrainGen;
+using TrueCraft.Core.World;
 
 namespace TrueCraft.Core.Test.Physics
 {

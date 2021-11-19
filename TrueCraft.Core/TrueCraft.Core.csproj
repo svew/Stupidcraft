@@ -26,7 +26,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TrueCraft.API\TrueCraft.API.csproj" />
     <ProjectReference Include="..\TrueCraft.Profiling\TrueCraft.Profiling.csproj" />
     <ProjectReference Include="..\externals\fNbt\fNbt\fNbt.csproj" />
   </ItemGroup>
@@ -34,6 +33,7 @@
   <ItemGroup>
     <PackageReference Include="Ionic.Zip" Version="1.9.1.8" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="YamlDotNet" Version="11.2.1" />
   </ItemGroup>
 
 </Project>

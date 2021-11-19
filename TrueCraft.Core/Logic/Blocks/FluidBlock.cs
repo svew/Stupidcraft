@@ -1,9 +1,7 @@
 ﻿using System;
-using TrueCraft.API;
-using TrueCraft.API.World;
-using TrueCraft.API.Server;
-using TrueCraft.API.Logic;
-using TrueCraft.API.Networking;
+using TrueCraft.Core.World;
+using TrueCraft.Core.Server;
+using TrueCraft.Core.Networking;
 using System.Collections.Generic;
 using System.Linq;
 

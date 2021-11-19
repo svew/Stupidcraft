@@ -1,9 +1,7 @@
 ﻿using System;
-using TrueCraft.API;
-using TrueCraft.API.World;
+using TrueCraft.Core;
 using TrueCraft.Core.Logic;
-using TrueCraft.Core.Logic.Blocks;
-using TrueCraft.API.Logic;
+using TrueCraft.Core.World;
 
 namespace TrueCraft.Client
 {

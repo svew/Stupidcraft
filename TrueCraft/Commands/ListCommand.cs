@@ -1,6 +1,6 @@
 ﻿using System;
-using TrueCraft.API.Networking;
 using System.Text;
+using TrueCraft.Core.Networking;
 
 namespace TrueCraft.Commands
 {

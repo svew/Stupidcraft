@@ -1,9 +1,8 @@
 ﻿using System;
-using TrueCraft.API.Windows;
+using TrueCraft.Core;
+using TrueCraft.Core.Logic;
 using TrueCraft.Core.Windows;
-using TrueCraft.API;
-using TrueCraft.API.Logic;
-using TrueCraft.API.World;
+using TrueCraft.Core.World;
 
 namespace TrueCraft.Windows
 {

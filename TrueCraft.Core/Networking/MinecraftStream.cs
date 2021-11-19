@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using TrueCraft.API.Networking;
 using System.Text;
 
 namespace TrueCraft.Core.Networking

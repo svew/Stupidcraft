@@ -2,15 +2,12 @@
 using NUnit.Framework;
 using Moq;
 using Moq.Protected;
-using TrueCraft.API.Logic;
-using TrueCraft.Core.Logic;
-using TrueCraft.API;
-using TrueCraft.API.World;
-using TrueCraft.API.Server;
-using TrueCraft.API.Networking;
-using TrueCraft.API.Entities;
 using TrueCraft.Core.Entities;
+using TrueCraft.Core.Logic;
+using TrueCraft.Core.Networking;
+using TrueCraft.Core.Server;
 using TrueCraft.Core.TerrainGen;
+using TrueCraft.Core.World;
 
 namespace TrueCraft.Core.Test.Logic
 {

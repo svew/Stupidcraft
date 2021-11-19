@@ -1,26 +1,18 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
-using System.Collections.Concurrent;
-using TrueCraft.API.Networking;
 using System.Threading;
 using TrueCraft.Core.Networking;
-using System.Linq;
 using TrueCraft.Core.Networking.Packets;
 using TrueCraft.Client.Events;
 using TrueCraft.Core.Logic;
-using TrueCraft.API.Entities;
-using TrueCraft.API;
 using System.ComponentModel;
 using System.IO;
 using TrueCraft.Core;
-using TrueCraft.API.Physics;
 using TrueCraft.Core.Physics;
 using TrueCraft.Core.Windows;
-using TrueCraft.API.Windows;
-using TrueCraft.API.Logic;
-using TrueCraft.API.World;
 using TrueCraft.Client.Windows;
+using TrueCraft.Core.World;
 
 namespace TrueCraft.Client
 {

@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using TrueCraft.API.Networking;
 using TrueCraft.Core.Networking.Packets;
 
 namespace TrueCraft.Core.Networking

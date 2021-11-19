@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Linq;
-using TrueCraft.API.Server;
-using TrueCraft.API.Networking;
-using TrueCraft.Core.Networking.Packets;
-using TrueCraft.API;
+using TrueCraft.Core;
 using TrueCraft.Core.Entities;
-using TrueCraft.API.World;
+using TrueCraft.Core.Networking;
+using TrueCraft.Core.Networking.Packets;
+using TrueCraft.Core.Server;
+using TrueCraft.Core.World;
 
 namespace TrueCraft.Handlers
 {
