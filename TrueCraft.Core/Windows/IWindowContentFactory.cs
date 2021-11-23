@@ -1,6 +1,5 @@
 using System;
 using TrueCraft.Core.Logic;
-using TrueCraft.Core.Server;
 using TrueCraft.Core.World;
 
 namespace TrueCraft.Core.Windows
@@ -11,7 +10,7 @@ namespace TrueCraft.Core.Windows
             ISlots armor, ISlots craftingGrid);
 
         IWindowContent NewFurnaceWindowContent(ISlots mainInventory, ISlots hotBar,
-            IEventScheduler scheduler, GlobalVoxelCoordinates coordinates,
+            GlobalVoxelCoordinates coordinates,
             IItemRepository itemRepository);
 
         IWindowContent NewChestWindowContent(ISlots mainInventory, ISlots hotBar,

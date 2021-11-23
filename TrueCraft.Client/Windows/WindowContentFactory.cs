@@ -1,6 +1,5 @@
 using System;
 using TrueCraft.Core.Logic;
-using TrueCraft.Core.Server;
 using TrueCraft.Core.Windows;
 using TrueCraft.Core.World;
 
@@ -19,7 +18,7 @@ namespace TrueCraft.Client.Windows
         }
 
         public IWindowContent NewFurnaceWindowContent(ISlots mainInventory, ISlots hotBar,
-            IEventScheduler scheduler, GlobalVoxelCoordinates coordinates,
+            GlobalVoxelCoordinates coordinates,
             IItemRepository itemRepository)
         {
             return new FurnaceWindowContentClient(mainInventory, hotBar, itemRepository);

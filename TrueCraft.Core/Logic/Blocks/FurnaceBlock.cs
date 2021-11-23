@@ -224,7 +224,7 @@ namespace TrueCraft.Core.Logic.Blocks
 #endif
             WindowContentFactory factory = new WindowContentFactory();
             IWindowContent window = factory.NewFurnaceWindowContent(user.Inventory, user.Hotbar,
-                             user.Server.Scheduler, descriptor.Coordinates,
+                             descriptor.Coordinates,
                              user.Server.ItemRepository);
 
             user.OpenWindow(window);

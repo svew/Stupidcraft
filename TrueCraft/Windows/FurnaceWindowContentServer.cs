@@ -10,7 +10,6 @@ namespace TrueCraft.Windows
 {
     public class FurnaceWindowContentServer : WindowContentServer, IFurnaceWindowContent
     {
-        public IEventScheduler EventScheduler { get; set; }
         public GlobalVoxelCoordinates Coordinates { get; }
 
         /// <summary>
@@ -22,12 +21,11 @@ namespace TrueCraft.Windows
         /// <param name="coordinates"></param>
         /// <param name="itemRepository"></param>
         public FurnaceWindowContentServer(ISlots mainInventory, ISlots hotBar,
-            IEventScheduler scheduler, GlobalVoxelCoordinates coordinates,
+            GlobalVoxelCoordinates coordinates,
             IItemRepository itemRepository) :
             base(FurnaceWindowConstants.Areas(mainInventory, hotBar),
                 itemRepository)
         {
-            EventScheduler = scheduler;
             Coordinates = coordinates;
         }
 

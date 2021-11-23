@@ -1,6 +1,5 @@
 using System;
 using TrueCraft.Core.Logic;
-using TrueCraft.Core.Server;
 using TrueCraft.Core.World;
 
 namespace TrueCraft.Core.Windows
@@ -25,14 +24,14 @@ namespace TrueCraft.Core.Windows
         }
 
         public IWindowContent NewFurnaceWindowContent(ISlots mainInventory, ISlots hotBar,
-            IEventScheduler scheduler, GlobalVoxelCoordinates coordinates,
+            GlobalVoxelCoordinates coordinates,
             IItemRepository itemRepository)
         {
 #if DEBUG
             if (_impl == null)
                 throw new ApplicationException("WindowContentFactory not initialized.");
 #endif
-            return _impl.NewFurnaceWindowContent(mainInventory, hotBar, scheduler, coordinates, itemRepository);
+            return _impl.NewFurnaceWindowContent(mainInventory, hotBar, coordinates, itemRepository);
         }
 
 
