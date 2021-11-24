@@ -32,10 +32,8 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override bool BlockRightClicked(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
         {
-#if DEBUG
-            if (WhoAmI.Answer == IAm.Client)
-                throw new ApplicationException(Strings.SERVER_CODE_ON_CLIENT);
-#endif
+            Server.ServerOnly.Assert();
+
             IWindowContentFactory factory = new WindowContentFactory();
             ICraftingBenchWindowContent window = (ICraftingBenchWindowContent)
                 factory.NewCraftingBenchWindowContent(user.Inventory, user.Hotbar,

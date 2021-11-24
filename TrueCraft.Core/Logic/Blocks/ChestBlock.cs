@@ -4,6 +4,7 @@ using fNbt;
 using TrueCraft.Core.Windows;
 using TrueCraft.Core.Entities;
 using TrueCraft.Core.Networking;
+using TrueCraft.Core.Server;
 
 namespace TrueCraft.Core.Logic.Blocks
 {
@@ -83,10 +84,8 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override bool BlockRightClicked(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
         {
-#if DEBUG
-            if (WhoAmI.Answer == IAm.Client)
-                throw new ApplicationException(Strings.SERVER_CODE_ON_CLIENT);
-#endif
+            ServerOnly.Assert();
+
             GlobalVoxelCoordinates adjacent = null; // No adjacent chest
             GlobalVoxelCoordinates self = descriptor.Coordinates;
             for (int i = 0; i < AdjacentBlocks.Length; i++)

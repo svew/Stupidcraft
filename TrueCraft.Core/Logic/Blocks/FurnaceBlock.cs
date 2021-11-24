@@ -157,10 +157,8 @@ namespace TrueCraft.Core.Logic.Blocks
 
         private FurnaceState GetState(IWorld world, GlobalVoxelCoordinates coords)
         {
-#if DEBUG
-            if (WhoAmI.Answer == IAm.Client)
-                throw new ApplicationException(Strings.SERVER_CODE_ON_CLIENT);
-#endif
+            ServerOnly.Assert();
+
             NbtCompound tileEntity = world.GetTileEntity(coords) ?? CreateTileEntity();
 
             return new FurnaceState(tileEntity);
@@ -218,10 +216,8 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override bool BlockRightClicked(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
         {
-#if DEBUG
-            if (WhoAmI.Answer == IAm.Client)
-                throw new ApplicationException(Strings.SERVER_CODE_ON_CLIENT);
-#endif
+            ServerOnly.Assert();
+
             WindowContentFactory factory = new WindowContentFactory();
             IWindowContent window = factory.NewFurnaceWindowContent(user.Inventory, user.Hotbar,
                              descriptor.Coordinates,
