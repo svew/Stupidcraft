@@ -18,9 +18,6 @@ namespace TrueCraft.Core.Logic
     {
         public static IBlockRepository BlockRepository { get; set; }
 
-        [Obsolete("Use ItemRepository.Get() instead")]
-        public static IItemRepository ItemRepository { get => TrueCraft.Core.Logic.ItemRepository.Get(); }
-
         public virtual void BlockLeftClicked(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
         {
             var coords = descriptor.Coordinates + MathHelper.BlockFaceToCoordinates(face);
@@ -58,7 +55,7 @@ namespace TrueCraft.Core.Logic
             var items = new ItemStack[0];
             var type = ToolType.None;
             var material = ToolMaterial.None;
-            var held = ItemRepository.GetItemProvider(item.ID);
+            var held = ItemRepository.Get().GetItemProvider(item.ID);
 
             if (held is ToolItem)
             {
@@ -310,7 +307,7 @@ namespace TrueCraft.Core.Logic
             damage = 0;
 
             var block = BlockRepository.GetBlockProvider(blockId);
-            var item = ItemRepository.GetItemProvider(itemId);
+            var item = ItemRepository.Get().GetItemProvider(itemId);
 
             double hardness = block.Hardness;
             if (hardness == -1)

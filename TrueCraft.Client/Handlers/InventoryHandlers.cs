@@ -44,13 +44,13 @@ namespace TrueCraft.Client.Handlers
             {
                 case WindowType.CraftingBench:
                     window = new CraftingBenchWindowContentClient(client.Inventory, client.Hotbar,
-                        CraftingRepository.Get(), BlockProvider.ItemRepository);
+                        CraftingRepository.Get(), ItemRepository.Get());
                     break;
 
                 case WindowType.Chest:
                     window = new ChestWindowContentClient(client.Inventory, client.Hotbar,
                         packet.TotalSlots == 2 * ChestWindowConstants.ChestLength,
-                        BlockProvider.ItemRepository);
+                        ItemRepository.Get());
                     break;
             }
 

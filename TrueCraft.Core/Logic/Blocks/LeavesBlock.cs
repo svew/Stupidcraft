@@ -40,7 +40,7 @@ namespace TrueCraft.Core.Logic.Blocks
 
         protected override ItemStack[] GetDrop(BlockDescriptor descriptor, ItemStack item)
         {
-            var provider = ItemRepository.GetItemProvider(item.ID);
+            var provider = ItemRepository.Get().GetItemProvider(item.ID);
             if (provider is ShearsItem)
                 return base.GetDrop(descriptor, item);
             else
