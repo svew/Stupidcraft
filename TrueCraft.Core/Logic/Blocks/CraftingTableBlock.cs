@@ -39,7 +39,7 @@ namespace TrueCraft.Core.Logic.Blocks
             IWindowContentFactory factory = new WindowContentFactory();
             ICraftingBenchWindowContent window = (ICraftingBenchWindowContent)
                 factory.NewCraftingBenchWindowContent(user.Inventory, user.Hotbar,
-                user.Server.CraftingRepository, user.Server.ItemRepository);
+                CraftingRepository.Get(), user.Server.ItemRepository);
             user.OpenWindow(window);
 
             // TODO: this should be called in response to Close Window packet, not Disposed.

@@ -35,9 +35,6 @@ namespace TrueCraft
         public IBlockRepository BlockRepository { get; private set; }
         public IItemRepository ItemRepository { get; private set; }
 
-        [Obsolete("Use TrueCraft.Core.Logic.CraftingRepository.Get() instead.")]
-        public ICraftingRepository CraftingRepository { get; private set; }
-
         public bool EnableClientLogging { get; set; }
         public IPEndPoint EndPoint { get; private set; }
 
@@ -101,8 +98,6 @@ namespace TrueCraft
             ItemRepository = TrueCraft.Core.Logic.ItemRepository.Get();
 
             BlockProvider.BlockRepository = BlockRepository;
-
-            CraftingRepository = TrueCraft.Core.Logic.CraftingRepository.Get();
 
             PendingBlockUpdates = new Queue<BlockUpdate>();
             EnableClientLogging = false;
