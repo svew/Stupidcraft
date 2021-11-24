@@ -44,7 +44,7 @@ namespace TrueCraft.Client.Handlers
             {
                 case WindowType.CraftingBench:
                     window = new CraftingBenchWindowContentClient(client.Inventory, client.Hotbar,
-                        client.CraftingRepository, BlockProvider.ItemRepository);
+                        CraftingRepository.Get(), BlockProvider.ItemRepository);
                     break;
 
                 case WindowType.Chest:
