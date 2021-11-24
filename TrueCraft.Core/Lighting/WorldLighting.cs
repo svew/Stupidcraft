@@ -20,7 +20,7 @@ namespace TrueCraft.Core.Lighting
             public bool Initial { get; set; }
         }
 
-        public IBlockRepository BlockRepository { get; set; }
+        private readonly IBlockRepository _blockRepository;
         public IWorld World { get; set; }
 
         private ConcurrentQueue<LightingOperation> PendingOperations { get; set; }
@@ -32,7 +32,7 @@ namespace TrueCraft.Core.Lighting
 
         public WorldLighting(IWorld world, IBlockRepository blockRepository)
         {
-            BlockRepository = blockRepository;
+            _blockRepository = blockRepository;
             World = world;
             PendingOperations = new ConcurrentQueue<LightingOperation>();
             HeightMaps = new Dictionary<GlobalChunkCoordinates, byte[,]>();
@@ -63,7 +63,7 @@ namespace TrueCraft.Core.Lighting
                         var id = chunk.GetBlockID(coords);
                         if (id == AirBlock.BlockID)
                             continue;
-                        var provider = BlockRepository.GetBlockProvider(id);
+                        var provider = _blockRepository.GetBlockProvider(id);
                         if (provider == null || provider.LightOpacity != 0)
                         {
                             map[x, z] = y;
@@ -92,7 +92,7 @@ namespace TrueCraft.Core.Lighting
                 var id = chunk.GetBlockID(localCoords);
                 if (id == 0)
                     continue;
-                var provider = BlockRepository.GetBlockProvider(id);
+                var provider = _blockRepository.GetBlockProvider(id);
                 if (provider.LightOpacity != 0)
                 {
                     map[x, z] = y;
@@ -131,7 +131,7 @@ namespace TrueCraft.Core.Lighting
             byte current = op.SkyLight ? World.GetSkyLight(coords) : World.GetBlockLight(coords);
             if (value == current)
                 return;
-            var provider = BlockRepository.GetBlockProvider(World.GetBlockID(coords));
+            var provider = _blockRepository.GetBlockProvider(World.GetBlockID(coords));
             if (op.Initial)
             {
                 byte emissiveness = provider.Luminance;
@@ -159,7 +159,7 @@ namespace TrueCraft.Core.Lighting
             Profiler.Start("lighting.voxel");
 
             var id = World.GetBlockID(coords);
-            var provider = BlockRepository.GetBlockProvider(id);
+            var provider = _blockRepository.GetBlockProvider(id);
 
             // The opacity of the block determines the amount of light it receives from
             // neighboring blocks. This is subtracted from the max of the neighboring
