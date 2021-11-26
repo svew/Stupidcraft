@@ -20,6 +20,8 @@ namespace TrueCraft.Core.Logic
 
         public virtual void BlockLeftClicked(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
         {
+            ServerOnly.Assert();
+
             var coords = descriptor.Coordinates + MathHelper.BlockFaceToCoordinates(face);
             if (world.IsValidPosition(coords) && world.GetBlockID(coords) == FireBlock.BlockID)
                 world.SetBlockID(coords, 0);
@@ -35,22 +37,30 @@ namespace TrueCraft.Core.Logic
         /// <returns>True if the right-click has been handled; false otherwise.</returns>
         public virtual bool BlockRightClicked(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
         {
+            ServerOnly.Assert();
+
             return true;
         }
 
         public virtual void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
         {
+            ServerOnly.Assert();
+
             // This space intentionally left blank
         }
 
         public virtual void BlockMined(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
         {
+            ServerOnly.Assert();
+
             GenerateDropEntity(descriptor, world, user.Server, user.SelectedItem);
             world.SetBlockID(descriptor.Coordinates, 0);
         }
 
         public void GenerateDropEntity(BlockDescriptor descriptor, IWorld world, IMultiplayerServer server, ItemStack item)
         {
+            ServerOnly.Assert();
+
             var entityManager = server.GetEntityManagerForWorld(world);
             var items = new ItemStack[0];
             var type = ToolType.None;
@@ -80,6 +90,8 @@ namespace TrueCraft.Core.Logic
 
         public virtual bool IsSupported(BlockDescriptor descriptor, IMultiplayerServer server, IWorld world)
         {
+            ServerOnly.Assert();
+
             var support = GetSupportDirection(descriptor);
             if (support != Vector3i.Zero)
             {
@@ -92,6 +104,8 @@ namespace TrueCraft.Core.Logic
 
         public virtual void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IWorld world)
         {
+            ServerOnly.Assert();
+
             if (!IsSupported(descriptor, server, world))
             {
                 GenerateDropEntity(descriptor, world, server, ItemStack.EmptyStack);
@@ -106,11 +120,15 @@ namespace TrueCraft.Core.Logic
 
         public virtual void ItemUsedOnEntity(ItemStack item, IEntity usedOn, IWorld world, IRemoteClient user)
         {
+            ServerOnly.Assert();
+
             // This space intentionally left blank
         }
 
         public virtual void ItemUsedOnNothing(ItemStack item, IWorld world, IRemoteClient user)
         {
+            ServerOnly.Assert();
+
             // This space intentionally left blank
         }
 
@@ -126,6 +144,8 @@ namespace TrueCraft.Core.Logic
 
         public virtual void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user)
         {
+            ServerOnly.Assert();
+
             var old = world.GetBlockData(coordinates);
             if (!Overwritable.Any(b => b == old.ID))
             {
@@ -177,11 +197,15 @@ namespace TrueCraft.Core.Logic
 
         public virtual void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IWorld world)
         {
+            ServerOnly.Assert();
+
             // This space intentionally left blank
         }
 
         public virtual void TileEntityLoadedForClient(BlockDescriptor descriptor, IWorld world, NbtCompound entity, IRemoteClient client)
         {
+            ServerOnly.Assert();
+
             // This space intentionally left blank
         }
 
