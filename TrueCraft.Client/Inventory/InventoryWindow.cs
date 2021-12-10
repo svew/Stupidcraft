@@ -8,7 +8,7 @@ using TrueCraft.Core.Windows;
 
 namespace TrueCraft.Client.Inventory
 {
-    public class InventoryWindow : InventoryWindow<ISlot>
+    public class InventoryWindow : InventoryWindow<ISlot>, IClickHandler
     {
         public const int CraftingOutputSlotIndex = 0;
         public const int ArmorSlotIndex = 5;
