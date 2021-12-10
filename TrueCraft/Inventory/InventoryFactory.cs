@@ -32,7 +32,8 @@ namespace TrueCraft.Inventory
             ISlots<IServerSlot> hotBar, IWorld world, GlobalVoxelCoordinates location,
             GlobalVoxelCoordinates otherHalf)
         {
-            throw new NotImplementedException();
+            return new ChestWindow(itemRepository, slotFactory, windowID,
+                mainInventory, hotBar, world, location, otherHalf);
         }
 
         public IFurnaceWindow<IServerSlot> NewFurnaceWindow(IItemRepository itemRepository,
