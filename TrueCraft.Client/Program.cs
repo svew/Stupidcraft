@@ -7,6 +7,7 @@ using TrueCraft.Core;
 using System.Threading;
 using System.Reflection;
 using TrueCraft.Core.Logic;
+using TrueCraft.Core.Inventory;
 
 namespace TrueCraft.Client
 {
@@ -16,7 +17,8 @@ namespace TrueCraft.Client
         public static void Main(string[] args)
         {
             WhoAmI.Answer = IAm.Client;
-            TrueCraft.Core.Windows.WindowContentFactory.Init(new TrueCraft.Client.Windows.WindowContentFactory());
+            TrueCraft.Core.Inventory.InventoryFactory<ISlot>.RegisterInventoryFactory(new TrueCraft.Client.Inventory.InventoryFactory());
+            TrueCraft.Core.Inventory.SlotFactory<ISlot>.RegisterSlotFactory(new TrueCraft.Client.Inventory.SlotFactory());
 
             UserSettings.Local = new UserSettings();
             UserSettings.Local.Load();

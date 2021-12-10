@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using TrueCraft.Core.World;
 using TrueCraft.Core.Logging;
 using TrueCraft.Core.Logic;
+using TrueCraft.Core.Inventory;
 
 namespace TrueCraft.Core.Server
 {
@@ -14,6 +15,9 @@ namespace TrueCraft.Core.Server
     /// </summary>
     public delegate void PacketHandler(IPacket packet, IRemoteClient client, IMultiplayerServer server);
 
+    // TODO: this looks like it should be a server-side only concern.
+    //        However, moving it is non-trivial due to the large number of
+    //        references to it in Core.
     public interface IMultiplayerServer
     {
         event EventHandler<ChatMessageEventArgs> ChatMessageReceived;

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Linq;
 using TrueCraft.Core;
+using TrueCraft.Core.Inventory;
 using TrueCraft.Core.Networking;
+using TrueCraft.Core.Server;
 using TrueCraft.Core.Windows;
 
 namespace TrueCraft.Commands
@@ -83,7 +85,7 @@ namespace TrueCraft.Commands
             }
 
             string username = receivingPlayer.Username;
-            IInventoryWindowContent inventory = receivingPlayer.InventoryWindowContent;
+            IInventoryWindow<IServerSlot> inventory = receivingPlayer.InventoryWindowContent;
             if (inventory == null) return false;
 
             while (count > 0)
@@ -96,7 +98,7 @@ namespace TrueCraft.Commands
 
                 count -= amountToGive;
 
-                inventory.PickUpStack(new ItemStack(id, amountToGive, metadata));
+                inventory.StoreItemStack(new ItemStack(id, amountToGive, metadata));
             }
 
             return true;

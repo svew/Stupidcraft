@@ -357,19 +357,19 @@ namespace TrueCraft.Commands
                 {
                     // Discard hotbar items
                     for (short i = 0; i <client.Hotbar.Count; i++)
-                        client.Hotbar[i] = ItemStack.EmptyStack;
+                        client.Hotbar[i].Item = ItemStack.EmptyStack;
                 }
                 else if (arguments[0] == "all")
                 {
                     // Discard all inventory items, including armor and crafting area contents
                     for (int i = 0; i < client.Hotbar.Count; i++)
-                        client.Hotbar[i] = ItemStack.EmptyStack;
+                        client.Hotbar[i].Item = ItemStack.EmptyStack;
                     for (int i = 0; i < client.Inventory.Count; i++)
-                        client.Inventory[i] = ItemStack.EmptyStack;
+                        client.Inventory[i].Item = ItemStack.EmptyStack;
                     for (int i = 0; i < client.Armor.Count; i++)
-                        client.Armor[i] = ItemStack.EmptyStack;
+                        client.Armor[i].Item = ItemStack.EmptyStack;
                     for (int i = 0; i < client.CraftingGrid.Count; i++)
-                        client.CraftingGrid[i] = ItemStack.EmptyStack;
+                        client.CraftingGrid[i].Item = ItemStack.EmptyStack;
                 }
                 else
                 {
@@ -380,7 +380,7 @@ namespace TrueCraft.Commands
             else
             {
                 // Discards selected item.
-                client.Hotbar[client.SelectedSlot] = ItemStack.EmptyStack;
+                client.Hotbar[client.SelectedSlot].Item = ItemStack.EmptyStack;
             }
         }
 
@@ -492,9 +492,9 @@ namespace TrueCraft.Commands
             int idx = 0;
             int j;
             for (j = 0; j < client.Inventory.Count; j++, idx ++)
-                items[idx] = client.Inventory[j];
+                items[idx] = client.Inventory[j].Item;
             for (j = 0; j < client.Hotbar.Count; j++, idx++)
-                items[idx] = client.Hotbar[j];
+                items[idx] = client.Hotbar[j].Item;
             client.QueuePacket(new WindowItemsPacket(0, items));
         }
 

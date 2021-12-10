@@ -1,6 +1,8 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using TrueCraft.Client.Rendering;
+using TrueCraft.Core;
+using TrueCraft.Core.Inventory;
 using TrueCraft.Core.Logic;
 
 namespace TrueCraft.Client.Modules
@@ -131,7 +133,7 @@ namespace TrueCraft.Client.Modules
             origin.Y += (int)Scale(3);
             for (int i = 0; i < Game.Client.Hotbar.Count; i++)
             {
-                var item = Game.Client.Hotbar[i];
+                ItemStack item = Game.Client.Hotbar[i].Item;
                 if (item.Empty)
                     continue;
                 var provider = Game.ItemRepository.GetItemProvider(item.ID);
@@ -153,7 +155,7 @@ namespace TrueCraft.Client.Modules
             origin.Y += (int)Scale(3);
             for (int i = 0; i < Game.Client.Hotbar.Count; i++)
             {
-                var item = Game.Client.Hotbar[i];
+                ItemStack item = Game.Client.Hotbar[i].Item;
                 if (item.Empty)
                     continue;
                 var provider = Game.ItemRepository.GetItemProvider(item.ID) as IBlockProvider;
@@ -173,7 +175,7 @@ namespace TrueCraft.Client.Modules
             origin.Y += (int)Scale(3);
             for (int i = 0; i < Game.Client.Hotbar.Count; i++)
             {
-                var item = Game.Client.Hotbar[i];
+                ItemStack item = Game.Client.Hotbar[i].Item;
                 if (item.Empty || item.Count == 1)
                     continue;
                 int offset = 10;

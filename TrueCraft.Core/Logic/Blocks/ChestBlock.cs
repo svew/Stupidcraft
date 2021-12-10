@@ -5,11 +5,14 @@ using TrueCraft.Core.Windows;
 using TrueCraft.Core.Entities;
 using TrueCraft.Core.Networking;
 using TrueCraft.Core.Server;
+using TrueCraft.Core.Inventory;
 
 namespace TrueCraft.Core.Logic.Blocks
 {
     public class ChestBlock : BlockProvider, IBurnableItem
     {
+        private const int ChestLength = 27;
+
         public static readonly byte BlockID = 0x36;
         
         public override byte ID { get { return 0x36; } }
@@ -117,9 +120,16 @@ namespace TrueCraft.Core.Logic.Blocks
                 }
             }
 
-            WindowContentFactory factory = new WindowContentFactory();
-            IChestWindowContent window = (IChestWindowContent)factory.NewChestWindowContent(user.Inventory, user.Hotbar,
-                world, self, adjacent, ItemRepository.Get());
+            //IChestWindow<IServerSlot> window = new ChestWindow<IServerSlot>(ItemRepository.Get(),
+            //    SlotFactory<IServerSlot>.Get(), WindowIDs.GetWindowID(), user.Inventory, user.Hotbar, world, self, adjacent);
+            IInventoryFactory<IServerSlot> factory = new InventoryFactory<IServerSlot>();
+            IItemRepository itemRepository = ItemRepository.Get();
+            ISlotFactory<IServerSlot> slotFactory = SlotFactory<IServerSlot>.Get();
+            sbyte windowID = WindowIDs.GetWindowID();
+            IChestWindow<IServerSlot> window = factory.NewChestWindow(itemRepository,
+                slotFactory, windowID, user.Inventory, user.Hotbar,
+                world, descriptor.Coordinates, adjacent);
+
             // TODO: the indexer of ChestInventory will ultimately send a SetSlot
             //   packet.  Instead of sending 50+ Set Slot Packets, this should be a
             //   single Window Items packet.
@@ -130,7 +140,7 @@ namespace TrueCraft.Core.Logic.Blocks
                 foreach (var item in (NbtList)entity["Items"])
                 {
                     var slot = ItemStack.FromNbt((NbtCompound)item);
-                    window.ChestInventory[slot.Index] = slot;
+                    window.ChestInventory[slot.Index].Item = slot;
                 }
             }
             // Add adjacent items
@@ -142,7 +152,7 @@ namespace TrueCraft.Core.Logic.Blocks
                     foreach (var item in (NbtList)entity["Items"])
                     {
                         var slot = ItemStack.FromNbt((NbtCompound)item);
-                        window.ChestInventory[slot.Index + ChestWindowConstants.ChestLength] = slot;
+                        window.ChestInventory[slot.Index + ChestLength].Item = slot;
                     }
                 }
             }

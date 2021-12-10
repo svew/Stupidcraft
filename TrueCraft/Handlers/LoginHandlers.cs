@@ -6,6 +6,7 @@ using TrueCraft.Core.Networking;
 using TrueCraft.Core.Networking.Packets;
 using TrueCraft.Core.Server;
 using TrueCraft.Core.World;
+using TrueCraft.Inventory;
 
 namespace TrueCraft.Handlers
 {
@@ -60,7 +61,7 @@ namespace TrueCraft.Handlers
                 // Send setup packets
                 remoteClient.QueuePacket(new LoginResponsePacket(client.Entity.EntityID, 0, Dimension.Overworld));
                 remoteClient.UpdateChunks(block: true);
-                remoteClient.QueuePacket(new WindowItemsPacket(0, remoteClient.InventoryWindowContent.GetSlots()));
+                remoteClient.QueuePacket(((IServerWindow)remoteClient.InventoryWindowContent).GetWindowItemsPacket());
                 remoteClient.QueuePacket(new UpdateHealthPacket((remoteClient.Entity as PlayerEntity).Health));
                 remoteClient.QueuePacket(new SpawnPositionPacket((int)remoteClient.Entity.Position.X,
                         (int)remoteClient.Entity.Position.Y, (int)remoteClient.Entity.Position.Z));

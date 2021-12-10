@@ -3,6 +3,7 @@ using System.Linq;
 using fNbt;
 using TrueCraft.Core;
 using TrueCraft.Core.Entities;
+using TrueCraft.Core.Inventory;
 using TrueCraft.Core.Logic;
 using TrueCraft.Core.Logic.Blocks;
 using TrueCraft.Core.Logic.Items;
@@ -10,7 +11,7 @@ using TrueCraft.Core.Networking;
 using TrueCraft.Core.Networking.Packets;
 using TrueCraft.Core.Server;
 using TrueCraft.Core.World;
-using TrueCraft.Windows;
+using TrueCraft.Inventory;
 
 namespace TrueCraft.Handlers
 {
@@ -38,7 +39,7 @@ namespace TrueCraft.Handlers
                     inventory.Count--;
                     var item = new ItemEntity(client.Entity.Position + new Vector3(0, PlayerEntity.Height, 0), spawned);
                     item.Velocity = MathHelper.RotateY(Vector3.Forwards, MathHelper.DegreesToRadians(client.Entity.Yaw)) * 0.5;
-                    client.Hotbar[client.SelectedSlot] = inventory;
+                    client.Hotbar[client.SelectedSlot].Item = inventory;
                     server.GetEntityManagerForWorld(client.World).SpawnEntity(item);
                     break;
                 case PlayerDiggingPacket.Action.StartDigging:
@@ -99,7 +100,7 @@ namespace TrueCraft.Handlers
                                     slot.Metadata += damage;
                                     if (slot.Metadata >= tool.Uses)
                                         slot.Count = 0; // Destroy item
-                                    client.Hotbar[client.SelectedSlot] = slot;
+                                    client.Hotbar[client.SelectedSlot].Item = slot;
                                 }
                             }
                         }
@@ -178,12 +179,12 @@ namespace TrueCraft.Handlers
         {
             var packet = (ClickWindowPacket)_packet;
             var client = (RemoteClient)_client;
-            IWindowContentServer window = client.CurrentWindow;
+            IWindow<IServerSlot> window = client.CurrentWindow;
 
             // Confirm expected Window ID
-            if (packet.WindowID != window.ID)
+            if (packet.WindowID != window.WindowID)
             {
-                server.Log(Core.Logging.LogCategory.Notice, "Invalid window number received {0}; expected {1}", packet.WindowID, window.ID);
+                server.Log(Core.Logging.LogCategory.Notice, "Invalid window number received {0}; expected {1}", packet.WindowID, window.WindowID);
                 server.DisconnectClient(_client);
                 return;
             }
@@ -212,9 +213,9 @@ namespace TrueCraft.Handlers
             }
 
             // Confirm reasonable slot index.
-            if (packet.SlotIndex >= window.Length || packet.SlotIndex < 0)
+            if (packet.SlotIndex >= window.Count || packet.SlotIndex < 0)
             {
-                server.Log(Core.Logging.LogCategory.Notice, "Illegal slot number received {0} in not in the set -999, [0, {1})", packet.SlotIndex, window.Length);
+                server.Log(Core.Logging.LogCategory.Notice, "Illegal slot number received {0} in not in the set -999, [0, {1})", packet.SlotIndex, window.Count);
                 server.DisconnectClient(_client);
                 return;
             }
@@ -222,7 +223,7 @@ namespace TrueCraft.Handlers
             // TODO confirm prior content of Slot
 
             ItemStack staging = client.ItemStaging;
-            bool accepted = window.HandleClick(packet.SlotIndex, packet.RightClick, packet.Shift, ref staging);
+            bool accepted = ((IServerWindow)window).HandleClick(packet.SlotIndex, packet.RightClick, packet.Shift, ref staging);
             client.ItemStaging = staging;
             client.QueuePacket(new TransactionStatusPacket(packet.WindowID, packet.TransactionID, accepted));
         }

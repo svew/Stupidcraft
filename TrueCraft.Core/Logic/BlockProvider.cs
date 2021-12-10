@@ -191,7 +191,7 @@ namespace TrueCraft.Core.Logic
             else
             {
                 item.Count--;
-                user.Inventory[user.SelectedSlot] = item;
+                user.Inventory[user.SelectedSlot].Item = item;
             }
         }
 

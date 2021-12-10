@@ -6,10 +6,12 @@ using TrueCraft.Client.Input;
 using Matrix = Microsoft.Xna.Framework.Matrix;
 using TVector3 = TrueCraft.Core.Vector3;
 using XVector3 = Microsoft.Xna.Framework.Vector3;
+using XMathHelper = Microsoft.Xna.Framework.MathHelper;
 using TrueCraft.Core.Logic;
 using TrueCraft.Core.Logic.Blocks;
 using TrueCraft.Core.Networking.Packets;
 using TrueCraft.Core.World;
+using TrueCraft.Core;
 
 namespace TrueCraft.Client.Modules
 {
@@ -82,7 +84,7 @@ namespace TrueCraft.Client.Modules
                     return true;
 
                 case Keys.E:
-                    Game.Client.CurrentWindow = Game.Client.InventoryWindowContent;
+                    Game.Client.CurrentWindow = Game.Client.InventoryWindow;
                     return true;
 
                 case Keys.Space:
@@ -238,7 +240,7 @@ namespace TrueCraft.Client.Modules
             Game.Client.Yaw -= look.X;
             Game.Client.Pitch -= look.Y;
             Game.Client.Yaw %= 360;
-            Game.Client.Pitch = MathHelper.Clamp(Game.Client.Pitch, -89.9f, 89.9f);
+            Game.Client.Pitch = XMathHelper.Clamp(Game.Client.Pitch, -89.9f, 89.9f);
 
             return true;
         }
@@ -251,7 +253,7 @@ namespace TrueCraft.Client.Modules
                     Digging = true;
                     return true;
                 case MouseButton.Right:
-                    var item = Game.Client.Hotbar[Game.Client.HotbarSelection];
+                    ItemStack item = Game.Client.Hotbar[Game.Client.HotbarSelection].Item;
                         Game.Client.QueuePacket(new PlayerBlockPlacementPacket(
                         Game.HighlightedBlock.X, (sbyte)Game.HighlightedBlock.Y, Game.HighlightedBlock.Z,
                         Game.HighlightedBlockFace, item.ID, item.Count, item.Metadata));
@@ -269,7 +271,7 @@ namespace TrueCraft.Client.Modules
             short damage;
             Game.EndDigging = Game.StartDigging.AddMilliseconds(
                 BlockProvider.GetHarvestTime(block,
-                    Game.Client.Hotbar[Game.Client.HotbarSelection].ID, out damage));
+                    Game.Client.Hotbar[Game.Client.HotbarSelection].Item.ID, out damage));
             Game.Client.QueuePacket(new PlayerDiggingPacket(
                 PlayerDiggingPacket.Action.StartDigging,
                 Game.TargetBlock.X, (sbyte)Game.TargetBlock.Y, Game.TargetBlock.Z,
@@ -315,7 +317,7 @@ namespace TrueCraft.Client.Modules
                 digging = true;
             if (gamePad.IsConnected && gamePad.Triggers.Left > 0.5f && GamePadState.Triggers.Left < 0.5f)
             {
-                var item = Game.Client.Hotbar[Game.Client.HotbarSelection];
+                ItemStack item = Game.Client.Hotbar[Game.Client.HotbarSelection].Item;
                 Game.Client.QueuePacket(new PlayerBlockPlacementPacket(
                     Game.HighlightedBlock.X, (sbyte)Game.HighlightedBlock.Y, Game.HighlightedBlock.Z,
                     Game.HighlightedBlockFace, item.ID, item.Count, item.Metadata));
@@ -327,7 +329,7 @@ namespace TrueCraft.Client.Modules
                 Game.Client.Yaw -= look.X;
                 Game.Client.Pitch -= look.Y;
                 Game.Client.Yaw %= 360;
-                Game.Client.Pitch = MathHelper.Clamp(Game.Client.Pitch, -89.9f, 89.9f);
+                Game.Client.Pitch = XMathHelper.Clamp(Game.Client.Pitch, -89.9f, 89.9f);
             }
 
             if (digging)
@@ -361,7 +363,7 @@ namespace TrueCraft.Client.Modules
             if (delta != XVector3.Zero)
             {
                 var lookAt = XVector3.Transform(-delta,
-                                 Matrix.CreateRotationY(MathHelper.ToRadians(-(Game.Client.Yaw - 180) + 180)));
+                                 Matrix.CreateRotationY(XMathHelper.ToRadians(-(Game.Client.Yaw - 180) + 180)));
 
                 lookAt.X *= (float)(gameTime.ElapsedGameTime.TotalSeconds * 4.3717);
                 lookAt.Z *= (float)(gameTime.ElapsedGameTime.TotalSeconds * 4.3717);

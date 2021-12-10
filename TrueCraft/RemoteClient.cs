@@ -9,16 +9,16 @@ using fNbt;
 using Ionic.Zlib;
 using TrueCraft.Core;
 using TrueCraft.Core.Entities;
+using TrueCraft.Core.Inventory;
 using TrueCraft.Core.Logging;
 using TrueCraft.Core.Logic;
 using TrueCraft.Core.Networking;
 using TrueCraft.Core.Networking.Packets;
 using TrueCraft.Core.Server;
-using TrueCraft.Core.Windows;
 using TrueCraft.Core.World;
 using TrueCraft.Exceptions;
+using TrueCraft.Inventory;
 using TrueCraft.Profiling;
-using TrueCraft.Windows;
 
 namespace TrueCraft
 {
@@ -29,12 +29,18 @@ namespace TrueCraft
             _loadedChunks = new HashSet<GlobalChunkCoordinates>();
             Server = server;
 
-            Inventory = new Slots(27, 9, 3);   // TODO hard-coded constants.
-            Hotbar = new Slots(9, 9, 1);       // TODO hard-coded constants.
-            Armor = new ArmorSlots();
-            Windows.WindowContentFactory factory = new Windows.WindowContentFactory();
-            CraftingGrid = new CraftingWindowContent(CraftingRepository.Get(), 2, 2);   // TODO hard-coded constants
-            InventoryWindowContent = (IInventoryWindowContent)factory.NewInventoryWindowContent(Inventory, Hotbar, Armor, CraftingGrid);
+            ISlotFactory<IServerSlot> slotFactory = SlotFactory<IServerSlot>.Get();
+            IItemRepository itemRepository = ItemRepository.Get();
+
+            Inventory = ServerSlots.GetServerSlots(itemRepository, 27);   // TODO hard-coded constant
+            Hotbar = ServerSlots.GetServerSlots(itemRepository, 9);       // TODO hard-coded constant
+            Armor = new ArmorSlots<IServerSlot>(itemRepository, slotFactory);
+            CraftingGrid = new CraftingArea<IServerSlot>(itemRepository,
+                CraftingRepository.Get(), slotFactory, 2, 2);                 // TODO hard-coded constants
+
+            InventoryWindowContent = new TrueCraft.Inventory.InventoryWindow(itemRepository,
+                CraftingRepository.Get(),
+                slotFactory, Inventory, Hotbar);
 
             SelectedSlot = 0;
 
@@ -70,22 +76,22 @@ namespace TrueCraft
         /// <summary>
         /// Gets the Player's Inventory.
         /// </summary>
-        public ISlots Inventory { get; }
+        public ISlots<IServerSlot> Inventory { get; }
 
         /// <summary>
         /// Gets the Player's Hotbar
         /// </summary>
-        public ISlots Hotbar { get; }
+        public ISlots<IServerSlot> Hotbar { get; }
 
         /// <summary>
         /// Gets the Player's Armor
         /// </summary>
-        public ISlots Armor { get; }
+        public ISlots<IServerSlot> Armor { get; }
 
         /// <summary>
         /// Gets the Player's Crafting Grid.
         /// </summary>
-        public ISlots CraftingGrid { get;  }
+        public ISlots<IServerSlot> CraftingGrid { get;  }
 
         /// <summary>
         /// Gets or sets the selected index in the Hotbar
@@ -96,13 +102,13 @@ namespace TrueCraft
 
         public ItemStack ItemStaging { get; set; }
 
-        private IWindowContentServer _currentWindow;
+        private IWindow<IServerSlot> _currentWindow;
 
-        public IWindowContentServer CurrentWindow
+        public IWindow<IServerSlot> CurrentWindow
         {
             get
             {
-                return _currentWindow ?? (IWindowContentServer)InventoryWindowContent;
+                return _currentWindow ?? InventoryWindowContent;
             }
             internal set
             {
@@ -206,14 +212,14 @@ namespace TrueCraft
         {
             get
             {
-                return Hotbar[SelectedSlot];
+                return Hotbar[SelectedSlot].Item;
             }
         }
 
         /// <summary>
         /// Gets the contents of the player's inventory window.
         /// </summary>
-        public IInventoryWindowContent InventoryWindowContent { get; }
+        public IInventoryWindow<IServerSlot> InventoryWindowContent { get; }
 
         internal int ChunkRadius { get; set; }
 
@@ -273,9 +279,7 @@ namespace TrueCraft
                         new NbtDouble(Entity.Position.Y),
                         new NbtDouble(Entity.Position.Z)
                     }),
-                    // TODO BUG: this saves the items in the Crafting area as part of the player's inventory.
-                    //           They should be dropped when the player closes the window.
-                    new NbtList("inventory", InventoryWindowContent.GetSlots().Select(s => s.ToNbt())),
+                    new NbtList("inventory", InventoryTags()),
                     new NbtShort("health", (Entity as PlayerEntity).Health),
                     new NbtFloat("yaw", Entity.Yaw),
                     new NbtFloat("pitch", Entity.Pitch),
@@ -284,24 +288,48 @@ namespace TrueCraft
             nbt.SaveToFile(path, NbtCompression.ZLib);
         }
 
-        public void OpenWindow(IWindowContent window)
+        private IEnumerable<NbtTag> InventoryTags()
         {
-            CurrentWindow = (IWindowContentServer)window;
-            window.Client = this;
-            window.ID = NextWindowID++;
-            if (NextWindowID < 0) NextWindowID = 1;
-            QueuePacket(new OpenWindowPacket(window.ID, window.Type, window.Name, (sbyte)window.Length2));
-            QueuePacket(new WindowItemsPacket(window.ID, window.GetSlots()));
+            List<NbtTag> rv = new List<NbtTag>();
+            // TODO: does B1.7.3 really save the crafting contents?
+            // TODO BUG: this saves the items in the Crafting area as part of the player's inventory.
+            //           They should be dropped when the player closes the window.
+            rv.AddRange(CraftingGrid.Select(s => s.Item.ToNbt()));
+            rv.AddRange(Armor.Select(s => s.Item.ToNbt()));
+            rv.AddRange(Inventory.Select(s => s.Item.ToNbt()));
+            rv.AddRange(Hotbar.Select(s => s.Item.ToNbt()));
+
+            return rv;
+        }
+
+        public void OpenWindow(IWindow<IServerSlot> window)
+        {
+            CurrentWindow = window;
+
+            int len = window.Count - window.MainInventory.Count - window.Hotbar.Count;
+            QueuePacket(new OpenWindowPacket(window.WindowID, window.Type, window.Name, (sbyte)len));
+
+            QueuePacket(new WindowItemsPacket(window.WindowID, AllItems(window)));
+        }
+
+        private static ItemStack[] AllItems(IWindow<IServerSlot> window)
+        {
+            int jul = window.Count;
+            ItemStack[] rv = new ItemStack[jul];
+            for (int j = 0; j < jul; j ++)
+                rv[j] = window[j];
+
+            return rv;
         }
 
         public void CloseWindow(bool clientInitiated = false)
         {
             if (!clientInitiated)
-                QueuePacket(new CloseWindowPacket(CurrentWindow.ID));
+                QueuePacket(new CloseWindowPacket(CurrentWindow.WindowID));
 
             // TODO Something else instantiates the window and gives it to us.  Then, we destroy it?
             //      Almost certainly the wrong action for a Chest.
-            CurrentWindow.Dispose();
+            //CurrentWindow.Dispose();
             CurrentWindow = null;
         }
 

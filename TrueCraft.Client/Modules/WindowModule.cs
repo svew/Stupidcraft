@@ -4,9 +4,10 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using TrueCraft.Client.Handlers;
 using TrueCraft.Client.Input;
+using TrueCraft.Client.Inventory;
 using TrueCraft.Client.Rendering;
-using TrueCraft.Client.Windows;
 using TrueCraft.Core;
+using TrueCraft.Core.Inventory;
 using TrueCraft.Core.Logic;
 using TrueCraft.Core.Networking;
 using TrueCraft.Core.Networking.Packets;
@@ -114,9 +115,9 @@ namespace TrueCraft.Client.Modules
                     break;
 
                 case WindowType.Chest:
-                    int len = Game.Client.CurrentWindow.Length2;
-                    Texture2D texture = (len == ChestWindowConstants.ChestLength ? _chest : _doubleChest);
-                    Rectangle chestRect = (len == ChestWindowConstants.ChestLength ? _chestWindowRect : _doubleChestWindowRect);
+                    bool doubleChest = ((IChestWindow<ISlot>)Game.Client.CurrentWindow).DoubleChest;
+                    Texture2D texture = (doubleChest ? _doubleChest : _chest);
+                    Rectangle chestRect = (doubleChest ? _doubleChestWindowRect : _chestWindowRect);
 
                     SpriteBatch.Draw(texture,
                         new Vector2(Game.GraphicsDevice.Viewport.Width / 2 - Scale(chestRect.Width / 2),
@@ -235,7 +236,7 @@ namespace TrueCraft.Client.Modules
         {
             if (Game.Client.CurrentWindow == null)
                 return false;
-            var id = Game.Client.CurrentWindow.ID;
+            var id = Game.Client.CurrentWindow.WindowID;
             if (id == -1)
                 id = 0;
             var item = ItemStack.EmptyStack;
@@ -247,7 +248,7 @@ namespace TrueCraft.Client.Modules
             bool shiftClick = Keyboard.GetState().IsKeyDown(Keys.LeftShift) || Keyboard.GetState().IsKeyDown(Keys.RightShift);
 
             ActionConfirmation action;
-            action = Game.Client.CurrentWindow.HandleClick(SelectedSlot,
+            action = ((IClickHandler)Game.Client.CurrentWindow).HandleClick(SelectedSlot,
                 rightClick, shiftClick, new MyHeldItem(this));
             if (object.ReferenceEquals(action, null))
                 return true;
@@ -274,7 +275,7 @@ namespace TrueCraft.Client.Modules
                     // TODO When the player closes a window with a Crafting Grid,
                     //      any items in the Grid's input should be dropped.
                     if (Game.Client.CurrentWindow.Type != WindowType.Inventory)
-                        Game.Client.QueuePacket(new CloseWindowPacket(Game.Client.CurrentWindow.ID));
+                        Game.Client.QueuePacket(new CloseWindowPacket(Game.Client.CurrentWindow.WindowID));
                     Game.Client.CurrentWindow = null;
                     Mouse.SetPosition(Game.GraphicsDevice.Viewport.Width / 2, Game.GraphicsDevice.Viewport.Height / 2);
                     Game.ControlModule.IgnoreNextUpdate = true;
@@ -287,27 +288,26 @@ namespace TrueCraft.Client.Modules
         private void DrawInventoryWindow(RenderStage stage)
         {
             // TODO fix hard-coded constants
-            InventoryWindowContentClient window = (InventoryWindowContentClient)Game.Client.CurrentWindow;
-            DrawWindowArea(window.CraftingGrid, window.CraftingOutputIndex, 88, 26, InventoryWindowRect, stage);
-            DrawWindowArea(window.Armor, window.ArmorIndex, 8, 8, InventoryWindowRect, stage);
-            DrawWindowArea(window.MainInventory, window.MainIndex, 8, 84, InventoryWindowRect, stage);
-            DrawWindowArea(window.Hotbar, window.HotbarIndex, 8, 142, InventoryWindowRect, stage);
+            InventoryWindow window = (InventoryWindow)Game.Client.CurrentWindow;
+            DrawWindowArea(window.CraftingGrid, InventoryWindow.CraftingOutputSlotIndex, 88, 26, InventoryWindowRect, stage);
+            DrawWindowArea(window.Armor, InventoryWindow.ArmorSlotIndex, 8, 8, InventoryWindowRect, stage);
+            DrawWindowArea(window.MainInventory, InventoryWindow.MainSlotIndex, 8, 84, InventoryWindowRect, stage);
+            DrawWindowArea(window.Hotbar, InventoryWindow.HotbarSlotIndex, 8, 142, InventoryWindowRect, stage);
         }
 
         private void DrawCraftingWindow(RenderStage stage)
         {
             // TODO fix hard-coded constants
-            CraftingBenchWindowContentClient window = (CraftingBenchWindowContentClient)Game.Client.CurrentWindow;
-            DrawWindowArea(window.CraftingGrid, window.CraftingOutputIndex, 29, 16, CraftingWindowRect, stage);
-            DrawWindowArea(window.MainInventory, window.MainIndex, 8, 84, CraftingWindowRect, stage);
-            DrawWindowArea(window.Hotbar, window.HotbarIndex, 8, 142, CraftingWindowRect, stage);
+            CraftingBenchWindow window = (CraftingBenchWindow)Game.Client.CurrentWindow;
+            DrawWindowArea(window.CraftingArea, CraftingBenchWindow.CraftingOutputSlotIndex, 29, 16, CraftingWindowRect, stage);
+            DrawWindowArea(window.MainInventory, CraftingBenchWindow.MainSlotIndex, 8, 84, CraftingWindowRect, stage);
+            DrawWindowArea(window.Hotbar, CraftingBenchWindow.HotbarSlotIndex, 8, 142, CraftingWindowRect, stage);
         }
 
         private void DrawChestWindow(RenderStage stage)
         {
-            ChestWindowContentClient window = (ChestWindowContentClient)Game.Client.CurrentWindow;
-            int len = window.Length2;
-            bool bSingleChest = len == ChestWindowConstants.ChestLength;
+            ChestWindow window = (ChestWindow)Game.Client.CurrentWindow;
+            bool bSingleChest = !window.DoubleChest;
             Rectangle rect = bSingleChest ? _chestWindowRect : _doubleChestWindowRect;
 
             // TODO fix hard-coded constants
@@ -321,9 +321,11 @@ namespace TrueCraft.Client.Modules
             //       Hotbar inventory.
             int yPlayerInventory = bSingleChest ? 84 : 140;
 
-            DrawWindowArea(window.ChestInventory, window.ChestIndex, 8, 18, rect, stage);
-            DrawWindowArea(window.MainInventory, window.MainIndex, 8, yPlayerInventory, rect, stage);
-            DrawWindowArea(window.Hotbar, window.HotbarIndex, 8, yPlayerInventory + 58, rect, stage);
+            ISlots<ISlot> deleteme = window.ChestInventory;
+
+            DrawWindowArea(window.ChestInventory, window.ChestSlotIndex, 8, 18, rect, stage);
+            DrawWindowArea(window.MainInventory, window.MainSlotIndex, 8, yPlayerInventory, rect, stage);
+            DrawWindowArea(window.Hotbar, window.HotbarSlotIndex, 8, yPlayerInventory + 58, rect, stage);
         }
 
         /// <summary>
@@ -335,7 +337,7 @@ namespace TrueCraft.Client.Modules
         /// <param name="yOffset">The r-coordinate within the GUI's Texture of the first slot of the Window Area.</param>
         /// <param name="frame">The Rectangle which is filled with the GUI Texture.</param>
         /// <param name="stage"></param>
-        private void DrawWindowArea(ISlots area, int startIndex, int xOffset, int yOffset, Rectangle frame, RenderStage stage)
+        private void DrawWindowArea(ISlots<ISlot> area, int startIndex, int xOffset, int yOffset, Rectangle frame, RenderStage stage)
         {
             var mouse = Mouse.GetState().Position.ToVector2();
             var scale = new Point((int)(16 * Game.ScaleFactor * 2));
@@ -345,10 +347,10 @@ namespace TrueCraft.Client.Modules
 
             for (int i = 0; i < area.Count; i++)
             {
-                var item = area[i];
+                ItemStack item = area[i].Item;
                 int x = (int)((i % area.Width) * Scale(18));
                 int y = (int)((i / area.Width) * Scale(18));
-                if (area is CraftingWindowContent)
+                if (area is ICraftingArea<ISlot>)
                 {
                     // yes I know this is a crappy hack
                     if (i == 0)

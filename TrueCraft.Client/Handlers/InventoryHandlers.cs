@@ -1,6 +1,6 @@
 ﻿using System;
-using TrueCraft.Client.Windows;
 using TrueCraft.Core;
+using TrueCraft.Core.Inventory;
 using TrueCraft.Core.Logic;
 using TrueCraft.Core.Networking;
 using TrueCraft.Core.Networking.Packets;
@@ -14,7 +14,7 @@ namespace TrueCraft.Client.Handlers
         {
             var packet = (WindowItemsPacket)_packet;
             if (packet.WindowID == 0)
-                client.InventoryWindowContent.SetSlots(packet.Items);
+                client.InventoryWindow.SetSlots(packet.Items);
             else
                 client.CurrentWindow.SetSlots(packet.Items);
         }
@@ -22,14 +22,14 @@ namespace TrueCraft.Client.Handlers
         public static void HandleSetSlot(IPacket _packet, MultiplayerClient client)
         {
             var packet = (SetSlotPacket)_packet;
-            IWindowContent window = null;
+            IWindow<ISlot> window = null;
             if (packet.WindowID == 0)
-                window = client.InventoryWindowContent;
+                window = client.InventoryWindow;
             else
                 window = client.CurrentWindow;
             if (window != null)
             {
-                if (packet.SlotIndex >= 0 && packet.SlotIndex < window.Length)
+                if (packet.SlotIndex >= 0 && packet.SlotIndex < window.Count)
                 {
                     window[packet.SlotIndex] = new ItemStack(packet.ItemID, packet.Count, packet.Metadata);
                 }
@@ -39,23 +39,28 @@ namespace TrueCraft.Client.Handlers
         public static void HandleOpenWindowPacket(IPacket _packet, MultiplayerClient client)
         {
             var packet = (OpenWindowPacket)_packet;
-            IWindowContentClient window = null;
+            sbyte windowID = packet.WindowID;
+            IInventoryFactory<ISlot> factory = new InventoryFactory<ISlot>();
+            IItemRepository itemRepository = ItemRepository.Get();
+            ISlotFactory<ISlot> slotFactory = SlotFactory<ISlot>.Get();
+
+            IWindow<ISlot> window = null;
             switch (packet.Type)
             {
                 case WindowType.CraftingBench:
-                    window = new CraftingBenchWindowContentClient(client.Inventory, client.Hotbar,
-                        CraftingRepository.Get(), ItemRepository.Get());
+                    window = factory.NewCraftingBenchWindow(itemRepository,
+                        CraftingRepository.Get(), slotFactory,
+                        windowID, client.Inventory, client.Hotbar, packet.Title, 3, 3);    // TODO hard-coded constants
                     break;
 
                 case WindowType.Chest:
-                    window = new ChestWindowContentClient(client.Inventory, client.Hotbar,
-                        packet.TotalSlots == 2 * ChestWindowConstants.ChestLength,
-                        ItemRepository.Get());
+                    window = factory.NewChestWindow(itemRepository, slotFactory,
+                        windowID, client.Inventory, client.Hotbar,
+                        null, null, null);
                     break;
             }
 
             // TODO: For any window type other than CraftingBench or Chest, window will be null.
-            window.ID = packet.WindowID;
             client.CurrentWindow = window;
         }
 

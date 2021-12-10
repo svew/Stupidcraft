@@ -15,25 +15,21 @@ namespace TrueCraft.Core.Logic
         {
         }
 
-        public void DoDiscovery()
+        public static void DoDiscovery(IDiscover discoverer)
         {
-            BlockRepository.Init(this);
-            ItemRepository.Init(this);
-            CraftingRepository.Init(this);
+            BlockRepository.Init(discoverer);
+            ItemRepository.Init(discoverer);
+            CraftingRepository.Init(discoverer);
         }
 
-        public void DiscoverBlockProviders(IRegisterBlockProvider repository)
+        public virtual void DiscoverBlockProviders(IRegisterBlockProvider repository)
         {
             var providerTypes = new List<Type>();
-            // TODO: this can only enumerate loaded assemblies.  It cannot
-            //   load unknown assemblies, such as those containing extended (mod) blocks.
-            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            Assembly thisAssembly = this.GetType().Assembly;
+            foreach (var type in thisAssembly.GetTypes().Where(t =>
+                typeof(IBlockProvider).IsAssignableFrom(t) && !t.IsAbstract))
             {
-                foreach (var type in assembly.GetTypes().Where(t =>
-                    typeof(IBlockProvider).IsAssignableFrom(t) && !t.IsAbstract))
-                {
-                    providerTypes.Add(type);
-                }
+                providerTypes.Add(type);
             }
 
             providerTypes.ForEach(t =>
@@ -43,7 +39,7 @@ namespace TrueCraft.Core.Logic
             });
         }
 
-        public void DiscoverItemProviders(IRegisterItemProvider repository)
+        public virtual void DiscoverItemProviders(IRegisterItemProvider repository)
         {
             var providerTypes = new List<Type>();
             // TODO: This can only enumerate currently loaded assemblies.
@@ -65,7 +61,7 @@ namespace TrueCraft.Core.Logic
         }
 
 
-        public void DiscoverRecipes(IRegisterRecipe repository)
+        public virtual void DiscoverRecipes(IRegisterRecipe repository)
         {
             XmlDocument doc = new XmlDocument();
 

@@ -30,4 +30,10 @@
     <ProjectReference Include="..\..\TrueCraft\TrueCraft.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="Windows\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Windows\" />
+  </ItemGroup>
 </Project>

@@ -19,6 +19,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Windows\" />
+  </ItemGroup>
+  <ItemGroup>
     <Content Include="Content/**/*.png" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="Content/**/*.txt" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="Content/**/*.ogg" CopyToOutputDirectory="PreserveNewest" />
@@ -42,4 +45,7 @@
     <None Include="..\lib\osx-x64\*" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Windows\" />
+  </ItemGroup>
 </Project>

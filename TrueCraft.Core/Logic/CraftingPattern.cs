@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Xml;
+using TrueCraft.Core.Inventory;
 using TrueCraft.Core.Windows;
 
 namespace TrueCraft.Core.Logic
@@ -103,73 +104,73 @@ namespace TrueCraft.Core.Logic
 
         }
 
-        private CraftingPattern(ICraftingArea area, int xmin, int xmax, int ymin, int ymax)
-        {
-            _pattern = new ItemStack[xmax - xmin + 1, ymax - ymin + 1];
+        //private CraftingPattern(ICraftingArea<T> area, int xmin, int xmax, int ymin, int ymax)
+        //{
+        //    _pattern = new ItemStack[xmax - xmin + 1, ymax - ymin + 1];
 
-            for (int x = xmin; x <= xmax; x++)
-                for (int y = ymin; y <= ymax; y++)
-                {
-                    ItemStack item = area.GetItemStack(x, y);
-                    _pattern[x - xmin, y - ymin] = new ItemStack(item.ID, 1, item.Metadata);
-                }
-        }
+        //    for (int x = xmin; x <= xmax; x++)
+        //        for (int y = ymin; y <= ymax; y++)
+        //        {
+        //            ItemStack item = area.GetItemStack(x, y);
+        //            _pattern[x - xmin, y - ymin] = new ItemStack(item.ID, 1, item.Metadata);
+        //        }
+        //}
 
-        public static CraftingPattern GetCraftingPattern(ICraftingArea area)
-        {
-            // Find x & y extents of the crafting inputs.
-            int xmin, xmax;
-            int ymin, ymax;
-            bool blank;
+        //public static CraftingPattern<T> GetCraftingPattern(ICraftingArea<T> area)
+        //{
+        //    // Find x & y extents of the crafting inputs.
+        //    int xmin, xmax;
+        //    int ymin, ymax;
+        //    bool blank;
 
-            // Find the smallest non-empty column index
-            xmin = 0;
-            do
-            {
-                blank = true;
-                for (int y = 0; y < area.Height && blank; y++)
-                    blank = (ItemStack.EmptyStack == area.GetItemStack(xmin, y));
-                if (blank)
-                    xmin++;
-            } while (blank && xmin < area.Width);
-            if (xmin == area.Width)
-                return null;
+        //    // Find the smallest non-empty column index
+        //    xmin = 0;
+        //    do
+        //    {
+        //        blank = true;
+        //        for (int y = 0; y < area.Height && blank; y++)
+        //            blank = (ItemStack.EmptyStack == area.GetItemStack(xmin, y));
+        //        if (blank)
+        //            xmin++;
+        //    } while (blank && xmin < area.Width);
+        //    if (xmin == area.Width)
+        //        return null;
 
-            // Find the largest non-empty column index.
-            xmax = area.Width - 1;
-            do
-            {
-                blank = true;
-                for (int y = area.Height - 1; y >= 0 && blank; y--)
-                    blank = (ItemStack.EmptyStack == area.GetItemStack(xmax, y));
-                if (blank)
-                    xmax--;
-            } while (blank);
+        //    // Find the largest non-empty column index.
+        //    xmax = area.Width - 1;
+        //    do
+        //    {
+        //        blank = true;
+        //        for (int y = area.Height - 1; y >= 0 && blank; y--)
+        //            blank = (ItemStack.EmptyStack == area.GetItemStack(xmax, y));
+        //        if (blank)
+        //            xmax--;
+        //    } while (blank);
 
-            // Find the smallest non-empty row index.
-            ymin = 0;
-            do
-            {
-                blank = true;
-                for (int x = xmin; x <= xmax && blank; x++)
-                    blank = (ItemStack.EmptyStack == area.GetItemStack(x, ymin));
-                if (blank)
-                    ymin++;
-            } while (blank);
+        //    // Find the smallest non-empty row index.
+        //    ymin = 0;
+        //    do
+        //    {
+        //        blank = true;
+        //        for (int x = xmin; x <= xmax && blank; x++)
+        //            blank = (ItemStack.EmptyStack == area.GetItemStack(x, ymin));
+        //        if (blank)
+        //            ymin++;
+        //    } while (blank);
 
-            // Find the largest non-empty row index.
-            ymax = area.Height - 1;
-            do
-            {
-                blank = true;
-                for (int x = xmax; x >= xmin && blank; x--)
-                    blank = (ItemStack.EmptyStack == area.GetItemStack(x, ymax));
-                if (blank)
-                    ymax--;
-            } while (blank);
+        //    // Find the largest non-empty row index.
+        //    ymax = area.Height - 1;
+        //    do
+        //    {
+        //        blank = true;
+        //        for (int x = xmax; x >= xmin && blank; x--)
+        //            blank = (ItemStack.EmptyStack == area.GetItemStack(x, ymax));
+        //        if (blank)
+        //            ymax--;
+        //    } while (blank);
 
-            return new CraftingPattern(area, xmin, xmax, ymin, ymax);
-        }
+        //    return new CraftingPattern<T>(area, xmin, xmax, ymin, ymax);
+        //}
         #endregion  // Construction
 
         public int Width { get => _pattern.GetLength(0); }

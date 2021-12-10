@@ -1,11 +1,14 @@
 ﻿using System;
 using TrueCraft.Core.World;
 using TrueCraft.Core.Entities;
-using TrueCraft.Core.Windows;
 using TrueCraft.Core.Server;
+using TrueCraft.Core.Inventory;
 
 namespace TrueCraft.Core.Networking
 {
+    // TODO: this appears to be a server-side only concern.
+    //       However, moving it from Core to Server is non-trivial due to the
+    //       large number of references to it in Core.
     public interface IRemoteClient
     {
         /// <summary>
@@ -28,27 +31,27 @@ namespace TrueCraft.Core.Networking
         /// <summary>
         /// This client's main inventory.
         /// </summary>
-        ISlots Inventory { get; }
+        ISlots<IServerSlot> Inventory { get; }
 
         /// <summary>
         /// This client's HotBar slots.
         /// </summary>
-        ISlots Hotbar { get; }
+        ISlots<IServerSlot> Hotbar { get; }
 
         /// <summary>
         /// This client's Armor slots.
         /// </summary>
-        ISlots Armor { get; }
+        ISlots<IServerSlot> Armor { get; }
 
         /// <summary>
         /// Gets this client's Crafting Grid.
         /// </summary>
-        ISlots CraftingGrid { get; }
+        ISlots<IServerSlot> CraftingGrid { get; }
 
         /// <summary>
         /// Gets the IWindowContent representing the player's inventory, hotbar, crafting grid, and armor.
         /// </summary>
-        IInventoryWindowContent InventoryWindowContent { get; }
+        IInventoryWindow<IServerSlot> InventoryWindowContent { get; }
 
         /// <summary>
         /// The username of the connected client. May be null if not yet ascertained.
@@ -106,10 +109,11 @@ namespace TrueCraft.Core.Networking
         /// If logging is enabled, sends your message to the client as chat.
         /// </summary>
         void Log(string message, params object[] parameters);
+
         /// <summary>
         /// Opens a window on the client. This sends the appropriate packets and tracks
         /// this window as the currently open window.
         /// </summary>
-        void OpenWindow(IWindowContent window);
+        void OpenWindow(IWindow<IServerSlot> window);
     }
 }

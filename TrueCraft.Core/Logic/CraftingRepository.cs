@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using TrueCraft.Core.Inventory;
 
 namespace TrueCraft.Core.Logic
 {

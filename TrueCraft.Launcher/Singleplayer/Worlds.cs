@@ -48,8 +48,7 @@ namespace TrueCraft.Launcher.Singleplayer
             }
             var world = new World(name, s, new StandardGenerator());
 
-            Discover discover = new Discover();
-            discover.DoDiscovery();
+            Discover.DoDiscovery(new Discover());
             world.BlockRepository = BlockRepository.Get();
 
             var safeName = name;

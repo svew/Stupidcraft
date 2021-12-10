@@ -7,6 +7,7 @@ using fNbt;
 using TrueCraft.Core.Server;
 using TrueCraft.Core.Networking.Packets;
 using TrueCraft.Core.Entities;
+using TrueCraft.Core.Inventory;
 
 namespace TrueCraft.Core.Logic.Blocks
 {
@@ -98,10 +99,23 @@ namespace TrueCraft.Core.Logic.Blocks
 
             public void Dispose()
             {
-                // TODO: if anything subscribes to the Disposed event, we'll get infinite recursion...
-                if (Disposed != null)
-                    Dispose();
+                Disposed?.Invoke(this, EventArgs.Empty);
             }
+        }
+
+        /// <summary>
+        /// A class to track the pair of the FurnaceWindow and its associated IRemoteClient instance
+        /// </summary>
+        protected class FurnaceWindowUser
+        {
+            public FurnaceWindowUser(IFurnaceWindow<IServerSlot> window, IRemoteClient user)
+            {
+                this.Window = window;
+                this.User = user;
+            }
+
+            public IFurnaceWindow<IServerSlot> Window { get; }
+            public IRemoteClient User { get; }
         }
 
         public static readonly byte BlockID = 0x3D;
@@ -129,15 +143,11 @@ namespace TrueCraft.Core.Logic.Blocks
             return new[] { new ItemStack(BlockID) };
         }
 
-        protected static Dictionary<GlobalVoxelCoordinates, FurnaceEventSubject> TrackedFurnaces { get; set; }
-        protected static Dictionary<GlobalVoxelCoordinates, List<IWindowContent>> TrackedFurnaceWindows { get; set; }
-
-        public FurnaceBlock()
-        {
-            // TODO: Why are static members initialized in an instance constructor???
-            TrackedFurnaces = new Dictionary<GlobalVoxelCoordinates, FurnaceEventSubject>();
-            TrackedFurnaceWindows = new Dictionary<GlobalVoxelCoordinates, List<IWindowContent>>();
-        }
+        // TODO: An instance of GlobalVoxelCoordinates is not sufficient.  If a
+        //       furnace is placed in another dimension at the same coordinates,
+        //       this will fail.
+        protected static Dictionary<GlobalVoxelCoordinates, FurnaceEventSubject> _trackedFurnaces = new Dictionary<GlobalVoxelCoordinates, FurnaceEventSubject>();
+        protected static Dictionary<GlobalVoxelCoordinates, List<FurnaceWindowUser>> _trackedFurnaceWindows = new Dictionary<GlobalVoxelCoordinates, List<FurnaceWindowUser>>();
 
         private NbtCompound CreateTileEntity()
         {
@@ -166,21 +176,23 @@ namespace TrueCraft.Core.Logic.Blocks
 
         private void UpdateWindows(GlobalVoxelCoordinates coords, FurnaceState state)
         {
-            if (TrackedFurnaceWindows.ContainsKey(coords))
+            ServerOnly.Assert();
+
+            if (_trackedFurnaceWindows.ContainsKey(coords))
             {
                 Handling = true;
-                foreach (var window in TrackedFurnaceWindows[coords])
+                foreach (var window in _trackedFurnaceWindows[coords])
                 {
-                    window[0] = state.Ingredient;  // TODO hard-coded indices.
-                    window[1] = state.Fuel;
-                    window[2] = state.Output;
+                    window.Window[0] = state.Ingredient;  // TODO hard-coded indices.
+                    window.Window[1] = state.Fuel;
+                    window.Window[2] = state.Output;
 
-                    window.Client.QueuePacket(new UpdateProgressPacket(
-                        window.ID, UpdateProgressPacket.ProgressTarget.ItemCompletion, state.CookTime));
+                    window.User.QueuePacket(new UpdateProgressPacket(
+                        window.Window.WindowID, UpdateProgressPacket.ProgressTarget.ItemCompletion, state.CookTime));
                     var burnProgress = state.BurnTimeRemaining / (double)state.BurnTimeTotal;
                     var burn = (short)(burnProgress * 250);
-                    window.Client.QueuePacket(new UpdateProgressPacket(
-                        window.ID, UpdateProgressPacket.ProgressTarget.AvailableHeat, burn));
+                    window.User.QueuePacket(new UpdateProgressPacket(
+                        window.Window.WindowID, UpdateProgressPacket.ProgressTarget.AvailableHeat, burn));
                 }
                 Handling = false;
             }
@@ -194,12 +206,16 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IWorld world)
         {
+            ServerOnly.Assert();
+
             var state = GetState(world, coords);
             TryInitializeFurnace(state, server.Scheduler, world, coords, server.ItemRepository);
         }
 
         public override void BlockMined(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
         {
+            ServerOnly.Assert();
+
             var entity = world.GetTileEntity(descriptor.Coordinates);
             if (entity != null)
             {
@@ -218,16 +234,16 @@ namespace TrueCraft.Core.Logic.Blocks
         {
             ServerOnly.Assert();
 
-            WindowContentFactory factory = new WindowContentFactory();
-            IWindowContent window = factory.NewFurnaceWindowContent(user.Inventory, user.Hotbar,
-                             descriptor.Coordinates,
-                             user.Server.ItemRepository);
+            IInventoryFactory<IServerSlot> factory = new InventoryFactory<IServerSlot>();
+            IFurnaceWindow<IServerSlot> window = factory.NewFurnaceWindow(user.Server.ItemRepository,
+                SlotFactory<IServerSlot>.Get(), WindowIDs.GetWindowID(), user.Inventory, user.Hotbar,
+                world, descriptor.Coordinates);
 
             user.OpenWindow(window);
-            if (!TrackedFurnaceWindows.ContainsKey(descriptor.Coordinates))
-                TrackedFurnaceWindows[descriptor.Coordinates] = new List<IWindowContent>();
-            TrackedFurnaceWindows[descriptor.Coordinates].Add(window);
-            window.Disposed += (sender, e) => TrackedFurnaceWindows.Remove(descriptor.Coordinates);
+            if (!_trackedFurnaceWindows.ContainsKey(descriptor.Coordinates))
+                _trackedFurnaceWindows[descriptor.Coordinates] = new List<FurnaceWindowUser>();
+            _trackedFurnaceWindows[descriptor.Coordinates].Add(new FurnaceWindowUser(window, user));
+            window.WindowClosed += (sender, e) => _trackedFurnaceWindows.Remove(descriptor.Coordinates);
 
             FurnaceState state = GetState(world, descriptor.Coordinates);
             UpdateWindows(descriptor.Coordinates, state);
@@ -276,7 +292,7 @@ namespace TrueCraft.Core.Logic.Blocks
         private void TryInitializeFurnace(FurnaceState state, IEventScheduler scheduler, IWorld world,
                                           GlobalVoxelCoordinates coords, IItemRepository itemRepository)
         {
-            if (TrackedFurnaces.ContainsKey(coords))
+            if (_trackedFurnaces.ContainsKey(coords))
                 return;
 
             ItemStack inputStack = state.Ingredient;
@@ -294,7 +310,7 @@ namespace TrueCraft.Core.Logic.Blocks
                     SetState(world, coords, state);
                 }
                 var subject = new FurnaceEventSubject();
-                TrackedFurnaces[coords] = subject;
+                _trackedFurnaces[coords] = subject;
                 scheduler.ScheduleEvent("smelting", subject, TimeSpan.FromSeconds(1),
                     server => UpdateFurnace(server.Scheduler, world, coords, itemRepository));
                 return;
@@ -311,7 +327,7 @@ namespace TrueCraft.Core.Logic.Blocks
                     SetState(world, coords, state);
                     world.SetBlockID(coords, LitFurnaceBlock.BlockID);
                     var subject = new FurnaceEventSubject();
-                    TrackedFurnaces[coords] = subject;
+                    _trackedFurnaces[coords] = subject;
                     scheduler.ScheduleEvent("smelting", subject, TimeSpan.FromSeconds(1),
                         server => UpdateFurnace(server.Scheduler, world, coords, itemRepository));
                 }
@@ -321,8 +337,8 @@ namespace TrueCraft.Core.Logic.Blocks
         private void UpdateFurnace(IEventScheduler scheduler, IWorld world, GlobalVoxelCoordinates coords, IItemRepository itemRepository)
         {
             // TODO: Why remove it on update?
-            if (TrackedFurnaces.ContainsKey(coords))
-                TrackedFurnaces.Remove(coords);
+            if (_trackedFurnaces.ContainsKey(coords))
+                _trackedFurnaces.Remove(coords);
 
             if (world.GetBlockID(coords) != FurnaceBlock.BlockID && world.GetBlockID(coords) != LitFurnaceBlock.BlockID)
             {

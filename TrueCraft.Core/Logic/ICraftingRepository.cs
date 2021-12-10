@@ -1,4 +1,5 @@
-using TrueCraft.Core.Windows;
+using TrueCraft.Core.Inventory;
+
 
 namespace TrueCraft.Core.Logic
 {

@@ -3,6 +3,8 @@ using TrueCraft.Core.World;
 using TrueCraft.Core.Windows;
 using TrueCraft.Core.Entities;
 using TrueCraft.Core.Networking;
+using TrueCraft.Core.Inventory;
+using TrueCraft.Core.Server;
 
 namespace TrueCraft.Core.Logic.Blocks
 {
@@ -34,18 +36,18 @@ namespace TrueCraft.Core.Logic.Blocks
         {
             Server.ServerOnly.Assert();
 
-            IWindowContentFactory factory = new WindowContentFactory();
-            ICraftingBenchWindowContent window = (ICraftingBenchWindowContent)
-                factory.NewCraftingBenchWindowContent(user.Inventory, user.Hotbar,
-                CraftingRepository.Get(), user.Server.ItemRepository);
+            IInventoryFactory<IServerSlot> factory = new InventoryFactory<IServerSlot>();
+            ICraftingBenchWindow<IServerSlot> window = factory.NewCraftingBenchWindow(
+                ItemRepository.Get(), CraftingRepository.Get(), SlotFactory<IServerSlot>.Get(),
+                WindowIDs.GetWindowID(), user.Inventory, user.Hotbar, "Crafting", 3, 3);
             user.OpenWindow(window);
 
             // TODO: this should be called in response to Close Window packet, not Disposed.
-            window.Disposed += (sender, e) =>
+            window.WindowClosed += (sender, e) =>
             {
                 // TODO BUG: this does not appear to be called (Items do not spawn, and remain in 2x2 (3x3?) Crafting Grid for next opening).
                 var entityManager = user.Server.GetEntityManagerForWorld(world);
-                ItemStack[] inputs = window.ClearInputs();
+                ItemStack[,] inputs = window.CraftingArea.GetItemStacks();
                 foreach(ItemStack item in inputs)
                 {
                     if (!item.Empty)

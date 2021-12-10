@@ -1,29 +1,60 @@
 using System;
 using Moq;
+using TrueCraft.Core.Inventory;
 using TrueCraft.Core.Logic;
-using TrueCraft.Core.Windows;
 using NUnit.Framework;
 using System.Xml;
+using System.Text;
 
 namespace TrueCraft.Core.Test.Logic
 {
     [TestFixture]
     public class TestCraftingPattern
     {
-        private static Mock<ICraftingArea> GetCraftingArea(short[] grid)
+        private static Mock<ICraftingArea<ISlot>> GetCraftingArea(short[] grid)
         {
             if (grid.Length != 9 && grid.Length != 4)
                 throw new ArgumentException(nameof(grid));
 
             int sz = (grid.Length == 9 ? 3 : 2);
 
-            Mock<ICraftingArea> area = new Mock<ICraftingArea>(MockBehavior.Strict);
+            Mock<ICraftingArea<ISlot>> area = new Mock<ICraftingArea<ISlot>>(MockBehavior.Strict);
             area.Setup(a => a.Width).Returns(sz);
             area.Setup(a => a.Height).Returns(sz);
             area.Setup(a => a.GetItemStack(It.IsAny<int>(), It.IsAny<int>()))
                 .Returns<int, int>((x, y) => grid[y * sz + x] != 0 ? new ItemStack(grid[y * sz + x]) : ItemStack.EmptyStack);
 
             return area;
+        }
+
+        private static XmlNode GetCraftingAreaXml(short[] grid)
+        {
+            if (grid.Length != 9 && grid.Length != 4)
+                throw new ArgumentException(nameof(grid));
+
+            int sz = (grid.Length == 9 ? 3 : 2);
+
+            StringBuilder rv = new StringBuilder();
+            rv.Append("<pattern>");
+            for (int r = 0; r < sz; r ++)
+            {
+                rv.Append("<r>");
+                for (int c = 0; c < sz; c ++)
+                {
+                    rv.Append("<c>");
+                    rv.Append("<id>");
+                    rv.Append(grid[r * sz + c]);
+                    rv.Append("</id>");
+                    rv.Append("<count>1</count></c>");
+                }
+                rv.Append("</r>");
+            }
+            rv.Append("</pattern>");
+
+            XmlDocument doc = new XmlDocument();
+            doc.LoadXml(rv.ToString());
+
+            return doc.FirstChild;
         }
 
         [Test]
@@ -50,19 +81,6 @@ namespace TrueCraft.Core.Test.Logic
             actual = CraftingPattern.GetCraftingPattern(items);
             Assert.Null(actual);
 
-        }
-
-        [Test]
-        public void ctor_Area_Empty_Grid_Gets_Null()
-        {
-            Mock<ICraftingArea> grid1 = GetCraftingArea(new short[] { 0, 0, 0, 0 });
-            Mock<ICraftingArea> grid2 = GetCraftingArea(new short[] { 0, 0, 0, 0, 0, 0, 0, 0, 0 });
-
-            CraftingPattern actual = CraftingPattern.GetCraftingPattern(grid1.Object);
-            Assert.Null(actual);
-
-            actual = CraftingPattern.GetCraftingPattern(grid2.Object);
-            Assert.Null(actual);
         }
 
         [TestCase(1, 1, new int[] { 17 }, new int[] { 1 },
@@ -116,9 +134,9 @@ namespace TrueCraft.Core.Test.Logic
         [TestCase(1, new short[] { 0, 0, 0, 0, 3, 0, 0, 0, 0 })]
         public void Width(int expectedWidth, short[] grid)
         {
-            Mock<ICraftingArea> area = GetCraftingArea(grid);
+            XmlNode xml = GetCraftingAreaXml(grid);
 
-            CraftingPattern actual = CraftingPattern.GetCraftingPattern(area.Object);
+            CraftingPattern actual = CraftingPattern.GetCraftingPattern(xml);
 
             Assert.AreEqual(expectedWidth, actual.Width);
         }
@@ -130,9 +148,9 @@ namespace TrueCraft.Core.Test.Logic
         [TestCase(1, new short[] { 0, 0, 0, 0, 3, 0, 0, 0, 0 })]
         public void Height(int expectedHeight, short[] grid)
         {
-            Mock<ICraftingArea> area = GetCraftingArea(grid);
+            XmlNode xml = GetCraftingAreaXml(grid);
 
-            CraftingPattern actual = CraftingPattern.GetCraftingPattern(area.Object);
+            CraftingPattern actual = CraftingPattern.GetCraftingPattern(xml);
 
             Assert.AreEqual(expectedHeight, actual.Height);
         }
@@ -145,11 +163,11 @@ namespace TrueCraft.Core.Test.Logic
         [TestCase(false, new short[] { 1, 0, 0, 0, 0, 0, 0, 0, 0 }, new short[] { 2, 0, 0, 0, 0, 0, 0, 0, 0 })]
         public void Test_Equality(bool expected, short[] grid1, short[] grid2)
         {
-            Mock<ICraftingArea> area1 = GetCraftingArea(grid1);
-            Mock<ICraftingArea> area2 = GetCraftingArea(grid2);
+            XmlNode xml1 = GetCraftingAreaXml(grid1);
+            XmlNode xml2 = GetCraftingAreaXml(grid2);
 
-            CraftingPattern a = CraftingPattern.GetCraftingPattern(area1.Object);
-            CraftingPattern b = CraftingPattern.GetCraftingPattern(area2.Object);
+            CraftingPattern a = CraftingPattern.GetCraftingPattern(xml1);
+            CraftingPattern b = CraftingPattern.GetCraftingPattern(xml2);
 
             Assert.False(object.ReferenceEquals(a, b));
             Assert.AreEqual(expected, a.Equals(b));

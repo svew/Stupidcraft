@@ -1,6 +1,7 @@
 ﻿using System;
 using TrueCraft.Core.Logic.Blocks;
 using TrueCraft.Core.Networking;
+using TrueCraft.Core.Server;
 using TrueCraft.Core.World;
 
 namespace TrueCraft.Core.Logic.Items
@@ -20,6 +21,8 @@ namespace TrueCraft.Core.Logic.Items
 
         public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user)
         {
+            ServerOnly.Assert();
+
             coordinates += MathHelper.BlockFaceToCoordinates(face);
             if (world.GetBlockID(coordinates) == AirBlock.BlockID)
             {
@@ -31,7 +34,7 @@ namespace TrueCraft.Core.Logic.Items
                 slot.Metadata += 1;
                 if (slot.Metadata >= Uses)
                     slot.Count = 0; // Destroy item
-                user.Hotbar[user.SelectedSlot] = slot;
+                user.Hotbar[user.SelectedSlot].Item = slot;
             }
         }
     }

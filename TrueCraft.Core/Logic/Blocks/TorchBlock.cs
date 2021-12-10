@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using TrueCraft.Core.Networking;
+using TrueCraft.Core.Server;
 using TrueCraft.Core.World;
 
 namespace TrueCraft.Core.Logic.Blocks
@@ -89,6 +90,8 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user)
         {
+            ServerOnly.Assert();
+
             coordinates += MathHelper.BlockFaceToCoordinates(face);
             var old = world.GetBlockData(coordinates);
             byte[] overwritable =
@@ -112,7 +115,7 @@ namespace TrueCraft.Core.Logic.Blocks
                 else
                 {
                     item.Count--;
-                    user.Hotbar[user.SelectedSlot] = item;
+                    user.Hotbar[user.SelectedSlot].Item = item;
                 }
             }
         }

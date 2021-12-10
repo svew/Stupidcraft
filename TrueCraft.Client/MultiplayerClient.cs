@@ -10,9 +10,9 @@ using System.ComponentModel;
 using System.IO;
 using TrueCraft.Core;
 using TrueCraft.Core.Physics;
-using TrueCraft.Core.Windows;
-using TrueCraft.Client.Windows;
 using TrueCraft.Core.World;
+using TrueCraft.Core.Inventory;
+using TrueCraft.Client.Inventory;
 
 namespace TrueCraft.Client
 {
@@ -36,15 +36,15 @@ namespace TrueCraft.Client
         public bool LoggedIn { get; internal set; }
         public int EntityID { get; internal set; }
 
-        public IWindowContentClient InventoryWindowContent { get; }
-        public ISlots Inventory { get; private set; }
-        public ISlots Hotbar { get; private set; }
-        public ISlots Armor { get; }
-        public ISlots CraftingGrid { get; }
+        public IInventoryWindow<ISlot> InventoryWindow { get; }
+        public ISlots<ISlot> Inventory { get; private set; }
+        public ISlots<ISlot> Hotbar { get; private set; }
+        public ISlots<ISlot> Armor { get => InventoryWindow.Armor; }
+        public ISlots<ISlot> CraftingGrid { get => InventoryWindow.CraftingGrid; }
 
         public int Health { get; set; }
 
-        public IWindowContentClient CurrentWindow { get; set; }
+        public IWindow<ISlot> CurrentWindow { get; set; }
 
         public bool Connected
         {
@@ -82,8 +82,7 @@ namespace TrueCraft.Client
             Handlers.PacketHandlers.RegisterHandlers(this);
             World = new ReadOnlyWorld();
 
-            Discover discover = new Discover();
-            discover.DoDiscovery();
+            Discover.DoDiscovery(new Discover());
 
             World.World.BlockRepository = BlockRepository.Get();
             World.World.ChunkProvider = new EmptyGenerator();
@@ -92,12 +91,14 @@ namespace TrueCraft.Client
             connected = 0;
             Health = 20;
 
-            Inventory = new Slots(27, 9, 3);   // TODO hard-coded constants
-            Hotbar = new Slots(9, 9, 1);       // TODO hard-coded constants
-            Armor = new ArmorSlots();
-            Windows.WindowContentFactory factory = new Windows.WindowContentFactory();
-            CraftingGrid = new CraftingWindowContent(CraftingRepository.Get(), 2, 2);   // TODO Hard-coded constants
-            InventoryWindowContent = (IWindowContentClient)factory.NewInventoryWindowContent(Inventory, Hotbar, Armor, CraftingGrid);
+            ISlotFactory<ISlot> slotFactory = new SlotFactory<ISlot>();
+            IItemRepository itemRepository = ItemRepository.Get();
+            Inventory = new Slots<ISlot>(itemRepository, slotFactory.GetSlots(itemRepository, 27), 9);   // TODO hard-coded constants
+            Hotbar = new Slots<ISlot>(itemRepository, slotFactory.GetSlots(itemRepository,9), 9);        // TODO hard-coded constants
+
+            IInventoryFactory<ISlot> factory = new InventoryFactory<ISlot>();
+            InventoryWindow = (InventoryWindow)factory.NewInventoryWindow(itemRepository,
+                CraftingRepository.Get(), slotFactory, Inventory, Hotbar);
         }
 
         public void RegisterPacketHandler(byte packetId, PacketHandler handler)
@@ -368,7 +369,6 @@ namespace TrueCraft.Client
                 _socketPool = null;
                 Inventory = null;
                 Hotbar = null;
-                CurrentWindow?.Dispose();
                 CurrentWindow = null;
             }
         }

@@ -1,6 +1,7 @@
 using System;
 using TrueCraft.Core.Logic.Blocks;
 using TrueCraft.Core.Networking;
+using TrueCraft.Core.Server;
 using TrueCraft.Core.World;
 
 namespace TrueCraft.Core.Logic.Items
@@ -20,6 +21,8 @@ namespace TrueCraft.Core.Logic.Items
 
         public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user)
         {
+            ServerOnly.Assert();
+
             coordinates += MathHelper.BlockFaceToCoordinates(face);
             IBlockProvider supportingBlock = world.BlockRepository.GetBlockProvider(world.GetBlockID(coordinates + Vector3i.Down));
 
@@ -27,7 +30,7 @@ namespace TrueCraft.Core.Logic.Items
             {
                 world.SetBlockID(coordinates, RedstoneDustBlock.BlockID);
                 item.Count--;
-                user.Hotbar[user.SelectedSlot] = item;
+                user.Hotbar[user.SelectedSlot].Item = item;
             }
         }
     }

@@ -79,7 +79,8 @@ namespace TrueCraft
         public MultiplayerServer()
         {
             TrueCraft.Core.WhoAmI.Answer = Core.IAm.Server;
-            TrueCraft.Core.Windows.WindowContentFactory.Init(new TrueCraft.Windows.WindowContentFactory());
+            TrueCraft.Core.Inventory.InventoryFactory<IServerSlot>.RegisterInventoryFactory(new TrueCraft.Inventory.InventoryFactory());
+            TrueCraft.Core.Inventory.SlotFactory<IServerSlot>.RegisterSlotFactory(new TrueCraft.Inventory.SlotFactory());
             var reader = new PacketReader();
             PacketReader = reader;
             Clients = new List<IRemoteClient>();
@@ -90,8 +91,7 @@ namespace TrueCraft
             LogProviders = new List<ILogProvider>();
             Scheduler = new EventScheduler(this);
 
-            Discover discover = new Discover();
-            discover.DoDiscovery();
+            Discover.DoDiscovery(new Discover());
 
             BlockRepository = TrueCraft.Core.Logic.BlockRepository.Get();
 

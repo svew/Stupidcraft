@@ -1,6 +1,7 @@
 using System;
 using TrueCraft.Core.Logic.Blocks;
 using TrueCraft.Core.Networking;
+using TrueCraft.Core.Server;
 using TrueCraft.Core.World;
 
 namespace TrueCraft.Core.Logic.Items
@@ -22,6 +23,8 @@ namespace TrueCraft.Core.Logic.Items
 
         public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user)
         {
+            ServerOnly.Assert();
+
             coordinates += MathHelper.BlockFaceToCoordinates(face);
             var head = coordinates;
             var foot = coordinates;
@@ -60,7 +63,7 @@ namespace TrueCraft.Core.Logic.Items
                 { ID = BedBlock.BlockID, Metadata = (byte)((byte)direction | (byte)BedBlock.BedType.Foot) });
             user.Server.BlockUpdatesEnabled = true;
             item.Count--;
-            user.Inventory[user.SelectedSlot] = item;
+            user.Inventory[user.SelectedSlot].Item = item;
         }
     }
 }
