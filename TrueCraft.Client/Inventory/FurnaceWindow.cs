@@ -9,7 +9,7 @@ using TrueCraft.Core.World;
 
 namespace TrueCraft.Client.Inventory
 {
-    public class FurnaceWindow : TrueCraft.Core.Inventory.FurnaceWindow<ISlot>
+    public class FurnaceWindow : TrueCraft.Core.Inventory.FurnaceWindow<ISlot>, IClickHandler
     {
         public FurnaceWindow(IItemRepository itemRepository,
             ISlotFactory<ISlot> slotFactory, sbyte windowID,

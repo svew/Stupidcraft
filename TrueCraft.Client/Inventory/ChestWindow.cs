@@ -8,7 +8,7 @@ using TrueCraft.Core.World;
 
 namespace TrueCraft.Client.Inventory
 {
-    public class ChestWindow : TrueCraft.Core.Inventory.ChestWindow<ISlot>
+    public class ChestWindow : TrueCraft.Core.Inventory.ChestWindow<ISlot>, IClickHandler
     {
         public ChestWindow(IItemRepository itemRepository,
             ISlotFactory<ISlot> slotFactory, sbyte windowID,
