@@ -30,6 +30,7 @@ namespace TrueCraft.Inventory
 
         public OpenWindowPacket GetOpenWindowPacket()
         {
+            // The Server should never send an Open Window Packet for the Inventory Window.
             throw new NotImplementedException();
         }
 
