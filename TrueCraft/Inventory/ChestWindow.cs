@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using fNbt;
 using TrueCraft.Core;
 using TrueCraft.Core.Inventory;
 using TrueCraft.Core.Logic;
@@ -23,6 +24,37 @@ namespace TrueCraft.Inventory
             World = world;
             Location = location;
             OtherHalf = otherHalf;
+            Load();
+        }
+
+        private void Load()
+        {
+            NbtCompound entity = World.GetTileEntity(Location);
+            ISlots<IServerSlot> chestInventory = this.ChestInventory;
+            if (entity != null)
+            {
+                foreach (var item in (NbtList)entity["Items"])
+                {
+                    ItemStack slot = ItemStack.FromNbt((NbtCompound)item);
+                    chestInventory[slot.Index].Item = slot;
+                    chestInventory[slot.Index].SetClean();
+                }
+            }
+            // Add adjacent items
+            if (!object.ReferenceEquals(OtherHalf, null))
+            {
+                entity = World.GetTileEntity(OtherHalf);
+                if (entity != null)
+                {
+                    foreach (var item in (NbtList)entity["Items"])
+                    {
+                        ItemStack slot = ItemStack.FromNbt((NbtCompound)item);
+                        chestInventory[slot.Index + ChestLength].Item = slot;
+                        chestInventory[slot.Index].SetClean();
+                    }
+                }
+            }
+
         }
 
         public IWorld World { get; }
@@ -70,20 +102,33 @@ namespace TrueCraft.Inventory
 
         public bool HandleClick(int slotIndex, bool right, bool shift, ref ItemStack itemStaging)
         {
+            bool rv;
+
             if (right)
             {
                 if (shift)
-                    return HandleShiftRightClick(slotIndex, ref itemStaging);
+                    rv = HandleShiftRightClick(slotIndex, ref itemStaging);
                 else
-                    return HandleRightClick(slotIndex, ref itemStaging);
+                    rv = HandleRightClick(slotIndex, ref itemStaging);
             }
             else
             {
                 if (shift)
-                    return HandleShiftLeftClick(slotIndex, ref itemStaging);
+                    rv = HandleShiftLeftClick(slotIndex, ref itemStaging);
                 else
-                    return HandleLeftClick(slotIndex, ref itemStaging);
+                    rv = HandleLeftClick(slotIndex, ref itemStaging);
             }
+
+            // TODO: For each Chest Slot changed, we must inform clients other than
+            //       the changing client of the new Slot contents.
+
+            // TODO: Is saving on every mouse click a performance problem?
+            //       If we don't save on every mouse click, we'll need to be able to send this
+            //       window's contents to any new client opening the chest instead of just
+            //       reading it from saved data.
+            Save();
+
+            return rv;
         }
 
         protected bool HandleLeftClick(int slotIndex, ref ItemStack itemStaging)
@@ -205,7 +250,44 @@ namespace TrueCraft.Inventory
 
         public void Save()
         {
-            throw new NotImplementedException();
+            NbtList entitySelf = new NbtList("Items", NbtTagType.Compound);
+            NbtList entityAdjacent = new NbtList("Items", NbtTagType.Compound);
+
+            ISlots<IServerSlot> chestInventory = this.ChestInventory;
+            for (int i = 0, iul = chestInventory.Count; i < iul; i++)
+            {
+                ItemStack item = chestInventory[i].Item;
+                if (!item.Empty)
+                {
+                    if (i < ChestWindow<IServerSlot>.ChestLength)
+                    {
+                        item.Index = i;
+                        entitySelf.Add(item.ToNbt());
+                    }
+                    else
+                    {
+                        item.Index = i - ChestWindow<IServerSlot>.ChestLength;
+                        entityAdjacent.Add(item.ToNbt());
+                    }
+                }
+            }
+
+            NbtCompound newEntity = World.GetTileEntity(Location);
+            if (newEntity == null)
+                newEntity = new NbtCompound(new[] { entitySelf });
+            else
+                newEntity["Items"] = entitySelf;
+            World.SetTileEntity(Location, newEntity);
+
+            if (DoubleChest)
+            {
+                newEntity = World.GetTileEntity(OtherHalf);
+                if (newEntity == null)
+                    newEntity = new NbtCompound(new[] { entityAdjacent });
+                else
+                    newEntity["Items"] = entityAdjacent;
+                World.SetTileEntity(OtherHalf, newEntity);
+            }
         }
     }
 }
