@@ -24,7 +24,8 @@ namespace TrueCraft.Inventory
             sbyte windowID, ISlots<IServerSlot> mainInventory, ISlots<IServerSlot> hotBar,
             string name, int width, int height)
         {
-            throw new NotImplementedException();
+            return new CraftingBenchWindow(itemRepository, craftingRepository,
+                slotFactory, windowID, mainInventory, hotBar, name, width, height);
         }
 
         public IChestWindow<IServerSlot> NewChestWindow(IItemRepository itemRepository,
