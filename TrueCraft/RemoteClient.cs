@@ -305,9 +305,9 @@ namespace TrueCraft
         public void OpenWindow(IWindow<IServerSlot> window)
         {
             CurrentWindow = window;
+            IServerWindow serverWindow = (IServerWindow)window;
 
-            int len = window.Count - window.MainInventory.Count - window.Hotbar.Count;
-            QueuePacket(new OpenWindowPacket(window.WindowID, window.Type, window.Name, (sbyte)len));
+            QueuePacket(serverWindow.GetOpenWindowPacket());
 
             QueuePacket(new WindowItemsPacket(window.WindowID, AllItems(window)));
         }

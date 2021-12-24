@@ -33,7 +33,8 @@ namespace TrueCraft.Inventory
 
         public OpenWindowPacket GetOpenWindowPacket()
         {
-            throw new NotImplementedException();
+            int len = Count - MainInventory.Count - Hotbar.Count;
+            return new OpenWindowPacket(WindowID, Type, Name, (sbyte)len);
         }
 
         public WindowItemsPacket GetWindowItemsPacket()
