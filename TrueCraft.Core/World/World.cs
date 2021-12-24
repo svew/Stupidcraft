@@ -18,7 +18,7 @@ namespace TrueCraft.Core.World
         public int Seed
         {
             get { return _Seed; }
-            set
+            private set
             {
                 _Seed = value;
                 BiomeDiagram = new BiomeMap(_Seed);

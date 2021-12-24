@@ -13,7 +13,7 @@ namespace TrueCraft.Core.World
     {
         string Name { get; set; }
         IBlockRepository BlockRepository { get; set; }
-        int Seed { get; set; }
+        int Seed { get; }
         IBiomeMap BiomeDiagram { get; set; }
         IChunkProvider ChunkProvider { get; set; }
 
