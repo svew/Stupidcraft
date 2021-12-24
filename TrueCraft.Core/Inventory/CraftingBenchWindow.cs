@@ -23,6 +23,9 @@ namespace TrueCraft.Core.Inventory
             base(itemRepository, windowID, Windows.WindowType.CraftingBench, name,
                 new ISlots<T>[] { GetSlots(itemRepository, craftingRepository, slotFactory, width, height), mainInventory, hotBar })
         {
+            CraftingOutputSlotIndex = 0;
+            MainSlotIndex = CraftingOutputSlotIndex + CraftingArea.Count;
+            HotbarSlotIndex = MainSlotIndex + MainInventory.Count;
         }
 
         private static ISlots<T> GetSlots(IItemRepository itemRepository,
@@ -45,5 +48,8 @@ namespace TrueCraft.Core.Inventory
                 return (ICraftingArea<T>)Slots[(int)AreaIndices.Crafting];
             }
         }
+
+        /// <inheritdoc />
+        public virtual int CraftingOutputSlotIndex { get; }
     }
 }

@@ -18,15 +18,5 @@ namespace TrueCraft.Core.Inventory
         /// Gets the Slot Index (within the Window) of the first Slot of the Chest Area.
         /// </summary>
         int ChestSlotIndex { get; }
-
-        /// <summary>
-        /// Gets the Slot Index (within the Window) of the first Slot of the Main Inventory Area.
-        /// </summary>
-        int MainSlotIndex { get; }
-
-        /// <summary>
-        /// Gets the Slot Index (within the Window) of the first Slot of the Hotbar Area.
-        /// </summary>
-        int HotbarSlotIndex { get; }
     }
 }

@@ -28,9 +28,19 @@ namespace TrueCraft.Core.Inventory
         ISlots<T> MainInventory { get; }
 
         /// <summary>
+        /// Gets the Slot Index (within the Window) of the first Slot of the Main Inventory Area.
+        /// </summary>
+        int MainSlotIndex { get; }
+
+        /// <summary>
         /// Gets the collection of Slots representing the Player's Hotbar.
         /// </summary>
         ISlots<T> Hotbar { get; }
+
+        /// <summary>
+        /// Gets the Slot Index (within the Window) of the first Slot of the Hotbar Area.
+        /// </summary>
+        int HotbarSlotIndex { get; }
 
         bool IsOutputSlot(int slotIndex);
 

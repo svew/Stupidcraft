@@ -28,6 +28,9 @@ namespace TrueCraft.Core.Inventory
                     GetSlots(itemRepository, slotFactory),
                     mainInventory, hotBar })
         {
+            IngredientSlotIndex = 0;
+            FuelSlotIndex = 1;
+            OutputSlotIndex = 2;
         }
 
         private static ISlots<T> GetSlots(IItemRepository itemRepository,
@@ -40,9 +43,18 @@ namespace TrueCraft.Core.Inventory
 
         public ISlots<T> Ingredient => Slots[(int)AreaIndices.Ingredient];
 
+        /// <inheritdoc />
+        public int IngredientSlotIndex { get; }
+
         public ISlots<T> Fuel => Slots[(int)AreaIndices.Fuel];
 
+        /// <inheritdoc />
+        public int FuelSlotIndex { get; }
+
         public ISlots<T> Output => Slots[(int)AreaIndices.Output];
+
+        /// <inheritdoc />
+        public int OutputSlotIndex { get; }
 
         public override bool IsOutputSlot(int slotIndex)
         {

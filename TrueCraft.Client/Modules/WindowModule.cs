@@ -288,19 +288,19 @@ namespace TrueCraft.Client.Modules
         {
             // TODO fix hard-coded constants
             InventoryWindow window = (InventoryWindow)Game.Client.CurrentWindow;
-            DrawWindowArea(window.CraftingGrid, InventoryWindow.CraftingOutputSlotIndex, 88, 26, InventoryWindowRect, stage);
-            DrawWindowArea(window.Armor, InventoryWindow.ArmorSlotIndex, 8, 8, InventoryWindowRect, stage);
-            DrawWindowArea(window.MainInventory, InventoryWindow.MainSlotIndex, 8, 84, InventoryWindowRect, stage);
-            DrawWindowArea(window.Hotbar, InventoryWindow.HotbarSlotIndex, 8, 142, InventoryWindowRect, stage);
+            DrawWindowArea(window.CraftingGrid, window.CraftingOutputSlotIndex, 88, 26, InventoryWindowRect, stage);
+            DrawWindowArea(window.Armor, window.ArmorSlotIndex, 8, 8, InventoryWindowRect, stage);
+            DrawWindowArea(window.MainInventory, window.MainSlotIndex, 8, 84, InventoryWindowRect, stage);
+            DrawWindowArea(window.Hotbar, window.HotbarSlotIndex, 8, 142, InventoryWindowRect, stage);
         }
 
         private void DrawCraftingWindow(RenderStage stage)
         {
             // TODO fix hard-coded constants
             CraftingBenchWindow window = (CraftingBenchWindow)Game.Client.CurrentWindow;
-            DrawWindowArea(window.CraftingArea, CraftingBenchWindow.CraftingOutputSlotIndex, 29, 16, CraftingWindowRect, stage);
-            DrawWindowArea(window.MainInventory, CraftingBenchWindow.MainSlotIndex, 8, 84, CraftingWindowRect, stage);
-            DrawWindowArea(window.Hotbar, CraftingBenchWindow.HotbarSlotIndex, 8, 142, CraftingWindowRect, stage);
+            DrawWindowArea(window.CraftingArea, window.CraftingOutputSlotIndex, 29, 16, CraftingWindowRect, stage);
+            DrawWindowArea(window.MainInventory, window.MainSlotIndex, 8, 84, CraftingWindowRect, stage);
+            DrawWindowArea(window.Hotbar, window.HotbarSlotIndex, 8, 142, CraftingWindowRect, stage);
         }
 
         private void DrawChestWindow(RenderStage stage)

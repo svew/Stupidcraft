@@ -10,11 +10,6 @@ namespace TrueCraft.Client.Inventory
     public class CraftingBenchWindow : TrueCraft.Core.Inventory.CraftingBenchWindow<ISlot>,
         IClickHandler
     {
-        public const int CraftingOutputSlotIndex = 0;
-        public const int MainSlotIndex = 10;
-        public const int HotbarSlotIndex = 387;
-
-
         public CraftingBenchWindow(IItemRepository itemRepository,
             ICraftingRepository craftingRepository, ISlotFactory<ISlot> slotFactory,
             sbyte windowID, ISlots<ISlot> mainInventory, ISlots<ISlot> hotBar,

@@ -60,12 +60,6 @@ namespace TrueCraft.Core.Inventory
         /// <inheritdoc />
         public int ChestSlotIndex { get => 0; }
 
-        /// <inheritdoc />
-        public int MainSlotIndex { get; }
-
-        /// <inheritdoc />
-        public int HotbarSlotIndex { get; }
-
         public override bool IsOutputSlot(int slotIndex)
         {
             return false;

@@ -10,11 +10,6 @@ namespace TrueCraft.Client.Inventory
 {
     public class InventoryWindow : InventoryWindow<ISlot>, IClickHandler
     {
-        public const int CraftingOutputSlotIndex = 0;
-        public const int ArmorSlotIndex = 5;
-        public const int MainSlotIndex = 9;
-        public const int HotbarSlotIndex = 36;
-
         public InventoryWindow(IItemRepository itemRepository,
             ICraftingRepository craftingRepository, ISlotFactory<ISlot> slotFactory,
             ISlots<ISlot> mainInventory, ISlots<ISlot> hotBar) :

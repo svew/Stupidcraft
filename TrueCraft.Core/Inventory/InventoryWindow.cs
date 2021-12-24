@@ -23,6 +23,10 @@ namespace TrueCraft.Core.Inventory
             base(itemRepository, 0, Windows.WindowType.Inventory, "Inventory",
                 GetSlots(itemRepository, craftingRepository, slotFactory, mainInventory, hotBar))
         {
+            CraftingOutputSlotIndex = 0;
+            ArmorSlotIndex = CraftingOutputSlotIndex + CraftingGrid.Count;
+            MainSlotIndex = ArmorSlotIndex + Armor.Count;
+            HotbarSlotIndex = MainSlotIndex + MainInventory.Count;
         }
 
         private static ISlots<T>[] GetSlots(IItemRepository itemRepository,
@@ -41,7 +45,13 @@ namespace TrueCraft.Core.Inventory
 
         public ICraftingArea<T> CraftingGrid { get => (ICraftingArea<T>)Slots[(int)AreaIndices.Crafting]; }
 
+        /// <inheritdoc />
+        public virtual int CraftingOutputSlotIndex { get; }
+
         public ISlots<T> Armor { get => Slots[(int)AreaIndices.Armor]; }
+
+        /// <inheritdoc />
+        public virtual int ArmorSlotIndex { get; }
 
         public override bool IsOutputSlot(int slotIndex)
         {

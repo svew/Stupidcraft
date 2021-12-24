@@ -94,6 +94,9 @@ namespace TrueCraft.Core.Inventory
         }
 
         /// <inheritdoc />
+        public virtual int MainSlotIndex { get; protected set; }
+
+        /// <inheritdoc />
         public virtual ISlots<T> Hotbar
         {
             get
@@ -101,6 +104,9 @@ namespace TrueCraft.Core.Inventory
                 return _slots[_hotbarIndex];
             }
         }
+
+        /// <inheritdoc />
+        public virtual int HotbarSlotIndex { get; protected set; }
 
         public ItemStack this[int index]
         {
