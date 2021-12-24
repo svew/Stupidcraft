@@ -40,7 +40,8 @@ namespace TrueCraft.Inventory
             ISlotFactory<IServerSlot> slotFactory, sbyte windowID, ISlots<IServerSlot> mainInventory,
             ISlots<IServerSlot> hotBar, IWorld world, GlobalVoxelCoordinates location)
         {
-            throw new NotImplementedException();
+            return new FurnaceWindow(itemRepository, slotFactory, windowID,
+                mainInventory, hotBar, world, location);
         }
     }
 }
