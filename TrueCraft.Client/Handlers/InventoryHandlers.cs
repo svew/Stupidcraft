@@ -58,6 +58,11 @@ namespace TrueCraft.Client.Handlers
                         windowID, client.Inventory, client.Hotbar,
                         null, null, null);
                     break;
+
+                case WindowType.Furnace:
+                    window = factory.NewFurnaceWindow(itemRepository, slotFactory,
+                        windowID, client.Inventory, client.Hotbar, null, null);
+                    break;
             }
 
             // TODO: For any window type other than CraftingBench or Chest, window will be null.
