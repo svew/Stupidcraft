@@ -16,8 +16,6 @@ namespace TrueCraft
     {
         public static ServerConfiguration ServerConfiguration;
 
-        public static CommandManager CommandManager;
-
         public static MultiplayerServer Server;
 
         public static void Main(string[] args)
@@ -102,8 +100,7 @@ namespace TrueCraft
                 }
             }
             world.Save();
-            CommandManager = new CommandManager();
-            Server.ChatMessageReceived += HandleChatMessageReceived;
+
             Server.Start(new IPEndPoint(IPAddress.Parse(ServerConfiguration.ServerAddress), ServerConfiguration.ServerPort));
             Console.CancelKeyPress += HandleCancelKeyPress;
             Server.Scheduler.ScheduleEvent("world.save", null,
@@ -127,47 +124,6 @@ namespace TrueCraft
         static void HandleCancelKeyPress(object sender, ConsoleCancelEventArgs e)
         {
             Server.Stop();
-        }
-
-        static void HandleChatMessageReceived(object sender, ChatMessageEventArgs e)
-        {
-            var message = e.Message;
-
-            if (!message.StartsWith("/") || message.StartsWith("//"))
-                SendChatMessage(e.Client.Username, message);
-            else
-                e.PreventDefault = ProcessChatCommand(e);
-        }
-
-        private static void SendChatMessage(string username, string message)
-        {
-            if (message.StartsWith("//"))
-                message = message.Substring(1);
-
-            Server.SendMessage("<{0}> {1}", username, message);
-        }
-
-        /// <summary>
-        /// Parse sent message as chat command
-        /// </summary>
-        /// <param name="e"></param>
-        /// <returns>true if the command was successfully executed</returns>
-        private static bool ProcessChatCommand(ChatMessageEventArgs e)
-        {
-            var commandWithoutSlash = e.Message.TrimStart('/');
-            var messageArray = commandWithoutSlash
-                .Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-
-            if (messageArray.Length <= 0) return false; // command not found
-
-            var alias = messageArray[0];
-            var trimmedMessageArray = new string[messageArray.Length - 1];
-            if (trimmedMessageArray.Length != 0)
-                Array.Copy(messageArray, 1, trimmedMessageArray, 0, messageArray.Length - 1);
-
-            CommandManager.HandleCommand(e.Client, alias, trimmedMessageArray);
-
-            return true;
         }
     }
 }

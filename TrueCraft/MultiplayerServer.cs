@@ -15,6 +15,7 @@ using TrueCraft.Core.Server;
 using TrueCraft.Core.Lighting;
 using TrueCraft.Core.World;
 using TrueCraft.Profiling;
+using TrueCraft.Commands;
 
 namespace TrueCraft
 {
@@ -313,8 +314,50 @@ namespace TrueCraft
 
         protected internal void OnChatMessageReceived(ChatMessageEventArgs e)
         {
+            HandleChatMessageReceived(e);
             if (ChatMessageReceived != null)
                 ChatMessageReceived(this, e);
+        }
+
+        private void HandleChatMessageReceived(ChatMessageEventArgs e)
+        {
+            var message = e.Message;
+
+            if (!message.StartsWith("/") || message.StartsWith("//"))
+                SendChatMessage(e.Client.Username, message);
+            else
+                e.PreventDefault = ProcessChatCommand(e);
+        }
+
+        private void SendChatMessage(string username, string message)
+        {
+            if (message.StartsWith("//"))
+                message = message.Substring(1);
+
+            SendMessage("<{0}> {1}", username, message);
+        }
+
+        /// <summary>
+        /// Parse sent message as chat command
+        /// </summary>
+        /// <param name="e"></param>
+        /// <returns>true if the command was successfully executed</returns>
+        private static bool ProcessChatCommand(ChatMessageEventArgs e)
+        {
+            var commandWithoutSlash = e.Message.TrimStart('/');
+            var messageArray = commandWithoutSlash
+                .Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+            if (messageArray.Length <= 0) return false; // command not found
+
+            var alias = messageArray[0];
+            var trimmedMessageArray = new string[messageArray.Length - 1];
+            if (trimmedMessageArray.Length != 0)
+                Array.Copy(messageArray, 1, trimmedMessageArray, 0, messageArray.Length - 1);
+
+            CommandManager.Instance.HandleCommand(e.Client, alias, trimmedMessageArray);
+
+            return true;
         }
 
         protected internal void OnPlayerJoined(PlayerJoinedQuitEventArgs e)

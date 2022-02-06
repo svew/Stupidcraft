@@ -9,12 +9,24 @@ namespace TrueCraft.Commands
 {
     public class CommandManager : ICommandManager
     {
-        public IList<ICommand> Commands { get; set; }
+        private static CommandManager _instance = null;
 
-        public CommandManager()
+        private readonly IList<ICommand> _commands;
+
+        private CommandManager()
         {
-            Commands = new List<ICommand>();
+            _commands = new List<ICommand>();
             LoadCommands();
+        }
+
+        public static ICommandManager Instance
+        {
+            get
+            {
+                if (_instance is null)
+                    _instance = new CommandManager();
+                return _instance;
+            }
         }
 
         private void LoadCommands()
@@ -27,9 +39,7 @@ namespace TrueCraft.Commands
                 .Where(t => !t.IsAbstract);
 
             foreach (var command in types.Select(type => (ICommand)Activator.CreateInstance(type)))
-            {
-                Commands.Add(command);
-            }
+                _commands.Add(command);
         }
 
         /// <summary>
@@ -53,14 +63,72 @@ namespace TrueCraft.Commands
 
         public ICommand FindByName(string name)
         {
-            return Commands.FirstOrDefault(c => c.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+            return _commands.FirstOrDefault(c => c.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
         }
 
         public ICommand FindByAlias(string alias)
         {
             // uncomment below if alias searching should be case-insensitive
-            return Commands.FirstOrDefault(c => c.Aliases.Contains(alias /*, StringComparer.OrdinalIgnoreCase*/));
+            return _commands.FirstOrDefault(c => c.Aliases.Contains(alias /*, StringComparer.OrdinalIgnoreCase*/));
         }
+
+        #region IList<ICommand>
+        public ICommand this[int index] { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+        public int Count { get => _commands.Count; }
+
+        public bool IsReadOnly { get => true; }
+
+        public int IndexOf(ICommand item)
+        {
+            return _commands.IndexOf(item);
+        }
+
+        public void Insert(int index, ICommand item)
+        {
+            throw new NotSupportedException();
+        }
+
+        public void RemoveAt(int index)
+        {
+            throw new NotSupportedException();
+        }
+
+        public void Add(ICommand item)
+        {
+            throw new NotSupportedException();
+        }
+
+        public void Clear()
+        {
+            throw new NotSupportedException();
+        }
+
+        public bool Contains(ICommand item)
+        {
+            return _commands.Contains(item);
+        }
+
+        public void CopyTo(ICommand[] array, int arrayIndex)
+        {
+            _commands.CopyTo(array, arrayIndex);
+        }
+
+        public bool Remove(ICommand item)
+        {
+            throw new NotSupportedException();
+        }
+
+        public IEnumerator<ICommand> GetEnumerator()
+        {
+            return _commands.GetEnumerator();
+        }
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            return _commands.GetEnumerator();
+        }
+        #endregion
     }
     public class DoNotAutoLoadAttribute : Attribute
     {
