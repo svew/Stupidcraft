@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using TrueCraft.Core;
 using TrueCraft.Core.Inventory;
 using TrueCraft.Core.Networking;
+using TrueCraft.Core.Networking.Packets;
 using TrueCraft.Core.Server;
 using TrueCraft.Core.Windows;
 
@@ -88,6 +90,11 @@ namespace TrueCraft.Commands
             IInventoryWindow<IServerSlot> inventory = receivingPlayer.InventoryWindowContent;
             if (inventory == null) return false;
 
+            List<int> affectedSlotIndices;
+            List<int> slotIndicesToSend = new List<int>();
+            List<ItemStack> newContents = null;
+            List<ItemStack> slotContentToSend = new List<ItemStack>();
+
             while (count > 0)
             {
                 sbyte amountToGive;
@@ -98,8 +105,35 @@ namespace TrueCraft.Commands
 
                 count -= amountToGive;
 
-                inventory.StoreItemStack(new ItemStack(id, amountToGive, metadata));
+                inventory.StoreItemStack(new ItemStack(id, amountToGive, metadata), out affectedSlotIndices, out newContents);
+
+                // Accumulate only the last version of each affected slot.
+                for (int j = 0; j < affectedSlotIndices.Count; j ++)
+                {
+                    int k = 0;
+                    while (k < slotIndicesToSend.Count && affectedSlotIndices[j] != slotIndicesToSend[k])
+                        k++;
+                    if (k == slotIndicesToSend.Count)
+                    {
+                        slotIndicesToSend.Add(affectedSlotIndices[j]);
+                        slotContentToSend.Add(newContents[j]);
+                    }
+                    else
+                    {
+                        slotContentToSend[k] = newContents[j];
+                    }
+                }
             }
+
+            for (int j = 0; j < slotIndicesToSend.Count; j ++)
+            {
+                ItemStack item = newContents[j];
+                receivingPlayer.QueuePacket(
+                    new SetSlotPacket(receivingPlayer.InventoryWindowContent.WindowID,
+                    (short)slotIndicesToSend[j], item.ID, item.Count, item.Metadata));
+            }
+
+            // TODO If the player's active hotbar slot has been altered, send the appropriate packets.
 
             return true;
         }

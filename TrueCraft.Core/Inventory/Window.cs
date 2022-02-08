@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using TrueCraft.Core.Logic;
 using TrueCraft.Core.Windows;
@@ -149,6 +150,40 @@ namespace TrueCraft.Core.Inventory
             remaining = MainInventory.StoreItemStack(remaining, true);
             remaining = Hotbar.StoreItemStack(remaining, false);
             return MainInventory.StoreItemStack(remaining, false);
+        }
+
+        /// <inheritdoc/>
+        public virtual ItemStack StoreItemStack(ItemStack items, out List<int> affectedSlotIndices, out List<ItemStack> newItems)
+        {
+            int hotbarSlotIndex = HotbarSlotIndex;
+            int mainSlotIndex = MainSlotIndex;
+            List<int> areaIndices;
+            List<ItemStack> areaItems;
+
+            affectedSlotIndices = new List<int>();
+            newItems = new List<ItemStack>();
+
+            ItemStack remaining = Hotbar.StoreItemStack(items, true, out areaIndices, out areaItems);
+            foreach (int j in areaIndices)
+                affectedSlotIndices.Add(j + hotbarSlotIndex);
+            newItems.AddRange(areaItems);
+
+            remaining = MainInventory.StoreItemStack(remaining, true, out areaIndices, out areaItems);
+            foreach (int j in areaIndices)
+                affectedSlotIndices.Add(j + mainSlotIndex);
+            newItems.AddRange(areaItems);
+
+            remaining = Hotbar.StoreItemStack(remaining, false, out areaIndices, out areaItems);
+            foreach (int j in areaIndices)
+                affectedSlotIndices.Add(j + hotbarSlotIndex);
+            newItems.AddRange(areaItems);
+
+            remaining = MainInventory.StoreItemStack(remaining, false, out areaIndices, out areaItems);
+            foreach (int j in areaIndices)
+                affectedSlotIndices.Add(j + mainSlotIndex);
+            newItems.AddRange(areaItems);
+
+            return remaining;
         }
     }
 }

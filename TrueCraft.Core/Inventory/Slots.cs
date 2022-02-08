@@ -38,7 +38,7 @@ namespace TrueCraft.Core.Inventory
             ItemStack remaining = items;
             while (j < jul && !remaining.Empty)
             {
-                while (j < jul && this[j].Item.Empty)
+                while (j < jul && (this[j].Item.Empty || 0 == this[j].CanAccept(remaining)))
                     j++;
                 if (j == jul)
                     break;
@@ -60,13 +60,20 @@ namespace TrueCraft.Core.Inventory
             return StoreInSlot(j, remaining);
         }
 
+        /// <inheritdoc/>
+        public virtual ItemStack StoreItemStack(ItemStack items, bool topUpOnly,
+            out List<int> affectedSlotIndices, out List<ItemStack> newItems)
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         /// Stores as much as possible of the given items in the specified index.
         /// </summary>
         /// <param name="index">Which slot to store the items in.</param>
         /// <param name="items">The items to store.</param>
         /// <returns>Any items remaining after as many as possible have been stored.</returns>
-        private ItemStack StoreInSlot(int index, ItemStack items)
+        protected ItemStack StoreInSlot(int index, ItemStack items)
         {
             if (!this[index].Item.CanMerge(items))
                 return items;
