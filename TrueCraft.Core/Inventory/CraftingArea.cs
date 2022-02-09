@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using TrueCraft.Core.Inventory;
 using TrueCraft.Core.Logic;
 
@@ -18,24 +19,18 @@ namespace TrueCraft.Core.Inventory
         {
             _repository = repository;
             Height = height;
+
+            for (int j = 1, jul = width * height; j <= jul; j++)
+                this[j].PropertyChanged += HandleSlotPropertyChanged;
+        }
+
+        private void HandleSlotPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            UpdateOutput();
         }
 
         /// <inheritdoc />
         public int Height { get; }
-
-        public override T this[int index]
-        {
-            get => base[index];
-            set
-            {
-                base[index] = value;
-
-                if (index == 0)
-                    return;
-
-                UpdateOutput();
-            }
-        }
 
         private void UpdateOutput()
         {
