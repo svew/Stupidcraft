@@ -31,6 +31,7 @@ namespace TrueCraft.Core.Inventory
             IngredientSlotIndex = 0;
             FuelSlotIndex = 1;
             OutputSlotIndex = 2;
+            MainSlotIndex = 3;
         }
 
         private static ISlots<T> GetSlots(IItemRepository itemRepository,
