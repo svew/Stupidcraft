@@ -47,7 +47,7 @@ namespace TrueCraft.Core.Logic.Blocks
             {
                 // TODO BUG: this does not appear to be called (Items do not spawn, and remain in 2x2 (3x3?) Crafting Grid for next opening).
                 var entityManager = user.Server.GetEntityManagerForWorld(world);
-                ItemStack[,] inputs = window.CraftingArea.GetItemStacks();
+                ItemStack[,] inputs = window.CraftingGrid.GetItemStacks();
                 foreach(ItemStack item in inputs)
                 {
                     if (!item.Empty)

@@ -312,7 +312,7 @@ namespace TrueCraft.Client.Modules
         {
             // TODO fix hard-coded constants
             CraftingBenchWindow window = (CraftingBenchWindow)Game.Client.CurrentWindow;
-            DrawWindowArea(window.CraftingArea, window.CraftingOutputSlotIndex, 29, 16, CraftingWindowRect, stage);
+            DrawWindowArea(window.CraftingGrid, window.CraftingOutputSlotIndex, 29, 16, CraftingWindowRect, stage);
             DrawWindowArea(window.MainInventory, window.MainSlotIndex, 8, 84, CraftingWindowRect, stage);
             DrawWindowArea(window.Hotbar, window.HotbarSlotIndex, 8, 142, CraftingWindowRect, stage);
         }

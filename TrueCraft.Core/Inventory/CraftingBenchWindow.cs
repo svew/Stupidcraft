@@ -24,7 +24,7 @@ namespace TrueCraft.Core.Inventory
                 new ISlots<T>[] { GetSlots(itemRepository, craftingRepository, slotFactory, width, height), mainInventory, hotBar })
         {
             CraftingOutputSlotIndex = 0;
-            MainSlotIndex = CraftingOutputSlotIndex + CraftingArea.Count;
+            MainSlotIndex = CraftingOutputSlotIndex + CraftingGrid.Count;
             HotbarSlotIndex = MainSlotIndex + MainInventory.Count;
         }
 
@@ -41,7 +41,7 @@ namespace TrueCraft.Core.Inventory
             return slotIndex == 0;
         }
 
-        public ICraftingArea<T> CraftingArea
+        public ICraftingArea<T> CraftingGrid
         {
             get
             {
