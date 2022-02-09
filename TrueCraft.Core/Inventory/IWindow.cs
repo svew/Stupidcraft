@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using TrueCraft.Core.Windows;
 
 namespace TrueCraft.Core.Inventory
@@ -51,14 +50,5 @@ namespace TrueCraft.Core.Inventory
         /// <param name="item">The ItemStack to add.</param>
         /// <returns>Any residual items which did not fit.</returns>
         ItemStack StoreItemStack(ItemStack item);
-
-        /// <summary>
-        /// Adds the given ItemStack to the Slots collections in this window.
-        /// </summary>
-        /// <param name="item">The ItemStack to add.</param>
-        /// <param name="affectedSlots">Returns a List of affected Slot Indices.</param>
-        /// <param name="newItems">Returns the new contents of each affected Slot.</param>
-        /// <returns>Any residual items which did not fit.</returns>
-        ItemStack StoreItemStack(ItemStack item, out List<int> affectedSlotIndices, out List<ItemStack> newItems);
     }
 }

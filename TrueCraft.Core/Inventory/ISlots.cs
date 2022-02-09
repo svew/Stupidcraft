@@ -12,7 +12,7 @@ namespace TrueCraft.Core.Inventory
         /// <summary>
         /// Adds the given ItemStack to these slots, merging with established slots if possible.
         /// </summary>
-        /// <param name="item">The ItemStack to merge into these Slots.</param>
+        /// <param name="items">The ItemStack to merge into these Slots.</param>
         /// <param name="topUpOnly">True if only partially filled slots should be topped up.
         /// No empty slots will be used.
         /// False to use an empty slot, if some Items do not fit into an already
@@ -23,23 +23,6 @@ namespace TrueCraft.Core.Inventory
         /// be returned.
         /// </returns>
         ItemStack StoreItemStack(ItemStack item, bool topUpOnly);
-
-        /// <summary>
-        /// Adds the given ItemStack to these slots, merging with established slots if possible.
-        /// </summary>
-        /// <param name="item">The ItemStack to merge into these Slots.</param>
-        /// <param name="topUpOnly">True if only partially filled slots should be topped up.
-        /// No empty slots will be used.
-        /// False to use an empty slot, if some Items do not fit into an already
-        /// used Slot.</param>
-        /// <param name="affectedSlots">A List of affected Slot Indices.</param>
-        /// <param name="newItems">The new contents of each affected Slot.</param>
-        /// <returns>
-        /// An ItemStack containing any leftover items that would not fit.
-        /// If all given Items fit in these Slots, then ItemStack.EmptyStack will
-        /// be returned.
-        /// </returns>
-        ItemStack StoreItemStack(ItemStack item, bool topUpOnly, out List<int> affectedSlots, out List<ItemStack> newItems);
 
         /// <summary>
         /// Gets the number of slots across when this Slots collection is displayed.
