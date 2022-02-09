@@ -25,7 +25,13 @@ namespace TrueCraft.Inventory
 
         public List<SetSlotPacket> GetDirtySetSlotPackets()
         {
-            throw new NotImplementedException();
+            int offset = Armor.Count + CraftingGrid.Count;
+            List<SetSlotPacket> packets = ((IServerSlots)MainInventory).GetSetSlotPackets(WindowID, (short)offset);
+            offset += MainInventory.Count;
+
+            packets.AddRange(((IServerSlots)Hotbar).GetSetSlotPackets(WindowID, (short)offset));
+
+            return packets;
         }
 
         public OpenWindowPacket GetOpenWindowPacket()

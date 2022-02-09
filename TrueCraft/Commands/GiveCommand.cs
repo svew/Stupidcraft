@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using TrueCraft.Core;
 using TrueCraft.Core.Inventory;
 using TrueCraft.Core.Networking;
+using TrueCraft.Core.Networking.Packets;
 using TrueCraft.Core.Server;
 using TrueCraft.Core.Windows;
+using TrueCraft.Inventory;
 
 namespace TrueCraft.Commands
 {
@@ -100,6 +103,10 @@ namespace TrueCraft.Commands
 
                 inventory.StoreItemStack(new ItemStack(id, amountToGive, metadata));
             }
+
+            List<SetSlotPacket> packets = ((IServerWindow)receivingPlayer.InventoryWindowContent).GetDirtySetSlotPackets();
+            foreach (IPacket packet in packets)
+                receivingPlayer.QueuePacket(packet);
 
             return true;
         }
