@@ -10,8 +10,8 @@ namespace TrueCraft.Launcher.Singleplayer
     {
         public delegate void ProgressNotification(double progress, string stage);
 
-        public MultiplayerServer Server { get; set; }
-        public World World { get; set; }
+        public MultiplayerServer Server { get; }
+        public World World { get; }
 
         public SingleplayerServer(World world)
         {
