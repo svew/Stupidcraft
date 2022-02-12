@@ -21,6 +21,8 @@ namespace TrueCraft
 {
     public class MultiplayerServer : IMultiplayerServer, IDisposable
     {
+        private static MultiplayerServer _singleton = null;
+
         public event EventHandler<ChatMessageEventArgs> ChatMessageReceived;
         public event EventHandler<PlayerJoinedQuitEventArgs> PlayerJoined;
         public event EventHandler<PlayerJoinedQuitEventArgs> PlayerQuit;
@@ -77,7 +79,7 @@ namespace TrueCraft
 
         internal bool ShuttingDown { get; private set; }
         
-        public MultiplayerServer()
+        private MultiplayerServer()
         {
             TrueCraft.Core.WhoAmI.Answer = Core.IAm.Server;
             TrueCraft.Core.Inventory.InventoryFactory<IServerSlot>.RegisterInventoryFactory(new TrueCraft.Inventory.InventoryFactory());
@@ -111,6 +113,14 @@ namespace TrueCraft
 
             reader.RegisterCorePackets();
             Handlers.PacketHandlers.RegisterHandlers(this);
+        }
+
+        public static MultiplayerServer Get()
+        {
+            if (_singleton == null)
+                _singleton = new MultiplayerServer();
+
+            return _singleton;
         }
 
         public void RegisterPacketHandler(byte packetId, PacketHandler handler)

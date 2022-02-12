@@ -20,7 +20,7 @@ namespace TrueCraft
 
         public static void Main(string[] args)
         {
-            Server = new MultiplayerServer();
+            Server = MultiplayerServer.Get();
 
             Server.AddLogProvider(new ConsoleLogProvider(LogCategory.Notice | LogCategory.Warning | LogCategory.Error | LogCategory.Debug));
 #if DEBUG

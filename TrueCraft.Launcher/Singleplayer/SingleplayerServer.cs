@@ -16,7 +16,7 @@ namespace TrueCraft.Launcher.Singleplayer
         public SingleplayerServer(World world)
         {
             World = world;
-            Server = new MultiplayerServer();
+            Server = MultiplayerServer.Get();
             TrueCraft.Program.ServerConfiguration = new ServerConfiguration()
             {
                 MOTD = null,
