@@ -309,17 +309,7 @@ namespace TrueCraft
 
             QueuePacket(serverWindow.GetOpenWindowPacket());
 
-            QueuePacket(new WindowItemsPacket(window.WindowID, AllItems(window)));
-        }
-
-        private static ItemStack[] AllItems(IWindow<IServerSlot> window)
-        {
-            int jul = window.Count;
-            ItemStack[] rv = new ItemStack[jul];
-            for (int j = 0; j < jul; j ++)
-                rv[j] = window[j];
-
-            return rv;
+            QueuePacket(serverWindow.GetWindowItemsPacket());
         }
 
         public void CloseWindow(bool clientInitiated = false)

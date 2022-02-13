@@ -150,5 +150,17 @@ namespace TrueCraft.Core.Inventory
             remaining = Hotbar.StoreItemStack(remaining, false);
             return MainInventory.StoreItemStack(remaining, false);
         }
+
+
+        protected ItemStack[] AllItems()
+        {
+            int jul = this.Count;
+            ItemStack[] rv = new ItemStack[jul];
+            for (int j = 0; j < jul; j++)
+                rv[j] = this[j];
+
+            return rv;
+        }
+
     }
 }

@@ -39,7 +39,7 @@ namespace TrueCraft.Inventory
 
         public WindowItemsPacket GetWindowItemsPacket()
         {
-            throw new NotImplementedException();
+            return new WindowItemsPacket(WindowID, AllItems());
         }
 
         public override void SetSlots(ItemStack[] slotContents)
