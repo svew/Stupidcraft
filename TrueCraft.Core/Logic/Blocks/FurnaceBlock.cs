@@ -15,81 +15,159 @@ namespace TrueCraft.Core.Logic.Blocks
     {
         protected class FurnaceState
         {
+            private readonly NbtCompound _furnaceState;
+
+            private const string BurnTimeRemainingTag = "BurnTime";
+
+            private const string BurnTimeTotalTag = "BurnTotal";
+
+            private const string CookTimeTag = "CookTime";
+
+            private const int IngredientIndex = 0;
+
+            private const int FuelIndex = 1;
+
+            private const int OutputIndex = 2;
+
+            /// <summary>
+            /// Constructs a new default FurnaceState.
+            /// </summary>
+            public FurnaceState()
+            {
+                _furnaceState = new NbtCompound(new NbtTag[]
+                {
+                    new NbtShort("BurnTime", 0),
+                    new NbtShort("BurnTotal", 0),
+                    new NbtShort("CookTime", -1),
+                    new NbtList("Items", new[]
+                    {
+                        ItemStack.EmptyStack.ToNbt(),
+                        ItemStack.EmptyStack.ToNbt(),
+                        ItemStack.EmptyStack.ToNbt()
+                    }, NbtTagType.Compound)
+                });
+            }
+
+            /// <summary>
+            /// Constructs a new instance of FurnaceState from a Tile Entity.
+            /// </summary>
+            /// <param name="tileEntity">The Tile Entity which stores the furnace state on disk.</param>
+            public FurnaceState(NbtCompound tileEntity)
+            {
+                _furnaceState = tileEntity;
+            }
+
+            private short InternalGet(string tag)
+            {
+                lock (_furnaceState)
+                {
+                    return (short)(_furnaceState.Get<NbtShort>(tag)?.Value ?? 0);
+                }
+            }
+
+            private void InternalSet(string tag, short value)
+            {
+                lock (_furnaceState)
+                {
+                    NbtShort burnTime = _furnaceState.Get<NbtShort>(tag);
+                    if (burnTime == null)
+                    {
+                        burnTime = new NbtShort(tag);
+                        _furnaceState.Add(burnTime);
+                    }
+                    burnTime.Value = value;
+                }
+            }
+
             /// <summary>
             /// Gets or sets the current number of ticks remaining for the
             /// Furnace to be lit by the most recently consumed fuel item.
             /// </summary>
-            public short BurnTimeRemaining { get; set; }
+            public short BurnTimeRemaining
+            {
+                get => InternalGet(BurnTimeRemainingTag);
+                set => InternalSet(BurnTimeRemainingTag, value);
+            }
 
             /// <summary>
             /// Gets or sets the total number of ticks of burning provided by
             /// the most recently consumed fuel item.
             /// </summary>
-            public short BurnTimeTotal { get; set; }
+            public short BurnTimeTotal
+            {
+                get => InternalGet(BurnTimeTotalTag);
+                set => InternalSet(BurnTimeTotalTag, value);
+            }
 
             /// <summary>
             /// Gets or sets the number of ticks spent cooking the current Ingredient.
             /// </summary>
-            public short CookTime { get; set; }
-
-            public ItemStack Ingredient { get; set; }
-
-            public ItemStack Fuel { get; set; }
-
-            public ItemStack Output { get; set; }
-
-            public NbtCompound ToNbt()
+            public short CookTime
             {
-                return new NbtCompound(new NbtTag[]
-                    {
-                        new NbtShort("BurnTime", BurnTimeRemaining),
-                        new NbtShort("BurnTotal", BurnTimeTotal),
-                        new NbtShort("CookTime", CookTime),
-                        new NbtList("Items", new[]
-                        {
-                            Ingredient.ToNbt(),
-                            Fuel.ToNbt(),
-                            Output.ToNbt()
-                        }, NbtTagType.Compound)
-                    });
+                get => InternalGet(CookTimeTag);
+                set => InternalSet(CookTimeTag, value);
             }
 
-            public FurnaceState(NbtCompound tileEntity)
+            private ItemStack InternalSlotGet(int slotIndex)
             {
-                NbtShort burnTime = tileEntity.Get<NbtShort>("BurnTime");
-                NbtShort burnTotal = tileEntity.Get<NbtShort>("BurnTotal");
-                NbtShort cookTime = tileEntity.Get<NbtShort>("CookTime");
+                lock(_furnaceState)
+                {
+                    NbtList items = _furnaceState.Get<NbtList>("Items");
+                    return ItemStack.FromNbt(items.Get<NbtCompound>(slotIndex));
+                }
+            }
 
-                BurnTimeTotal = (short)(burnTotal?.Value ?? 0);
-                BurnTimeRemaining = (short)(burnTime?.Value ?? 0);
-                CookTime = (short)(cookTime?.Value ?? 200);
+            private void InternalSlotSet(int slotIndex, ItemStack stack)
+            {
+                lock(_furnaceState)
+                {
+                    NbtList items = _furnaceState.Get<NbtList>("Items");
+                    items[slotIndex] = stack.ToNbt();
+                }
+            }
 
-                NbtList items = tileEntity.Get<NbtList>("Items");
-                int cnt = items?.Count ?? 0;
-                if (cnt >= 3)
+            public ItemStack Ingredient
+            {
+                get => InternalSlotGet(IngredientIndex);
+                set => InternalSlotSet(IngredientIndex, value);
+            }
+
+            public void DecrementIngredient()
+            {
+                InternalDecrement(IngredientIndex);
+            }
+
+            public ItemStack Fuel
+            {
+                get => InternalSlotGet(FuelIndex);
+                set => InternalSlotSet(FuelIndex, value);
+            }
+
+            private void InternalDecrement(int slotIndex)
+            {
+                lock (_furnaceState)
                 {
-                    Ingredient = ItemStack.FromNbt(items.Get<NbtCompound>(0));
-                    Fuel = ItemStack.FromNbt(items.Get<NbtCompound>(1));
-                    Output = ItemStack.FromNbt(items.Get<NbtCompound>(2));
+                    NbtList items = _furnaceState.Get<NbtList>("Items");
+                    NbtCompound fuel = (NbtCompound)items[slotIndex];
+                    NbtByte cnt = (NbtByte)fuel["Count"];
+                    cnt.Value -= 1;
                 }
-                else if (cnt == 2)
-                {
-                    Ingredient = ItemStack.FromNbt(items.Get<NbtCompound>(0));
-                    Fuel = ItemStack.FromNbt(items.Get<NbtCompound>(1));
-                    Output = ItemStack.EmptyStack;
-                }
-                else if (cnt == 1)
-                {
-                    Ingredient = ItemStack.FromNbt(items.Get<NbtCompound>(0));
-                    Fuel = ItemStack.EmptyStack;
-                    Output = ItemStack.EmptyStack;
-                }
-                else
-                {
-                    Ingredient = ItemStack.EmptyStack;
-                    Fuel = ItemStack.EmptyStack;
-                    Output = ItemStack.EmptyStack;
-                }
+            }
+
+            public void DecrementFuel()
+            {
+                InternalDecrement(FuelIndex);
+            }
+
+            public ItemStack Output
+            {
+                get => InternalSlotGet(OutputIndex);
+                set => InternalSlotSet(OutputIndex, value);
+            }
+
+            public void Save(IWorld world, GlobalVoxelCoordinates coordinates)
+            {
+                world.SetTileEntity(coordinates, _furnaceState);
             }
         }
 
@@ -149,29 +227,19 @@ namespace TrueCraft.Core.Logic.Blocks
         protected static Dictionary<GlobalVoxelCoordinates, FurnaceEventSubject> _trackedFurnaces = new Dictionary<GlobalVoxelCoordinates, FurnaceEventSubject>();
         protected static Dictionary<GlobalVoxelCoordinates, List<FurnaceWindowUser>> _trackedFurnaceWindows = new Dictionary<GlobalVoxelCoordinates, List<FurnaceWindowUser>>();
 
-        private NbtCompound CreateTileEntity()
-        {
-            return new NbtCompound(new NbtTag[]
-            {
-                new NbtShort("BurnTime", 0),
-                new NbtShort("BurnTotal", 0),
-                new NbtShort("CookTime", -1),
-                new NbtList("Items", new[]
-                {
-                    ItemStack.EmptyStack.ToNbt(),
-                    ItemStack.EmptyStack.ToNbt(),
-                    ItemStack.EmptyStack.ToNbt()
-                }, NbtTagType.Compound)
-            });
-        }
-
         private FurnaceState GetState(IWorld world, GlobalVoxelCoordinates coords)
         {
             ServerOnly.Assert();
 
-            NbtCompound tileEntity = world.GetTileEntity(coords) ?? CreateTileEntity();
+            NbtCompound tileEntity = world.GetTileEntity(coords);
+            if (tileEntity == null)
+            {
+                FurnaceState rv =  new FurnaceState();
+                rv.Save(world, coords);
+                return rv;
+            }
 
-            return new FurnaceState(tileEntity);
+                return new FurnaceState(tileEntity);
         }
 
         private void UpdateWindows(GlobalVoxelCoordinates coords, FurnaceState state)
@@ -200,7 +268,7 @@ namespace TrueCraft.Core.Logic.Blocks
 
         private void SetState(IWorld world, GlobalVoxelCoordinates coords, FurnaceState state)
         {
-            world.SetTileEntity(coords, state.ToNbt());
+            state.Save(world, coords);
             UpdateWindows(coords, state);
         }
 
@@ -323,7 +391,7 @@ namespace TrueCraft.Core.Logic.Blocks
                     // We can definitely start
                     state.BurnTimeRemaining = state.BurnTimeTotal = (short)(fuel.BurnTime.TotalSeconds * 20);  // TODO Hard-coded constant for 20 ticks per second.
                     state.CookTime = 0;
-                    state.Fuel = state.Fuel.GetReducedStack(1);
+                    state.DecrementFuel();
                     SetState(world, coords, state);
                     world.SetBlockID(coords, LitFurnaceBlock.BlockID);
                     var subject = new FurnaceEventSubject();
@@ -386,7 +454,7 @@ namespace TrueCraft.Core.Logic.Blocks
                     else if (outputStack.CanMerge(input.SmeltingOutput))
                         outputStack.Count += input.SmeltingOutput.Count;
                     state.Output = outputStack;
-                    state.Ingredient = state.Ingredient.GetReducedStack(1);
+                    state.DecrementIngredient();
                 }
             }
 
