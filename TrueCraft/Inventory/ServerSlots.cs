@@ -9,7 +9,7 @@ namespace TrueCraft.Inventory
 {
     public class ServerSlots : Slots<IServerSlot>, IServerSlots
     {
-        protected ServerSlots(IItemRepository itemRepository, List<IServerSlot> slots) :
+        public ServerSlots(IItemRepository itemRepository, List<IServerSlot> slots) :
             base(itemRepository, slots)
         {
         }

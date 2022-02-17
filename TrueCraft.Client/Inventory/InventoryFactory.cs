@@ -1,6 +1,7 @@
 using System;
 using TrueCraft.Core.Inventory;
 using TrueCraft.Core.Logic;
+using TrueCraft.Core.Server;
 using TrueCraft.Core.World;
 
 namespace TrueCraft.Client.Inventory
@@ -33,8 +34,8 @@ namespace TrueCraft.Client.Inventory
         }
 
         public IFurnaceWindow<ISlot> NewFurnaceWindow(IItemRepository itemRepository,
-            ISlotFactory<ISlot> slotFactory, sbyte windowID,
-            ISlots<ISlot> mainInventory, ISlots<ISlot> hotBar,
+            ISlotFactory<ISlot> slotFactory, sbyte windowID, 
+            IFurnaceSlots furnaceSlots, ISlots<ISlot> mainInventory, ISlots<ISlot> hotBar,
             IWorld world, GlobalVoxelCoordinates location)
         {
             return new FurnaceWindow(itemRepository, slotFactory, windowID,

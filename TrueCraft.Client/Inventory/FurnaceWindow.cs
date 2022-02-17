@@ -1,22 +1,73 @@
 using System;
+using System.Collections.Generic;
 using fNbt;
 using TrueCraft.Client.Handlers;
 using TrueCraft.Client.Modules;
 using TrueCraft.Core;
 using TrueCraft.Core.Inventory;
 using TrueCraft.Core.Logic;
+using TrueCraft.Core.Windows;
 using TrueCraft.Core.World;
 
 namespace TrueCraft.Client.Inventory
 {
-    public class FurnaceWindow : TrueCraft.Core.Inventory.FurnaceWindow<ISlot>, IClickHandler
+    public class FurnaceWindow : Window<ISlot>, IFurnaceWindow<ISlot>, IClickHandler
     {
+        // NOTE: these values must match the order in which the slots
+        //    collections are added in the constructors.
+        public enum AreaIndices
+        {
+            Ingredient = 0,
+            Fuel = 1,
+            Output = 2,
+            Main = 3,
+            Hotbar = 4
+        }
+
+        private const int _outputSlotIndex = 2;
+
         public FurnaceWindow(IItemRepository itemRepository,
             ISlotFactory<ISlot> slotFactory, sbyte windowID,
             ISlots<ISlot> mainInventory, ISlots<ISlot> hotBar,
             IWorld world, GlobalVoxelCoordinates location) :
-            base(itemRepository, slotFactory, windowID, mainInventory, hotBar)
+            base(itemRepository, windowID, WindowType.Furnace, "Furnace",
+                new ISlots<ISlot>[] { GetSlots(itemRepository, slotFactory),
+                    GetSlots(itemRepository, slotFactory),
+                    GetSlots(itemRepository, slotFactory),
+                    mainInventory, hotBar })
         {
+            IngredientSlotIndex = 0;
+            FuelSlotIndex = 1;
+            OutputSlotIndex = 2;
+            MainSlotIndex = 3;
+        }
+
+        private static ISlots<ISlot> GetSlots(IItemRepository itemRepository,
+            ISlotFactory<ISlot> slotFactory)
+        {
+            List<ISlot> lst = new List<ISlot>();
+            lst.Add(slotFactory.GetSlot(itemRepository));
+            return new Slots<ISlot>(itemRepository, lst, 1);
+        }
+
+        public ISlots<ISlot> Ingredient => Slots[(int)AreaIndices.Ingredient];
+
+        /// <inheritdoc />
+        public int IngredientSlotIndex { get; }
+
+        public ISlots<ISlot> Fuel => Slots[(int)AreaIndices.Fuel];
+
+        /// <inheritdoc />
+        public int FuelSlotIndex { get; }
+
+        public ISlots<ISlot> Output => Slots[(int)AreaIndices.Output];
+
+        /// <inheritdoc />
+        public int OutputSlotIndex { get; }
+
+        public override bool IsOutputSlot(int slotIndex)
+        {
+            return slotIndex == _outputSlotIndex;
         }
 
         public override void SetSlots(ItemStack[] slotContents)

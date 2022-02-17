@@ -61,7 +61,7 @@ namespace TrueCraft.Client.Handlers
 
                 case WindowType.Furnace:
                     window = factory.NewFurnaceWindow(itemRepository, slotFactory,
-                        windowID, client.Inventory, client.Hotbar, null, null);
+                        windowID, null, client.Inventory, client.Hotbar, null, null);
                     break;
             }
 

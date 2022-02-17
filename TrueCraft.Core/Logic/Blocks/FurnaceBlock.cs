@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 using TrueCraft.Core.Networking;
 using TrueCraft.Core.World;
 using TrueCraft.Core.Windows;
@@ -8,12 +9,13 @@ using TrueCraft.Core.Server;
 using TrueCraft.Core.Networking.Packets;
 using TrueCraft.Core.Entities;
 using TrueCraft.Core.Inventory;
+using System.ComponentModel;
 
 namespace TrueCraft.Core.Logic.Blocks
 {
     public class FurnaceBlock : BlockProvider
     {
-        protected class FurnaceState
+        protected class FurnaceState : IFurnaceSlots
         {
             private readonly NbtCompound _furnaceState;
 
@@ -46,6 +48,9 @@ namespace TrueCraft.Core.Logic.Blocks
                         ItemStack.EmptyStack.ToNbt()
                     }, NbtTagType.Compound)
                 });
+                IngredientSlot = new IngredientSlotImpl(IngredientIndex, this);
+                FuelSlot = new FuelSlotImpl(FuelIndex, this);
+                OutputSlot = new OutputSlotImpl(OutputIndex, this);
             }
 
             /// <summary>
@@ -55,6 +60,9 @@ namespace TrueCraft.Core.Logic.Blocks
             public FurnaceState(NbtCompound tileEntity)
             {
                 _furnaceState = tileEntity;
+                IngredientSlot = new IngredientSlotImpl(IngredientIndex, this);
+                FuelSlot = new FuelSlotImpl(FuelIndex, this);
+                OutputSlot = new OutputSlotImpl(OutputIndex, this);
             }
 
             private short InternalGet(string tag)
@@ -169,6 +177,139 @@ namespace TrueCraft.Core.Logic.Blocks
             {
                 world.SetTileEntity(coordinates, _furnaceState);
             }
+
+            #region IFurnaceSlots
+            // TODO It is not possible to robustly implement the INotifyPropertyChanged
+            //    as the NbtTag class does not implement it.  So we have no way to
+            //    detect if the underlying storage is changed through other means.
+            private abstract class SlotImpl : IServerSlot
+            {
+                private bool _dirty = false;
+
+                protected FurnaceState _parent;
+
+                protected SlotImpl(int slotIndex, FurnaceState parent)
+                {
+                    Index = slotIndex;
+                    _parent = parent;
+                }
+
+                protected virtual void OnPropertyChanged([CallerMemberName]string name = "")
+                {
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+                }
+
+                public bool Dirty
+                {
+                    get => _dirty;
+                    protected set
+                    {
+                        if (_dirty == value) return;
+                        _dirty = value;
+                        OnPropertyChanged();
+                    }
+                }
+
+                public void SetClean()
+                {
+                    Dirty = false;
+                }
+
+                public int Index { get; }
+
+                public abstract ItemStack Item { get; set; }
+
+                public event PropertyChangedEventHandler PropertyChanged;
+
+                public int CanAccept(ItemStack other)
+                {
+                    if (other.Empty) return 0;
+
+                    ItemStack item = this.Item;
+
+                    if (item.Empty) return other.Count;
+
+                    if (item.CanMerge(other))
+                    {
+                        IItemProvider provider = ItemRepository.Get().GetItemProvider(item.ID);
+                        int maxStack = provider.MaximumStack;
+                        return Math.Min(maxStack - item.Count, other.Count);
+                    }
+
+                    return 0;
+                }
+
+                public SetSlotPacket GetSetSlotPacket(sbyte windowID)
+                {
+                    Dirty = false;
+                    ItemStack item = Item;
+                    return new SetSlotPacket(windowID, (short)Index, item.ID, item.Count, item.Metadata);
+                }
+            }
+
+            private class IngredientSlotImpl : SlotImpl
+            {
+
+                public IngredientSlotImpl(int slotIndex, FurnaceState parent) : base(slotIndex, parent)
+                {
+                }
+
+                public override ItemStack Item
+                {
+                    get => _parent.Ingredient;
+                    set
+                    {
+                        _parent.Ingredient = value;
+                        OnPropertyChanged();
+                        Dirty = true;
+                    }
+                }
+            }
+
+            public IServerSlot IngredientSlot { get; }
+
+            private class FuelSlotImpl : SlotImpl
+            {
+                public FuelSlotImpl(int slotIndex, FurnaceState parent) : base(slotIndex, parent)
+                {
+
+                }
+
+                public override ItemStack Item
+                {
+                    get => _parent.Fuel;
+                    set
+                    {
+                        _parent.Fuel = value;
+                        OnPropertyChanged();
+                        Dirty = true;
+                    }
+                }
+            }
+
+            public IServerSlot FuelSlot { get; }
+
+            public IServerSlot OutputSlot { get; }
+
+            private class OutputSlotImpl : SlotImpl
+            {
+                public OutputSlotImpl(int slotIndex, FurnaceState parent) : base (slotIndex, parent)
+                {
+
+                }
+
+                public override ItemStack Item
+                {
+                    get => _parent.Output;
+                    set
+                    {
+                        _parent.Output = value;
+                        OnPropertyChanged();
+                        Dirty = true;
+                    }
+                }
+            }
+            #endregion
         }
 
         protected class FurnaceEventSubject : IEventSubject
@@ -302,9 +443,11 @@ namespace TrueCraft.Core.Logic.Blocks
         {
             ServerOnly.Assert();
 
+            FurnaceState state = GetState(world, descriptor.Coordinates);
             IInventoryFactory<IServerSlot> factory = new InventoryFactory<IServerSlot>();
             IFurnaceWindow<IServerSlot> window = factory.NewFurnaceWindow(user.Server.ItemRepository,
-                SlotFactory<IServerSlot>.Get(), WindowIDs.GetWindowID(), user.Inventory, user.Hotbar,
+                SlotFactory<IServerSlot>.Get(), WindowIDs.GetWindowID(),
+                state, user.Inventory, user.Hotbar,
                 world, descriptor.Coordinates);
 
             user.OpenWindow(window);
@@ -313,7 +456,6 @@ namespace TrueCraft.Core.Logic.Blocks
             _trackedFurnaceWindows[descriptor.Coordinates].Add(new FurnaceWindowUser(window, user));
             window.WindowClosed += (sender, e) => _trackedFurnaceWindows.Remove(descriptor.Coordinates);
 
-            FurnaceState state = GetState(world, descriptor.Coordinates);
             UpdateWindows(descriptor.Coordinates, state);
 
             // TODO: Set window progress appropriately
