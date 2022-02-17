@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Xml;
+using fNbt;
 using NUnit.Framework;
 
 
@@ -83,6 +84,31 @@ namespace TrueCraft.Core.Test
             Assert.AreEqual(id, actual.ID);
             Assert.AreEqual(count - reduction, actual.Count);
             Assert.AreEqual(metadata, actual.Metadata);
+        }
+
+        [Test]
+        public void Equals_Nbt()
+        {
+            short id = 5;
+            short metadata = 17;
+            byte count = 19;
+            byte slot = 23;
+
+            NbtCompound compound = new NbtCompound();
+            NbtShort idTag = new NbtShort("id", id);
+            compound.Add(idTag);
+            compound.Add(new NbtShort("Damage", metadata));
+            compound.Add(new NbtByte("Count", count));
+            compound.Add(new NbtByte("Slot", slot));
+
+            ItemStack item = new ItemStack(id, (sbyte)count, metadata);
+            item.Index = slot;
+
+            Assert.True(item.Equals(compound));
+            Assert.True(item == compound);
+            Assert.False(item != compound);
+            Assert.True(compound == item);
+            Assert.False(compound != item);
         }
     }
 }

@@ -11,7 +11,7 @@ namespace TrueCraft.Core
     /// <summary>
     /// Represents a stack of items.
     /// </summary>
-    public struct ItemStack : ICloneable, IEquatable<ItemStack>
+    public struct ItemStack : ICloneable, IEquatable<ItemStack>, IEquatable<NbtTag>
     {
         /// <summary>
         /// Returns the hash code for this item stack.
@@ -343,7 +343,9 @@ namespace TrueCraft.Core
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) return false;
-            return obj is ItemStack && Equals((ItemStack)obj);
+            if (obj is ItemStack)
+                return Equals((ItemStack)obj);
+            return obj is NbtTag && Equals((NbtTag)obj);
         }
 
         /// <summary>
@@ -355,5 +357,54 @@ namespace TrueCraft.Core
         {
             return _Id == other._Id && _Count == other._Count && _Metadata == other._Metadata && Index == other.Index && Equals(Nbt, other.Nbt);
         }
+
+        #region IEquatable<NbtTag> & related
+        public bool Equals(NbtTag nbt)
+        {
+            NbtCompound other = nbt as NbtCompound;
+            if (object.ReferenceEquals(other, null))
+                return false;
+
+            NbtShort id = other.Get<NbtShort>("id");
+            if (object.ReferenceEquals(id, null) || _Id != id.Value)
+                return false;
+
+            NbtShort metadata = other.Get<NbtShort>("Damage");
+            if (object.ReferenceEquals(metadata, null) || _Metadata != metadata.Value)
+                return false;
+
+            NbtByte count = other.Get<NbtByte>("Count");
+            if (object.ReferenceEquals(count, null) || _Count != count.Value)
+                return false;
+
+            NbtByte slot = other.Get<NbtByte>("Slot");
+            if (object.ReferenceEquals(slot, null) || Index != slot.Value)
+                return false;
+
+            // TODO: compare Nbt property
+
+            return true;
+        }
+
+        public static bool operator==(ItemStack l, NbtTag r)
+        {
+            return l.Equals(r);
+        }
+
+        public static bool operator !=(ItemStack l, NbtTag r)
+        {
+            return !(l == r);
+        }
+
+        public static bool operator==(NbtTag l, ItemStack r)
+        {
+            return (r == l);
+        }
+
+        public static bool operator !=(NbtTag l, ItemStack r)
+        {
+            return !(r == l);
+        }
+        #endregion
     }
 }
