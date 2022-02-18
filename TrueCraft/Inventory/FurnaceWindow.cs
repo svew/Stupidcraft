@@ -35,6 +35,12 @@ namespace TrueCraft.Inventory
                     new ServerSlots(itemRepository, new List<IServerSlot> {furnaceSlots.OutputSlot }),
                     mainInventory, hotBar })
         {
+            int slotIndex = 0;
+            IngredientSlotIndex = slotIndex;
+            slotIndex += Ingredient.Count;
+            FuelSlotIndex = slotIndex;
+            slotIndex += Fuel.Count;
+            OutputSlotIndex = slotIndex;
         }
 
         public ISlots<IServerSlot> Ingredient => Slots[(int)AreaIndices.Ingredient];
