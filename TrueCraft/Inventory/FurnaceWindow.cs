@@ -4,6 +4,7 @@ using fNbt;
 using TrueCraft.Core;
 using TrueCraft.Core.Inventory;
 using TrueCraft.Core.Logic;
+using TrueCraft.Core.Logic.Blocks;
 using TrueCraft.Core.Networking.Packets;
 using TrueCraft.Core.Server;
 using TrueCraft.Core.World;
@@ -24,6 +25,9 @@ namespace TrueCraft.Inventory
             Hotbar = 4
         }
 
+        private readonly IWorld _world;
+        private readonly GlobalVoxelCoordinates _location;
+
         private const int _outputSlotIndex = 2;
         public FurnaceWindow(IItemRepository itemRepository,
             ISlotFactory<IServerSlot> slotFactory, sbyte windowID, IFurnaceSlots furnaceSlots,
@@ -35,6 +39,9 @@ namespace TrueCraft.Inventory
                     new ServerSlots(itemRepository, new List<IServerSlot> {furnaceSlots.OutputSlot }),
                     mainInventory, hotBar })
         {
+            _world = world;
+            _location = location;
+
             int slotIndex = 0;
             IngredientSlotIndex = slotIndex;
             slotIndex += Ingredient.Count;
@@ -103,20 +110,26 @@ namespace TrueCraft.Inventory
 
         public bool HandleClick(int slotIndex, bool right, bool shift, ref ItemStack itemStaging)
         {
+            bool rv;
+
             if (right)
             {
                 if (shift)
-                    return HandleShiftRightClick(slotIndex, ref itemStaging);
+                    rv = HandleShiftRightClick(slotIndex, ref itemStaging);
                 else
-                    return HandleRightClick(slotIndex, ref itemStaging);
+                    rv = HandleRightClick(slotIndex, ref itemStaging);
             }
             else
             {
                 if (shift)
-                    return HandleShiftLeftClick(slotIndex, ref itemStaging);
+                    rv = HandleShiftLeftClick(slotIndex, ref itemStaging);
                 else
-                    return HandleLeftClick(slotIndex, ref itemStaging);
+                    rv = HandleLeftClick(slotIndex, ref itemStaging);
             }
+
+            FurnaceBlock furnace = (FurnaceBlock)BlockRepository.Get().GetBlockProvider(0x3D);  // TODO hard-coded block id.
+            furnace.TryStartFurnace(MultiplayerServer.Get().Scheduler, _world, _location, ItemRepository);
+            return rv;
         }
 
         protected bool HandleLeftClick(int slotIndex, ref ItemStack itemStaging)

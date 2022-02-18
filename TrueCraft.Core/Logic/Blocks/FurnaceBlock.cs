@@ -365,24 +365,39 @@ namespace TrueCraft.Core.Logic.Blocks
         // TODO: An instance of GlobalVoxelCoordinates is not sufficient.  If a
         //       furnace is placed in another dimension at the same coordinates,
         //       this will fail.
-        protected static Dictionary<GlobalVoxelCoordinates, FurnaceEventSubject> _trackedFurnaces = new Dictionary<GlobalVoxelCoordinates, FurnaceEventSubject>();
+        protected static Dictionary<GlobalVoxelCoordinates, FurnaceEventSubject> _scheduledFurnaces = new Dictionary<GlobalVoxelCoordinates, FurnaceEventSubject>();
         protected static Dictionary<GlobalVoxelCoordinates, List<FurnaceWindowUser>> _trackedFurnaceWindows = new Dictionary<GlobalVoxelCoordinates, List<FurnaceWindowUser>>();
+        protected static Dictionary<GlobalVoxelCoordinates, FurnaceState> _trackedFurnaceStates = new Dictionary<GlobalVoxelCoordinates, FurnaceState>();
 
         private FurnaceState GetState(IWorld world, GlobalVoxelCoordinates coords)
         {
             ServerOnly.Assert();
 
+            if (_trackedFurnaceStates.ContainsKey(coords))
+                return _trackedFurnaceStates[coords];
+
+            FurnaceState rv;
             NbtCompound tileEntity = world.GetTileEntity(coords);
             if (tileEntity == null)
             {
-                FurnaceState rv =  new FurnaceState();
+                rv = new FurnaceState();
                 rv.Save(world, coords);
-                return rv;
+            }
+            else
+            {
+                rv = new FurnaceState(tileEntity);
             }
 
-                return new FurnaceState(tileEntity);
+            _trackedFurnaceStates.Add(coords, rv);
+            return rv;
         }
 
+        /// <summary>
+        /// Sends out Progress packets to all Clients with a Furnace Window open
+        /// at the specified coordinates.
+        /// </summary>
+        /// <param name="coords"></param>
+        /// <param name="state"></param>
         private void UpdateWindows(GlobalVoxelCoordinates coords, FurnaceState state)
         {
             ServerOnly.Assert();
@@ -391,20 +406,25 @@ namespace TrueCraft.Core.Logic.Blocks
             {
                 Handling = true;
                 foreach (var window in _trackedFurnaceWindows[coords])
-                {
-                    window.Window[0] = state.Ingredient;  // TODO hard-coded indices.
-                    window.Window[1] = state.Fuel;
-                    window.Window[2] = state.Output;
-
-                    window.User.QueuePacket(new UpdateProgressPacket(
-                        window.Window.WindowID, UpdateProgressPacket.ProgressTarget.ItemCompletion, state.CookTime));
-                    var burnProgress = state.BurnTimeRemaining / (double)state.BurnTimeTotal;
-                    var burn = (short)(burnProgress * 250);
-                    window.User.QueuePacket(new UpdateProgressPacket(
-                        window.Window.WindowID, UpdateProgressPacket.ProgressTarget.AvailableHeat, burn));
-                }
+                    UpdateWindow(window.Window, window.User, state);
                 Handling = false;
             }
+        }
+
+        /// <summary>
+        /// Sends Progress packets for a single open Furnace Window.
+        /// </summary>
+        /// <param name="window"></param>
+        /// <param name="user"></param>
+        /// <param name="state"></param>
+        private void UpdateWindow(IFurnaceWindow<IServerSlot> window, IRemoteClient user, FurnaceState state)
+        {
+            user.QueuePacket(new UpdateProgressPacket(
+                        window.WindowID, UpdateProgressPacket.ProgressTarget.ItemCompletion, state.CookTime));
+            double burnProgress = state.BurnTimeRemaining / (double)state.BurnTimeTotal;
+            short burn = (short)(burnProgress * 250);
+            user.QueuePacket(new UpdateProgressPacket(
+                window.WindowID, UpdateProgressPacket.ProgressTarget.AvailableHeat, burn));
         }
 
         private void SetState(IWorld world, GlobalVoxelCoordinates coords, FurnaceState state)
@@ -417,13 +437,16 @@ namespace TrueCraft.Core.Logic.Blocks
         {
             ServerOnly.Assert();
 
-            var state = GetState(world, coords);
-            TryInitializeFurnace(state, server.Scheduler, world, coords, server.ItemRepository);
+            FurnaceState state = GetState(world, coords);
+            if (state.BurnTimeRemaining > 0)
+                ScheduleFurnace(server.Scheduler, world, coords, ItemRepository.Get());
         }
 
         public override void BlockMined(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
         {
             ServerOnly.Assert();
+
+            // TODO clean up running Furnace
 
             var entity = world.GetTileEntity(descriptor.Coordinates);
             if (entity != null)
@@ -456,152 +479,168 @@ namespace TrueCraft.Core.Logic.Blocks
             _trackedFurnaceWindows[descriptor.Coordinates].Add(new FurnaceWindowUser(window, user));
             window.WindowClosed += (sender, e) => _trackedFurnaceWindows.Remove(descriptor.Coordinates);
 
-            UpdateWindows(descriptor.Coordinates, state);
+            UpdateWindow(window, user, state);
 
-            // TODO: Set window progress appropriately
-
-            //window.WindowChange += (sender, e) => FurnaceWindowChanged(sender, e, world);
             return false;
         }
 
         private bool Handling = false;
 
-        // TODO Move to OnWindowChanged - separate into Client- and Server-side methods.
-        //protected void FurnaceWindowChanged(object sender, WindowChangeEventArgs e, IWorld world)
-        //{
-        //    if (Handling)
-        //        return;
-        //    IFurnaceWindowContent window = sender as IFurnaceWindowContent;
-        //    int index = e.SlotIndex;
-        //    if (window.IsPlayerInventorySlot(index))
-        //        return;
-
-        //    Handling = true;
-        //    e.Handled = true;
-        //    window[index] = e.Value;
-
-        //    var state = GetState(world, window.Coordinates);
-
-        //    state.Ingredient = window[0];  // TODO hard-coded indices
-        //    state.Fuel = window[1];
-        //    state.Output = window[2];
-
-        //    SetState(world, window.Coordinates, state);
-
-        //    Handling = true;
-
-        //    if (!TrackedFurnaces.ContainsKey(window.Coordinates))
-        //    {
-        //        // Set up the initial state
-        //        TryInitializeFurnace(state, window.EventScheduler, world, window.Coordinates, window.ItemRepository);
-        //    }
-
-        //    Handling = false;
-        //}
-
-        private void TryInitializeFurnace(FurnaceState state, IEventScheduler scheduler, IWorld world,
-                                          GlobalVoxelCoordinates coords, IItemRepository itemRepository)
+        /// <summary>
+        /// Tries to change the Furnace from the Off state to the Lit state.
+        /// </summary>
+        /// <param name="scheduler"></param>
+        /// <param name="world"></param>
+        /// <param name="coords"></param>
+        /// <param name="itemRepository"></param>
+        public void TryStartFurnace(IEventScheduler scheduler, IWorld world,
+            GlobalVoxelCoordinates coords, IItemRepository itemRepository)
         {
-            if (_trackedFurnaces.ContainsKey(coords))
+            // If the furnace is already scheduled, it is already lit.
+            if (_scheduledFurnaces.ContainsKey(coords))
                 return;
 
+            FurnaceState state = GetState(world, coords);
             ItemStack inputStack = state.Ingredient;
             ItemStack fuelStack = state.Fuel;
             ItemStack outputStack = state.Output;
 
-            var input = itemRepository.GetItemProvider(inputStack.ID) as ISmeltableItem;
-            var fuel = itemRepository.GetItemProvider(fuelStack.ID) as IBurnableItem;
+            ISmeltableItem input = itemRepository.GetItemProvider(inputStack.ID) as ISmeltableItem;
+            IBurnableItem fuel = itemRepository.GetItemProvider(fuelStack.ID) as IBurnableItem;
 
-            if (state.BurnTimeRemaining > 0)
-            {
-                if (state.CookTime == -1 && input != null && (outputStack.Empty || outputStack.CanMerge(input.SmeltingOutput)))
-                {
-                    state.CookTime = 0;
-                    SetState(world, coords, state);
-                }
-                var subject = new FurnaceEventSubject();
-                _trackedFurnaces[coords] = subject;
-                scheduler.ScheduleEvent("smelting", subject, TimeSpan.FromSeconds(1),
-                    server => UpdateFurnace(server.Scheduler, world, coords, itemRepository));
+            if (!CanStartBurningFuel(itemRepository, fuel, input, outputStack))
                 return;
-            }
 
-            if (fuel != null && input != null) // We can maybe start
-            {
-                if (outputStack.Empty || outputStack.CanMerge(input.SmeltingOutput))
-                {
-                    // We can definitely start
-                    state.BurnTimeRemaining = state.BurnTimeTotal = (short)(fuel.BurnTime.TotalSeconds * 20);  // TODO Hard-coded constant for 20 ticks per second.
-                    state.CookTime = 0;
-                    state.DecrementFuel();
-                    SetState(world, coords, state);
-                    world.SetBlockID(coords, LitFurnaceBlock.BlockID);
-                    var subject = new FurnaceEventSubject();
-                    _trackedFurnaces[coords] = subject;
-                    scheduler.ScheduleEvent("smelting", subject, TimeSpan.FromSeconds(1),
-                        server => UpdateFurnace(server.Scheduler, world, coords, itemRepository));
-                }
-            }
+            ScheduleFurnace(scheduler, world, coords, itemRepository);
+
+            world.SetBlockID(coords, LitFurnaceBlock.BlockID);
+
+            state.BurnTimeTotal = (short)(fuel.BurnTime.TotalSeconds * 20);  // TODO hard-coded ticks per second
+            state.BurnTimeRemaining = state.BurnTimeTotal;
+            state.CookTime = 0;
+            state.DecrementFuel();
+            fuelStack = state.Fuel;
+            foreach (FurnaceWindowUser fwu in _trackedFurnaceWindows[coords])
+                fwu.User.QueuePacket(new SetSlotPacket(fwu.Window.WindowID, (short)fwu.Window.FuelSlotIndex, fuelStack.ID, fuelStack.Count, fuelStack.Metadata));
+
+            UpdateWindows(coords, state);
+        }
+
+        /// <summary>
+        /// Determines whether or not the Furnace will start burning an item of Fuel.
+        /// </summary>
+        /// <param name="itemRepository"></param>
+        /// <param name="fuel"></param>
+        /// <param name="input"></param>
+        /// <param name="outputStack"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// <para>
+        /// To start burning a fuel item, we need:
+        /// <list type="number">
+        /// <item>Fuel</item>
+        /// <item>a smeltable ingredient, AND</item>
+        /// <item>room for the output</item>
+        /// </list>
+        /// </para></remarks>
+        private bool CanStartBurningFuel(IItemRepository itemRepository,
+            IBurnableItem fuel, ISmeltableItem input, ItemStack outputStack)
+        {
+            if (object.ReferenceEquals(fuel, null))
+                return false;
+
+            if (object.ReferenceEquals(input, null))
+                return false;
+
+            if (!outputStack.CanMerge(input.SmeltingOutput))
+                return false;
+
+            IItemProvider provider = itemRepository.GetItemProvider(input.SmeltingOutput.ID);
+            if (outputStack.Count == provider.MaximumStack)
+                return false;
+
+            return true;
+        }
+
+        private void ScheduleFurnace(IEventScheduler scheduler,
+            IWorld world, GlobalVoxelCoordinates coords, IItemRepository itemRepository)
+        {
+            FurnaceEventSubject subject = new FurnaceEventSubject();
+            _scheduledFurnaces[coords] = subject;
+            // TODO hard-coded TimeSpan that must be coordinated with hard-coded values in other places.
+            scheduler.ScheduleEvent("smelting", subject, TimeSpan.FromSeconds(1),
+                server => UpdateFurnace(server.Scheduler, world, coords, itemRepository));
         }
 
         private void UpdateFurnace(IEventScheduler scheduler, IWorld world, GlobalVoxelCoordinates coords, IItemRepository itemRepository)
         {
-            // TODO: Why remove it on update?
-            if (_trackedFurnaces.ContainsKey(coords))
-                _trackedFurnaces.Remove(coords);
-
-            if (world.GetBlockID(coords) != FurnaceBlock.BlockID && world.GetBlockID(coords) != LitFurnaceBlock.BlockID)
-            {
-                /*if (window != null && !window.IsDisposed)
-                    window.Dispose();*/
+            // This furnace is no longer scheduled, so remove it.
+            if (!_scheduledFurnaces.ContainsKey(coords))
                 return;
+            _scheduledFurnaces.Remove(coords);
+
+            FurnaceState state = GetState(world, coords);
+            ItemStack inputStack = state.Ingredient;
+            ItemStack fuelStack = state.Fuel;
+            ItemStack outputStack = state.Output;
+
+            ISmeltableItem input = itemRepository.GetItemProvider(inputStack.ID) as ISmeltableItem;
+            IBurnableItem fuel = itemRepository.GetItemProvider(fuelStack.ID) as IBurnableItem;
+
+            if (!object.ReferenceEquals(input, null))
+            {
+                // Increase CookTime
+                state.CookTime += 20;   // TODO hard-coded value that must be coordinated with TimeSpan in ScheduleFurnace
+                if (state.CookTime >= 200)   // TODO Hard-coded constant
+                {
+                    state.DecrementIngredient();
+                    inputStack = state.Ingredient;
+
+                    IItemProvider outputItemProvider = itemRepository.GetItemProvider(input.SmeltingOutput.ID);
+                    int maxStack = outputItemProvider.MaximumStack;
+                    if (outputStack.Empty)
+                        outputStack = input.SmeltingOutput;
+                    else
+                        outputStack.Count += (sbyte)Math.Min(maxStack - outputStack.Count, input.SmeltingOutput.Count);
+                    state.Output = outputStack;
+
+                    foreach(FurnaceWindowUser fwu in _trackedFurnaceWindows[coords])
+                    {
+                        IFurnaceWindow<IServerSlot> window = fwu.Window;
+                        IRemoteClient user = fwu.User;
+                        user.QueuePacket(new SetSlotPacket(window.WindowID, (short)window.IngredientSlotIndex, inputStack.ID, inputStack.Count, inputStack.Metadata));
+                        user.QueuePacket(new SetSlotPacket(window.WindowID, (short)window.OutputSlotIndex, outputStack.ID, outputStack.Count, outputStack.Metadata));
+                    }
+
+                    state.CookTime = 0;
+                }
             }
 
-            var state = GetState(world, coords);
-
-            var inputStack = state.Ingredient;
-            var outputStack = state.Output;
-
-            var input = itemRepository.GetItemProvider(inputStack.ID) as ISmeltableItem;
-
-            // Update burn time
-            var burnTime = state.BurnTimeRemaining;
-            if (state.BurnTimeRemaining > 0)
+            // Reduce BurnTimeRemaining
+            state.BurnTimeRemaining -= 20;   // TODO hard-coded value that must be coordinated with TimeSpan in ScheduleFurnace
+            if (state.BurnTimeRemaining <= 0)
             {
-                state.BurnTimeRemaining -= 20; // ticks
-                if (state.BurnTimeRemaining <= 0)
+                if (CanStartBurningFuel(itemRepository, fuel, input, outputStack))
+                {
+                    state.BurnTimeTotal = (short)(fuel.BurnTime.TotalSeconds * 20);  // TODO hard-coded ticks per second
+                    state.BurnTimeRemaining = state.BurnTimeTotal;
+                    state.DecrementFuel();
+                    fuelStack = state.Fuel;
+                    foreach (FurnaceWindowUser fwu in _trackedFurnaceWindows[coords])
+                        fwu.User.QueuePacket(new SetSlotPacket(fwu.Window.WindowID, (short)fwu.Window.FuelSlotIndex, fuelStack.ID, fuelStack.Count, fuelStack.Metadata));
+                }
+                else
                 {
                     state.BurnTimeRemaining = 0;
                     state.BurnTimeTotal = 0;
-                    world.SetBlockID(coords, FurnaceBlock.BlockID);
+                    state.CookTime = 0;
                 }
             }
 
-            // Update cook time
-            if (state.CookTime < 200 && state.CookTime >= 0)
-            {
-                state.CookTime += 20; // ticks
-                if (state.CookTime >= 200)
-                    state.CookTime = 200;
-            }
+            if (state.BurnTimeRemaining > 0)
+                ScheduleFurnace(scheduler, world, coords, itemRepository);
 
-            // Are we done cooking?
-            if (state.CookTime == 200 && burnTime > 0)
-            {
-                state.CookTime = -1;
-                if (input != null && (outputStack.Empty || outputStack.CanMerge(input.SmeltingOutput)))
-                {
-                    if (outputStack.Empty)
-                        outputStack = input.SmeltingOutput;
-                    else if (outputStack.CanMerge(input.SmeltingOutput))
-                        outputStack.Count += input.SmeltingOutput.Count;
-                    state.Output = outputStack;
-                    state.DecrementIngredient();
-                }
-            }
-
-            SetState(world, coords, state);
-            TryInitializeFurnace(state, scheduler, world, coords, itemRepository);
+            UpdateWindows(coords, state);
         }
 
         public override Tuple<int, int> GetTextureMap(byte metadata)
