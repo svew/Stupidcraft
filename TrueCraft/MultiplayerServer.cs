@@ -67,7 +67,14 @@ namespace TrueCraft
             }
         }
 
-        private Timer EnvironmentWorker;
+        private Thread _masterTick;
+        private List<AutoResetEvent> _lstAutoResetEvents;
+        private CountdownEvent _cde;
+        private Thread _environmentWorker;
+        private AutoResetEvent _environmentAutoReset;
+
+
+
         private TcpListener Listener;
         private readonly PacketHandler[] PacketHandlers;
         private IList<ILogProvider> LogProviders;
@@ -87,7 +94,15 @@ namespace TrueCraft
             var reader = new PacketReader();
             PacketReader = reader;
             Clients = new List<IRemoteClient>();
-            EnvironmentWorker = new Timer(DoEnvironment);
+
+            // Initialize threads
+            _masterTick = new Thread(MasterTick);
+            _lstAutoResetEvents = new List<AutoResetEvent>(1);
+            _environmentWorker = new Thread(TickedThreadEntry);
+            _environmentAutoReset = new AutoResetEvent(false);
+            _lstAutoResetEvents.Add(_environmentAutoReset);
+            _cde = new CountdownEvent(_lstAutoResetEvents.Count);
+
             PacketHandlers = new PacketHandler[0x100];
             Worlds = new List<IWorld>();
             EntityManagers = new List<IEntityManager>();
@@ -123,6 +138,28 @@ namespace TrueCraft
             return _singleton;
         }
 
+        private long lastTick = 0;
+
+        private void MasterTick()
+        {
+            while (!ShuttingDown)
+            {
+                long start = Time.ElapsedMilliseconds;
+
+                // Release all threads for this tick
+                foreach (AutoResetEvent j in _lstAutoResetEvents)
+                    j.Set();
+
+                // Wait for all threads to confirm they have started
+                _cde.Wait();
+                _cde.Reset();
+
+                long end = Time.ElapsedMilliseconds;
+                int wait = (int)Math.Max(MillisecondsPerTick - (end - start), 0);
+                Thread.Sleep(wait);
+            }
+        }
+
         public void RegisterPacketHandler(byte packetId, PacketHandler handler)
         {
             PacketHandlers[packetId] = handler;
@@ -148,7 +185,11 @@ namespace TrueCraft
                 AcceptClient(this, args);
             
             Log(LogCategory.Notice, "Running TrueCraft server on {0}", EndPoint);
-            EnvironmentWorker.Change(MillisecondsPerTick, Timeout.Infinite);
+
+            // Start all threads
+            _environmentWorker.Start(new Tuple<Action, AutoResetEvent>(DoEnvironment, _environmentAutoReset));
+            _masterTick.Start();
+
             if(Program.ServerConfiguration.Query)
                 QueryProtocol.Start();
         }
@@ -430,11 +471,27 @@ namespace TrueCraft
             }
         }
 
-        private void DoEnvironment(object discarded)
+        private void TickedThreadEntry(object args)
         {
-            if (ShuttingDown)
-                return;
+            (Action action, AutoResetEvent autoReset) = (Tuple<Action, AutoResetEvent>)args;
 
+            while (!ShuttingDown)
+            {
+                autoReset.WaitOne();
+
+                // Signal that this thread has been released and has begun processing
+                // this tick.
+                _cde.Signal();
+
+                action();
+            }
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        private void DoEnvironment()
+        {
             long start = Time.ElapsedMilliseconds;
             long limit = Time.ElapsedMilliseconds + MillisecondsPerTick;
             Profiler.Start("environment");
@@ -473,12 +530,6 @@ namespace TrueCraft
             }
 
             Profiler.Done(MillisecondsPerTick);
-            long end = Time.ElapsedMilliseconds;
-            long next = MillisecondsPerTick - (end - start);
-            if (next < 0)
-                next = 0;
-            
-            EnvironmentWorker.Change(next, Timeout.Infinite);
         }
 
         public bool PlayerIsWhitelisted(string client)
