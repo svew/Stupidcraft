@@ -65,6 +65,12 @@ namespace TrueCraft.Core.Networking
         /// The item stack at the slot the user has selected in their hotbar.
         /// </summary>
         ItemStack SelectedItem { get; }
+
+        /// <summary>
+        /// The ItemStack held by the mouse cursor while a window is open.
+        /// </summary>
+        public ItemStack ItemStaging { get; set; }
+
         /// <summary>
         /// The server this user is playing on.
         /// </summary>

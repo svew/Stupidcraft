@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using TrueCraft.Core;
 using TrueCraft.Core.Inventory;
 using TrueCraft.Core.Logic;
+using TrueCraft.Core.Networking;
 using TrueCraft.Core.Networking.Packets;
 using TrueCraft.Core.Server;
 
@@ -57,22 +58,32 @@ namespace TrueCraft.Inventory
                 }
         }
 
-        public bool HandleClick(int slotIndex, bool right, bool shift, ref ItemStack itemStaging)
+        public void HandleClick(IRemoteClient client, ClickWindowPacket packet)
         {
-            if (right)
+            int slotIndex = packet.SlotIndex;
+            ItemStack itemStaging = client.ItemStaging;
+            bool handled;
+
+
+            if (packet.RightClick)
             {
-                if (shift)
-                    return HandleShiftRightClick(slotIndex, ref itemStaging);
+                if (packet.Shift)
+                    handled = HandleShiftRightClick(slotIndex, ref itemStaging);
                 else
-                    return HandleRightClick(slotIndex, ref itemStaging);
+                    handled = HandleRightClick(slotIndex, ref itemStaging);
             }
             else
             {
-                if (shift)
-                    return HandleShiftLeftClick(slotIndex, ref itemStaging);
+                if (packet.Shift)
+                    handled = HandleShiftLeftClick(slotIndex, ref itemStaging);
                 else
-                    return HandleLeftClick(slotIndex, ref itemStaging);
+                    handled = HandleLeftClick(slotIndex, ref itemStaging);
             }
+
+            if (handled)
+                client.ItemStaging = itemStaging;
+
+            client.QueuePacket(new TransactionStatusPacket(packet.WindowID, packet.TransactionID, handled));
         }
 
         protected bool HandleLeftClick(int slotIndex, ref ItemStack itemStaging)

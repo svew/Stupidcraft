@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using TrueCraft.Core;
 using TrueCraft.Core.Inventory;
+using TrueCraft.Core.Networking;
 using TrueCraft.Core.Networking.Packets;
 using TrueCraft.Core.Server;
 
@@ -20,7 +21,12 @@ namespace TrueCraft.Inventory
         OpenWindowPacket GetOpenWindowPacket();
         WindowItemsPacket GetWindowItemsPacket();
 
-        bool HandleClick(int slotIndex, bool right, bool shift, ref ItemStack itemStaging);
+        /// <summary>
+        /// Handles a ClickWindowPacket
+        /// </summary>
+        /// <param name="client">The client which sent the packet</param>
+        /// <param name="packet">The ClickWindowPacket</param>
+        void HandleClick(IRemoteClient client, ClickWindowPacket packet);
 
         void Save();
     }

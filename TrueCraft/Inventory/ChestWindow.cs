@@ -4,6 +4,7 @@ using fNbt;
 using TrueCraft.Core;
 using TrueCraft.Core.Inventory;
 using TrueCraft.Core.Logic;
+using TrueCraft.Core.Networking;
 using TrueCraft.Core.Networking.Packets;
 using TrueCraft.Core.Server;
 using TrueCraft.Core.World;
@@ -101,23 +102,25 @@ namespace TrueCraft.Inventory
                 }
         }
 
-        public bool HandleClick(int slotIndex, bool right, bool shift, ref ItemStack itemStaging)
+        public void HandleClick(IRemoteClient client, ClickWindowPacket packet)
         {
-            bool rv;
+            int slotIndex = packet.SlotIndex;
+            ItemStack itemStaging = client.ItemStaging;
+            bool handled;
 
-            if (right)
+            if (packet.RightClick)
             {
-                if (shift)
-                    rv = HandleShiftRightClick(slotIndex, ref itemStaging);
+                if (packet.Shift)
+                    handled = HandleShiftRightClick(slotIndex, ref itemStaging);
                 else
-                    rv = HandleRightClick(slotIndex, ref itemStaging);
+                    handled = HandleRightClick(slotIndex, ref itemStaging);
             }
             else
             {
-                if (shift)
-                    rv = HandleShiftLeftClick(slotIndex, ref itemStaging);
+                if (packet.Shift)
+                    handled = HandleShiftLeftClick(slotIndex, ref itemStaging);
                 else
-                    rv = HandleLeftClick(slotIndex, ref itemStaging);
+                    handled = HandleLeftClick(slotIndex, ref itemStaging);
             }
 
             // TODO: For each Chest Slot changed, we must inform clients other than
@@ -129,7 +132,10 @@ namespace TrueCraft.Inventory
             //       reading it from saved data.
             Save();
 
-            return rv;
+            if (handled)
+                client.ItemStaging = itemStaging;
+
+            client.QueuePacket(new TransactionStatusPacket(packet.WindowID, packet.TransactionID, handled));
         }
 
         protected bool HandleLeftClick(int slotIndex, ref ItemStack itemStaging)
