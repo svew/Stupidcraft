@@ -65,7 +65,6 @@ namespace TrueCraft.Client.Handlers
                     break;
             }
 
-            // TODO: For any window type other than CraftingBench or Chest, window will be null.
             client.CurrentWindow = window;
         }
 
