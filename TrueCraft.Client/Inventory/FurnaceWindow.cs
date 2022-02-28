@@ -166,8 +166,42 @@ namespace TrueCraft.Client.Inventory
 
         protected ActionConfirmation HandleShiftLeftClick(int slotIndex, IHeldItem heldItem)
         {
-            // TODO
-            throw new NotImplementedException();
+            ItemStack srcSlotContent = this[slotIndex];
+            int areaIndex = GetAreaIndex(slotIndex);
+
+            // If the source area is anywhere but the Hotbar
+            if (areaIndex != (int)AreaIndices.Hotbar)
+            {
+                if (areaIndex == (int)AreaIndices.Main)
+                {
+                    // Move as many as possible to the Hotbar.
+                    return ActionConfirmation.GetActionConfirmation(() =>
+                    {
+                        this[slotIndex] = Hotbar.StoreItemStack(srcSlotContent, false);
+                    });
+                }
+                else
+                {
+                    // Move as many as possible to the Hotbar, then any remaining
+                    // to the Inventory
+                    return ActionConfirmation.GetActionConfirmation(() =>
+                    {
+                        ItemStack remaining = Hotbar.StoreItemStack(srcSlotContent, true);
+                    remaining = MainInventory.StoreItemStack(remaining, true);
+                    remaining = Hotbar.StoreItemStack(remaining, false);
+                    this[slotIndex] = MainInventory.StoreItemStack(remaining, false);
+                    });
+                }
+            }
+            else
+            {
+                    // The source area is the Hotbar.  Move as many as possible to
+                    // the main Inventory.
+                    return ActionConfirmation.GetActionConfirmation(() =>
+                    {
+                        this[slotIndex] = MainInventory.StoreItemStack(srcSlotContent, false);
+                    });
+            }
         }
 
         protected ActionConfirmation HandleRightClick(int slotIndex, IHeldItem heldItem)

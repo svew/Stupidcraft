@@ -195,8 +195,40 @@ namespace TrueCraft.Inventory
 
         protected bool HandleShiftLeftClick(int slotIndex, ref ItemStack itemStaging)
         {
-            // TODO
-            throw new NotImplementedException();
+            // Play-testing Beta1.7.3 shows Shift-Left-Clicking moves items
+            // from wherever they are to the Hotbar/Inventory.  Items are never
+            // moved to the furnace slots.  They may be moved from the Furnace slots.
+            // The content of the mouse cursor is not considered.
+
+            ItemStack srcSlotContent = this[slotIndex];
+            int areaIndex = GetAreaIndex(slotIndex);
+
+            // If the source area is anywhere but the Hotbar
+            if (areaIndex != (int)AreaIndices.Hotbar)
+            {
+                if (areaIndex == (int)AreaIndices.Main)
+                {
+                    // Move as many as possible to the Hotbar.
+                    this[slotIndex] = Hotbar.StoreItemStack(srcSlotContent, false);
+                }
+                else
+                {
+                    // Move as many as possible to the Hotbar, then any remaining
+                    // to the Inventory
+                    ItemStack remaining = Hotbar.StoreItemStack(srcSlotContent, true);
+                    remaining = MainInventory.StoreItemStack(remaining, true);
+                    remaining = Hotbar.StoreItemStack(remaining, false);
+                    this[slotIndex] = MainInventory.StoreItemStack(remaining, false);
+                }
+            }
+            else
+            {
+                // The source area is the Hotbar.  Move as many as possible to
+                // the main Inventory.
+                this[slotIndex] = MainInventory.StoreItemStack(srcSlotContent, false);
+            }
+
+            return true;
         }
 
         protected bool HandleRightClick(int slotIndex, ref ItemStack itemStaging)
