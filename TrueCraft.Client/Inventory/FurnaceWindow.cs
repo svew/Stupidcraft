@@ -11,7 +11,7 @@ using TrueCraft.Core.World;
 
 namespace TrueCraft.Client.Inventory
 {
-    public class FurnaceWindow : Window<ISlot>, IFurnaceWindow<ISlot>, IClickHandler
+    public class FurnaceWindow : Window<ISlot>, IFurnaceWindow<ISlot>, IFurnaceProgress, IClickHandler
     {
         // NOTE: these values must match the order in which the slots
         //    collections are added in the constructors.
@@ -49,6 +49,12 @@ namespace TrueCraft.Client.Inventory
             lst.Add(slotFactory.GetSlot(itemRepository));
             return new Slots<ISlot>(itemRepository, lst, 1);
         }
+
+        /// <inheritdoc />
+        public int SmeltingProgress { get; set; }
+
+        /// <inheritdoc />
+        public int BurnProgress { get; set; }
 
         public ISlots<ISlot> Ingredient => Slots[(int)AreaIndices.Ingredient];
 

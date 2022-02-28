@@ -352,9 +352,11 @@ namespace TrueCraft.Client.Modules
         /// </summary>
         private void DrawFurnaceProgress()
         {
+            IFurnaceProgress furnaceProgress = (IFurnaceProgress)Game.Client.CurrentWindow;
             Viewport vp = Game.GraphicsDevice.Viewport;
             int x = (int)((vp.Width - Scale(_furnaceWindowRect.Width)) / 2);
             int y = (int)((vp.Height - Scale(_furnaceWindowRect.Height)) / 2);
+            int progress;
 
             // Draw the progress of the current smelting operation.
             // TODO hard-coded constants
@@ -364,8 +366,9 @@ namespace TrueCraft.Client.Modules
             //   6: Height of Smelting Progress Bar
             // 177: x-coordinate of the upper left corner of the Smelting Progress Bar within the Furnace Texture.
             //  20: y-coordinate of the upper left corner of the Smelting Progress Bar within the Furnace Texture.
-            Rectangle smeltingProgress = new Rectangle(x + (int)Scale(80), y + (int)Scale(40), (int)Scale(24), (int)Scale(6));
-            Rectangle smeltingSource = new Rectangle(177, 20, 24, 6);
+            progress = (int)(24.0 * furnaceProgress.SmeltingProgress / 180);
+            Rectangle smeltingProgress = new Rectangle(x + (int)Scale(80), y + (int)Scale(40), (int)Scale(progress), (int)Scale(6));
+            Rectangle smeltingSource = new Rectangle(177, 20, progress, 6);
             SpriteBatch.Draw(_furnace, smeltingProgress, smeltingSource, Color.White);
 
             // Draw the flame Height.
@@ -377,8 +380,9 @@ namespace TrueCraft.Client.Modules
             //   0: y-coordinate of the upper left pixel of the flame within the Furnace Texture.
             //  11: width  of the rectangle within the Furnace Texture which contains the flame.
             //  14: height of the rectangle within the Furnace Texture which contains the flame.
-            Rectangle flameHeight = new Rectangle(x + (int)Scale(58), y + (int)Scale(36), (int)Scale(11), (int)Scale(14));
-            Rectangle flameSource = new Rectangle(178, 0, 11, 14);
+            progress = 14 - (int)(14.0 * furnaceProgress.BurnProgress / 250);
+            Rectangle flameHeight = new Rectangle(x + (int)Scale(58), y + (int)Scale(36 + progress), (int)Scale(11), (int)Scale(14 - progress));
+            Rectangle flameSource = new Rectangle(178, 0 + progress, 11, 14 - progress);
             SpriteBatch.Draw(_furnace, flameHeight, flameSource, Color.White);
         }
 

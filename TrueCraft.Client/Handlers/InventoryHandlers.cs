@@ -1,4 +1,5 @@
 ﻿using System;
+using TrueCraft.Client.Inventory;
 using TrueCraft.Core;
 using TrueCraft.Core.Inventory;
 using TrueCraft.Core.Logic;
@@ -66,6 +67,17 @@ namespace TrueCraft.Client.Handlers
             }
 
             client.CurrentWindow = window;
+        }
+
+        public static void HandleUpdateProgressPacket(IPacket packet, MultiplayerClient client)
+        {
+            IFurnaceProgress furnace = (IFurnaceProgress)client.CurrentWindow;
+            UpdateProgressPacket progressPacket = (UpdateProgressPacket)packet;
+
+            if (progressPacket.Target == UpdateProgressPacket.ProgressTarget.ItemCompletion)
+                furnace.SmeltingProgress = progressPacket.Value;
+            else if (progressPacket.Target == UpdateProgressPacket.ProgressTarget.AvailableHeat)
+                furnace.BurnProgress = progressPacket.Value;
         }
 
         public static void HandleCloseWindowPacket(IPacket _packet, MultiplayerClient client)
