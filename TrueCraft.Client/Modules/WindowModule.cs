@@ -96,10 +96,12 @@ namespace TrueCraft.Client.Modules
             if (!HeldItem.Empty)
                 provider = Game.ItemRepository.GetItemProvider(HeldItem.ID);
 
+            // Draw background
             SpriteBatch.Begin(samplerState: SamplerState.PointClamp, blendState: BlendState.NonPremultiplied);
             SpriteBatch.Draw(Game.White1x1, new Rectangle(0, 0,
                 Game.GraphicsDevice.Viewport.Width, Game.GraphicsDevice.Viewport.Height), new Color(Color.Black, 180));
 
+            // Draw window texture.
             switch (Game.Client.CurrentWindow.Type)
             {
                 case WindowType.Inventory:
@@ -138,6 +140,10 @@ namespace TrueCraft.Client.Modules
                     DrawFurnaceWindow(RenderStage.Sprites);
                     break;
             }
+
+            // Draw Progress bars
+            if (Game.Client.CurrentWindow.Type == WindowType.Furnace)
+                DrawFurnaceProgress();
 
             if (provider != null)
             {
@@ -339,6 +345,41 @@ namespace TrueCraft.Client.Modules
             DrawWindowArea(window.ChestInventory, window.ChestSlotIndex, 8, 18, rect, stage);
             DrawWindowArea(window.MainInventory, window.MainSlotIndex, 8, yPlayerInventory, rect, stage);
             DrawWindowArea(window.Hotbar, window.HotbarSlotIndex, 8, yPlayerInventory + 58, rect, stage);
+        }
+
+        /// <summary>
+        /// Draws the progress bars of the Furnace.
+        /// </summary>
+        private void DrawFurnaceProgress()
+        {
+            Viewport vp = Game.GraphicsDevice.Viewport;
+            int x = (int)((vp.Width - Scale(_furnaceWindowRect.Width)) / 2);
+            int y = (int)((vp.Height - Scale(_furnaceWindowRect.Height)) / 2);
+
+            // Draw the progress of the current smelting operation.
+            // TODO hard-coded constants
+            //  80: x-coordinate of upper left of the Smelting Progress Bar
+            //  40: y-coordinate of upper left of the Smelting Progress Bar
+            //  24: width of Smelting Progress Bar
+            //   6: Height of Smelting Progress Bar
+            // 177: x-coordinate of the upper left corner of the Smelting Progress Bar within the Furnace Texture.
+            //  20: y-coordinate of the upper left corner of the Smelting Progress Bar within the Furnace Texture.
+            Rectangle smeltingProgress = new Rectangle(x + (int)Scale(80), y + (int)Scale(40), (int)Scale(24), (int)Scale(6));
+            Rectangle smeltingSource = new Rectangle(177, 20, 24, 6);
+            SpriteBatch.Draw(_furnace, smeltingProgress, smeltingSource, Color.White);
+
+            // Draw the flame Height.
+            // TODO hard-coded constants
+            //  58: x-coordinate of the upper left of the flame area
+            //  36: y-coordinate of the upper left of the flame area
+            //  16: width & height of the flame area
+            // 178: x-coordinate of the upper left pixel of the flame within the Furnace Texture.
+            //   0: y-coordinate of the upper left pixel of the flame within the Furnace Texture.
+            //  11: width  of the rectangle within the Furnace Texture which contains the flame.
+            //  14: height of the rectangle within the Furnace Texture which contains the flame.
+            Rectangle flameHeight = new Rectangle(x + (int)Scale(58), y + (int)Scale(36), (int)Scale(11), (int)Scale(14));
+            Rectangle flameSource = new Rectangle(178, 0, 11, 14);
+            SpriteBatch.Draw(_furnace, flameHeight, flameSource, Color.White);
         }
 
         private void DrawFurnaceWindow(RenderStage stage)
