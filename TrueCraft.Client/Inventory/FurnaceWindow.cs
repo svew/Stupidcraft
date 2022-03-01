@@ -206,8 +206,90 @@ namespace TrueCraft.Client.Inventory
 
         protected ActionConfirmation HandleRightClick(int slotIndex, IHeldItem heldItem)
         {
-            // TODO
-            throw new NotImplementedException();
+            int maxStack;
+
+            if (IsOutputSlot(slotIndex))
+            {
+                // can only remove from output slot.
+                ItemStack output = this[slotIndex];
+
+                // It is a No-Op if either the output slot is empty or the output
+                // is not compatible with the item in hand.
+                // It is assumed that Beta 1.7.3 sends a window click anyway in this case.
+                if (output.Empty || !output.CanMerge(heldItem.HeldItem))
+                    return null;
+
+                maxStack = ItemRepository.GetItemProvider(output.ID).MaximumStack;
+                if (heldItem.HeldItem.Empty)
+                {
+                    return ActionConfirmation.GetActionConfirmation(() =>
+                    {
+                        sbyte amt = (sbyte)(output.Count / 2 + output.Count % 2);
+                        heldItem.HeldItem = new ItemStack(output.ID, amt, output.Metadata);
+                        this[slotIndex] = output.GetReducedStack(amt);
+                    });
+                }
+
+                if (heldItem.HeldItem.Count < maxStack)
+                {
+                    // Play-testing of Beta1.7.3 shows that when the mouse cursor
+                    // has a compatible item in it, all of the output stack is
+                    // picked up, not half of it
+                    return ActionConfirmation.GetActionConfirmation(() =>
+                    {
+                        sbyte amt = (sbyte)(output.Count + heldItem.HeldItem.Count > maxStack ? maxStack - heldItem.HeldItem.Count : output.Count);
+                        heldItem.HeldItem = new ItemStack(output.ID, (sbyte)(amt + heldItem.HeldItem.Count), output.Metadata);
+                        this[slotIndex] = output.GetReducedStack(amt);
+                    });
+                }
+
+                return null;
+            }
+
+            ItemStack stack = this[slotIndex];
+            if (heldItem.HeldItem.Empty)
+            {
+                // If the stack is empty, there's nothing to do.
+                if (stack.Empty)
+                    return null;
+
+                // An empty hand picks up half
+                return ActionConfirmation.GetActionConfirmation(() =>
+                {
+                    sbyte amt = (sbyte)(stack.Count / 2 + stack.Count % 2);
+                    heldItem.HeldItem = new ItemStack(stack.ID, amt, stack.Metadata);
+                    this[slotIndex] = stack.GetReducedStack(amt);
+                });
+            }
+
+            // If the stack is empty or compatible
+            if (heldItem.HeldItem.CanMerge(stack))
+            {
+                if (stack.Empty)
+                    return ActionConfirmation.GetActionConfirmation(() =>
+                    {
+                        this[slotIndex] = new ItemStack(heldItem.HeldItem.ID, 1, heldItem.HeldItem.Metadata);
+                        heldItem.HeldItem = heldItem.HeldItem.GetReducedStack(1);
+                    });
+
+                // Place one item.
+                maxStack = ItemRepository.GetItemProvider(stack.ID).MaximumStack;
+                if (stack.Count < maxStack)
+                    return ActionConfirmation.GetActionConfirmation(() =>
+                    {
+                        this[slotIndex] = new ItemStack(heldItem.HeldItem.ID, (sbyte)(stack.Count + 1), heldItem.HeldItem.Metadata);
+                        heldItem.HeldItem = heldItem.HeldItem.GetReducedStack(1);
+                    });
+
+                return null;
+            }
+
+            // The stack and the staging item are incompatible
+            return ActionConfirmation.GetActionConfirmation(() =>
+            {
+                this[slotIndex] = heldItem.HeldItem;
+                heldItem.HeldItem = stack;
+            });
         }
 
         protected ActionConfirmation HandleShiftRightClick(int slotIndex, IHeldItem heldItem)

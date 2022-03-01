@@ -233,8 +233,80 @@ namespace TrueCraft.Inventory
 
         protected bool HandleRightClick(int slotIndex, ref ItemStack itemStaging)
         {
-            // TODO
-            throw new NotImplementedException();
+            int maxStack;
+
+            if (IsOutputSlot(slotIndex))
+            {
+                // can only remove from output slot.
+                ItemStack output = this[slotIndex];
+
+                // It is a No-Op if either the output slot is empty or the output
+                // is not compatible with the item in hand.
+                // It is assumed that Beta 1.7.3 sends a window click anyway in this case.
+                if (output.Empty || !output.CanMerge(itemStaging))
+                    return true;
+
+                maxStack = ItemRepository.GetItemProvider(output.ID).MaximumStack;
+                if (itemStaging.Empty)
+                {
+                    sbyte amt = (sbyte)(output.Count / 2 + output.Count % 2);
+                    itemStaging = new ItemStack(output.ID, amt, output.Metadata);
+                    this[slotIndex] = output.GetReducedStack(amt);
+                    return true;
+                }
+
+                if (itemStaging.Count < maxStack)
+                {
+                    // Play-testing of Beta1.7.3 shows that when the mouse cursor
+                    // has a compatible item in it, all of the output stack is
+                    // picked up, not half of it
+                    sbyte amt = (sbyte)(output.Count + itemStaging.Count > maxStack ? maxStack - itemStaging.Count : output.Count);
+                    itemStaging = new ItemStack(output.ID, (sbyte)(amt + itemStaging.Count), output.Metadata);
+                    this[slotIndex] = output.GetReducedStack(amt);
+                    return true;
+                }
+
+                return true;
+            }
+
+            ItemStack stack = this[slotIndex];
+            if (itemStaging.Empty)
+            {
+                // If the stack is empty, there's nothing to do.
+                if (stack.Empty)
+                    return true;
+
+                // An empty hand picks up half
+                sbyte amt = (sbyte)(stack.Count / 2 + stack.Count % 2);
+                itemStaging = new ItemStack(stack.ID, amt, stack.Metadata);
+                this[slotIndex] = stack.GetReducedStack(amt);
+                return true;
+            }
+
+            // If the stack is empty or compatible
+            if (itemStaging.CanMerge(stack))
+            {
+                if (stack.Empty)
+                {
+                    this[slotIndex] = new ItemStack(itemStaging.ID, 1, itemStaging.Metadata);
+                    itemStaging = itemStaging.GetReducedStack(1);
+                    return true;
+                }
+
+                // Place one item.
+                maxStack = ItemRepository.GetItemProvider(stack.ID).MaximumStack;
+                if (stack.Count < maxStack)
+                {
+                    this[slotIndex] = new ItemStack(itemStaging.ID, (sbyte)(stack.Count + 1), itemStaging.Metadata);
+                    itemStaging = itemStaging.GetReducedStack(1);
+                    return true;
+                }
+            }
+
+            // The stack and the staging item are incompatible
+            this[slotIndex] = itemStaging;
+            itemStaging = stack;
+            return true;
         }
 
         protected bool HandleShiftRightClick(int slotIndex, ref ItemStack itemStaging)
