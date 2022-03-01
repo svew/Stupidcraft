@@ -40,6 +40,7 @@ namespace TrueCraft.Client.Inventory
             FuelSlotIndex = 1;
             OutputSlotIndex = 2;
             MainSlotIndex = 3;
+            HotbarSlotIndex = MainSlotIndex + MainInventory.Count;
         }
 
         private static ISlots<ISlot> GetSlots(IItemRepository itemRepository,
