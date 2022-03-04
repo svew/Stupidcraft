@@ -36,7 +36,6 @@ namespace TrueCraft.Client.Modules
         private enum RenderStage
         {
             Sprites,
-            Models,
             Text
         }
 
@@ -145,6 +144,11 @@ namespace TrueCraft.Client.Modules
             if (Game.Client.CurrentWindow.Type == WindowType.Furnace)
                 DrawFurnaceProgress();
 
+            // Draw blocks held by Mouse Cursor
+            if (provider != null && provider.GetIconTexture((byte)HeldItem.Metadata) == null && provider is IBlockProvider)
+                IconRenderer.RenderBlockIcon(Game, SpriteBatch, provider as IBlockProvider, (byte)HeldItem.Metadata, rect);
+
+            // Draw Items held by Mouse Cursor
             if (provider != null)
             {
                 if (provider.GetIconTexture((byte)HeldItem.Metadata) != null)
@@ -153,35 +157,7 @@ namespace TrueCraft.Client.Modules
                         (byte)HeldItem.Metadata, rect, Color.White);
                 }
             }
-            SpriteBatch.End();
 
-            switch (Game.Client.CurrentWindow.Type)
-            {
-                case WindowType.Inventory:
-                    DrawInventoryWindow(RenderStage.Models);
-                    break;
-
-                case WindowType.CraftingBench:
-                    DrawCraftingWindow(RenderStage.Models);
-                    break;
-
-                case WindowType.Chest:
-                    DrawChestWindow(RenderStage.Models);
-                    break;
-
-                case WindowType.Furnace:
-                    DrawFurnaceWindow(RenderStage.Models);
-                    break;
-            }
-            if (provider != null)
-            {
-                if (provider.GetIconTexture((byte)HeldItem.Metadata) == null && provider is IBlockProvider)
-                {
-                    IconRenderer.RenderBlockIcon(Game, provider as IBlockProvider, (byte)HeldItem.Metadata, rect);
-                }
-            }
-
-            SpriteBatch.Begin(samplerState: SamplerState.PointClamp, blendState: BlendState.NonPremultiplied);
             switch (Game.Client.CurrentWindow.Type)
             {
                 case WindowType.Inventory:
@@ -484,8 +460,8 @@ namespace TrueCraft.Client.Modules
                     IconRenderer.RenderItemIcon(SpriteBatch, Items, provider,
                         (byte)item.Metadata, rect, Color.White);
 
-                if (texture == null && stage == RenderStage.Models && provider is IBlockProvider)
-                    IconRenderer.RenderBlockIcon(Game, provider as IBlockProvider, (byte)item.Metadata, rect);
+                if (texture == null && stage == RenderStage.Sprites && provider is IBlockProvider)
+                    IconRenderer.RenderBlockIcon(Game, SpriteBatch, provider as IBlockProvider, (byte)item.Metadata, rect);
 
                 if (stage == RenderStage.Text && item.Count > 1)
                 {

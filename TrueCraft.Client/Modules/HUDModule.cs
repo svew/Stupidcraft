@@ -45,13 +45,7 @@ namespace TrueCraft.Client.Modules
             DrawHotbar(gameTime);
             DrawHotbarItemSprites(gameTime);
             DrawLife(gameTime);
-
-            SpriteBatch.End();
-
-            DrawHotbarBlockSprites(gameTime);
-
-            // Once more, with feeling
-            SpriteBatch.Begin(samplerState: SamplerState.PointClamp, blendState: BlendState.NonPremultiplied);
+            DrawHotbarBlockSprites();
             DrawHotbarSlotCounts(gameTime);
             SpriteBatch.End();
         }
@@ -146,7 +140,7 @@ namespace TrueCraft.Client.Modules
             }
         }
 
-        private void DrawHotbarBlockSprites(GameTime gameTime)
+        private void DrawHotbarBlockSprites()
         {
             var scale = new Point((int)(16 * Game.ScaleFactor * 2));
             var origin = new Point((int)(Game.GraphicsDevice.Viewport.Width / 2 - Scale(HotbarBackgroundRect.Width / 2)),
@@ -163,7 +157,7 @@ namespace TrueCraft.Client.Modules
                     continue;
                 var position = origin + new Point((int)Scale(i * 20), 0);
                 var rect = new Rectangle(position, scale);
-                IconRenderer.RenderBlockIcon(Game, provider, (byte)item.Metadata, rect);
+                IconRenderer.RenderBlockIcon(Game, SpriteBatch, provider, (byte)item.Metadata, rect);
             }
         }
 

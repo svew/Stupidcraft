@@ -7,8 +7,11 @@ namespace TrueCraft.Client.Rendering
 {
     public static class IconRenderer
     {
-        private static Mesh[] BlockMeshes = new Mesh[0x100];
-        private static BasicEffect RenderEffect;
+        private static Mesh[] _blockMeshes = new Mesh[0x100];
+
+        private static BlockIconCacheEntry[] _blockIconCache = new BlockIconCacheEntry[0x100];
+
+        private static BasicEffect _renderEffect;
 
         public static void CreateBlocks(TrueCraftGame game, IBlockRepository repository)
         {
@@ -21,7 +24,7 @@ namespace TrueCraft.Client.Rendering
                 int[] indices;
                 VertexPositionNormalColorTexture[] vertices = BlockRenderer.RenderIcon(provider, out indices);
                 Mesh mesh = new Mesh(game, vertices, indices);
-                BlockMeshes[provider.ID] = mesh;
+                _blockMeshes[provider.ID] = mesh;
             }
 
             PrepareEffects(game);
@@ -29,19 +32,16 @@ namespace TrueCraft.Client.Rendering
 
         public static void PrepareEffects(TrueCraftGame game)
         {
-            RenderEffect = new BasicEffect(game.GraphicsDevice);
-            RenderEffect.Texture = game.TextureMapper?.GetTexture("terrain.png");
-            RenderEffect.TextureEnabled = true;
-            RenderEffect.VertexColorEnabled = true;
-            RenderEffect.LightingEnabled = true;
-            RenderEffect.DirectionalLight0.Direction = new Vector3(10, -10, -0.8f);
-            RenderEffect.DirectionalLight0.DiffuseColor = Color.White.ToVector3();
-            RenderEffect.DirectionalLight0.Enabled = true;
-            RenderEffect.Projection = Matrix.CreateOrthographicOffCenter(
-                0, game.GraphicsDevice.Viewport.Width,
-                0, game.GraphicsDevice.Viewport.Height,
-                0.1f, 1000.0f);
-            RenderEffect.View = Matrix.CreateLookAt(Vector3.UnitZ, Vector3.Zero, Vector3.Up);
+            _renderEffect = new BasicEffect(game.GraphicsDevice);
+            _renderEffect.Texture = game.TextureMapper?.GetTexture("terrain.png");
+            _renderEffect.TextureEnabled = true;
+            _renderEffect.VertexColorEnabled = true;
+            _renderEffect.LightingEnabled = true;
+            _renderEffect.DirectionalLight0.Direction = new Vector3(10, -10, -0.8f);
+            _renderEffect.DirectionalLight0.DiffuseColor = Color.White.ToVector3();
+            _renderEffect.DirectionalLight0.Enabled = true;
+            _renderEffect.Projection = Matrix.CreateOrthographic(18, 18, 0.1f, 1000.0f);   // TODO Hard-coded GUI slot size
+            _renderEffect.View = Matrix.CreateLookAt(Vector3.UnitZ, Vector3.Zero, Vector3.Up);
         }
 
         public static void RenderItemIcon(SpriteBatch spriteBatch, Texture2D texture, IItemProvider provider,
@@ -53,20 +53,71 @@ namespace TrueCraft.Client.Rendering
             spriteBatch.Draw(texture, destination, source, color);
         }
 
-        public static void RenderBlockIcon(TrueCraftGame game, IBlockProvider provider, byte metadata, Rectangle destination)
+        public static void RenderBlockIcon(TrueCraftGame game, SpriteBatch spriteBatch, IBlockProvider provider, byte metadata, Rectangle destination)
         {
-            var mesh = BlockMeshes[provider.ID];
-            if (mesh != null)
+            BlockIconCacheEntry iconCacheEntry = _blockIconCache[provider.ID];
+            while (iconCacheEntry != null && iconCacheEntry.Metadata != metadata && iconCacheEntry.Next != null)
+                iconCacheEntry = iconCacheEntry.Next;
+            if (iconCacheEntry?.Metadata != metadata)
+                iconCacheEntry = null;
+
+            if (iconCacheEntry == null)
             {
-                RenderEffect.World = Matrix.Identity
-                    * Matrix.CreateScale(0.6f)
-                    * Matrix.CreateRotationY(-MathHelper.PiOver4)
-                    * Matrix.CreateRotationX(MathHelper.ToRadians(30))
-                    * Matrix.CreateScale(new Vector3(destination.Width, destination.Height, 1))
-                    * Matrix.CreateTranslation(new Vector3(
-                        destination.X, -(destination.Y - game.GraphicsDevice.Viewport.Height / 2) + game.GraphicsDevice.Viewport.Height / 2, 0))
-                    * Matrix.CreateTranslation(new Vector3(destination.Width / 2, -destination.Height / 2, 0));
-                mesh.Draw(RenderEffect);
+                Mesh mesh = _blockMeshes[provider.ID];
+                if (mesh != null)
+                {
+                    _renderEffect.World = Matrix.Identity
+                        * Matrix.CreateScale(0.6f)
+                        * Matrix.CreateRotationY(-MathHelper.PiOver4)
+                        * Matrix.CreateRotationX(MathHelper.ToRadians(30))
+                        * Matrix.CreateScale(new Vector3(18, 18, 1));    // TODO Hard-coded GUI slot size
+
+                    RenderTarget2D newIcon = new RenderTarget2D(game.GraphicsDevice, 18, 18);   // TODO hard-coded GUI slot size
+
+                    game.GraphicsDevice.SetRenderTarget(newIcon);
+                    game.GraphicsDevice.Clear(Color.Transparent);
+                    mesh.Draw(_renderEffect);
+                    game.GraphicsDevice.SetRenderTarget(null);
+
+                    iconCacheEntry = new BlockIconCacheEntry(newIcon, metadata);
+                    if (_blockIconCache[provider.ID] == null)
+                        _blockIconCache[provider.ID] = iconCacheEntry;
+                    else
+                        _blockIconCache[provider.ID].Append(iconCacheEntry);
+                }
+            }
+
+            Texture2D icon = iconCacheEntry.Icon;
+            Rectangle source = new Rectangle(0, 0, icon.Width, icon.Height);
+            spriteBatch.Draw(icon, destination, source, Color.White);
+        }
+
+        private class BlockIconCacheEntry
+        {
+            private readonly Texture2D _icon;
+            private readonly short _metadata;
+            private BlockIconCacheEntry _next;
+
+            public BlockIconCacheEntry(Texture2D icon, short metadata)
+            {
+                _icon = icon;
+                _metadata = metadata;
+                _next = null;
+            }
+
+            public Texture2D Icon { get => _icon; }
+
+            public short Metadata { get => _metadata; }
+
+            public BlockIconCacheEntry Next { get => _next; }
+
+            public void Append(BlockIconCacheEntry icon)
+            {
+                BlockIconCacheEntry last = this;
+                while (last._next != null)
+                    last = last._next;
+
+                last._next = icon;
             }
         }
     }
