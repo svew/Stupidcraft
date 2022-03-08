@@ -42,7 +42,10 @@ namespace TrueCraft.Core.Logic.Items
 
         public override short BaseDurability { get { return 60; } }
 
-        public override string DisplayName { get { return "Wooden Hoe"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Wooden Hoe";
+        }
     }
 
     public class StoneHoeItem : HoeItem
@@ -60,7 +63,10 @@ namespace TrueCraft.Core.Logic.Items
 
         public override short BaseDurability { get { return 132; } }
 
-        public override string DisplayName { get { return "Stone Hoe"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Stone Hoe";
+        }
     }
 
     public class IronHoeItem : HoeItem
@@ -78,7 +84,10 @@ namespace TrueCraft.Core.Logic.Items
 
         public override short BaseDurability { get { return 251; } }
 
-        public override string DisplayName { get { return "Iron Hoe"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Iron Hoe";
+        }
     }
 
     public class GoldenHoeItem : HoeItem
@@ -96,7 +105,10 @@ namespace TrueCraft.Core.Logic.Items
 
         public override short BaseDurability { get { return 33; } }
 
-        public override string DisplayName { get { return "Golden Hoe"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Golden Hoe";
+        }
     }
 
     public class DiamondHoeItem : HoeItem
@@ -114,6 +126,9 @@ namespace TrueCraft.Core.Logic.Items
 
         public override short BaseDurability { get { return 1562; } }
 
-        public override string DisplayName { get { return "Diamond Hoe"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Diamond Hoe";
+        }
     }
 }

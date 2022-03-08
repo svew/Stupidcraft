@@ -16,7 +16,10 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override bool Opaque { get { return false; } }
         
-        public override string DisplayName { get { return "Locked Chest"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Locked Chest";
+        }
 
         public TimeSpan BurnTime { get { return TimeSpan.FromSeconds(15); } }
 

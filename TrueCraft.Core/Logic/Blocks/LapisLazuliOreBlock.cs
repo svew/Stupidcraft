@@ -15,7 +15,10 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override byte Luminance { get { return 0; } }
         
-        public override string DisplayName { get { return "Lapis Lazuli Ore"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Lapis Lazuli Ore";
+        }
 
         //public ItemStack SmeltingOutput { get { return new ItemStack(); } } // TODO: Metadata
 

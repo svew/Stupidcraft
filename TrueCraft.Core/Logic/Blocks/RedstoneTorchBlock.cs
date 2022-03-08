@@ -16,7 +16,10 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override bool Opaque { get { return false; } }
         
-        public override string DisplayName { get { return "Redstone Torch"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Redstone Torch";
+        }
 
         public override SoundEffectClass SoundEffect
         {
@@ -40,7 +43,10 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override byte Luminance { get { return 0; } }
 
-        public override string DisplayName { get { return "Redstone Torch (inactive)"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Redstone Torch (inactive)";
+        }
 
         public override Tuple<int, int> GetTextureMap(byte metadata)
         {

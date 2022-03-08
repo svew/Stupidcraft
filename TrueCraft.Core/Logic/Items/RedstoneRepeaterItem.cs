@@ -13,6 +13,9 @@ namespace TrueCraft.Core.Logic.Items
             return new Tuple<int, int>(6, 5);
         }
 
-        public override string DisplayName { get { return "Redstone Repeater"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Redstone Repeater";
+        }
     }
 }

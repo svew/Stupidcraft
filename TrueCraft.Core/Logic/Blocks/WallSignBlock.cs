@@ -21,7 +21,10 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override bool Opaque { get { return true; } } // This is weird. You can stack signs on signs in Minecraft.
         
-        public override string DisplayName { get { return "Sign"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Sign";
+        }
 
         public override SoundEffectClass SoundEffect
         {

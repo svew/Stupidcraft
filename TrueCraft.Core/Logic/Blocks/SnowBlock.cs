@@ -16,7 +16,10 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override byte Luminance { get { return 0; } }
         
-        public override string DisplayName { get { return "Snow Block"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Snow Block";
+        }
 
         public override SoundEffectClass SoundEffect
         {
@@ -48,7 +51,10 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override bool Opaque { get { return false; } }
 
-        public override string DisplayName { get { return "Snow"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Snow";
+        }
 
         public override BoundingBox? BoundingBox { get { return null; } }
 

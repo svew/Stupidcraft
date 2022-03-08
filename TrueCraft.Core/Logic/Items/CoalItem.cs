@@ -19,7 +19,13 @@ namespace TrueCraft.Core.Logic.Items
             return new Tuple<int, int>(7, 0);
         }
 
-        public override string DisplayName { get { return "Coal"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            if ((MetaData)metadata == MetaData.Charcoal)
+                return "Charcoal";
+
+            return "Coal";
+        }
 
         public TimeSpan BurnTime { get { return TimeSpan.FromSeconds(80); } }
     }

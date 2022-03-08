@@ -24,7 +24,10 @@ namespace TrueCraft.Core.Logic.Items
 
         public override float BaseArmor { get { return 4; } }
 
-        public override string DisplayName { get { return "Leather Tunic"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Leather Tunic";
+        }
     }
 
     public class IronChestplateItem : ChestplateItem
@@ -44,7 +47,10 @@ namespace TrueCraft.Core.Logic.Items
 
         public override float BaseArmor { get { return 4; } }
 
-        public override string DisplayName { get { return "Iron Chestplate"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Iron Chestplate";
+        }
     }
 
     public class GoldenChestplateItem : ChestplateItem
@@ -64,7 +70,10 @@ namespace TrueCraft.Core.Logic.Items
 
         public override float BaseArmor { get { return 4; } }
 
-        public override string DisplayName { get { return "Golden Chestplate"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Golden Chestplate";
+        }
     }
 
     public class DiamondChestplateItem : ChestplateItem
@@ -84,7 +93,10 @@ namespace TrueCraft.Core.Logic.Items
 
         public override float BaseArmor { get { return 4; } }
 
-        public override string DisplayName { get { return "Diamond Chestplate"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Diamond Chestplate";
+        }
     }
 
     public class ChainChestplateItem : ArmorItem // Not HelmentItem because it can't inherit the recipe
@@ -104,6 +116,9 @@ namespace TrueCraft.Core.Logic.Items
 
         public override float BaseArmor { get { return 4; } }
 
-        public override string DisplayName { get { return "Chain Chestplate"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Chain Chestplate";
+        }
     }
 }

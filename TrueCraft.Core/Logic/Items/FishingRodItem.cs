@@ -17,6 +17,9 @@ namespace TrueCraft.Core.Logic.Items
 
         public override short BaseDurability { get { return 65; } }
 
-        public override string DisplayName { get { return "Fishing Rod"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Fishing Rod";
+        }
     }
 }

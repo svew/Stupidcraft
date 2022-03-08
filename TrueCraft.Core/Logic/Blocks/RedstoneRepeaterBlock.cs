@@ -16,7 +16,10 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override bool Opaque { get { return false; } }
         
-        public override string DisplayName { get { return "Redstone Repeater"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Redstone Repeater";
+        }
 
         public override SoundEffectClass SoundEffect
         {
@@ -38,6 +41,9 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override byte ID { get { return 0x5E; } }
 
-        public override string DisplayName { get { return "Redstone Repeater (active)"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Redstone Repeater (active)";
+        }
     }
 }

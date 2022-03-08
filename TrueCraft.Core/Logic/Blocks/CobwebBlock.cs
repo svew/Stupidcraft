@@ -33,7 +33,10 @@ namespace TrueCraft.Core.Logic.Blocks
             }
         }
         
-        public override string DisplayName { get { return "Cobweb"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Cobweb";
+        }
 
         public override Tuple<int, int> GetTextureMap(byte metadata)
         {

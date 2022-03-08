@@ -16,7 +16,10 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override byte Luminance { get { return 0; } }
         
-        public override string DisplayName { get { return "Pumpkin"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Pumpkin";
+        }
 
         public override SoundEffectClass SoundEffect
         {

@@ -9,7 +9,14 @@ namespace TrueCraft.Core.Logic
     {
         short ID { get; }
         sbyte MaximumStack { get; }
-        string DisplayName { get; }
+
+        /// <summary>
+        /// Gets the name to be displayed to the Player for this item.
+        /// </summary>
+        /// <param name="metadata">The item's metadata.</param>
+        /// <returns>A string for display to the Player.</returns>
+        string GetDisplayName(short metadata);
+
         void ItemUsedOnNothing(ItemStack item, IWorld world, IRemoteClient user);
         void ItemUsedOnEntity(ItemStack item, IEntity usedOn, IWorld world, IRemoteClient user);
         void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user);

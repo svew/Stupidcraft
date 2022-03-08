@@ -21,7 +21,10 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override byte LightOpacity { get { return 2; } }
         
-        public override string DisplayName { get { return "Leaves"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Leaves";
+        }
 
         public override bool Flammable { get { return true; } }
 

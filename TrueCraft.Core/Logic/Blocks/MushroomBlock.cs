@@ -28,7 +28,10 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override bool Opaque { get { return false; } }
         
-        public override string DisplayName { get { return "Brown Mushroom"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Brown Mushroom";
+        }
 
         public override Tuple<int, int> GetTextureMap(byte metadata)
         {
@@ -44,7 +47,10 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override byte Luminance { get { return 0; } }
 
-        public override string DisplayName { get { return "Red Mushroom"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Red Mushroom";
+        }
 
         public override Tuple<int, int> GetTextureMap(byte metadata)
         {

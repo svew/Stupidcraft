@@ -55,7 +55,10 @@ namespace TrueCraft.Core.Logic.Blocks
         
         public override double BlastResistance { get { return 15; } }
         
-        public override string DisplayName { get { return "Wooden Stairs"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Wooden Stairs";
+        }
 
         public override bool Flammable { get { return true; } }
 
@@ -78,6 +81,9 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override double BlastResistance { get { return 30; } }
 
-        public override string DisplayName { get { return "Stone Stairs"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Stone Stairs";
+        }
     }
 }

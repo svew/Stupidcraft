@@ -20,7 +20,10 @@ namespace TrueCraft.Core.Logic.Items
         //This is per "slice"
         public override float Restores { get { return 1.5f; } }
 
-        public override string DisplayName { get { return "Cake"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Cake";
+        }
 
         public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user)
         {

@@ -32,7 +32,10 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override byte LightOpacity { get { return 255; } }
         
-        public override string DisplayName { get { return "Farmland"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Farmland";
+        }
 
         public override SoundEffectClass SoundEffect
         {

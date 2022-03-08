@@ -286,10 +286,11 @@ namespace TrueCraft.Core.Logic
 
         public virtual bool DiffuseSkyLight { get { return false; } }
 
-        /// <summary>
-        /// The name of the block as it would appear to players.
-        /// </summary>
-        public virtual string DisplayName { get { return string.Empty; } }
+        /// <inheritdoc />
+        public virtual string GetDisplayName(short metadata)
+        {
+            return string.Empty;
+        }
 
         public virtual ToolMaterial EffectiveToolMaterials { get { return ToolMaterial.All; } }
 

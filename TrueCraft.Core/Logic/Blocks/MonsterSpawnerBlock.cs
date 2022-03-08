@@ -16,7 +16,10 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override bool Opaque { get { return false; } }
         
-        public override string DisplayName { get { return "Monster Spawner"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Monster Spawner";
+        }
 
         public override Tuple<int, int> GetTextureMap(byte metadata)
         {

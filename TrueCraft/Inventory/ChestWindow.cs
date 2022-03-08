@@ -72,7 +72,13 @@ namespace TrueCraft.Inventory
 
         public List<SetSlotPacket> GetDirtySetSlotPackets()
         {
-            throw new NotImplementedException();
+            int offset = 9;  // TODO hard-coded constant.  This is the offset within the Inventory Window of the Main Inventory.
+            List<SetSlotPacket> packets = ((IServerSlots)MainInventory).GetSetSlotPackets(0, (short)offset);
+            offset += MainInventory.Count;
+
+            packets.AddRange(((IServerSlots)Hotbar).GetSetSlotPackets(0, (short)offset));
+
+            return packets;
         }
 
         public OpenWindowPacket GetOpenWindowPacket()
@@ -83,7 +89,7 @@ namespace TrueCraft.Inventory
 
         public WindowItemsPacket GetWindowItemsPacket()
         {
-            throw new NotImplementedException();
+            return new WindowItemsPacket(WindowID, AllItems());
         }
 
         public override void SetSlots(ItemStack[] slotContents)

@@ -15,7 +15,10 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override byte Luminance { get { return 0; } }
         
-        public override string DisplayName { get { return "Diamond Ore"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Diamond Ore";
+        }
 
         public ItemStack SmeltingOutput { get { return new ItemStack(DiamondItem.ItemID); } }
 

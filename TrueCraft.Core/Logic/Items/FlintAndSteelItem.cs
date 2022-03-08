@@ -12,7 +12,10 @@ namespace TrueCraft.Core.Logic.Items
         public override short ID { get { return 0x103; } }
         public override sbyte MaximumStack { get { return 1; } }
         public override short BaseDurability { get { return 65; } }
-        public override string DisplayName { get { return "Flint and Steel"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Flint and Steel";
+        }
 
         public override Tuple<int, int> GetIconTexture(byte metadata)
         {

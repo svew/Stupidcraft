@@ -13,7 +13,10 @@ namespace TrueCraft.Core.Logic.Items
             return new Tuple<int, int>(5, 3);
         }
 
-        public override string DisplayName { get { return "Stick"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Stick";
+        }
 
         public TimeSpan BurnTime { get { return TimeSpan.FromSeconds(5); } }
     }

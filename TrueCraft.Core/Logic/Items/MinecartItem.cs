@@ -15,7 +15,10 @@ namespace TrueCraft.Core.Logic.Items
 
         public override sbyte MaximumStack { get { return 1; } }
 
-        public override string DisplayName { get { return "Minecart"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Minecart";
+        }
     }
 
     public class MinecartWithChestItem : MinecartItem
@@ -24,7 +27,10 @@ namespace TrueCraft.Core.Logic.Items
 
         public override short ID { get { return 0x156; } }
 
-        public override string DisplayName { get { return "Minecart with Chest"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Minecart with Chest";
+        }
     }
 
     public class MinecartWithFurnaceItem : MinecartItem
@@ -33,6 +39,9 @@ namespace TrueCraft.Core.Logic.Items
 
         public override short ID { get { return 0x157; } }
 
-        public override string DisplayName { get { return "Minecart with Furnace"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Minecart with Furnace";
+        }
     }
 }

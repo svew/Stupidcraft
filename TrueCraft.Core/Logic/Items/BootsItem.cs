@@ -24,7 +24,10 @@ namespace TrueCraft.Core.Logic.Items
 
         public override float BaseArmor { get { return 1.5f; } }
 
-        public override string DisplayName { get { return "Leather Boots"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Leather Boots";
+        }
     }
 
     public class IronBootsItem : BootsItem
@@ -44,7 +47,10 @@ namespace TrueCraft.Core.Logic.Items
 
         public override float BaseArmor { get { return 1.5f; } }
 
-        public override string DisplayName { get { return "Iron Boots"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Iron Boots";
+        }
     }
 
     public class GoldenBootsItem : BootsItem
@@ -64,7 +70,11 @@ namespace TrueCraft.Core.Logic.Items
 
         public override float BaseArmor { get { return 1.5f; } }
 
-        public override string DisplayName { get { return "Golden Boots"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Golden Boots";
+
+        }
     }
 
     public class DiamondBootsItem : BootsItem
@@ -84,7 +94,11 @@ namespace TrueCraft.Core.Logic.Items
 
         public override float BaseArmor { get { return 1.5f; } }
 
-        public override string DisplayName { get { return "Diamond Boots"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Diamond Boots";
+
+        }
     }
 
     public class ChainBootsItem : ArmorItem // Not HelmentItem because it can't inherit the recipe
@@ -104,6 +118,9 @@ namespace TrueCraft.Core.Logic.Items
 
         public override float BaseArmor { get { return 1.5f; } }
 
-        public override string DisplayName { get { return "Chain Boots"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Chain Boots";
+        }
     }
 }

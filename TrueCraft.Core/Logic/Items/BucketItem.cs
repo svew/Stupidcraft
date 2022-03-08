@@ -17,7 +17,10 @@ namespace TrueCraft.Core.Logic.Items
             return new Tuple<int, int>(10, 4);
         }
 
-        public override string DisplayName { get { return "Bucket"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Bucket";
+        }
 
         protected virtual byte? RelevantBlockType { get { return null; } }
 
@@ -75,7 +78,10 @@ namespace TrueCraft.Core.Logic.Items
 
         public override short ID { get { return 0x147; } }
 
-        public override string DisplayName { get { return "Lava Bucket"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Lava Bucket";
+        }
 
         public TimeSpan BurnTime { get { return TimeSpan.FromSeconds(1000); } }
 
@@ -94,7 +100,10 @@ namespace TrueCraft.Core.Logic.Items
 
         public override short ID { get { return 0x14F; } }
 
-        public override string DisplayName { get { return "Milk"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Milk";
+        }
 
         protected override byte? RelevantBlockType
         {
@@ -111,7 +120,10 @@ namespace TrueCraft.Core.Logic.Items
 
         public override short ID { get { return 0x146; } }
 
-        public override string DisplayName { get { return "Water Bucket"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Water Bucket";
+        }
 
         protected override byte? RelevantBlockType
         {

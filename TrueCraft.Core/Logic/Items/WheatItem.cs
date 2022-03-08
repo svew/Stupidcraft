@@ -13,6 +13,9 @@ namespace TrueCraft.Core.Logic.Items
             return new Tuple<int, int>(9, 1);
         }
 
-        public override string DisplayName { get { return "Wheat"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Wheat";
+        }
     }
 }

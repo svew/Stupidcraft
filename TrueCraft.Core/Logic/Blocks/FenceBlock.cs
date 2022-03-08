@@ -18,7 +18,10 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override bool Flammable { get { return true; } }
         
-        public override string DisplayName { get { return "Fence"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Fence";
+        }
 
         public TimeSpan BurnTime { get { return TimeSpan.FromSeconds(15); } }
 

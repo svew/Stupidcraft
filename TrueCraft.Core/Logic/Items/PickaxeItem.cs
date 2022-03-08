@@ -28,7 +28,10 @@ namespace TrueCraft.Core.Logic.Items
 
         public override short BaseDurability { get { return 60; } }
 
-        public override string DisplayName { get { return "Wooden Pickaxe"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Wooden Pickaxe";
+        }
     }
 
     public class StonePickaxeItem : PickaxeItem
@@ -46,7 +49,10 @@ namespace TrueCraft.Core.Logic.Items
 
         public override short BaseDurability { get { return 132; } }
 
-        public override string DisplayName { get { return "Stone Pickaxe"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Stone Pickaxe";
+        }
     }
 
     public class IronPickaxeItem : PickaxeItem
@@ -64,7 +70,10 @@ namespace TrueCraft.Core.Logic.Items
 
         public override short BaseDurability { get { return 251; } }
 
-        public override string DisplayName { get { return "Iron Pickaxe"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Iron Pickaxe";
+        }
     }
 
     public class GoldenPickaxeItem : PickaxeItem
@@ -82,7 +91,10 @@ namespace TrueCraft.Core.Logic.Items
 
         public override short BaseDurability { get { return 33; } }
 
-        public override string DisplayName { get { return "Golden Pickaxe"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Golden Pickaxe";
+        }
     }
 
     public class DiamondPickaxeItem : PickaxeItem
@@ -100,6 +112,9 @@ namespace TrueCraft.Core.Logic.Items
 
         public override short BaseDurability { get { return 1562; } }
 
-        public override string DisplayName { get { return "Diamond Pickaxe"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Diamond Pickaxe";
+        }
     }
 }

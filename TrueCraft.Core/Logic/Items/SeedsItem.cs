@@ -16,7 +16,10 @@ namespace TrueCraft.Core.Logic.Items
             return new Tuple<int, int>(9, 0);
         }
 
-        public override string DisplayName { get { return "Seeds"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Seeds";
+        }
 
         public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user)
         {

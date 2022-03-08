@@ -19,7 +19,10 @@ namespace TrueCraft.Core.Logic.Blocks
         
         public override byte ID { get { return 0x48; } }
         
-        public override string DisplayName { get { return "Wooden Pressure Plate"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Wooden Pressure Plate";
+        }
 
         public override SoundEffectClass SoundEffect
         {
@@ -36,6 +39,9 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override byte ID { get { return 0x46; } }
 
-        public override string DisplayName { get { return "Stone Pressure Plate"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Stone Pressure Plate";
+        }
     }
 }

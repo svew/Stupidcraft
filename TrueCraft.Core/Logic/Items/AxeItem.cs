@@ -28,7 +28,10 @@ namespace TrueCraft.Core.Logic.Items
 
         public override short BaseDurability { get { return 60; } }
 
-        public override string DisplayName { get { return "Wooden Axe"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Wooden Axe";
+        }
     }
 
     public class StoneAxeItem : AxeItem
@@ -46,7 +49,10 @@ namespace TrueCraft.Core.Logic.Items
 
         public override short BaseDurability { get { return 132; } }
 
-        public override string DisplayName { get { return "Stone Axe"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Stone Axe";
+        }
     }
 
     public class IronAxeItem : AxeItem
@@ -64,7 +70,10 @@ namespace TrueCraft.Core.Logic.Items
 
         public override short BaseDurability { get { return 251; } }
 
-        public override string DisplayName { get { return "Iron Axe"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Iron Axe";
+        }
     }
 
     public class GoldenAxeItem : AxeItem
@@ -82,7 +91,10 @@ namespace TrueCraft.Core.Logic.Items
 
         public override short BaseDurability { get { return 33; } }
 
-        public override string DisplayName { get { return "Golden Axe"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Golden Axe";
+        }
     }
 
     public class DiamondAxeItem : AxeItem
@@ -100,6 +112,9 @@ namespace TrueCraft.Core.Logic.Items
 
         public override short BaseDurability { get { return 1562; } }
 
-        public override string DisplayName { get { return "Diamond Axe"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Diamond Axe";
+        }
     }
 }

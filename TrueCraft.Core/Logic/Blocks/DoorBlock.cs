@@ -40,7 +40,10 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override bool Opaque { get { return false; } }
         
-        public override string DisplayName { get { return "Wooden Door"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Wooden Door";
+        }
 
         public override SoundEffectClass SoundEffect
         {
@@ -87,7 +90,10 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override bool Opaque { get { return false; } }
         
-        public override string DisplayName { get { return "Iron Door"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Iron Door";
+        }
 
         public override Tuple<int, int> GetTextureMap(byte metadata)
         {

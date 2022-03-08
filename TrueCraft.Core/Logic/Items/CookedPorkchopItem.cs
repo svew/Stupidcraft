@@ -15,6 +15,9 @@ namespace TrueCraft.Core.Logic.Items
 
         public override float Restores { get { return 4; } }
 
-        public override string DisplayName { get { return "Cooked Porkchop"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Cooked Porkchop";
+        }
     }
 }

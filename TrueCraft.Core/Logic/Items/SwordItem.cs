@@ -32,7 +32,10 @@ namespace TrueCraft.Core.Logic.Items
 
         public override float Damage { get { return 2.5f; } }
 
-        public override string DisplayName { get { return "Wooden Sword"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Wooden Sword";
+        }
     }
 
     public class StoneSwordItem : SwordItem
@@ -52,7 +55,10 @@ namespace TrueCraft.Core.Logic.Items
 
         public override float Damage { get { return 3.5f; } }
 
-        public override string DisplayName { get { return "Stone Sword"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Stone Sword";
+        }
     }
 
     public class IronSwordItem : SwordItem
@@ -72,7 +78,10 @@ namespace TrueCraft.Core.Logic.Items
 
         public override float Damage { get { return 4.5f; } }
 
-        public override string DisplayName { get { return "Iron Sword"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Iron Sword";
+        }
     }
 
     public class GoldenSwordItem : SwordItem
@@ -92,7 +101,10 @@ namespace TrueCraft.Core.Logic.Items
 
         public override float Damage { get { return 2.5f; } }
 
-        public override string DisplayName { get { return "Golden Sword"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Golden Sword";
+        }
     }
 
     public class DiamondSwordItem : SwordItem
@@ -112,6 +124,9 @@ namespace TrueCraft.Core.Logic.Items
 
         public override float Damage { get { return 5.5f; } }
 
-        public override string DisplayName { get { return "Diamond Sword"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Diamond Sword";
+        }
     }
 }

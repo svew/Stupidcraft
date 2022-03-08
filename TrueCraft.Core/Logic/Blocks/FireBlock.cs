@@ -22,7 +22,10 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override bool Opaque { get { return false; } }
         
-        public override string DisplayName { get { return "Fire"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Fire";
+        }
 
         public override SoundEffectClass SoundEffect
         {

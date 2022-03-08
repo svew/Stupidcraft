@@ -15,6 +15,9 @@ namespace TrueCraft.Core.Logic.Items
 
         public override sbyte MaximumStack { get { return 16; } }
 
-        public override string DisplayName { get { return "Snowball"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Snowball";
+        }
     }
 }

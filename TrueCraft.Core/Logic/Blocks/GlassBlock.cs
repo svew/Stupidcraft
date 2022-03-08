@@ -16,7 +16,10 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override bool Opaque { get { return false; } }
         
-        public override string DisplayName { get { return "Glass"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Glass";
+        }
 
         public override byte LightOpacity { get { return 0; } }
 

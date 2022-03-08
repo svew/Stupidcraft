@@ -18,7 +18,10 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override bool Opaque { get { return false; } }
         
-        public override string DisplayName { get { return "Piston"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Piston";
+        }
 
         public override Tuple<int, int> GetTextureMap(byte metadata)
         {
@@ -47,7 +50,10 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override bool Opaque { get { return false; } }
 
-        public override string DisplayName { get { return "Sticky Piston"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Sticky Piston";
+        }
 
         public override Tuple<int, int> GetTextureMap(byte metadata)
         {
@@ -74,7 +80,10 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override byte Luminance { get { return 0; } }
 
-        public override string DisplayName { get { return "Piston Plunger"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Piston Plunger";
+        }
 
         public override Tuple<int, int> GetTextureMap(byte metadata)
         {
@@ -94,6 +103,9 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override byte Luminance { get { return 0; } }
 
-        public override string DisplayName { get { return "Piston Placeholder"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Piston Placeholder";
+        }
     }
 }

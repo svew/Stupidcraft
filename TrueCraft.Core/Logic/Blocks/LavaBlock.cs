@@ -30,7 +30,10 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override byte LightOpacity { get { return 255; } }
 
-        public override string DisplayName { get { return "Lava"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Lava";
+        }
 
         protected override bool AllowSourceCreation { get { return false; } }
 
@@ -52,6 +55,9 @@ namespace TrueCraft.Core.Logic.Blocks
         
         public override double BlastResistance { get { return 500; } }
 
-        public override string DisplayName { get { return "Lava (stationary)"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Lava (stationary)";
+        }
     }
 }

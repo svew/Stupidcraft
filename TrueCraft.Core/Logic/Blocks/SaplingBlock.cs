@@ -23,7 +23,10 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override bool Opaque { get { return false; } }
         
-        public override string DisplayName { get { return "Sapling"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Sapling";
+        }
 
         public override BoundingBox? BoundingBox { get { return null; } }
 

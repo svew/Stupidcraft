@@ -347,7 +347,10 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override byte Luminance { get { return 0; } }
 
-        public override string DisplayName { get { return "Furnace"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Furnace";
+        }
 
         public override ToolType EffectiveTools
         {
@@ -664,6 +667,9 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override bool Opaque { get { return false; } }
 
-        public override string DisplayName { get { return "Furnace (lit)"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Furnace (lit)";
+        }
     }
 }

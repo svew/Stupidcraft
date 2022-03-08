@@ -16,6 +16,9 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override bool Opaque { get { return false; } }
         
-        public override string DisplayName { get { return "Button"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Button";
+        }
     }
 }

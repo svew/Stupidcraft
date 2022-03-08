@@ -20,7 +20,6 @@ namespace TrueCraft.Core.Logic
         SoundEffectClass SoundEffect { get; }
         ToolMaterial EffectiveToolMaterials { get; }
         ToolType EffectiveTools { get; }
-        string DisplayName { get; }
         BoundingBox? BoundingBox { get; } // NOTE: Will this eventually need to be metadata-aware?
         BoundingBox? InteractiveBoundingBox { get; } // NOTE: Will this eventually need to be metadata-aware?
         Tuple<int, int> GetTextureMap(byte metadata);

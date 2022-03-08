@@ -189,17 +189,17 @@ namespace TrueCraft.Client.Modules
             }
             if (SelectedSlot >= 0)
             {
-                var item = Game.Client.CurrentWindow[SelectedSlot];
+                ItemStack item = Game.Client.CurrentWindow[SelectedSlot];
                 if (!item.Empty)
                 {
-                    var p = Game.ItemRepository.GetItemProvider(item.ID);
-                    var size = Font.MeasureText(p.DisplayName);
+                    IItemProvider p = Game.ItemRepository.GetItemProvider(item.ID);
+                    Point size = Font.MeasureText(p.GetDisplayName(item.Metadata));
                     mouse = Mouse.GetState().Position.ToVector2().ToPoint();
                     mouse += new Point(10, 10);
                     SpriteBatch.Draw(Game.White1x1, new Rectangle(mouse,
                         new Point(size.X + 10, size.Y + 15)),
                         new Color(Color.Black, 200));
-                    Font.DrawText(SpriteBatch, mouse.X + 5, mouse.Y, p.DisplayName);
+                    Font.DrawText(SpriteBatch, mouse.X + 5, mouse.Y, p.GetDisplayName(item.Metadata));
                 }
             }
             SpriteBatch.End();

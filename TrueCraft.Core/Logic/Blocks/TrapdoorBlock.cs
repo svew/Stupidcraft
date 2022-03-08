@@ -33,7 +33,10 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override bool Opaque { get { return false; } }
 
-        public override string DisplayName { get { return "Trapdoor"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Trapdoor";
+        }
 
         public TimeSpan BurnTime { get { return TimeSpan.FromSeconds(15); } }
 

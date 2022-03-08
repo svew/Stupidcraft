@@ -15,7 +15,10 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override byte Luminance { get { return 0; } }
 
-        public override string DisplayName { get { return "Redstone Ore"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Redstone Ore";
+        }
 
         public ItemStack SmeltingOutput { get { return new ItemStack(RedstoneItem.ItemID); } }
 
@@ -40,6 +43,9 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override bool Opaque { get { return false; } }
         
-        public override string DisplayName { get { return "Redstone Ore (glowing)"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Redstone Ore (glowing)";
+        }
     }
 }

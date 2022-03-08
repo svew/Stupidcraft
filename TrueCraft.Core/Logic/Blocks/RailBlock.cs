@@ -16,7 +16,10 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override bool Opaque { get { return false; } }
         
-        public override string DisplayName { get { return "Rail"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Rail";
+        }
 
         public override Tuple<int, int> GetTextureMap(byte metadata)
         {
@@ -30,7 +33,10 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override byte ID { get { return 0x1B; } }
 
-        public override string DisplayName { get { return "Powered Rail"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Powered Rail";
+        }
 
         public override Tuple<int, int> GetTextureMap(byte metadata)
         {
@@ -44,7 +50,10 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override byte ID { get { return 0x1C; } }
 
-        public override string DisplayName { get { return "Detector Rail"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Detector Rail";
+        }
 
         public override Tuple<int, int> GetTextureMap(byte metadata)
         {

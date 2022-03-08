@@ -18,7 +18,10 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override byte LightOpacity { get { return 2; } }
         
-        public override string DisplayName { get { return "Water"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Water";
+        }
 
         protected override double SecondsBetweenUpdates { get { return 0.25; } }
 
@@ -40,6 +43,9 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override byte ID { get { return 0x09; } }
 
-        public override string DisplayName { get { return "Water (stationary)"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Water (stationary)";
+        }
     }
 }

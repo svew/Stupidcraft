@@ -26,7 +26,10 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override byte LightOpacity { get { return 255; } }
 
-        public override string DisplayName { get { return "Stone Slab"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Stone Slab";
+        }
 
         public override SoundEffectClass SoundEffect
         {
@@ -54,7 +57,10 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override byte Luminance { get { return 0; } }
 
-        public override string DisplayName { get { return "Double Stone Slab"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Double Stone Slab";
+        }
 
         public override SoundEffectClass SoundEffect
         {

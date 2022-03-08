@@ -13,6 +13,9 @@ namespace TrueCraft.Core.Logic.Items
 
         public override short ID { get { return 0x150; } }
 
-        public override string DisplayName { get { return "Brick"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Brick";
+        }
     }
 }

@@ -314,13 +314,20 @@ namespace TrueCraft
 
         public void CloseWindow(bool clientInitiated = false)
         {
+            IServerWindow serverWindow = (IServerWindow)CurrentWindow;
             if (!clientInitiated)
-                QueuePacket(new CloseWindowPacket(CurrentWindow.WindowID));
+                QueuePacket(serverWindow.GetCloseWindowPacket());
 
             // TODO Something else instantiates the window and gives it to us.  Then, we destroy it?
             //      Almost certainly the wrong action for a Chest.
             //CurrentWindow.Dispose();
             CurrentWindow = null;
+
+            // We know from packet sniffing that Beta1.7.3 sends Set Slot Packets
+            // after a client-initiated window closure.  It is assumed that they
+            // are sent after a server-initiated one too.
+            foreach (IPacket packet in serverWindow.GetDirtySetSlotPackets())
+                QueuePacket(packet);
         }
 
         public void Log(string message, params object[] parameters)

@@ -71,7 +71,10 @@ namespace TrueCraft.Core.Logic.Items
             return new Tuple<int, int>(12, 2);
         }
 
-        public override string DisplayName { get { return "Iron Door"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Iron Door";
+        }
 
         protected override byte BlockID { get { return IronDoorBlock.BlockID; } }
     }
@@ -87,7 +90,10 @@ namespace TrueCraft.Core.Logic.Items
             return new Tuple<int, int>(11, 2);
         }
 
-        public override string DisplayName { get { return "Wooden Door"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Wooden Door";
+        }
 
         protected override byte BlockID { get { return WoodenDoorBlock.BlockID; } }
     }

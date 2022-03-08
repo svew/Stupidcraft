@@ -19,7 +19,10 @@ namespace TrueCraft.Core.Logic.Items
 
         public override sbyte MaximumStack { get { return 1; } }
 
-        public override string DisplayName { get { return "Bed"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Bed";
+        }
 
         public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user)
         {

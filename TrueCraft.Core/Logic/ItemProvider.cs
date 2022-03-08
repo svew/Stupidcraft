@@ -13,7 +13,11 @@ namespace TrueCraft.Core.Logic
 
         public virtual sbyte MaximumStack { get { return 64; } }
 
-        public virtual string DisplayName { get { return string.Empty; } }
+        /// <inheritdoc />
+        public virtual string GetDisplayName(short metadata)
+        {
+            return string.Empty;
+        }
 
         public virtual void ItemUsedOnEntity(ItemStack item, IEntity usedOn, IWorld world, IRemoteClient user)
         {

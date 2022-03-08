@@ -14,7 +14,10 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override byte Luminance { get { return 0; } }
         
-        public override string DisplayName { get { return "Moss Stone"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Moss Stone";
+        }
 
         public override Tuple<int, int> GetTextureMap(byte metadata)
         {

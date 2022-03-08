@@ -14,7 +14,10 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override byte Luminance { get { return 0; } }
         
-        public override string DisplayName { get { return "Jukebox"; } }
+        public override string GetDisplayName(short metadata)
+        {
+            return "Jukebox";
+        }
 
         public TimeSpan BurnTime { get { return TimeSpan.FromSeconds(15); } }
 
