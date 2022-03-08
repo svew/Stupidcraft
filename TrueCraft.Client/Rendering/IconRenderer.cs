@@ -72,7 +72,7 @@ namespace TrueCraft.Client.Rendering
                         * Matrix.CreateRotationX(MathHelper.ToRadians(30))
                         * Matrix.CreateScale(new Vector3(18, 18, 1));    // TODO Hard-coded GUI slot size
 
-                    RenderTarget2D newIcon = new RenderTarget2D(game.GraphicsDevice, 18, 18);   // TODO hard-coded GUI slot size
+                    RenderTarget2D newIcon = new RenderTarget2D(game.GraphicsDevice, 3 * 18, 3 * 18);   // TODO hard-coded GUI slot size
 
                     game.GraphicsDevice.SetRenderTarget(newIcon);
                     game.GraphicsDevice.Clear(Color.Transparent);
