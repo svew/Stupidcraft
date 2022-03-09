@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using TrueCraft.Core.World;
 using TrueCraft.Core.Networking;
 using TrueCraft.Core.Entities;
@@ -16,6 +17,14 @@ namespace TrueCraft.Core.Logic
     /// </summary>
     public abstract class BlockProvider : IItemProvider, IBlockProvider
     {
+        private static List<short> _metadata;
+
+        static BlockProvider()
+        {
+            _metadata = new List<short>(1);
+            _metadata.Add(0);
+        }
+
         public static IBlockRepository BlockRepository { get; set; }
 
         public virtual void BlockLeftClicked(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
@@ -226,6 +235,9 @@ namespace TrueCraft.Core.Logic
         {
             return null; // Blocks are rendered in 3D
         }
+
+        /// <inheritdoc />
+        public virtual IEnumerable<short> VisibleMetadata => _metadata;
 
         public virtual Vector3i GetSupportDirection(BlockDescriptor descriptor)
         {

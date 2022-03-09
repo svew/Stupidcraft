@@ -7,9 +7,9 @@ namespace TrueCraft.Client.Rendering
 {
     public static class IconRenderer
     {
-        private static Mesh[] _blockMeshes = new Mesh[0x100];
+        private static CacheEntry<Mesh>[] _blockMeshes = new CacheEntry<Mesh>[0x100];
 
-        private static BlockIconCacheEntry[] _blockIconCache = new BlockIconCacheEntry[0x100];
+        private static CacheEntry<Texture2D>[] _blockIconCache = new CacheEntry<Texture2D>[0x100];
 
         private static BasicEffect _renderEffect;
 
@@ -22,9 +22,16 @@ namespace TrueCraft.Client.Rendering
                     continue;
 
                 int[] indices;
-                VertexPositionNormalColorTexture[] vertices = BlockRenderer.RenderIcon(provider, out indices);
-                Mesh mesh = new Mesh(game, vertices, indices);
-                _blockMeshes[provider.ID] = mesh;
+                foreach (short metadata in provider.VisibleMetadata)
+                {
+                    VertexPositionNormalColorTexture[] vertices = BlockRenderer.RenderIcon(provider, metadata, out indices);
+                    Mesh mesh = new Mesh(game, vertices, indices);
+                    CacheEntry<Mesh> meshCacheEntry = new CacheEntry<Mesh>(mesh, metadata);
+                    if (_blockMeshes[provider.ID] == null)
+                        _blockMeshes[provider.ID] = meshCacheEntry;
+                    else
+                        _blockMeshes[provider.ID].Append(meshCacheEntry);
+                }
             }
 
             PrepareEffects(game);
@@ -55,15 +62,13 @@ namespace TrueCraft.Client.Rendering
 
         public static void RenderBlockIcon(TrueCraftGame game, SpriteBatch spriteBatch, IBlockProvider provider, byte metadata, Rectangle destination)
         {
-            BlockIconCacheEntry iconCacheEntry = _blockIconCache[provider.ID];
-            while (iconCacheEntry != null && iconCacheEntry.Metadata != metadata && iconCacheEntry.Next != null)
-                iconCacheEntry = iconCacheEntry.Next;
+            CacheEntry<Texture2D> iconCacheEntry = _blockIconCache[provider.ID]?.Find(metadata);
             if (iconCacheEntry?.Metadata != metadata)
                 iconCacheEntry = null;
 
             if (iconCacheEntry == null)
             {
-                Mesh mesh = _blockMeshes[provider.ID];
+                Mesh mesh = _blockMeshes[provider.ID].Find(metadata).Value;
                 if (mesh != null)
                 {
                     _renderEffect.World = Matrix.Identity
@@ -79,7 +84,7 @@ namespace TrueCraft.Client.Rendering
                     mesh.Draw(_renderEffect);
                     game.GraphicsDevice.SetRenderTarget(null);
 
-                    iconCacheEntry = new BlockIconCacheEntry(newIcon, metadata);
+                    iconCacheEntry = new CacheEntry<Texture2D>(newIcon, metadata);
                     if (_blockIconCache[provider.ID] == null)
                         _blockIconCache[provider.ID] = iconCacheEntry;
                     else
@@ -87,37 +92,57 @@ namespace TrueCraft.Client.Rendering
                 }
             }
 
-            Texture2D icon = iconCacheEntry.Icon;
+            Texture2D icon = iconCacheEntry.Value;
             Rectangle source = new Rectangle(0, 0, icon.Width, icon.Height);
             spriteBatch.Draw(icon, destination, source, Color.White);
         }
 
-        private class BlockIconCacheEntry
+        private class CacheEntry<T>
         {
-            private readonly Texture2D _icon;
+            private readonly T _icon;
             private readonly short _metadata;
-            private BlockIconCacheEntry _next;
+            private CacheEntry<T> _next;
 
-            public BlockIconCacheEntry(Texture2D icon, short metadata)
+            public CacheEntry(T icon, short metadata)
             {
                 _icon = icon;
                 _metadata = metadata;
                 _next = null;
             }
 
-            public Texture2D Icon { get => _icon; }
+            public T Value { get => _icon; }
 
             public short Metadata { get => _metadata; }
 
-            public BlockIconCacheEntry Next { get => _next; }
+            public CacheEntry<T> Next { get => _next; }
 
-            public void Append(BlockIconCacheEntry icon)
+            public void Append(CacheEntry<T> icon)
             {
-                BlockIconCacheEntry last = this;
+                CacheEntry<T> last = this;
                 while (last._next != null)
                     last = last._next;
 
                 last._next = icon;
+            }
+
+            /// <summary>
+            /// Finds the CacheEntry within this list with matching Metadata.
+            /// </summary>
+            /// <param name="metadata">The metadata to match</param>
+            /// <returns>The matching CacheEntry or this if there is no match.</returns>
+            /// <remarks>
+            /// Call this method on the head of the list.  If no matching entry
+            /// is found, the this object will be returned as a default.
+            /// </remarks>
+            public CacheEntry<T> Find(short metadata)
+            {
+                CacheEntry<T> rv = this;
+                while (rv._metadata != metadata && rv._next != null)
+                    rv = rv._next;
+                if (rv == null || rv._metadata != metadata)
+                    return this;
+                else
+                    return rv;
             }
         }
     }

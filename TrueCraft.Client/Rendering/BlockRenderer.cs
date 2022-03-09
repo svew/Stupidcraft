@@ -45,9 +45,9 @@ namespace TrueCraft.Client.Rendering
             return CreateUniformCube(offset, texture, faces, indiciesOffset, out indicies, Color.White, lighting);
         }
 
-        public static VertexPositionNormalColorTexture[] RenderIcon(IBlockProvider provider, out int[] indices)
+        public static VertexPositionNormalColorTexture[] RenderIcon(IBlockProvider provider, short metadata, out int[] indices)
         {
-            Tuple<int, int> textureMap = provider.GetTextureMap(0);
+            Tuple<int, int> textureMap = provider.GetTextureMap((byte)metadata);
             if (textureMap == null)
                 textureMap = new Tuple<int, int>(0, 0);
 
@@ -65,10 +65,10 @@ namespace TrueCraft.Client.Rendering
 
             Vector3 offset = new Vector3(-0.5f);
 
-            return Renderers[provider.ID].Render(offset, texture, out indices);
+            return Renderers[provider.ID].Render(metadata, offset, texture, out indices);
         }
 
-        public virtual VertexPositionNormalColorTexture[] Render(Vector3 offset, Vector2[] texture, out int[] indices)
+        public virtual VertexPositionNormalColorTexture[] Render(short metadata, Vector3 offset, Vector2[] texture, out int[] indices)
         {
             return CreateUniformCube(offset, texture, VisibleFaces.All, 0, out indices, Color.White);
         }

@@ -2,6 +2,7 @@
 using TrueCraft.Core.World;
 using TrueCraft.Core.Networking;
 using TrueCraft.Core.Entities;
+using System.Collections.Generic;
 
 namespace TrueCraft.Core.Logic
 {
@@ -21,5 +22,10 @@ namespace TrueCraft.Core.Logic
         void ItemUsedOnEntity(ItemStack item, IEntity usedOn, IWorld world, IRemoteClient user);
         void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user);
         Tuple<int, int> GetIconTexture(byte metadata);
+
+        /// <summary>
+        /// Gets an enumerable over any metadata which affects rendering.
+        /// </summary>
+        IEnumerable<short> VisibleMetadata { get; }
     }
 }

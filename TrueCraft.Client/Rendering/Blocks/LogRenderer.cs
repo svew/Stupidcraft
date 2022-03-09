@@ -139,9 +139,18 @@ namespace TrueCraft.Client.Rendering.Blocks
             }
         }
 
-        public override VertexPositionNormalColorTexture[] Render(Vector3 offset, Vector2[] texture, out int[] indices)
+        public override VertexPositionNormalColorTexture[] Render(short metadata, Vector3 offset, Vector2[] texture, out int[] indices)
         {
-            return base.Render(offset, BaseTexture, out indices);
+            switch((WoodBlock.WoodType)metadata)
+            {
+                case WoodBlock.WoodType.Spruce:
+                    return base.Render(metadata, offset, SpruceTexture, out indices);
+                case WoodBlock.WoodType.Birch:
+                    return base.Render(metadata, offset, BirchTexture, out indices);
+                case WoodBlock.WoodType.Oak:
+                default:
+                    return base.Render(metadata, offset, BaseTexture, out indices);
+            }
         }
     }
 }

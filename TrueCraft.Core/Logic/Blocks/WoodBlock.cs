@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using TrueCraft.Core.Logic.Items;
 
 namespace TrueCraft.Core.Logic.Blocks
@@ -44,6 +45,16 @@ namespace TrueCraft.Core.Logic.Blocks
         public override Tuple<int, int> GetTextureMap(byte metadata)
         {
             return new Tuple<int, int>(4, 1);
+        }
+
+        public override IEnumerable<short> VisibleMetadata
+        {
+            get
+            {
+                yield return (short)WoodType.Oak;
+                yield return (short)WoodType.Spruce;
+                yield return (short)WoodType.Birch;
+            }
         }
     }
 }
