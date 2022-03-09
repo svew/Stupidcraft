@@ -103,5 +103,19 @@ namespace TrueCraft.Client.Rendering.Blocks
             }
             return cube;
         }
+
+        public override VertexPositionNormalColorTexture[] Render(short metadata, Vector3 offset, Vector2[] texture, out int[] indices)
+        {
+            VertexPositionNormalColorTexture[] cube = CreateUniformCube(
+                new Vector3(-0.5f), Texture, VisibleFaces.All,
+                0, out indices, Color.White);
+            for (int i = 0; i < cube.Length; i++)
+            {
+                cube[i].Position.X *= 1f / 8f;
+                cube[i].Position.Z *= 1f / 8f;
+            }
+
+            return cube;
+        }
     }
 }
