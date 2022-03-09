@@ -65,5 +65,22 @@ namespace TrueCraft.Client.Rendering.Blocks
                 indicies[i] -= faceCorrection;
             return verticies;
         }
+
+        public override VertexPositionNormalColorTexture[] Render(short metadata, Vector3 offset, Vector2[] texture, out int[] indices)
+        {
+            VertexPositionNormalColorTexture[] vertices;
+            Vector3 correction;
+            int faceCorrection = 0;
+            vertices = CreateQuad(CubeFace.PositiveZ, offset, Texture, 0, 0, out indices, Color.White);
+            correction = 0.5f * Vector3.Forward;
+            faceCorrection = (int)CubeFace.PositiveZ * 4;
+
+            for (int i = 0; i < vertices.Length; i++)
+                vertices[i].Position += correction;
+            for (int i = 0; i < indices.Length; i++)
+                indices[i] -= faceCorrection;
+
+            return vertices;
+        }
     }
 }
