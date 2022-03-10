@@ -22,7 +22,7 @@ namespace TrueCraft.Core.Networking
         /// <summary>
         /// The world this client is present in.
         /// </summary>
-        IWorld World { get; }
+        IDimension World { get; }
         /// <summary>
         /// The entity associated with this client.
         /// </summary>

@@ -55,7 +55,7 @@ namespace TrueCraft.Core.Logic.Blocks
             return new Tuple<int, int>(7, 5);
         }
 
-        public bool IsHydrated(GlobalVoxelCoordinates coordinates, IWorld world)
+        public bool IsHydrated(GlobalVoxelCoordinates coordinates, IDimension world)
         {
             var min = new GlobalVoxelCoordinates(-6 + coordinates.X, coordinates.Y, -6 + coordinates.Z);
             var max = new GlobalVoxelCoordinates(6 + coordinates.X, coordinates.Y + 1, 6 + coordinates.Z);
@@ -74,7 +74,7 @@ namespace TrueCraft.Core.Logic.Blocks
             return false;
         }
 
-        void HydrationCheckEvent(IMultiplayerServer server, GlobalVoxelCoordinates coords, IWorld world)
+        void HydrationCheckEvent(IMultiplayerServer server, GlobalVoxelCoordinates coords, IDimension world)
         {
             if (world.GetBlockID(coords) != BlockID)
                 return;
@@ -100,7 +100,7 @@ namespace TrueCraft.Core.Logic.Blocks
                 _server => HydrationCheckEvent(_server, coords, world));
         }
 
-        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
+        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
         {
             if (IsHydrated(descriptor.Coordinates, world))
             {
@@ -112,7 +112,7 @@ namespace TrueCraft.Core.Logic.Blocks
                 server => HydrationCheckEvent(server, descriptor.Coordinates, world));
         }
 
-        public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IWorld world)
+        public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IDimension world)
         {
             var chunk = world.FindChunk(coords);
             server.Scheduler.ScheduleEvent("farmland", chunk,

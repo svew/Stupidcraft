@@ -17,7 +17,7 @@ namespace TrueCraft.Inventory
         public ChestWindow(IItemRepository itemRepository,
             ISlotFactory<IServerSlot> slotFactory,
             sbyte windowID, ISlots<IServerSlot> mainInventory, ISlots<IServerSlot> hotBar,
-            IWorld world,
+            IDimension world,
             GlobalVoxelCoordinates location, GlobalVoxelCoordinates otherHalf) :
             base(itemRepository, slotFactory, windowID, mainInventory, hotBar,
                 otherHalf != null)
@@ -58,7 +58,7 @@ namespace TrueCraft.Inventory
 
         }
 
-        public IWorld World { get; }
+        public IDimension World { get; }
 
         public GlobalVoxelCoordinates Location { get; }
 

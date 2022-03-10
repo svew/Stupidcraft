@@ -66,7 +66,7 @@ namespace TrueCraft.Core.Logic.Blocks
             public byte Level;
         }
 
-        public void ScheduleNextEvent(GlobalVoxelCoordinates coords, IWorld world, IMultiplayerServer server)
+        public void ScheduleNextEvent(GlobalVoxelCoordinates coords, IDimension world, IMultiplayerServer server)
         {
             if (world.GetBlockID(coords) == StillID)
                 return;
@@ -76,13 +76,13 @@ namespace TrueCraft.Core.Logic.Blocks
                 AutomataUpdate(_server, world, coords));
         }
 
-        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
+        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
         {
             if (ID == FlowingID)
                 ScheduleNextEvent(descriptor.Coordinates, world, user.Server);
         }
 
-        public override void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IWorld world)
+        public override void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IDimension world)
         {
             if (ID == StillID)
             {
@@ -96,12 +96,12 @@ namespace TrueCraft.Core.Logic.Blocks
             }
         }
 
-        public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IWorld world)
+        public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IDimension world)
         {
             ScheduleNextEvent(coords, world, server);
         }
 
-        private void AutomataUpdate(IMultiplayerServer server, IWorld world, GlobalVoxelCoordinates coords)
+        private void AutomataUpdate(IMultiplayerServer server, IDimension world, GlobalVoxelCoordinates coords)
         {
             if (world.GetBlockID(coords) != FlowingID && world.GetBlockID(coords) != StillID)
                 return;
@@ -117,7 +117,7 @@ namespace TrueCraft.Core.Logic.Blocks
             }
         }
 
-        public bool DoAutomata(IMultiplayerServer server, IWorld world, GlobalVoxelCoordinates coords)
+        public bool DoAutomata(IMultiplayerServer server, IDimension world, GlobalVoxelCoordinates coords)
         {
             var previousLevel = world.GetMetadata(coords);
 
@@ -157,7 +157,7 @@ namespace TrueCraft.Core.Logic.Blocks
             return true;
         }
 
-        private void FlowOutward(IWorld world, LiquidFlow target, IMultiplayerServer server)
+        private void FlowOutward(IDimension world, LiquidFlow target, IMultiplayerServer server)
         {
             // For each block we can flow into, generate an item entity if appropriate
             var provider = world.BlockRepository.GetBlockProvider(world.GetBlockID(target.TargetBlock));
@@ -179,7 +179,7 @@ namespace TrueCraft.Core.Logic.Blocks
         /// <summary>
         /// Examines neighboring blocks and determines the new fluid level that this block should adopt.
         /// </summary>
-        protected byte DetermineInwardFlow(IWorld world, GlobalVoxelCoordinates coords)
+        protected byte DetermineInwardFlow(IDimension world, GlobalVoxelCoordinates coords)
         {
             var currentLevel = world.GetMetadata(coords);
             var up = world.GetBlockID(coords + Vector3i.Up);
@@ -215,7 +215,7 @@ namespace TrueCraft.Core.Logic.Blocks
         /// <summary>
         /// Produces a list of outward flow targets that this block may flow towards.
         /// </summary>
-        protected LiquidFlow[] DetermineOutwardFlow(IWorld world, GlobalVoxelCoordinates coords)
+        protected LiquidFlow[] DetermineOutwardFlow(IDimension world, GlobalVoxelCoordinates coords)
         {
             // The maximum distance we will search for lower ground to flow towards
             const int dropCheckDistance = 5;
@@ -317,7 +317,7 @@ namespace TrueCraft.Core.Logic.Blocks
         /// <summary>
         /// Returns true if the given candidate coordinate has a line-of-sight to the given target coordinate.
         /// </summary>
-        private bool LineOfSight(IWorld world, GlobalVoxelCoordinates candidate, GlobalVoxelCoordinates target)
+        private bool LineOfSight(IDimension world, GlobalVoxelCoordinates candidate, GlobalVoxelCoordinates target)
         {
             GlobalVoxelCoordinates sight = new GlobalVoxelCoordinates(candidate.X, candidate.Y + 1, candidate.Z);
             Vector3i direction = (target - candidate).Clamp(1);

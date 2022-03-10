@@ -21,7 +21,7 @@ namespace TrueCraft.Core.Lighting
         }
 
         private readonly IBlockRepository _blockRepository;
-        public IWorld World { get; set; }
+        public IDimension World { get; set; }
 
         private ConcurrentQueue<LightingOperation> PendingOperations { get; set; }
 
@@ -30,7 +30,7 @@ namespace TrueCraft.Core.Lighting
         /// </summary>
         private Dictionary<GlobalChunkCoordinates, byte[,]> HeightMaps { get; set; }
 
-        public WorldLighting(IWorld world, IBlockRepository blockRepository)
+        public WorldLighting(IDimension world, IBlockRepository blockRepository)
         {
             _blockRepository = blockRepository;
             World = world;

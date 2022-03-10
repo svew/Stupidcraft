@@ -13,7 +13,7 @@ namespace TrueCraft.Core.TerrainGen.Decorators
         public Perlin Noise { get; set; }
         public ClampNoise ChanceNoise { get; set; }
 
-        public void Decorate(IWorld world, IChunk chunk, IBiomeRepository biomes)
+        public void Decorate(IDimension world, IChunk chunk, IBiomeRepository biomes)
         {
             Noise = new Perlin(world.Seed);
             ChanceNoise = new ClampNoise(Noise);

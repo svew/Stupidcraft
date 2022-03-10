@@ -68,7 +68,7 @@ namespace TrueCraft.Core.Logic.Blocks
             Vector3i.South
         };
 
-        public void DoUpdate(IMultiplayerServer server, IWorld world, BlockDescriptor descriptor)
+        public void DoUpdate(IMultiplayerServer server, IDimension world, BlockDescriptor descriptor)
         {
             var down = descriptor.Coordinates + Vector3i.Down;
 
@@ -105,7 +105,7 @@ namespace TrueCraft.Core.Logic.Blocks
             ScheduleUpdate(server, world, descriptor);
         }
 
-        public void DoSpread(IMultiplayerServer server, IWorld world, BlockDescriptor descriptor)
+        public void DoSpread(IMultiplayerServer server, IDimension world, BlockDescriptor descriptor)
         {
             foreach (var coord in SpreadableBlocks)
             {
@@ -132,12 +132,12 @@ namespace TrueCraft.Core.Logic.Blocks
             }
         }
 
-        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
+        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
         {
             ScheduleUpdate(user.Server, world, descriptor);
         }
 
-        public void ScheduleUpdate(IMultiplayerServer server, IWorld world, BlockDescriptor descriptor)
+        public void ScheduleUpdate(IMultiplayerServer server, IDimension world, BlockDescriptor descriptor)
         {
             var chunk = world.FindChunk(descriptor.Coordinates);
             server.Scheduler.ScheduleEvent("fire.spread", chunk,

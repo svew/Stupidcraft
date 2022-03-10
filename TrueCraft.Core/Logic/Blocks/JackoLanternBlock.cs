@@ -38,7 +38,7 @@ namespace TrueCraft.Core.Logic.Blocks
             return new Tuple<int, int>(6, 6);
         }
 
-        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
+        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
         {
             world.SetMetadata(descriptor.Coordinates, (byte)MathHelper.DirectionByRotationFlat(user.Entity.Yaw, true));
         }

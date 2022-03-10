@@ -71,7 +71,7 @@ namespace TrueCraft.Client.Modules
             //      Could it be related to the lighting height map adding 2 to the height?
             //      That would result in incorrect heights when placing blocks high above other blocks.
             Core.Vector3 posA = new Core.Vector3(e.Position.X, 0, e.Position.Z);
-            Core.Vector3 posB = new Core.Vector3(e.Position.X + 1, World.Height, e.Position.Z + 1);
+            Core.Vector3 posB = new Core.Vector3(e.Position.X + 1, Dimension.Height, e.Position.Z + 1);
             WorldLighting.EnqueueOperation(new TrueCraft.Core.BoundingBox(posA, posB), true);
             WorldLighting.EnqueueOperation(new TrueCraft.Core.BoundingBox(posA, posB), false);
             for (int i = 0; i < 100; i++)

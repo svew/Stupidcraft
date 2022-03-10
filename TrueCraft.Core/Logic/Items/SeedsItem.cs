@@ -21,7 +21,7 @@ namespace TrueCraft.Core.Logic.Items
             return "Seeds";
         }
 
-        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user)
+        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension world, IRemoteClient user)
         {
             if (world.GetBlockID(coordinates) == FarmlandBlock.BlockID)
             {

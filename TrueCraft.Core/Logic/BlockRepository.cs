@@ -53,7 +53,7 @@ namespace TrueCraft.Core.Logic
             BlockProviders[provider.ID] = provider;
         }
 
-        public BoundingBox? GetBoundingBox(IWorld world, GlobalVoxelCoordinates coordinates)
+        public BoundingBox? GetBoundingBox(IDimension world, GlobalVoxelCoordinates coordinates)
         {
             // TODO: Block-specific bounding boxes
             var id = world.GetBlockID(coordinates);

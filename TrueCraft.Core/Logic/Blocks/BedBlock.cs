@@ -58,7 +58,7 @@ namespace TrueCraft.Core.Logic.Blocks
             return new[] { new ItemStack(BedItem.ItemID) };
         }
             
-        public bool ValidBedPosition(BlockDescriptor descriptor, IBlockRepository repository, IWorld world, bool checkNeighbor = true, bool checkSupport = false)
+        public bool ValidBedPosition(BlockDescriptor descriptor, IBlockRepository repository, IDimension world, bool checkNeighbor = true, bool checkSupport = false)
         {
             if (checkNeighbor)
             {
@@ -92,7 +92,7 @@ namespace TrueCraft.Core.Logic.Blocks
             return true;
         }
 
-        public override void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IWorld world)
+        public override void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IDimension world)
         {
             if (!ValidBedPosition(descriptor, server.BlockRepository, world))
                 world.SetBlockID(descriptor.Coordinates, 0);

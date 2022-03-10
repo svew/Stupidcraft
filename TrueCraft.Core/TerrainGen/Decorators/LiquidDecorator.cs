@@ -8,7 +8,7 @@ namespace TrueCraft.Core.TerrainGen.Decorators
     {
         public static readonly int WaterLevel = 40;
 
-        public void Decorate(IWorld world, IChunk chunk, IBiomeRepository biomes)
+        public void Decorate(IDimension world, IChunk chunk, IBiomeRepository biomes)
         {
             for (int x = 0; x < Chunk.Width; x++)
             {

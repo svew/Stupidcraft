@@ -64,7 +64,7 @@ namespace TrueCraft.Core.Logic.Blocks
             return new[] { new ItemStack(DirtBlock.BlockID, 1) };
         }
 
-        private void ScheduledUpdate(IWorld world, GlobalVoxelCoordinates coords)
+        private void ScheduledUpdate(IDimension world, GlobalVoxelCoordinates coords)
         {
             if (world.IsValidPosition(coords + Vector3i.Up))
             {
@@ -75,7 +75,7 @@ namespace TrueCraft.Core.Logic.Blocks
             }
         }
 
-        public override void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IWorld world)
+        public override void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IDimension world)
         {
             if (source.Coordinates == descriptor.Coordinates + Vector3i.Up)
             {
@@ -92,7 +92,7 @@ namespace TrueCraft.Core.Logic.Blocks
             }
         }
 
-        public void TrySpread(GlobalVoxelCoordinates coords, IWorld world, IMultiplayerServer server)
+        public void TrySpread(GlobalVoxelCoordinates coords, IDimension world, IMultiplayerServer server)
         {
             if (!world.IsValidPosition(coords + Vector3i.Up))
                 return;
@@ -137,7 +137,7 @@ namespace TrueCraft.Core.Logic.Blocks
             }
         }
 
-        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
+        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
         {
             var chunk = world.FindChunk(descriptor.Coordinates);
             user.Server.Scheduler.ScheduleEvent("grass", chunk,
@@ -145,7 +145,7 @@ namespace TrueCraft.Core.Logic.Blocks
                 s => TrySpread(descriptor.Coordinates, world, user.Server));
         }
 
-        public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IWorld world)
+        public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IDimension world)
         {
             var chunk = world.FindChunk(coords);
             server.Scheduler.ScheduleEvent("grass", chunk,

@@ -8,6 +8,6 @@ namespace TrueCraft.Core.World
     public interface IDecoration
     {
         bool ValidLocation(LocalVoxelCoordinates location);
-        bool GenerateAt(IWorld world, IChunk chunk, LocalVoxelCoordinates location);
+        bool GenerateAt(IDimension world, IChunk chunk, LocalVoxelCoordinates location);
     }
 }

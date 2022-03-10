@@ -36,12 +36,12 @@ namespace TrueCraft.Core.Logic.Blocks
             return new Tuple<int, int>(2, 1);
         }
 
-        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
+        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
         {
             BlockUpdate(descriptor, descriptor, user.Server, world);
         }
 
-        public override void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IWorld world)
+        public override void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IDimension world)
         {
             if (world.GetBlockID(descriptor.Coordinates + Vector3i.Down) == AirBlock.BlockID)
             {

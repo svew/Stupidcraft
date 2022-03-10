@@ -20,7 +20,7 @@ namespace TrueCraft.Core.TerrainGen.Decorations
             return true;
         }
 
-        public override bool GenerateAt(IWorld world, IChunk chunk, LocalVoxelCoordinates location)
+        public override bool GenerateAt(IDimension world, IChunk chunk, LocalVoxelCoordinates location)
         {
             if (!ValidLocation(location))
                 return false;

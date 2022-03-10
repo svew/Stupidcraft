@@ -7,7 +7,7 @@ namespace TrueCraft.Core.TerrainGen.Decorators
 {
     class FreezeDecorator : IChunkDecorator
     {
-        public void Decorate(IWorld world, IChunk chunk, IBiomeRepository biomes)
+        public void Decorate(IDimension world, IChunk chunk, IBiomeRepository biomes)
         {
             for (int x = 0; x < Chunk.Width; x++)
             {

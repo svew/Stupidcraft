@@ -31,7 +31,7 @@ namespace TrueCraft
 
         public IPacketReader PacketReader { get; private set; }
         public IList<IRemoteClient> Clients { get; private set; }
-        public IList<IWorld> Worlds { get; private set; }
+        public IList<IDimension> Worlds { get; private set; }
         public IList<IEntityManager> EntityManagers { get; private set; }
         public IList<WorldLighting> WorldLighters { get; set; }
         public IEventScheduler Scheduler { get; private set; }
@@ -48,7 +48,7 @@ namespace TrueCraft
         private struct BlockUpdate
         {
             public GlobalVoxelCoordinates Coordinates;
-            public IWorld World;
+            public IDimension World;
         }
         private Queue<BlockUpdate> PendingBlockUpdates { get; set; }
         public bool BlockUpdatesEnabled
@@ -79,7 +79,7 @@ namespace TrueCraft
         private readonly PacketHandler[] PacketHandlers;
         private IList<ILogProvider> LogProviders;
         private Stopwatch Time;
-        private ConcurrentBag<Tuple<IWorld, IChunk>> ChunksToSchedule;
+        private ConcurrentBag<Tuple<IDimension, IChunk>> ChunksToSchedule;
         internal object ClientLock = new object();
         
         private QueryProtocol QueryProtocol;
@@ -104,7 +104,7 @@ namespace TrueCraft
             _cde = new CountdownEvent(_lstAutoResetEvents.Count);
 
             PacketHandlers = new PacketHandler[0x100];
-            Worlds = new List<IWorld>();
+            Worlds = new List<IDimension>();
             EntityManagers = new List<IEntityManager>();
             LogProviders = new List<ILogProvider>();
             Scheduler = new EventScheduler(this);
@@ -121,7 +121,7 @@ namespace TrueCraft
             EnableClientLogging = false;
             QueryProtocol = new TrueCraft.QueryProtocol(this);
             WorldLighters = new List<WorldLighting>();
-            ChunksToSchedule = new ConcurrentBag<Tuple<IWorld, IChunk>>();
+            ChunksToSchedule = new ConcurrentBag<Tuple<IDimension, IChunk>>();
             Time = new Stopwatch();
 
             AccessConfiguration = Configuration.LoadConfiguration<AccessConfiguration>("access.yaml");
@@ -208,7 +208,7 @@ namespace TrueCraft
                 DisconnectClient(Clients[j]);
         }
 
-        public void AddWorld(IWorld world)
+        public void AddWorld(IDimension world)
         {
             Worlds.Add(world);
             world.BlockRepository = BlockRepository;
@@ -226,7 +226,7 @@ namespace TrueCraft
         void HandleChunkLoaded(object sender, ChunkLoadedEventArgs e)
         {
             if (Program.ServerConfiguration.EnableEventLoading)
-                ChunksToSchedule.Add(new Tuple<IWorld, IChunk>(sender as IWorld, e.Chunk));
+                ChunksToSchedule.Add(new Tuple<IDimension, IChunk>(sender as IDimension, e.Chunk));
             if (Program.ServerConfiguration.EnableLighting)
             {
                 var lighter = WorldLighters.SingleOrDefault(l => l.World == sender);
@@ -249,7 +249,7 @@ namespace TrueCraft
                                 (sbyte)e.NewBlock.ID, (sbyte)e.NewBlock.Metadata));
                     }
                 }
-                PendingBlockUpdates.Enqueue(new BlockUpdate { Coordinates = e.Position, World = sender as IWorld });
+                PendingBlockUpdates.Enqueue(new BlockUpdate { Coordinates = e.Position, World = sender as IDimension });
                 ProcessBlockUpdates();
                 if (Program.ServerConfiguration.EnableLighting)
                 {
@@ -257,7 +257,7 @@ namespace TrueCraft
                     if (lighter != null)
                     {
                         Vector3 posA = new Vector3(e.Position.X, 0, e.Position.Z);
-                        Vector3 posB = new Vector3(e.Position.X + 1, World.Height, e.Position.Z + 1);
+                        Vector3 posB = new Vector3(e.Position.X + 1, Dimension.Height, e.Position.Z + 1);
                         lighter.EnqueueOperation(new BoundingBox(posA, posB), true);
                         lighter.EnqueueOperation(new BoundingBox(posA, posB), false);
                     }
@@ -269,7 +269,7 @@ namespace TrueCraft
         {
             if (Program.ServerConfiguration.EnableLighting)
             {
-                var lighter = new WorldLighting(sender as IWorld, BlockRepository);
+                var lighter = new WorldLighting(sender as IDimension, BlockRepository);
                 lighter.InitialLighting(e.Chunk, false);
             }
             else
@@ -282,7 +282,7 @@ namespace TrueCraft
             HandleChunkLoaded(sender, e);
         }
 
-        void ScheduleUpdatesForChunk(IWorld world, IChunk chunk)
+        void ScheduleUpdatesForChunk(IDimension world, IChunk chunk)
         {
             chunk.UpdateHeightMap();
             int _x = chunk.Coordinates.X * Chunk.Width;
@@ -340,7 +340,7 @@ namespace TrueCraft
             }
         }
 
-        public IEntityManager GetEntityManagerForWorld(IWorld world)
+        public IEntityManager GetEntityManagerForWorld(IDimension world)
         {
             for (int i = 0; i < EntityManagers.Count; i++)
             {
@@ -523,7 +523,7 @@ namespace TrueCraft
             if (Program.ServerConfiguration.EnableEventLoading)
             {
                 Profiler.Start("environment.chunks");
-                Tuple<IWorld, IChunk> t;
+                Tuple<IDimension, IChunk> t;
                 if (ChunksToSchedule.TryTake(out t))
                     ScheduleUpdatesForChunk(t.Item1, t.Item2);
                 Profiler.Done();

@@ -31,17 +31,17 @@ namespace TrueCraft.Core.Logic
             return string.Empty;
         }
 
-        public virtual void ItemUsedOnEntity(ItemStack item, IEntity usedOn, IWorld world, IRemoteClient user)
+        public virtual void ItemUsedOnEntity(ItemStack item, IEntity usedOn, IDimension world, IRemoteClient user)
         {
             // This space intentionally left blank
         }
 
-        public virtual void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user)
+        public virtual void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension world, IRemoteClient user)
         {
             // This space intentionally left blank
         }
 
-        public virtual void ItemUsedOnNothing(ItemStack item, IWorld world, IRemoteClient user)
+        public virtual void ItemUsedOnNothing(ItemStack item, IDimension world, IRemoteClient user)
         {
             // This space intentionally left blank
         }

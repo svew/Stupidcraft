@@ -27,7 +27,7 @@ namespace TrueCraft.Core.Logic
 
         public static IBlockRepository BlockRepository { get; set; }
 
-        public virtual void BlockLeftClicked(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
+        public virtual void BlockLeftClicked(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
         {
             ServerOnly.Assert();
 
@@ -44,21 +44,21 @@ namespace TrueCraft.Core.Logic
         /// <param name="world"></param>
         /// <param name="user"></param>
         /// <returns>True if the right-click has been handled; false otherwise.</returns>
-        public virtual bool BlockRightClicked(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
+        public virtual bool BlockRightClicked(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
         {
             ServerOnly.Assert();
 
             return true;
         }
 
-        public virtual void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
+        public virtual void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
         {
             ServerOnly.Assert();
 
             // This space intentionally left blank
         }
 
-        public virtual void BlockMined(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
+        public virtual void BlockMined(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
         {
             ServerOnly.Assert();
 
@@ -66,7 +66,7 @@ namespace TrueCraft.Core.Logic
             world.SetBlockID(descriptor.Coordinates, 0);
         }
 
-        public void GenerateDropEntity(BlockDescriptor descriptor, IWorld world, IMultiplayerServer server, ItemStack item)
+        public void GenerateDropEntity(BlockDescriptor descriptor, IDimension world, IMultiplayerServer server, ItemStack item)
         {
             ServerOnly.Assert();
 
@@ -97,7 +97,7 @@ namespace TrueCraft.Core.Logic
             }
         }
 
-        public virtual bool IsSupported(BlockDescriptor descriptor, IMultiplayerServer server, IWorld world)
+        public virtual bool IsSupported(BlockDescriptor descriptor, IMultiplayerServer server, IDimension world)
         {
             ServerOnly.Assert();
 
@@ -111,7 +111,7 @@ namespace TrueCraft.Core.Logic
             return true;
         }
 
-        public virtual void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IWorld world)
+        public virtual void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IDimension world)
         {
             ServerOnly.Assert();
 
@@ -127,14 +127,14 @@ namespace TrueCraft.Core.Logic
             return new[] { new ItemStack(descriptor.ID, 1, descriptor.Metadata) };
         }
 
-        public virtual void ItemUsedOnEntity(ItemStack item, IEntity usedOn, IWorld world, IRemoteClient user)
+        public virtual void ItemUsedOnEntity(ItemStack item, IEntity usedOn, IDimension world, IRemoteClient user)
         {
             ServerOnly.Assert();
 
             // This space intentionally left blank
         }
 
-        public virtual void ItemUsedOnNothing(ItemStack item, IWorld world, IRemoteClient user)
+        public virtual void ItemUsedOnNothing(ItemStack item, IDimension world, IRemoteClient user)
         {
             ServerOnly.Assert();
 
@@ -151,7 +151,7 @@ namespace TrueCraft.Core.Logic
             SnowfallBlock.BlockID
         };
 
-        public virtual void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user)
+        public virtual void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension world, IRemoteClient user)
         {
             ServerOnly.Assert();
 
@@ -204,14 +204,14 @@ namespace TrueCraft.Core.Logic
             }
         }
 
-        public virtual void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IWorld world)
+        public virtual void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IDimension world)
         {
             ServerOnly.Assert();
 
             // This space intentionally left blank
         }
 
-        public virtual void TileEntityLoadedForClient(BlockDescriptor descriptor, IWorld world, NbtCompound entity, IRemoteClient client)
+        public virtual void TileEntityLoadedForClient(BlockDescriptor descriptor, IDimension world, NbtCompound entity, IRemoteClient client)
         {
             ServerOnly.Assert();
 

@@ -15,7 +15,7 @@ namespace TrueCraft.Core.Logic.Items
             }
         }
 
-        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user)
+        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension world, IRemoteClient user)
         {
             var id = world.GetBlockID(coordinates);
             if (id == DirtBlock.BlockID || id == GrassBlock.BlockID)

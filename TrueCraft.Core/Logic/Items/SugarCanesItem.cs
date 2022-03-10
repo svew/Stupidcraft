@@ -22,7 +22,7 @@ namespace TrueCraft.Core.Logic.Items
             return "Sugar Canes";
         }
 
-        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user)
+        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension world, IRemoteClient user)
         {
             ServerOnly.Assert();
 

@@ -27,7 +27,7 @@ namespace TrueCraft.Core.Server
         IAccessConfiguration AccessConfiguration { get; }
         IPacketReader PacketReader { get; }
         IList<IRemoteClient> Clients { get; }
-        IList<IWorld> Worlds { get; }
+        IList<IDimension> Worlds { get; }
         IEventScheduler Scheduler { get; }
         IBlockRepository BlockRepository { get; }
 
@@ -39,10 +39,10 @@ namespace TrueCraft.Core.Server
         void Start(IPEndPoint endPoint);
         void Stop();
         void RegisterPacketHandler(byte packetId, PacketHandler handler);
-        void AddWorld(IWorld world);
+        void AddWorld(IDimension world);
         void AddLogProvider(ILogProvider provider);
         void Log(LogCategory category, string text, params object[] parameters);
-        IEntityManager GetEntityManagerForWorld(IWorld world);
+        IEntityManager GetEntityManagerForWorld(IDimension world);
         void SendMessage(string message, params object[] parameters);
 
         void DisconnectClient(IRemoteClient client);

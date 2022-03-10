@@ -14,7 +14,7 @@ namespace TrueCraft.Core.Test.Logic
     [TestFixture]
     public class BlockProviderTest
     {
-        public Mock<IWorld> World { get; set; }
+        public Mock<IDimension> World { get; set; }
         public Mock<IMultiplayerServer> Server { get; set; }
         public Mock<IEntityManager> EntityManager { get; set; }
         public Mock<IRemoteClient> User { get; set; }
@@ -23,7 +23,7 @@ namespace TrueCraft.Core.Test.Logic
         [OneTimeSetUp]
         public void SetUp()
         {
-            World = new Mock<IWorld>();
+            World = new Mock<IDimension>();
             Server = new Mock<IMultiplayerServer>();
             EntityManager = new Mock<IEntityManager>();
             User = new Mock<IRemoteClient>();
@@ -35,8 +35,8 @@ namespace TrueCraft.Core.Test.Logic
 
             World.Setup(w => w.SetBlockID(It.IsAny<GlobalVoxelCoordinates>(), It.IsAny<byte>()));
 
-            Server.Setup(s => s.GetEntityManagerForWorld(It.IsAny<IWorld>()))
-                .Returns<IWorld>(w => EntityManager.Object);
+            Server.Setup(s => s.GetEntityManagerForWorld(It.IsAny<IDimension>()))
+                .Returns<IDimension>(w => EntityManager.Object);
             Server.SetupGet(s => s.BlockRepository).Returns(BlockRepository.Object);
 
             EntityManager.Setup(m => m.SpawnEntity(It.IsAny<IEntity>()));
@@ -76,7 +76,7 @@ namespace TrueCraft.Core.Test.Logic
         public void TestSupport()
         {
             // We need an actual world for this
-            var world = new TrueCraft.Core.World.World("test", new FlatlandGenerator());
+            var world = new TrueCraft.Core.World.Dimension("test", new FlatlandGenerator());
             world.SetBlockID(GlobalVoxelCoordinates.Zero, 1);
             GlobalVoxelCoordinates oneY = new GlobalVoxelCoordinates(0, 1, 0);
             world.SetBlockID(oneY, 2);

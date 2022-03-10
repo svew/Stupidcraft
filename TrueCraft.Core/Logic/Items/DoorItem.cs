@@ -25,7 +25,7 @@ namespace TrueCraft.Core.Logic.Items
 
         public override sbyte MaximumStack { get { return 1; } }
 
-        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user)
+        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension world, IRemoteClient user)
         {
             ServerOnly.Assert();
 

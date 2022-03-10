@@ -53,7 +53,7 @@ namespace TrueCraft.Core.Logic.Blocks
             Vector3i.East
         };
 
-        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user)
+        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension world, IRemoteClient user)
         {
             int adjacent = 0;
             GlobalVoxelCoordinates coords = coordinates + MathHelper.BlockFaceToCoordinates(face);
@@ -83,12 +83,12 @@ namespace TrueCraft.Core.Logic.Blocks
             }
         }
 
-        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
+        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
         {
             world.SetMetadata(descriptor.Coordinates, (byte)MathHelper.DirectionByRotationFlat(user.Entity.Yaw, true));
         }
 
-        public override bool BlockRightClicked(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
+        public override bool BlockRightClicked(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
         {
             ServerOnly.Assert();
 
@@ -135,7 +135,7 @@ namespace TrueCraft.Core.Logic.Blocks
             return false;
         }
 
-        public override void BlockMined(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
+        public override void BlockMined(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
         {
             var self = descriptor.Coordinates;
             var entity = world.GetTileEntity(self);

@@ -13,7 +13,7 @@ namespace TrueCraft.Launcher.Singleplayer
     {
         public static Worlds Local { get; set; }
 
-        public World[] Saves { get; set; }
+        public Dimension[] Saves { get; set; }
 
         public void Load()
         {
@@ -21,12 +21,12 @@ namespace TrueCraft.Launcher.Singleplayer
                 Directory.CreateDirectory(Paths.Worlds);
 
             var directories = Directory.GetDirectories(Paths.Worlds);
-            var saves = new List<World>();
+            var saves = new List<Dimension>();
             foreach (var d in directories)
             {
                 try
                 {
-                    var w = World.LoadWorld(d);
+                    var w = Dimension.LoadWorld(d);
                     saves.Add(w);
                 }
                 catch (Exception e)
@@ -38,7 +38,7 @@ namespace TrueCraft.Launcher.Singleplayer
             Saves = saves.ToArray();
         }
 
-        public World CreateNewWorld(string name, string seed)
+        public Dimension CreateNewWorld(string name, string seed)
         {
             int s;
             if (!int.TryParse(seed, out s))
@@ -46,7 +46,7 @@ namespace TrueCraft.Launcher.Singleplayer
                 // TODO: Hash seed string
                 s = MathHelper.Random.Next();
             }
-            var world = new World(name, s, new StandardGenerator());
+            var world = new Dimension(name, s, new StandardGenerator());
 
             Discover.DoDiscovery(new Discover());
             world.BlockRepository = BlockRepository.Get();

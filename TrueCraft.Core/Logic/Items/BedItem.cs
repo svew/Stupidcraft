@@ -24,7 +24,7 @@ namespace TrueCraft.Core.Logic.Items
             return "Bed";
         }
 
-        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user)
+        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension world, IRemoteClient user)
         {
             ServerOnly.Assert();
 

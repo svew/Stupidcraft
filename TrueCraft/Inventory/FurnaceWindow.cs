@@ -26,14 +26,14 @@ namespace TrueCraft.Inventory
             Hotbar = 4
         }
 
-        private readonly IWorld _world;
+        private readonly IDimension _world;
         private readonly GlobalVoxelCoordinates _location;
 
         private const int _outputSlotIndex = 2;
         public FurnaceWindow(IItemRepository itemRepository,
             ISlotFactory<IServerSlot> slotFactory, sbyte windowID, IFurnaceSlots furnaceSlots,
             ISlots<IServerSlot> mainInventory,
-            ISlots<IServerSlot> hotBar, IWorld world, GlobalVoxelCoordinates location) :
+            ISlots<IServerSlot> hotBar, IDimension world, GlobalVoxelCoordinates location) :
             base(itemRepository, windowID, Core.Windows.WindowType.Furnace, "Furnace",
                 new ISlots<IServerSlot>[] { new ServerSlots(itemRepository, new List<IServerSlot> {furnaceSlots.IngredientSlot }),
                     new ServerSlots(itemRepository, new List<IServerSlot> { furnaceSlots.FuelSlot }),

@@ -22,7 +22,7 @@ namespace TrueCraft.Core.Logic.Items
             return new Tuple<int, int>(5, 0);
         }
 
-        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user)
+        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension world, IRemoteClient user)
         {
             ServerOnly.Assert();
 

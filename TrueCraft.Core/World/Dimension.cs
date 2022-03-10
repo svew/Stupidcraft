@@ -9,7 +9,7 @@ using TrueCraft.Core.Logic;
 
 namespace TrueCraft.Core.World
 {
-    public class World : IDisposable, IWorld, IEnumerable<IChunk>
+    public class Dimension : IDisposable, IDimension, IEnumerable<IChunk>
     {
         public static readonly int Height = 128;
 
@@ -64,35 +64,35 @@ namespace TrueCraft.Core.World
         public event EventHandler<ChunkLoadedEventArgs> ChunkGenerated;
         public event EventHandler<ChunkLoadedEventArgs> ChunkLoaded;
 
-        public World()
+        public Dimension()
         {
             _regions = new Dictionary<RegionCoordinates, IRegion>();
             BaseTime = DateTime.UtcNow;
         }
 
-        public World(string name) : this()
+        public Dimension(string name) : this()
         {
             Name = name;
             Seed = MathHelper.Random.Next();
         }
 
-        public World(string name, IChunkProvider chunkProvider) : this(name)
+        public Dimension(string name, IChunkProvider chunkProvider) : this(name)
         {
             ChunkProvider = chunkProvider;
             ChunkProvider.Initialize(this);
         }
 
-        public World(string name, int seed, IChunkProvider chunkProvider) : this(name, chunkProvider)
+        public Dimension(string name, int seed, IChunkProvider chunkProvider) : this(name, chunkProvider)
         {
             Seed = seed;
         }
 
-        public static World LoadWorld(string baseDirectory)
+        public static Dimension LoadWorld(string baseDirectory)
         {
             if (!Directory.Exists(baseDirectory))
                 throw new DirectoryNotFoundException();
 
-            var world = new World(Path.GetFileName(baseDirectory));
+            var world = new Dimension(Path.GetFileName(baseDirectory));
             world.BaseDirectory = baseDirectory;
 
             if (File.Exists(Path.Combine(baseDirectory, "manifest.nbt")))
@@ -436,11 +436,11 @@ namespace TrueCraft.Core.World
 
         public class ChunkEnumerator : IEnumerator<IChunk>
         {
-            public World World { get; set; }
+            public Dimension World { get; set; }
             private int Index { get; set; }
             private IList<IChunk> Chunks { get; set; }
 
-            public ChunkEnumerator(World world)
+            public ChunkEnumerator(Dimension world)
             {
                 World = world;
                 Index = -1;

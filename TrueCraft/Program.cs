@@ -48,15 +48,15 @@ namespace TrueCraft
                 if (Directory.Exists("players"))
                     Directory.Delete("players", true);
             }
-            IWorld world;
+            IDimension world;
             try
             {
-                world = World.LoadWorld("world");
+                world = Dimension.LoadWorld("world");
                 Server.AddWorld(world);
             }
             catch
             {
-                world = new World("default", new StandardGenerator());
+                world = new Dimension("default", new StandardGenerator());
                 world.BlockRepository = Server.BlockRepository;
                 world.Save("world");
                 Server.AddWorld(world);

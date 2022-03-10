@@ -10,7 +10,7 @@ namespace TrueCraft.Core.Logic.Blocks
     {
         public abstract short ItemID { get; }
 
-        public override void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IWorld world)
+        public override void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IDimension world)
         {
             bool upper = ((DoorItem.DoorFlags)descriptor.Metadata & DoorItem.DoorFlags.Upper) == DoorItem.DoorFlags.Upper;
             var other = upper ? Vector3i.Down : Vector3i.Up;
@@ -58,12 +58,12 @@ namespace TrueCraft.Core.Logic.Blocks
             return new Tuple<int, int>(1, 6);
         }
 
-        public override void BlockLeftClicked(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
+        public override void BlockLeftClicked(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
         {
             BlockRightClicked(descriptor, face, world, user);
         }
 
-        public override bool BlockRightClicked(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
+        public override bool BlockRightClicked(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
         {
             bool upper = ((DoorItem.DoorFlags)descriptor.Metadata & DoorItem.DoorFlags.Upper) == DoorItem.DoorFlags.Upper;
             var other = upper ? Vector3i.Down : Vector3i.Up;

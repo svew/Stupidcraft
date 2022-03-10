@@ -18,9 +18,9 @@ namespace TrueCraft.Core.Logic
         /// <returns>A string for display to the Player.</returns>
         string GetDisplayName(short metadata);
 
-        void ItemUsedOnNothing(ItemStack item, IWorld world, IRemoteClient user);
-        void ItemUsedOnEntity(ItemStack item, IEntity usedOn, IWorld world, IRemoteClient user);
-        void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IWorld world, IRemoteClient user);
+        void ItemUsedOnNothing(ItemStack item, IDimension world, IRemoteClient user);
+        void ItemUsedOnEntity(ItemStack item, IEntity usedOn, IDimension world, IRemoteClient user);
+        void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension world, IRemoteClient user);
         Tuple<int, int> GetIconTexture(byte metadata);
 
         /// <summary>

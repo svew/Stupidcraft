@@ -8,7 +8,7 @@ namespace TrueCraft.Core.Server
 {
     public interface IEntityManager
     {
-        IWorld World { get; }
+        IDimension World { get; }
         TimeSpan TimeSinceLastUpdate { get; }
         /// <summary>
         /// Adds an entity to the world and assigns it an entity ID.

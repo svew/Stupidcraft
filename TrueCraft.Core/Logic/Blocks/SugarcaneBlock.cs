@@ -63,7 +63,7 @@ namespace TrueCraft.Core.Logic.Blocks
             return new[] { new ItemStack(SugarCanesItem.ItemID) };
         }
 
-        public static bool ValidPlacement(BlockDescriptor descriptor, IWorld world)
+        public static bool ValidPlacement(BlockDescriptor descriptor, IDimension world)
         {
             var below = world.GetBlockID(descriptor.Coordinates + Vector3i.Down);
             if (below != SugarcaneBlock.BlockID && below != GrassBlock.BlockID && below != DirtBlock.BlockID)
@@ -92,7 +92,7 @@ namespace TrueCraft.Core.Logic.Blocks
             return true;
         }
 
-        public override void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IWorld world)
+        public override void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IDimension world)
         {
             if (!ValidPlacement(descriptor, world))
             {
@@ -102,7 +102,7 @@ namespace TrueCraft.Core.Logic.Blocks
             }
         }
 
-        private void TryGrowth(IMultiplayerServer server, GlobalVoxelCoordinates coords, IWorld world)
+        private void TryGrowth(IMultiplayerServer server, GlobalVoxelCoordinates coords, IDimension world)
         {
             if (world.GetBlockID(coords) != BlockID)
                 return;
@@ -138,7 +138,7 @@ namespace TrueCraft.Core.Logic.Blocks
             }
         }
 
-        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
+        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
         {
             var chunk = world.FindChunk(descriptor.Coordinates);
             user.Server.Scheduler.ScheduleEvent("sugarcane", chunk,
@@ -146,7 +146,7 @@ namespace TrueCraft.Core.Logic.Blocks
                 (server) => TryGrowth(server, descriptor.Coordinates, world));
         }
 
-        public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IWorld world)
+        public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IDimension world)
         {
             var chunk = world.FindChunk(coords);
             server.Scheduler.ScheduleEvent("sugarcane", chunk,

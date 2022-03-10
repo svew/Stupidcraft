@@ -56,7 +56,7 @@ namespace TrueCraft.Core.Logic.Blocks
                 return new[] { new ItemStack(SeedsItem.ItemID) };
         }
 
-        private void GrowBlock(IMultiplayerServer server, IWorld world, GlobalVoxelCoordinates coords)
+        private void GrowBlock(IMultiplayerServer server, IDimension world, GlobalVoxelCoordinates coords)
         {
             if (world.GetBlockID(coords) != BlockID)
                 return;
@@ -72,7 +72,7 @@ namespace TrueCraft.Core.Logic.Blocks
             }
         }
 
-        public override void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IWorld world)
+        public override void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IDimension world)
         {
             if (world.GetBlockID(descriptor.Coordinates + Vector3i.Down) != FarmlandBlock.BlockID)
             {
@@ -81,7 +81,7 @@ namespace TrueCraft.Core.Logic.Blocks
             }
         }
 
-        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
+        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
         {
             var chunk = world.FindChunk(descriptor.Coordinates);
             user.Server.Scheduler.ScheduleEvent("crops", chunk,
@@ -89,7 +89,7 @@ namespace TrueCraft.Core.Logic.Blocks
                 (server) => GrowBlock(server, world, descriptor.Coordinates + MathHelper.BlockFaceToCoordinates(face)));
         }
 
-        public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IWorld world)
+        public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IDimension world)
         {
             var chunk = world.FindChunk(coords);
             server.Scheduler.ScheduleEvent("crops", chunk,

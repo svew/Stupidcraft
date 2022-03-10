@@ -6,17 +6,17 @@ namespace TrueCraft.Core
 {
     public class EmptyGenerator : IChunkProvider
     {
-        public IChunk GenerateChunk(IWorld world, GlobalChunkCoordinates coordinates)
+        public IChunk GenerateChunk(IDimension world, GlobalChunkCoordinates coordinates)
         {
             return new Chunk(coordinates);
         }
 
-        public GlobalVoxelCoordinates GetSpawn(IWorld world)
+        public GlobalVoxelCoordinates GetSpawn(IDimension world)
         {
             return GlobalVoxelCoordinates.Zero;
         }
 
-        public void Initialize(IWorld world)
+        public void Initialize(IDimension world)
         {
         }
 

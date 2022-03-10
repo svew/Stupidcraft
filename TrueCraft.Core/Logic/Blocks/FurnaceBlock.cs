@@ -173,7 +173,7 @@ namespace TrueCraft.Core.Logic.Blocks
                 set => InternalSlotSet(OutputIndex, value);
             }
 
-            public void Save(IWorld world, GlobalVoxelCoordinates coordinates)
+            public void Save(IDimension world, GlobalVoxelCoordinates coordinates)
             {
                 world.SetTileEntity(coordinates, _furnaceState);
             }
@@ -372,7 +372,7 @@ namespace TrueCraft.Core.Logic.Blocks
         protected static Dictionary<GlobalVoxelCoordinates, List<FurnaceWindowUser>> _trackedFurnaceWindows = new Dictionary<GlobalVoxelCoordinates, List<FurnaceWindowUser>>();
         protected static Dictionary<GlobalVoxelCoordinates, FurnaceState> _trackedFurnaceStates = new Dictionary<GlobalVoxelCoordinates, FurnaceState>();
 
-        private FurnaceState GetState(IWorld world, GlobalVoxelCoordinates coords)
+        private FurnaceState GetState(IDimension world, GlobalVoxelCoordinates coords)
         {
             ServerOnly.Assert();
 
@@ -430,13 +430,13 @@ namespace TrueCraft.Core.Logic.Blocks
                 window.WindowID, UpdateProgressPacket.ProgressTarget.AvailableHeat, burn));
         }
 
-        private void SetState(IWorld world, GlobalVoxelCoordinates coords, FurnaceState state)
+        private void SetState(IDimension world, GlobalVoxelCoordinates coords, FurnaceState state)
         {
             state.Save(world, coords);
             UpdateWindows(coords, state);
         }
 
-        public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IWorld world)
+        public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IDimension world)
         {
             ServerOnly.Assert();
 
@@ -445,7 +445,7 @@ namespace TrueCraft.Core.Logic.Blocks
                 ScheduleFurnace(server.Scheduler, world, coords, ItemRepository.Get());
         }
 
-        public override void BlockMined(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
+        public override void BlockMined(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
         {
             ServerOnly.Assert();
 
@@ -465,7 +465,7 @@ namespace TrueCraft.Core.Logic.Blocks
             base.BlockMined(descriptor, face, world, user);
         }
 
-        public override bool BlockRightClicked(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
+        public override bool BlockRightClicked(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
         {
             ServerOnly.Assert();
 
@@ -496,7 +496,7 @@ namespace TrueCraft.Core.Logic.Blocks
         /// <param name="world"></param>
         /// <param name="coords"></param>
         /// <param name="itemRepository"></param>
-        public void TryStartFurnace(IEventScheduler scheduler, IWorld world,
+        public void TryStartFurnace(IEventScheduler scheduler, IDimension world,
             GlobalVoxelCoordinates coords, IItemRepository itemRepository)
         {
             // If the furnace is already scheduled, it is already lit.
@@ -566,7 +566,7 @@ namespace TrueCraft.Core.Logic.Blocks
         }
 
         private void ScheduleFurnace(IEventScheduler scheduler,
-            IWorld world, GlobalVoxelCoordinates coords, IItemRepository itemRepository)
+            IDimension world, GlobalVoxelCoordinates coords, IItemRepository itemRepository)
         {
             FurnaceEventSubject subject = new FurnaceEventSubject();
             _scheduledFurnaces[coords] = subject;
@@ -575,7 +575,7 @@ namespace TrueCraft.Core.Logic.Blocks
                 server => UpdateFurnace(server.Scheduler, world, coords, itemRepository));
         }
 
-        private void UpdateFurnace(IEventScheduler scheduler, IWorld world, GlobalVoxelCoordinates coords, IItemRepository itemRepository)
+        private void UpdateFurnace(IEventScheduler scheduler, IDimension world, GlobalVoxelCoordinates coords, IItemRepository itemRepository)
         {
             // This furnace is no longer scheduled, so remove it.
             if (!_scheduledFurnaces.ContainsKey(coords))
@@ -651,7 +651,7 @@ namespace TrueCraft.Core.Logic.Blocks
             return new Tuple<int, int>(13, 2);
         }
 
-        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
+        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
         {
             world.SetMetadata(descriptor.Coordinates, (byte)MathHelper.DirectionByRotationFlat(user.Entity.Yaw, true));
         }

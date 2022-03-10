@@ -10,13 +10,13 @@ namespace TrueCraft.Core.Test.World
     [TestFixture]
     public class WorldTest
     {
-        public TrueCraft.Core.World.World World { get; set; }
+        public TrueCraft.Core.World.Dimension World { get; set; }
 
         [OneTimeSetUp]
         public void SetUp()
         {
             var assemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            World = TrueCraft.Core.World.World.LoadWorld(Path.Combine(assemblyDir, "Files"));
+            World = TrueCraft.Core.World.Dimension.LoadWorld(Path.Combine(assemblyDir, "Files"));
         }
 
         [Test]

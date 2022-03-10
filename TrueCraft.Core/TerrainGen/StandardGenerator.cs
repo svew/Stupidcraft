@@ -38,7 +38,7 @@ namespace TrueCraft.Core.TerrainGen
             ChunkDecorators.Add(new DungeonDecorator(GroundLevel));
         }
 
-        public void Initialize(IWorld world)
+        public void Initialize(IDimension world)
         {
             HighNoise = new Perlin(world.Seed);
             LowNoise = new Perlin(world.Seed);
@@ -89,7 +89,7 @@ namespace TrueCraft.Core.TerrainGen
         public bool SingleBiome { get; private set; }
         public byte GenerationBiome { get; private set; }
 
-        public IChunk GenerateChunk(IWorld world, GlobalChunkCoordinates coordinates)
+        public IChunk GenerateChunk(IDimension world, GlobalChunkCoordinates coordinates)
         {
             const int featurePointDistance = 400;
 
@@ -189,14 +189,14 @@ namespace TrueCraft.Core.TerrainGen
             return chunk;
         }
 
-        public GlobalVoxelCoordinates GetSpawn(IWorld world)
+        public GlobalVoxelCoordinates GetSpawn(IDimension world)
         {
             var chunk = GenerateChunk(world, new GlobalChunkCoordinates(0, 0));
             var spawnPointHeight = chunk.HeightMap[0];
             return new GlobalVoxelCoordinates(0, spawnPointHeight + 1, 0);
         }
 
-        byte GetBiome(IWorld world, GlobalColumnCoordinates location)
+        byte GetBiome(IDimension world, GlobalColumnCoordinates location)
         {
             if (SingleBiome)
                 return GenerationBiome;

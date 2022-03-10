@@ -7,9 +7,9 @@ namespace TrueCraft.Core.World
 {
     // TODO: Entities
     /// <summary>
-    /// An in-game world composed of chunks and blocks.
+    /// An in-game Dimension (eg. OverWorld, The Nether) composed of chunks and blocks.
     /// </summary>
-    public interface IWorld : IEnumerable<IChunk>
+    public interface IDimension : IEnumerable<IChunk>
     {
         string Name { get; set; }
         IBlockRepository BlockRepository { get; set; }
@@ -27,21 +27,31 @@ namespace TrueCraft.Core.World
 
         IChunk GetChunk(GlobalChunkCoordinates coordinates, bool generate = true);
         IChunk FindChunk(GlobalVoxelCoordinates coordinates, bool generate = true);
-        byte GetBlockID(GlobalVoxelCoordinates coordinates);
-        byte GetMetadata(GlobalVoxelCoordinates coordinates);
-        byte GetBlockLight(GlobalVoxelCoordinates coordinates);
-        byte GetSkyLight(GlobalVoxelCoordinates coordinates);
-        LocalVoxelCoordinates FindBlockPosition(GlobalVoxelCoordinates coordinates, out IChunk chunk, bool generate = true);
-        NbtCompound GetTileEntity(GlobalVoxelCoordinates coordinates);
+
         BlockDescriptor GetBlockData(GlobalVoxelCoordinates coordinates);
         void SetBlockData(GlobalVoxelCoordinates coordinates, BlockDescriptor block);
+
+        byte GetBlockID(GlobalVoxelCoordinates coordinates);
         void SetBlockID(GlobalVoxelCoordinates coordinates, byte value);
+
+        byte GetMetadata(GlobalVoxelCoordinates coordinates);
         void SetMetadata(GlobalVoxelCoordinates coordinates, byte value);
-        void SetSkyLight(GlobalVoxelCoordinates coordinates, byte value);
+
+        byte GetBlockLight(GlobalVoxelCoordinates coordinates);
         void SetBlockLight(GlobalVoxelCoordinates coordinates, byte value);
+
+        byte GetSkyLight(GlobalVoxelCoordinates coordinates);
+        void SetSkyLight(GlobalVoxelCoordinates coordinates, byte value);
+
+        LocalVoxelCoordinates FindBlockPosition(GlobalVoxelCoordinates coordinates, out IChunk chunk, bool generate = true);
+
+        NbtCompound GetTileEntity(GlobalVoxelCoordinates coordinates);
         void SetTileEntity(GlobalVoxelCoordinates coordinates, NbtCompound value);
+
         bool IsValidPosition(GlobalVoxelCoordinates position);
+
         bool IsChunkLoaded(GlobalVoxelCoordinates coordinates);
+
         void Save();
         void Save(string path);
     }

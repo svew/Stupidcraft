@@ -22,7 +22,7 @@ namespace TrueCraft.Core.Test.Lighting
         public void TestBasicLighting()
         {
             var repository = GetBlockRepository();
-            var world = new TrueCraft.Core.World.World("TEST", new FlatlandGenerator());
+            var world = new TrueCraft.Core.World.Dimension("TEST", new FlatlandGenerator());
             world.BlockRepository = repository;
             var lighter = new WorldLighting(world, repository);
             world.GetBlockID(GlobalVoxelCoordinates.Zero); // Generate a chunk
@@ -58,7 +58,7 @@ namespace TrueCraft.Core.Test.Lighting
         public void TestShortPropegation()
         {
             var repository = GetBlockRepository();
-            var world = new TrueCraft.Core.World.World("TEST", new FlatlandGenerator());
+            var world = new TrueCraft.Core.World.Dimension("TEST", new FlatlandGenerator());
             world.BlockRepository = repository;
             var lighter = new WorldLighting(world, repository);
             world.GetBlockID(GlobalVoxelCoordinates.Zero); // Generate a chunk
@@ -90,7 +90,7 @@ namespace TrueCraft.Core.Test.Lighting
         public void TestFarPropegation()
         {
             var repository = GetBlockRepository();
-            var world = new TrueCraft.Core.World.World("TEST", new FlatlandGenerator());
+            var world = new TrueCraft.Core.World.Dimension("TEST", new FlatlandGenerator());
             world.BlockRepository = repository;
             var lighter = new WorldLighting(world, repository);
             world.GetBlockID(GlobalVoxelCoordinates.Zero); // Generate a chunk
@@ -136,7 +136,7 @@ namespace TrueCraft.Core.Test.Lighting
         public void TestFarPropegationx2()
         {
             var repository = GetBlockRepository();
-            var world = new TrueCraft.Core.World.World("TEST", new FlatlandGenerator());
+            var world = new TrueCraft.Core.World.Dimension("TEST", new FlatlandGenerator());
             world.BlockRepository = repository;
             var lighter = new WorldLighting(world, repository);
             world.GetBlockID(GlobalVoxelCoordinates.Zero); // Generate a chunk
@@ -231,7 +231,7 @@ namespace TrueCraft.Core.Test.Lighting
         public void TestLeavesAndEtc()
         {
             var repository = GetBlockRepository();
-            var world = new TrueCraft.Core.World.World("TEST", new FlatlandGenerator());
+            var world = new TrueCraft.Core.World.Dimension("TEST", new FlatlandGenerator());
             world.BlockRepository = repository;
             var lighter = new WorldLighting(world, repository);
             world.GetBlockID(GlobalVoxelCoordinates.Zero); // Generate a chunk

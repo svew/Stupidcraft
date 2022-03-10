@@ -8,7 +8,7 @@ namespace TrueCraft.Core.TerrainGen.Decorations
     {
         const int LeafRadius = 2;
 
-        public override bool GenerateAt(IWorld world, IChunk chunk, LocalVoxelCoordinates location)
+        public override bool GenerateAt(IDimension world, IChunk chunk, LocalVoxelCoordinates location)
         {
             if (!ValidLocation(location))
                 return false;

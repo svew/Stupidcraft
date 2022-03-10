@@ -9,13 +9,13 @@ namespace TrueCraft.Client
     {
         private bool UnloadChunks { get; set; }
 
-        internal World World { get; set; }
+        internal Dimension World { get; set; }
 
         public long Time { get { return World.Time; } }
 
         internal ReadOnlyWorld()
         {
-            World = new World("default");
+            World = new Dimension("default");
             UnloadChunks = true;
         }
 

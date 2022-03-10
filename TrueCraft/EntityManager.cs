@@ -17,7 +17,7 @@ namespace TrueCraft
     public class EntityManager : IEntityManager
     {
         public TimeSpan TimeSinceLastUpdate { get; private set; }
-        public IWorld World { get; set; }
+        public IDimension World { get; set; }
         public IMultiplayerServer Server { get; set; }
         public PhysicsEngine PhysicsEngine { get; set; }
 
@@ -27,7 +27,7 @@ namespace TrueCraft
         private ConcurrentBag<IEntity> PendingDespawns { get; set; }
         private DateTime LastUpdate { get; set; }
 
-        public EntityManager(IMultiplayerServer server, IWorld world)
+        public EntityManager(IMultiplayerServer server, IDimension world)
         {
             Server = server;
             World = world;

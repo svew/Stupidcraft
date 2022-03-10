@@ -7,7 +7,7 @@ namespace TrueCraft.Core.Physics
 {
     public class PhysicsEngine : IPhysicsEngine
     {
-        public PhysicsEngine(IWorld world, IBlockPhysicsProvider physicsProvider)
+        public PhysicsEngine(IDimension world, IBlockPhysicsProvider physicsProvider)
         {
             World = world;
             Entities = new List<IPhysicsEntity>();
@@ -15,7 +15,7 @@ namespace TrueCraft.Core.Physics
             BlockPhysicsProvider = physicsProvider;
         }
 
-        public IWorld World { get; set; }
+        public IDimension World { get; set; }
         public IBlockPhysicsProvider BlockPhysicsProvider { get; set; }
         public List<IPhysicsEntity> Entities { get; set; }
         private object EntityLock { get; set; }

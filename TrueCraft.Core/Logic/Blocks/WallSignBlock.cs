@@ -41,7 +41,7 @@ namespace TrueCraft.Core.Logic.Blocks
             return new Tuple<int, int>(4, 0);
         }
 
-        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
+        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
         {
             world.SetMetadata(descriptor.Coordinates, (byte)MathHelper.DirectionByRotationFlat(user.Entity.Yaw, true));
         }
@@ -51,13 +51,13 @@ namespace TrueCraft.Core.Logic.Blocks
             return new[] { new ItemStack(SignItem.ItemID) };
         }
 
-        public override void BlockMined(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
+        public override void BlockMined(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
         {
             world.SetTileEntity(descriptor.Coordinates, null);
             base.BlockMined(descriptor, face, world, user);
         }
 
-        public override void TileEntityLoadedForClient(BlockDescriptor descriptor, IWorld world, NbtCompound entity, IRemoteClient client)
+        public override void TileEntityLoadedForClient(BlockDescriptor descriptor, IDimension world, NbtCompound entity, IRemoteClient client)
         {
             client.QueuePacket(new UpdateSignPacket
             {

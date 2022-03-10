@@ -10,7 +10,7 @@ namespace TrueCraft.Core.Test.AI
     [TestFixture]
     public class PathFindingTest
     {
-        private void DrawGrid(PathResult path, IWorld world)
+        private void DrawGrid(PathResult path, IDimension world)
         {
             for (int z = -8; z < 8; z++)
             {
@@ -35,7 +35,7 @@ namespace TrueCraft.Core.Test.AI
         [Test]
         public void TestAStarLinearPath()
         {
-            var world = new TrueCraft.Core.World.World("default", new FlatlandGenerator());
+            var world = new TrueCraft.Core.World.Dimension("default", new FlatlandGenerator());
             var astar = new AStarPathFinder();
 
             var watch = new Stopwatch();
@@ -62,7 +62,7 @@ namespace TrueCraft.Core.Test.AI
         [Test]
         public void TestAStarDiagonalPath()
         {
-            var world = new TrueCraft.Core.World.World("default", new FlatlandGenerator());
+            var world = new TrueCraft.Core.World.Dimension("default", new FlatlandGenerator());
             var astar = new AStarPathFinder();
             GlobalVoxelCoordinates start = new GlobalVoxelCoordinates(0, 4, 0);
             GlobalVoxelCoordinates end = new GlobalVoxelCoordinates(5, 4, 5);
@@ -82,7 +82,7 @@ namespace TrueCraft.Core.Test.AI
         [Test]
         public void TestAStarObstacle()
         {
-            var world = new TrueCraft.Core.World.World("default", new FlatlandGenerator());
+            var world = new TrueCraft.Core.World.Dimension("default", new FlatlandGenerator());
             var astar = new AStarPathFinder();
             GlobalVoxelCoordinates start = new GlobalVoxelCoordinates(0, 4, 0);
             GlobalVoxelCoordinates end = new GlobalVoxelCoordinates(5, 4, 0);
@@ -104,7 +104,7 @@ namespace TrueCraft.Core.Test.AI
         [Test]
         public void TestAStarImpossible()
         {
-            var world = new TrueCraft.Core.World.World("default", new FlatlandGenerator());
+            var world = new TrueCraft.Core.World.Dimension("default", new FlatlandGenerator());
             var astar = new AStarPathFinder();
             GlobalVoxelCoordinates start = new GlobalVoxelCoordinates(0, 4, 0);
             GlobalVoxelCoordinates end = new GlobalVoxelCoordinates(5, 4, 0);
@@ -126,7 +126,7 @@ namespace TrueCraft.Core.Test.AI
         [Test]
         public void TestAStarExitRoom()
         {
-            var world = new TrueCraft.Core.World.World("default", new FlatlandGenerator());
+            var world = new TrueCraft.Core.World.Dimension("default", new FlatlandGenerator());
             var astar = new AStarPathFinder();
             GlobalVoxelCoordinates start = new GlobalVoxelCoordinates(0, 4, 0);
             GlobalVoxelCoordinates end = new GlobalVoxelCoordinates(5, 4, 0);
@@ -156,7 +156,7 @@ namespace TrueCraft.Core.Test.AI
         [Test]
         public void TestAStarAvoidRoom()
         {
-            var world = new TrueCraft.Core.World.World("default", new FlatlandGenerator());
+            var world = new TrueCraft.Core.World.Dimension("default", new FlatlandGenerator());
             var astar = new AStarPathFinder();
             GlobalVoxelCoordinates start = new GlobalVoxelCoordinates(-5, 4, 0);
             GlobalVoxelCoordinates end = new GlobalVoxelCoordinates(5, 4, 0);

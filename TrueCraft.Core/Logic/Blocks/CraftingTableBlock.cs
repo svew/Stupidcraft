@@ -35,7 +35,7 @@ namespace TrueCraft.Core.Logic.Blocks
             }
         }
 
-        public override bool BlockRightClicked(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
+        public override bool BlockRightClicked(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
         {
             Server.ServerOnly.Assert();
 

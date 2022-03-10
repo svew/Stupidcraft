@@ -34,7 +34,7 @@ namespace TrueCraft.Core.World
         /// </summary>
         public RegionCoordinates Position { get; }
 
-        public World World { get; }
+        public Dimension World { get; }
 
         private HashSet<LocalChunkCoordinates> DirtyChunks { get; } = new HashSet<LocalChunkCoordinates>(Width * Depth);
 
@@ -49,7 +49,7 @@ namespace TrueCraft.Core.World
         /// <param name="position"></param>
         /// <param name="world"></param>
         /// </params>
-        public Region(RegionCoordinates position, World world)
+        public Region(RegionCoordinates position, Dimension world)
         {
             _chunks = new ConcurrentDictionary<LocalChunkCoordinates, IChunk>(Environment.ProcessorCount, Width * Depth);
             Position = position;
@@ -59,7 +59,7 @@ namespace TrueCraft.Core.World
         /// <summary>
         /// Creates a region from the given region file.
         /// </summary>
-        public Region(RegionCoordinates position, World world, string file) : this(position, world)
+        public Region(RegionCoordinates position, Dimension world, string file) : this(position, world)
         {
             if (File.Exists(file))
             {

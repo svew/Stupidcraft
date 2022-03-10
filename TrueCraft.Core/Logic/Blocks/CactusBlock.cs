@@ -42,7 +42,7 @@ namespace TrueCraft.Core.Logic.Blocks
             return new Tuple<int, int>(6, 4);
         }
 
-        public bool ValidCactusPosition(BlockDescriptor descriptor, IBlockRepository repository, IWorld world, bool checkNeighbor = true, bool checkSupport = true)
+        public bool ValidCactusPosition(BlockDescriptor descriptor, IBlockRepository repository, IDimension world, bool checkNeighbor = true, bool checkSupport = true)
         {
             if (checkNeighbor)
             {
@@ -62,7 +62,7 @@ namespace TrueCraft.Core.Logic.Blocks
             return true;
         }
 
-        private void TryGrowth(IMultiplayerServer server, GlobalVoxelCoordinates coords, IWorld world)
+        private void TryGrowth(IMultiplayerServer server, GlobalVoxelCoordinates coords, IDimension world)
         {
             if (world.GetBlockID(coords) != BlockID)
                 return;
@@ -98,7 +98,7 @@ namespace TrueCraft.Core.Logic.Blocks
             }
         }
 
-        public void DestroyCactus(BlockDescriptor descriptor, IMultiplayerServer server, IWorld world)
+        public void DestroyCactus(BlockDescriptor descriptor, IMultiplayerServer server, IDimension world)
         {
             var toDrop = 0;
 
@@ -130,7 +130,7 @@ namespace TrueCraft.Core.Logic.Blocks
                     new ItemStack(CactusBlock.BlockID, (sbyte)toDrop)));
         }
 
-        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IWorld world, IRemoteClient user)
+        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
         {
             if (ValidCactusPosition(descriptor, user.Server.BlockRepository, world))
                 base.BlockPlaced(descriptor, face, world, user);
@@ -151,14 +151,14 @@ namespace TrueCraft.Core.Logic.Blocks
                 (server) => TryGrowth(server, descriptor.Coordinates, world));
         }
 
-        public override void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IWorld world)
+        public override void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IDimension world)
         {
             if (!ValidCactusPosition(descriptor, server.BlockRepository, world))
                 DestroyCactus(descriptor, server, world);
             base.BlockUpdate(descriptor, source, server, world);
         }
 
-        public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IWorld world)
+        public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IDimension world)
         {
             var chunk = world.FindChunk(coords);
             server.Scheduler.ScheduleEvent("cactus", chunk,
