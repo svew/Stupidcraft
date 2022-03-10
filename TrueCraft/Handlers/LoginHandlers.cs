@@ -59,7 +59,7 @@ namespace TrueCraft.Handlers
                 entityManager.SpawnEntity(remoteClient.Entity);
 
                 // Send setup packets
-                remoteClient.QueuePacket(new LoginResponsePacket(client.Entity.EntityID, 0, Dimension.Overworld));
+                remoteClient.QueuePacket(new LoginResponsePacket(client.Entity.EntityID, 0, DimensionID.Overworld));
                 remoteClient.UpdateChunks(block: true);
                 remoteClient.QueuePacket(((IServerWindow)remoteClient.InventoryWindowContent).GetWindowItemsPacket());
                 remoteClient.QueuePacket(new UpdateHealthPacket((remoteClient.Entity as PlayerEntity).Health));

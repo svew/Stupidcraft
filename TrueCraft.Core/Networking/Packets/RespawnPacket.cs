@@ -10,11 +10,11 @@ namespace TrueCraft.Core.Networking.Packets
     {
         public byte ID { get { return 0x09; } }
 
-        public Dimension Dimension;
+        public DimensionID Dimension;
 
         public void ReadPacket(IMinecraftStream stream)
         {
-            Dimension = (Dimension)stream.ReadInt8();
+            Dimension = (DimensionID)stream.ReadInt8();
         }
 
         public void WritePacket(IMinecraftStream stream)

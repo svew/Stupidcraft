@@ -10,22 +10,22 @@ namespace TrueCraft
     {
         public EntityManager EntityManager { get; set; }
 
-        private Dictionary<Dimension, List<ISpawnRule>> SpawnRules { get; set; }
+        private Dictionary<DimensionID, List<ISpawnRule>> SpawnRules { get; set; }
 
         public MobManager(EntityManager manager)
         {
             EntityManager = manager;
-            SpawnRules = new Dictionary<Dimension, List<ISpawnRule>>();
+            SpawnRules = new Dictionary<DimensionID, List<ISpawnRule>>();
         }
 
-        public void AddRules(Dimension dimension, ISpawnRule rules)
+        public void AddRules(DimensionID dimension, ISpawnRule rules)
         {
             if (!SpawnRules.ContainsKey(dimension))
                 SpawnRules[dimension] = new List<ISpawnRule>();
             SpawnRules[dimension].Add(rules);
         }
 
-        public void SpawnInitialMobs(IChunk chunk, Dimension dimension)
+        public void SpawnInitialMobs(IChunk chunk, DimensionID dimension)
         {
             if (!SpawnRules.ContainsKey(dimension))
                 return;
@@ -40,7 +40,7 @@ namespace TrueCraft
         /// <summary>
         /// Call at dusk and it'll spawn baddies.
         /// </summary>
-        public void DayCycleSpawn(IChunk chunk, Dimension dimension)
+        public void DayCycleSpawn(IChunk chunk, DimensionID dimension)
         {
             // TODO
         }

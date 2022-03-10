@@ -5,7 +5,7 @@ namespace TrueCraft.Core
     /// <summary>
     /// Enumerates the different dimensions in the world in TrueCraft.
     /// </summary>
-    public enum Dimension
+    public enum DimensionID
     {
         /// <summary>
         /// The Nether dimension.

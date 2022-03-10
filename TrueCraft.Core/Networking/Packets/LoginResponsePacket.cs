@@ -9,7 +9,7 @@ namespace TrueCraft.Core.Networking.Packets
     {
         public byte ID { get { return 0x01; } }
 
-        public LoginResponsePacket(int entityID, long seed, Dimension dimension)
+        public LoginResponsePacket(int entityID, long seed, DimensionID dimension)
         {
             EntityID = entityID;
             Seed = seed;
@@ -18,14 +18,14 @@ namespace TrueCraft.Core.Networking.Packets
 
         public int EntityID;
         public long Seed;
-        public Dimension Dimension;
+        public DimensionID Dimension;
 
         public void ReadPacket(IMinecraftStream stream)
         {
             EntityID = stream.ReadInt32();
             stream.ReadString(); // Unused
             Seed = stream.ReadInt64();
-            Dimension = (Dimension)stream.ReadInt8();
+            Dimension = (DimensionID)stream.ReadInt8();
         }
 
         public void WritePacket(IMinecraftStream stream)
