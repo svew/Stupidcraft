@@ -6,11 +6,24 @@ namespace TrueCraft.Core.World
 {
     public interface IChunk : IEventSubject, IDisposable
     {
+        /// <summary>
+        /// Gets the distance at which this Chunk is located away
+        /// from the origin (in Chunks) in the X-direction.
+        /// </summary>
         int X { get; }
-        int Z { get; }
-        int MaxHeight { get; }
 
+        /// <summary>
+        /// Gets the distance at which this Chunk is located away
+        /// from the origin (in Chunks) in the Z-direction.
+        /// </summary>
+        int Z { get; }
+
+        /// <summary>
+        /// Gets the coordinates (In chunks) of the location of this Chunk.
+        /// </summary>
         GlobalChunkCoordinates Coordinates { get; }
+
+        int MaxHeight { get; }
 
         bool IsModified { get; set; }
         bool LightPopulated { get; set; }

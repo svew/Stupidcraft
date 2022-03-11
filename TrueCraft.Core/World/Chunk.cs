@@ -8,11 +8,36 @@ namespace TrueCraft.Core.World
 {
     public class Chunk : INbtSerializable, IChunk
     {
+        private GlobalChunkCoordinates _coordinates;
+
         public const int Width = WorldConstants.ChunkWidth;
         public const int Height = WorldConstants.Height;
         public const int Depth = WorldConstants.ChunkDepth;
 
         public event EventHandler Disposed;
+
+        #region Constructors
+        public Chunk()
+        {
+            Biomes = new byte[Width * Depth];
+            HeightMap = new int[Width * Depth];
+            TileEntities = new Dictionary<LocalVoxelCoordinates, NbtCompound>();
+            TerrainPopulated = false;
+            LightPopulated = false;
+            MaxHeight = 0;
+            const int size = Width * Height * Depth;
+            const int halfSize = size / 2;
+            Data = new byte[size + halfSize * 3];
+            Metadata = new NibbleSlice(Data, size, halfSize);
+            BlockLight = new NibbleSlice(Data, size + halfSize, halfSize);
+            SkyLight = new NibbleSlice(Data, size + halfSize * 2, halfSize);
+        }
+
+        public Chunk(GlobalChunkCoordinates coordinates) : this()
+        {
+            _coordinates = coordinates;
+        }
+        #endregion
 
         public void Dispose()
         {
@@ -36,19 +61,16 @@ namespace TrueCraft.Core.World
         public int[] HeightMap { get; set; }
         public int MaxHeight { get; private set; }
 
-        /// <summary>
-        /// Gets the distance at which this Chunk is located away
-        /// from the origin (in Chunks) in the X-direction.
-        /// </summary>
+        /// <inheritdoc />
         [TagName("xPos")]
-        public int X { get; private set; }
+        public int X { get => _coordinates.X; }
 
-        /// <summary>
-        /// Gets the distance at which this Chunk is located away
-        /// from the origin (in Chunks) in the Z-direction.
-        /// </summary>
+        /// <inheritdoc />
         [TagName("zPos")]
-        public int Z { get; private set; }
+        public int Z { get => _coordinates.Z; }
+
+        /// <inheritdoc />
+        public GlobalChunkCoordinates Coordinates { get => _coordinates; }
 
         [NbtIgnore]
         private bool _LightPopulated;
@@ -66,42 +88,12 @@ namespace TrueCraft.Core.World
         }
         public Dictionary<LocalVoxelCoordinates, NbtCompound> TileEntities { get; }
 
-        public GlobalChunkCoordinates Coordinates
-        {
-            get
-            {
-                return new GlobalChunkCoordinates(X, Z);
-            }
-        }
-
         public long LastUpdate { get; set; }
 
         public bool TerrainPopulated { get; set; }
 
         [NbtIgnore]
         public IRegion ParentRegion { get; set; }
-
-        public Chunk()
-        {
-            Biomes = new byte[Width * Depth];
-            HeightMap = new int[Width * Depth];
-            TileEntities = new Dictionary<LocalVoxelCoordinates, NbtCompound>();
-            TerrainPopulated = false;
-            LightPopulated = false;
-            MaxHeight = 0;
-            const int size = Width * Height * Depth;
-            const int halfSize = size / 2;
-            Data = new byte[size + halfSize * 3];
-            Metadata = new NibbleSlice(Data, size, halfSize);
-            BlockLight = new NibbleSlice(Data, size + halfSize, halfSize);
-            SkyLight = new NibbleSlice(Data, size + halfSize * 2, halfSize);
-        }
-
-        public Chunk(GlobalChunkCoordinates coordinates) : this()
-        {
-            X = coordinates.X;
-            Z = coordinates.Z;
-        }
 
         public byte GetBlockID(LocalVoxelCoordinates coordinates)
         {
@@ -319,8 +311,10 @@ namespace TrueCraft.Core.World
         {
             var tag = (NbtCompound)value;
 
-            X = tag["X"].IntValue;
-            Z = tag["Z"].IntValue;
+            int x = tag["X"].IntValue;
+            int z = tag["Z"].IntValue;
+            _coordinates = new GlobalChunkCoordinates(x, z);
+
             if (tag.Contains("TerrainPopulated"))
                 TerrainPopulated = tag["TerrainPopulated"].ByteValue > 0;
             if (tag.Contains("LightPopulated"))
