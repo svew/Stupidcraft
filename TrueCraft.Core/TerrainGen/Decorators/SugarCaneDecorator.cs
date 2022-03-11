@@ -19,7 +19,7 @@ namespace TrueCraft.Core.TerrainGen.Decorators
                 for (int z = 0; z < Chunk.Depth; z++)
                 {
                     var biome = biomes.GetBiome(chunk.Biomes[x * Chunk.Width + z]);
-                    int height = chunk.HeightMap[x * Chunk.Width + z];
+                    int height = chunk.GetHeight(x, z);
                     int blockX = MathHelper.ChunkToBlockX(x, chunk.Coordinates.X);
                     int blockZ = MathHelper.ChunkToBlockZ(z, chunk.Coordinates.Z);
                     if (biome.Plants.Contains(PlantSpecies.SugarCane))

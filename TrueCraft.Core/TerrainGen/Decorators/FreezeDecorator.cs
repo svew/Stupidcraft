@@ -16,7 +16,7 @@ namespace TrueCraft.Core.TerrainGen.Decorators
                     var biome = biomes.GetBiome(chunk.Biomes[x * Chunk.Width + z]);
                     if (biome.Temperature < 0.15)
                     {
-                        var height = chunk.HeightMap[x * Chunk.Width + z];
+                        int height = chunk.GetHeight(x, z);
                         for (int y = height; y < Chunk.Height; y++)
                         {
                             var location = new LocalVoxelCoordinates(x, y, z);

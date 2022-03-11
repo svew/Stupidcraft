@@ -20,7 +20,7 @@ namespace TrueCraft.Core.TerrainGen.Decorators
                     var biome = biomes.GetBiome(chunk.Biomes[x * Chunk.Width + z]);
                     var blockX = MathHelper.ChunkToBlockX(x, chunk.Coordinates.X);
                     var blockZ = MathHelper.ChunkToBlockZ(z, chunk.Coordinates.Z);
-                    int height = chunk.HeightMap[x * Chunk.Width + z];
+                    int height = chunk.GetHeight(x, z);
                     if (noise.Value2D(blockX, blockZ) > 0)
                     {
                         LocalVoxelCoordinates blockLocation = new LocalVoxelCoordinates(x, height, z);

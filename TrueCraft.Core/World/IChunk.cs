@@ -23,11 +23,23 @@ namespace TrueCraft.Core.World
         /// </summary>
         GlobalChunkCoordinates Coordinates { get; }
 
+        /// <summary>
+        /// Gets the y-coordinate of the highest block in this Chunk
+        /// </summary>
         int MaxHeight { get; }
+
+        /// <summary>
+        /// Gets the y-coordinate of the highest block in the specified Column of Blocks
+        /// </summary>
+        /// <param name="x">The x-coordinate of the column relative to the chunk.</param>
+        /// <param name="z">The z-coordinate of the column relative to the chunk.</param>
+        /// <returns>The y-coordinate of the highest block</returns>
+        int GetHeight(int x, int z);
+        void UpdateHeightMap();
 
         bool IsModified { get; set; }
         bool LightPopulated { get; set; }
-        int[] HeightMap { get; }
+
         byte[] Biomes { get; }
         DateTime LastAccessed { get; set; }
         byte[] Data { get; }
@@ -39,8 +51,6 @@ namespace TrueCraft.Core.World
         NibbleSlice BlockLight { get; }
         NibbleSlice SkyLight { get; }
         IRegion ParentRegion { get; set; }
-        int GetHeight(byte x, byte z);
-        void UpdateHeightMap();
 
         byte GetBlockID(LocalVoxelCoordinates coordinates);
         byte GetMetadata(LocalVoxelCoordinates coordinates);

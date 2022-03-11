@@ -21,7 +21,8 @@ namespace TrueCraft.Core.TerrainGen.Decorators
                     var biome = biomes.GetBiome(chunk.Biomes[x * Chunk.Width + z]);
                     var blockX = MathHelper.ChunkToBlockX(x, chunk.Coordinates.X);
                     var blockZ = MathHelper.ChunkToBlockZ(z, chunk.Coordinates.Z);
-                    var height = chunk.HeightMap[x * Chunk.Width + z];
+
+                    int height = chunk.GetHeight(x, z);
                     if (biome.Plants.Contains(PlantSpecies.Cactus) && chanceNoise.Value2D(blockX, blockZ) > 1.7)
                     {
                         var blockLocation = new LocalVoxelCoordinates(x, height, z);

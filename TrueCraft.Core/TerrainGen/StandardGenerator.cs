@@ -144,7 +144,6 @@ namespace TrueCraft.Core.TerrainGen
 
                     var height = GetHeight(blockX, blockZ);
                     var surfaceHeight = height - biome.SurfaceDepth;
-                    chunk.HeightMap[x * Chunk.Width + z] = height;
 
                     // TODO: Do not overwrite blocks if they are already set from adjacent chunks
                     for (int y = 0; y <= height; y++)
@@ -192,7 +191,7 @@ namespace TrueCraft.Core.TerrainGen
         public GlobalVoxelCoordinates GetSpawn(IDimension world)
         {
             var chunk = GenerateChunk(world, new GlobalChunkCoordinates(0, 0));
-            var spawnPointHeight = chunk.HeightMap[0];
+            int spawnPointHeight = chunk.GetHeight(0, 0);
             return new GlobalVoxelCoordinates(0, spawnPointHeight + 1, 0);
         }
 

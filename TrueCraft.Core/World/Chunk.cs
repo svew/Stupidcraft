@@ -20,7 +20,7 @@ namespace TrueCraft.Core.World
         public Chunk()
         {
             Biomes = new byte[Width * Depth];
-            HeightMap = new int[Width * Depth];
+            _heightMap = new int[Width * Depth];
             TileEntities = new Dictionary<LocalVoxelCoordinates, NbtCompound>();
             TerrainPopulated = false;
             LightPopulated = false;
@@ -58,8 +58,6 @@ namespace TrueCraft.Core.World
         [NbtIgnore]
         public NibbleSlice SkyLight { get; set; }
         public byte[] Biomes { get; set; }
-        public int[] HeightMap { get; set; }
-        public int MaxHeight { get; private set; }
 
         /// <inheritdoc />
         [TagName("xPos")]
@@ -221,18 +219,22 @@ namespace TrueCraft.Core.World
                 ParentRegion.DamageChunk((LocalChunkCoordinates)Coordinates);
         }
 
-        /// <summary>
-        /// Gets the height of the specified column.
-        /// </summary>
-        public int GetHeight(byte x, byte z)
+        #region Height Map
+        private readonly int[] _heightMap;
+
+        /// <inheritdoc />
+        public int MaxHeight { get; private set; }
+
+        /// <inheritdoc />
+        public int GetHeight(int x, int z)
         {
-            return HeightMap[(x * Width) + z];
+            return _heightMap[(x * Width) + z];
         }
 
         private void SetHeight(byte x, byte z, int value)
         {
             IsModified = true;
-            HeightMap[(x * Width) + z] = value;
+            _heightMap[(x * Width) + z] = value;
         }
 
         public void UpdateHeightMap()
@@ -258,6 +260,7 @@ namespace TrueCraft.Core.World
                 }
             }
         }
+        #endregion
 
         public NbtFile ToNbt()
         {

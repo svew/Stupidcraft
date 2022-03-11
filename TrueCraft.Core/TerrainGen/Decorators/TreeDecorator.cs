@@ -26,7 +26,7 @@ namespace TrueCraft.Core.TerrainGen.Decorators
                     var biome = biomes.GetBiome(chunk.Biomes[x * Chunk.Width + z]);
                     var blockX = MathHelper.ChunkToBlockX(x, chunk.Coordinates.X);
                     var blockZ = MathHelper.ChunkToBlockZ(z, chunk.Coordinates.Z);
-                    var height = chunk.HeightMap[x * Chunk.Width + z];
+                    int height = chunk.GetHeight(x, z);
 
                     if (lastTree != null && lastTree.DistanceTo(new LocalColumnCoordinates(x, z)) < biome.TreeDensity)
                         continue;
