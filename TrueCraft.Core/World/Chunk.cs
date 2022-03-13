@@ -63,11 +63,11 @@ namespace TrueCraft.Core.World
         [NbtIgnore]
         public byte[] Data { get; set; }
         [NbtIgnore]
-        public NibbleSlice Metadata { get; set; }
+        public NibbleSlice Metadata { get; private set; }
         [NbtIgnore]
-        public NibbleSlice BlockLight { get; set; }
+        public NibbleSlice BlockLight { get; private set; }
         [NbtIgnore]
-        public NibbleSlice SkyLight { get; set; }
+        public NibbleSlice SkyLight { get; private set; }
 
         #region Biome IDs
         private readonly Biome[] _biomes;
