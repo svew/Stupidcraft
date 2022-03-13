@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using fNbt;
 using fNbt.Serialization;
 using TrueCraft.Core.Logic.Blocks;
+using TrueCraft.Core.Server;
 
 namespace TrueCraft.Core.World
 {
@@ -14,14 +16,16 @@ namespace TrueCraft.Core.World
         public const int Height = WorldConstants.Height;
         public const int Depth = WorldConstants.ChunkDepth;
 
+        private Dictionary<LocalVoxelCoordinates, NbtCompound> _tileEntities;
+
         public event EventHandler Disposed;
 
         #region Constructors
         public Chunk()
         {
-            Biomes = new byte[Width * Depth];
+            _biomes = new Biome[Width * Depth];
             _heightMap = new int[Width * Depth];
-            TileEntities = new Dictionary<LocalVoxelCoordinates, NbtCompound>();
+            _tileEntities = new Dictionary<LocalVoxelCoordinates, NbtCompound>();
             TerrainPopulated = false;
             LightPopulated = false;
             MaxHeight = 0;
@@ -45,6 +49,13 @@ namespace TrueCraft.Core.World
                 Disposed(this, null);
         }
 
+        [Conditional("DEBUG")]
+        private void ValidateIndices(int x, int z)
+        {
+            if (x < 0 || x >= Width || z < 0 || z >= Depth)
+                throw new ArgumentOutOfRangeException();
+        }
+
         [NbtIgnore]
         public DateTime LastAccessed { get; set; }
         [NbtIgnore]
@@ -57,7 +68,24 @@ namespace TrueCraft.Core.World
         public NibbleSlice BlockLight { get; set; }
         [NbtIgnore]
         public NibbleSlice SkyLight { get; set; }
-        public byte[] Biomes { get; set; }
+
+        #region Biome IDs
+        private readonly Biome[] _biomes;
+
+        /// <inheritdoc />
+        public Biome GetBiome(int x, int z)
+        {
+            ValidateIndices(x, z);
+            return _biomes[x * Depth + z];
+        }
+
+        public void SetBiome(int x, int z, Biome biome)
+        {
+            ServerOnly.Assert();
+            ValidateIndices(x, z);
+            _biomes[x * Depth + z] = biome;
+        }
+        #endregion
 
         /// <inheritdoc />
         [TagName("xPos")]
@@ -84,7 +112,6 @@ namespace TrueCraft.Core.World
                 IsModified = true;
             }
         }
-        public Dictionary<LocalVoxelCoordinates, NbtCompound> TileEntities { get; }
 
         public long LastUpdate { get; set; }
 
@@ -200,8 +227,8 @@ namespace TrueCraft.Core.World
         /// </summary>
         public NbtCompound GetTileEntity(LocalVoxelCoordinates coordinates)
         {
-            if (TileEntities.ContainsKey(coordinates))
-                return TileEntities[coordinates];
+            if (_tileEntities.ContainsKey(coordinates))
+                return _tileEntities[coordinates];
             return null;
         }
         
@@ -210,10 +237,10 @@ namespace TrueCraft.Core.World
         /// </summary>
         public void SetTileEntity(LocalVoxelCoordinates coordinates, NbtCompound value)
         {
-            if (value == null && TileEntities.ContainsKey(coordinates))
-                TileEntities.Remove(coordinates);
+            if (value == null && _tileEntities.ContainsKey(coordinates))
+                _tileEntities.Remove(coordinates);
             else
-                TileEntities[coordinates] = value;
+                _tileEntities[coordinates] = value;
             IsModified = true;
             if (ParentRegion != null)
                 ParentRegion.DamageChunk((LocalChunkCoordinates)Coordinates);
@@ -293,7 +320,7 @@ namespace TrueCraft.Core.World
             chunk.Add(new NbtByteArray("BlockLight", BlockLight.ToArray()));
             
             var tiles = new NbtList("TileEntities", NbtTagType.Compound);
-            foreach (var kvp in TileEntities)
+            foreach (var kvp in _tileEntities)
             {
                 var c = new NbtCompound();
                 c.Add(new NbtList("coordinates", new[] { 
@@ -338,7 +365,7 @@ namespace TrueCraft.Core.World
             {
                 foreach (var entity in tag["TileEntities"] as NbtList)
                 {
-                    TileEntities[new LocalVoxelCoordinates(entity["coordinates"][0].IntValue,
+                    _tileEntities[new LocalVoxelCoordinates(entity["coordinates"][0].IntValue,
                         entity["coordinates"][1].IntValue,
                         entity["coordinates"][2].IntValue)] = entity["value"][0] as NbtCompound;
                 }

@@ -40,12 +40,17 @@ namespace TrueCraft.Core.World
         bool IsModified { get; set; }
         bool LightPopulated { get; set; }
 
-        byte[] Biomes { get; }
+        /// <summary>
+        /// Gets the Biome at the specified column within the Chunk.
+        /// </summary>
+        /// <param name="x">The x-coordinate of the column relative to the chunk.</param>
+        /// <param name="z">The z-coordinate of the column relative to the chunk.</param>
+        /// <returns>The Biome.</returns>
+        Biome GetBiome(int x, int z);
+
         DateTime LastAccessed { get; set; }
         byte[] Data { get; }
         bool TerrainPopulated { get; set; }
-
-        Dictionary<LocalVoxelCoordinates, NbtCompound> TileEntities { get; }
 
         NibbleSlice Metadata { get; }
         NibbleSlice BlockLight { get; }
@@ -60,6 +65,7 @@ namespace TrueCraft.Core.World
         void SetMetadata(LocalVoxelCoordinates coordinates, byte value);
         void SetSkyLight(LocalVoxelCoordinates coordinates, byte value);
         void SetBlockLight(LocalVoxelCoordinates coordinates, byte value);
+
         NbtCompound GetTileEntity(LocalVoxelCoordinates coordinates);
         void SetTileEntity(LocalVoxelCoordinates coordinates, NbtCompound value);
     }

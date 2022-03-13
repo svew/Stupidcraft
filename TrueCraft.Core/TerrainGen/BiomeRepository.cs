@@ -39,9 +39,9 @@ namespace TrueCraft.Core.TerrainGen
             BiomeProviders[provider.ID] = provider;
         }
 
-        public IBiomeProvider GetBiome(byte id)
+        public IBiomeProvider GetBiome(Biome id)
         {
-            return BiomeProviders[id];
+            return BiomeProviders[(byte)id];
         }
 
         public IBiomeProvider GetBiome(double temperature, double rainfall, bool spawn)

@@ -13,7 +13,7 @@ namespace TrueCraft.Core.TerrainGen.Decorators
             {
                 for (int z = 0; z < Chunk.Depth; z++)
                 {
-                    var biome = biomes.GetBiome(chunk.Biomes[x * Chunk.Width + z]);
+                    IBiomeProvider biome = biomes.GetBiome(chunk.GetBiome(x, z));
                     if (biome.Temperature < 0.15)
                     {
                         int height = chunk.GetHeight(x, z);
@@ -65,7 +65,7 @@ namespace TrueCraft.Core.TerrainGen.Decorators
                 if (checkX < 0 || checkX >= Chunk.Width || checkZ < 0 || checkZ >= Chunk.Depth)
                     return false;
                 LocalVoxelCoordinates check = new LocalVoxelCoordinates(checkX, location.Y, checkZ);
-                var biome = biomes.GetBiome(chunk.Biomes[checkX * Chunk.Width + checkZ]);
+                IBiomeProvider biome = biomes.GetBiome(chunk.GetBiome(checkX, checkZ));
                 if (chunk.GetBlockID(check).Equals(biome.SurfaceBlock) || chunk.GetBlockID(check).Equals(biome.FillerBlock))
                     return true;
             }

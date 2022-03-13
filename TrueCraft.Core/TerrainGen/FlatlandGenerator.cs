@@ -79,8 +79,9 @@ namespace TrueCraft.Core.TerrainGen
                     y++;
                 }
             }
-            for (int i = 0; i < chunk.Biomes.Length; i++)
-                chunk.Biomes[i] = (byte)Biome;
+            for (int x = 0; x < Chunk.Width; x++)
+                for (int z = 0; z < Chunk.Depth; z++)
+                    chunk.SetBiome(x, z, Biome);
             chunk.TerrainPopulated = true;
             chunk.UpdateHeightMap();
             return chunk;

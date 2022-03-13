@@ -138,9 +138,9 @@ namespace TrueCraft.Core.TerrainGen
                         world.BiomeDiagram.AddCell(cell);
                     }
 
-                    var biomeId = GetBiome(world, location);
-                    var biome = Biomes.GetBiome(biomeId);
-                    chunk.Biomes[x * Chunk.Width + z] = biomeId;
+                    Biome biomeId = (Biome)GetBiome(world, location);
+                    IBiomeProvider biome = Biomes.GetBiome(biomeId);
+                    chunk.SetBiome(x, z, biomeId);
 
                     var height = GetHeight(blockX, blockZ);
                     var surfaceHeight = height - biome.SurfaceDepth;

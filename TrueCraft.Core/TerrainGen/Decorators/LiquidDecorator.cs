@@ -14,7 +14,7 @@ namespace TrueCraft.Core.TerrainGen.Decorators
             {
                 for (int z = 0; z < Chunk.Depth; z++)
                 {
-                    var biome = biomes.GetBiome(chunk.Biomes[x * Chunk.Width + z]);
+                    IBiomeProvider biome = biomes.GetBiome(chunk.GetBiome(x, z));
                     int height = chunk.GetHeight(x, z);
                     for (int y = height; y <= WaterLevel; y++)
                     {
