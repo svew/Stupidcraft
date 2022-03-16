@@ -22,16 +22,16 @@ namespace TrueCraft.Core.Logic.Items
             return new Tuple<int, int>(5, 0);
         }
 
-        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension world, IRemoteClient user)
+        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension dimension, IRemoteClient user)
         {
             ServerOnly.Assert();
 
             coordinates += MathHelper.BlockFaceToCoordinates(face);
-            if (world.GetBlockID(coordinates) == AirBlock.BlockID)
+            if (dimension.GetBlockID(coordinates) == AirBlock.BlockID)
             {
-                world.SetBlockID(coordinates, FireBlock.BlockID);
-                world.BlockRepository.GetBlockProvider(FireBlock.BlockID)
-                    .BlockPlaced(world.GetBlockData(coordinates), face, world, user);
+                dimension.SetBlockID(coordinates, FireBlock.BlockID);
+                dimension.BlockRepository.GetBlockProvider(FireBlock.BlockID)
+                    .BlockPlaced(dimension.GetBlockData(coordinates), face, dimension, user);
 
                 var slot = user.SelectedItem;
                 slot.Metadata += 1;

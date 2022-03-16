@@ -58,7 +58,7 @@ namespace TrueCraft.Core.Logic.Blocks
             return new[] { new ItemStack(BedItem.ItemID) };
         }
             
-        public bool ValidBedPosition(BlockDescriptor descriptor, IBlockRepository repository, IDimension world, bool checkNeighbor = true, bool checkSupport = false)
+        public bool ValidBedPosition(BlockDescriptor descriptor, IBlockRepository repository, IDimension dimension, bool checkNeighbor = true, bool checkSupport = false)
         {
             if (checkNeighbor)
             {
@@ -80,23 +80,23 @@ namespace TrueCraft.Core.Logic.Blocks
                 }
                 if ((descriptor.Metadata & (byte)BedType.Head) == (byte)BedType.Head)
                     other = -other;
-                if (world.GetBlockID(descriptor.Coordinates + other) != BedBlock.BlockID)
+                if (dimension.GetBlockID(descriptor.Coordinates + other) != BedBlock.BlockID)
                     return false;
             }
             if (checkSupport)
             {
-                var supportingBlock = repository.GetBlockProvider(world.GetBlockID(descriptor.Coordinates + Vector3i.Down));
+                var supportingBlock = repository.GetBlockProvider(dimension.GetBlockID(descriptor.Coordinates + Vector3i.Down));
                 if (!supportingBlock.Opaque)
                     return false;
             }
             return true;
         }
 
-        public override void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IDimension world)
+        public override void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IDimension dimension)
         {
-            if (!ValidBedPosition(descriptor, server.BlockRepository, world))
-                world.SetBlockID(descriptor.Coordinates, 0);
-            base.BlockUpdate(descriptor, source, server, world);
+            if (!ValidBedPosition(descriptor, server.BlockRepository, dimension))
+                dimension.SetBlockID(descriptor.Coordinates, 0);
+            base.BlockUpdate(descriptor, source, server, dimension);
         }
     }
 }

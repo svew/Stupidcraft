@@ -21,9 +21,9 @@ namespace TrueCraft.Handlers
         {
             var packet = (PlayerDiggingPacket)_packet;
             var client = (RemoteClient)_client;
-            var world = _client.World;
+            IDimension dimension = _client.Dimension;
             var position = new GlobalVoxelCoordinates(packet.X, packet.Y, packet.Z);
-            var descriptor = world.GetBlockData(position);
+            var descriptor = dimension.GetBlockData(position);
             var provider = server.BlockRepository.GetBlockProvider(descriptor.ID);
             short damage;
             int time;
@@ -40,7 +40,7 @@ namespace TrueCraft.Handlers
                     var item = new ItemEntity(client.Entity.Position + new Vector3(0, PlayerEntity.Height, 0), spawned);
                     item.Velocity = MathHelper.RotateY(Vector3.Forwards, MathHelper.DegreesToRadians(client.Entity.Yaw)) * 0.5;
                     client.Hotbar[client.SelectedSlot].Item = inventory;
-                    server.GetEntityManagerForWorld(client.World).SpawnEntity(item);
+                    server.GetEntityManagerForWorld(client.Dimension).SpawnEntity(item);
                     break;
                 case PlayerDiggingPacket.Action.StartDigging:
                     foreach (var nearbyClient in server.Clients) // TODO: Send this repeatedly during the course of the digging
@@ -52,7 +52,7 @@ namespace TrueCraft.Handlers
                     if (provider == null)
                         server.SendMessage(ChatColor.Red + "WARNING: block provider for ID {0} is null (player digging)", descriptor.ID);
                     else
-                        provider.BlockLeftClicked(descriptor, packet.Face, world, client);
+                        provider.BlockLeftClicked(descriptor, packet.Face, dimension, client);
 
                     // "But why on Earth does this behavior change if you use shears on leaves?"
                     // "This is poor seperation of concerns"
@@ -69,7 +69,7 @@ namespace TrueCraft.Handlers
                     time = BlockProvider.GetHarvestTime(descriptor.ID, client.SelectedItem.ID, out damage);
                     if (time <= 20)
                     {
-                        provider.BlockMined(descriptor, packet.Face, world, client);
+                        provider.BlockMined(descriptor, packet.Face, dimension, client);
                         break;
                     }
                     client.ExpectedDigComplete = DateTime.UtcNow.AddMilliseconds(time);
@@ -89,7 +89,7 @@ namespace TrueCraft.Handlers
                         var diff = (DateTime.UtcNow - client.ExpectedDigComplete).TotalMilliseconds;
                         if (diff > -100) // Allow a small tolerance
                         {
-                            provider.BlockMined(descriptor, packet.Face, world, client);
+                            provider.BlockMined(descriptor, packet.Face, dimension, client);
                             // Damage the item
                             if (damage != 0)
                             {
@@ -121,7 +121,7 @@ namespace TrueCraft.Handlers
             {
                 if (position.DistanceTo(client.Entity.Position) > 10 /* TODO: Reach */)
                     return;
-                block = client.World.GetBlockData(position);
+                block = client.Dimension.GetBlockData(position);
             }
             else
             {
@@ -139,11 +139,11 @@ namespace TrueCraft.Handlers
                     server.SendMessage(ChatColor.Red + "Packet logged at {0}, please report upstream", DateTime.UtcNow);
                     return;
                 }
-                if (!provider.BlockRightClicked(block.Value, packet.Face, client.World, client))
+                if (!provider.BlockRightClicked(block.Value, packet.Face, client.Dimension, client))
                 {
                     position += MathHelper.BlockFaceToCoordinates(packet.Face);
-                    var oldID = client.World.GetBlockID(position);
-                    var oldMeta = client.World.GetMetadata(position);
+                    var oldID = client.Dimension.GetBlockID(position);
+                    var oldMeta = client.Dimension.GetMetadata(position);
                     // TODO: BlockChangePacket should have new ID & metadata, not old; Naming issue?
                     client.QueuePacket(new BlockChangePacket(position.X, (sbyte)position.Y, position.Z, (sbyte)oldID, (sbyte)oldMeta));
                     // TODO: why send SetSlot when there is no change??
@@ -165,7 +165,7 @@ namespace TrueCraft.Handlers
                     if (block != null)
                     {
                         if (itemProvider != null)
-                            itemProvider.ItemUsedOnBlock(position, slot, packet.Face, client.World, client);
+                            itemProvider.ItemUsedOnBlock(position, slot, packet.Face, client.Dimension, client);
                     }
                     else
                     {
@@ -208,7 +208,7 @@ namespace TrueCraft.Handlers
                     client.ItemStaging = ItemStack.EmptyStack;
                 }
                 item.Velocity = MathHelper.FowardVector(client.Entity.Yaw) * 0.3;
-                server.GetEntityManagerForWorld(client.World).SpawnEntity(item);
+                server.GetEntityManagerForWorld(client.Dimension).SpawnEntity(item);
                 return;
             }
 
@@ -237,7 +237,7 @@ namespace TrueCraft.Handlers
             var packet = (ChangeHeldItemPacket)_packet;
             var client = (RemoteClient)_client;
             client.SelectedSlot = packet.Slot;
-            var notified = server.GetEntityManagerForWorld(client.World).ClientsForEntity(client.Entity);
+            var notified = server.GetEntityManagerForWorld(client.Dimension).ClientsForEntity(client.Entity);
             foreach (var c in notified)
                 c.QueuePacket(new EntityEquipmentPacket(client.Entity.EntityID, 0, client.SelectedItem.ID, client.SelectedItem.Metadata));
         }
@@ -264,7 +264,7 @@ namespace TrueCraft.Handlers
             var client = (RemoteClient)_client;
             if (packet.EntityID == client.Entity.EntityID)
             {
-                var nearby = server.GetEntityManagerForWorld(client.World)
+                var nearby = server.GetEntityManagerForWorld(client.Dimension)
                     .ClientsForEntity(client.Entity);
                 foreach (var player in nearby)
                     player.QueuePacket(packet);
@@ -278,10 +278,10 @@ namespace TrueCraft.Handlers
             var coords = new GlobalVoxelCoordinates(packet.X, packet.Y, packet.Z);
             if (client.Entity.Position.DistanceTo((Vector3)coords) < 10) // TODO: Reach
             {
-                var block = client.World.GetBlockID(coords);
+                var block = client.Dimension.GetBlockID(coords);
                 if (block == UprightSignBlock.BlockID || block == WallSignBlock.BlockID)
                 {
-                    client.World.SetTileEntity(coords, new NbtCompound(new[]
+                    client.Dimension.SetTileEntity(coords, new NbtCompound(new[]
                     {
                         new NbtString("Text1", packet.Text[0]),
                         new NbtString("Text2", packet.Text[1]),
@@ -289,7 +289,7 @@ namespace TrueCraft.Handlers
                         new NbtString("Text4", packet.Text[3]),
                     }));
                     // TODO: Some utility methods for things like "clients with given chunk loaded"
-                    server.Clients.Where(c => ((RemoteClient)c).LoggedIn && c.World == _client.World).ToList().ForEach(c => c.QueuePacket(packet));
+                    server.Clients.Where(c => ((RemoteClient)c).LoggedIn && c.Dimension == _client.Dimension).ToList().ForEach(c => c.QueuePacket(packet));
                 }
             }
         }

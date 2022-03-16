@@ -22,16 +22,16 @@ namespace TrueCraft.Core.Logic.Items
             return "Redstone";
         }
 
-        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension world, IRemoteClient user)
+        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension dimension, IRemoteClient user)
         {
             ServerOnly.Assert();
 
             coordinates += MathHelper.BlockFaceToCoordinates(face);
-            IBlockProvider supportingBlock = world.BlockRepository.GetBlockProvider(world.GetBlockID(coordinates + Vector3i.Down));
+            IBlockProvider supportingBlock = dimension.BlockRepository.GetBlockProvider(dimension.GetBlockID(coordinates + Vector3i.Down));
 
             if (supportingBlock.Opaque)
             {
-                world.SetBlockID(coordinates, RedstoneDustBlock.BlockID);
+                dimension.SetBlockID(coordinates, RedstoneDustBlock.BlockID);
                 item.Count--;
                 user.Hotbar[user.SelectedSlot].Item = item;
             }

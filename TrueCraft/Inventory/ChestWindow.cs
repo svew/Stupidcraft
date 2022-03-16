@@ -17,12 +17,12 @@ namespace TrueCraft.Inventory
         public ChestWindow(IItemRepository itemRepository,
             ISlotFactory<IServerSlot> slotFactory,
             sbyte windowID, ISlots<IServerSlot> mainInventory, ISlots<IServerSlot> hotBar,
-            IDimension world,
+            IDimension dimension,
             GlobalVoxelCoordinates location, GlobalVoxelCoordinates otherHalf) :
             base(itemRepository, slotFactory, windowID, mainInventory, hotBar,
                 otherHalf != null)
         {
-            World = world;
+            Dimension = dimension;
             Location = location;
             OtherHalf = otherHalf;
             Load();
@@ -30,7 +30,7 @@ namespace TrueCraft.Inventory
 
         private void Load()
         {
-            NbtCompound entity = World.GetTileEntity(Location);
+            NbtCompound entity = Dimension.GetTileEntity(Location);
             ISlots<IServerSlot> chestInventory = this.ChestInventory;
             if (entity != null)
             {
@@ -44,7 +44,7 @@ namespace TrueCraft.Inventory
             // Add adjacent items
             if (!object.ReferenceEquals(OtherHalf, null))
             {
-                entity = World.GetTileEntity(OtherHalf);
+                entity = Dimension.GetTileEntity(OtherHalf);
                 if (entity != null)
                 {
                     foreach (var item in (NbtList)entity["Items"])
@@ -58,7 +58,7 @@ namespace TrueCraft.Inventory
 
         }
 
-        public IDimension World { get; }
+        public IDimension Dimension { get; }
 
         public GlobalVoxelCoordinates Location { get; }
 
@@ -285,21 +285,21 @@ namespace TrueCraft.Inventory
                 }
             }
 
-            NbtCompound newEntity = World.GetTileEntity(Location);
+            NbtCompound newEntity = Dimension.GetTileEntity(Location);
             if (newEntity == null)
                 newEntity = new NbtCompound(new[] { entitySelf });
             else
                 newEntity["Items"] = entitySelf;
-            World.SetTileEntity(Location, newEntity);
+            Dimension.SetTileEntity(Location, newEntity);
 
             if (DoubleChest)
             {
-                newEntity = World.GetTileEntity(OtherHalf);
+                newEntity = Dimension.GetTileEntity(OtherHalf);
                 if (newEntity == null)
                     newEntity = new NbtCompound(new[] { entityAdjacent });
                 else
                     newEntity["Items"] = entityAdjacent;
-                World.SetTileEntity(OtherHalf, newEntity);
+                Dimension.SetTileEntity(OtherHalf, newEntity);
             }
         }
     }

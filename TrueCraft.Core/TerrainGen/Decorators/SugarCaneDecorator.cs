@@ -9,9 +9,9 @@ namespace TrueCraft.Core.TerrainGen.Decorators
 {
     public class SugarCaneDecorator : IChunkDecorator
     {
-        public void Decorate(IDimension world, IChunk chunk, IBiomeRepository biomes)
+        public void Decorate(IDimension dimension, IChunk chunk, IBiomeRepository biomes)
         {
-            var noise = new Perlin(world.Seed);
+            var noise = new Perlin(dimension.Seed);
             var chanceNoise = new ClampNoise(noise);
             chanceNoise.MaxValue = 1;
             for (int x = 0; x < Chunk.Width; x++)
@@ -31,7 +31,7 @@ namespace TrueCraft.Core.TerrainGen.Decorators
                             var neighborsWater = Decoration.NeighboursBlock(chunk, blockLocation, WaterBlock.BlockID) || Decoration.NeighboursBlock(chunk, blockLocation, StationaryWaterBlock.BlockID);
                             if (chunk.GetBlockID(blockLocation).Equals(GrassBlock.BlockID) && neighborsWater || chunk.GetBlockID(blockLocation).Equals(SandBlock.BlockID) && neighborsWater)
                             {
-                                var random = new Random(world.Seed);
+                                var random = new Random(dimension.Seed);
                                 double heightChance = random.NextDouble();
                                 int caneHeight = 3;
                                 if (heightChance < 0.05)

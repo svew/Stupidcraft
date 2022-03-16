@@ -14,7 +14,7 @@ namespace TrueCraft.Core.Test.Logic
     [TestFixture]
     public class BlockProviderTest
     {
-        public Mock<IDimension> World { get; set; }
+        public Mock<IDimension> Dimension { get; set; }
         public Mock<IMultiplayerServer> Server { get; set; }
         public Mock<IEntityManager> EntityManager { get; set; }
         public Mock<IRemoteClient> User { get; set; }
@@ -23,17 +23,17 @@ namespace TrueCraft.Core.Test.Logic
         [OneTimeSetUp]
         public void SetUp()
         {
-            World = new Mock<IDimension>();
+            Dimension = new Mock<IDimension>();
             Server = new Mock<IMultiplayerServer>();
             EntityManager = new Mock<IEntityManager>();
             User = new Mock<IRemoteClient>();
             BlockRepository = new Mock<IBlockRepository>();
             BlockProvider.BlockRepository = BlockRepository.Object;
 
-            User.SetupGet(u => u.World).Returns(World.Object);
+            User.SetupGet(u => u.Dimension).Returns(Dimension.Object);
             User.SetupGet(u => u.Server).Returns(Server.Object);
 
-            World.Setup(w => w.SetBlockID(It.IsAny<GlobalVoxelCoordinates>(), It.IsAny<byte>()));
+            Dimension.Setup(w => w.SetBlockID(It.IsAny<GlobalVoxelCoordinates>(), It.IsAny<byte>()));
 
             Server.Setup(s => s.GetEntityManagerForWorld(It.IsAny<IDimension>()))
                 .Returns<IDimension>(w => EntityManager.Object);
@@ -44,7 +44,7 @@ namespace TrueCraft.Core.Test.Logic
 
         protected void ResetMocks()
         {
-            World.Invocations.Clear();
+            Dimension.Invocations.Clear();
             Server.Invocations.Clear();
             EntityManager.Invocations.Clear();
             User.Invocations.Clear();
@@ -61,25 +61,25 @@ namespace TrueCraft.Core.Test.Logic
                 Coordinates = GlobalVoxelCoordinates.Zero
             };
 
-            blockProvider.Object.BlockMined(descriptor, BlockFace.PositiveY, World.Object, User.Object);
+            blockProvider.Object.BlockMined(descriptor, BlockFace.PositiveY, Dimension.Object, User.Object);
             EntityManager.Verify(m => m.SpawnEntity(It.Is<ItemEntity>(e => e.Item.ID == 10)));
-            World.Verify(w => w.SetBlockID(GlobalVoxelCoordinates.Zero, 0));
+            Dimension.Verify(w => w.SetBlockID(GlobalVoxelCoordinates.Zero, 0));
 
             blockProvider.Protected().Setup<ItemStack[]>("GetDrop", ItExpr.IsAny<BlockDescriptor>(), ItExpr.IsAny<ItemStack>())
                 .Returns(() => new[] { new ItemStack(12) });
-            blockProvider.Object.BlockMined(descriptor, BlockFace.PositiveY, World.Object, User.Object);
+            blockProvider.Object.BlockMined(descriptor, BlockFace.PositiveY, Dimension.Object, User.Object);
             EntityManager.Verify(m => m.SpawnEntity(It.Is<ItemEntity>(e => e.Item.ID == 12)));
-            World.Verify(w => w.SetBlockID(GlobalVoxelCoordinates.Zero, 0));
+            Dimension.Verify(w => w.SetBlockID(GlobalVoxelCoordinates.Zero, 0));
         }
 
         [Test]
         public void TestSupport()
         {
             // We need an actual world for this
-            var world = new TrueCraft.Core.World.Dimension("test", new FlatlandGenerator());
-            world.SetBlockID(GlobalVoxelCoordinates.Zero, 1);
+            IDimension dimension = new TrueCraft.Core.World.Dimension("test", new FlatlandGenerator());
+            dimension.SetBlockID(GlobalVoxelCoordinates.Zero, 1);
             GlobalVoxelCoordinates oneY = new GlobalVoxelCoordinates(0, 1, 0);
-            world.SetBlockID(oneY, 2);
+            dimension.SetBlockID(oneY, 2);
 
             var blockProvider = new Mock<BlockProvider> { CallBase = true };
             var updated = new BlockDescriptor { ID = 2, Coordinates = oneY };
@@ -94,13 +94,13 @@ namespace TrueCraft.Core.Test.Logic
             BlockRepository.Setup(r => r.GetBlockProvider(It.Is<byte>(b => b == 1))).Returns(supportive.Object);
             BlockRepository.Setup(r => r.GetBlockProvider(It.Is<byte>(b => b == 3))).Returns(unsupportive.Object);
 
-            blockProvider.Object.BlockUpdate(updated, source, Server.Object, world);
-            World.Verify(w => w.SetBlockID(oneY, 0), Times.Never);
+            blockProvider.Object.BlockUpdate(updated, source, Server.Object, dimension);
+            Dimension.Verify(w => w.SetBlockID(oneY, 0), Times.Never);
 
-            world.SetBlockID(GlobalVoxelCoordinates.Zero, 3);
+            dimension.SetBlockID(GlobalVoxelCoordinates.Zero, 3);
 
-            blockProvider.Object.BlockUpdate(updated, source, Server.Object, world);
-            Assert.AreEqual(0, world.GetBlockID(oneY));
+            blockProvider.Object.BlockUpdate(updated, source, Server.Object, dimension);
+            Assert.AreEqual(0, dimension.GetBlockID(oneY));
             EntityManager.Verify(m => m.SpawnEntity(It.Is<ItemEntity>(e => e.Item.ID == 2)));
         }
     }

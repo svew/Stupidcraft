@@ -48,23 +48,23 @@ namespace TrueCraft
                 if (Directory.Exists("players"))
                     Directory.Delete("players", true);
             }
-            IDimension world;
+            IDimension dimension;
             try
             {
-                world = Dimension.LoadWorld("world");
-                Server.AddWorld(world);
+                dimension = Dimension.LoadWorld("world");
+                Server.AddDimension(dimension);
             }
             catch
             {
-                world = new Dimension("default", new StandardGenerator());
-                world.BlockRepository = Server.BlockRepository;
-                world.Save("world");
-                Server.AddWorld(world);
+                dimension = new Dimension("default", new StandardGenerator());
+                dimension.BlockRepository = Server.BlockRepository;
+                dimension.Save("world");
+                Server.AddDimension(dimension);
                 Server.Log(LogCategory.Notice, "Generating world around spawn point...");
                 for (int x = -5; x < 5; x++)
                 {
                     for (int z = -5; z < 5; z++)
-                        world.GetChunk(new GlobalChunkCoordinates(x, z));
+                        dimension.GetChunk(new GlobalChunkCoordinates(x, z));
                     int progress = (int)(((x + 5) / 10.0) * 100);
                     if (progress % 10 == 0)
                         Server.Log(LogCategory.Notice, "{0}% complete", progress + 10);
@@ -74,7 +74,7 @@ namespace TrueCraft
                 {
                     for (int z = -5; z < 5; z++)
                     {
-                        var chunk = world.GetChunk(new GlobalChunkCoordinates(x, z));
+                        var chunk = dimension.GetChunk(new GlobalChunkCoordinates(x, z));
                         for (byte _x = 0; _x < Chunk.Width; _x++)
                         {
                             for (byte _z = 0; _z < Chunk.Depth; _z++)
@@ -82,9 +82,9 @@ namespace TrueCraft
                                 for (int _y = 0; _y < chunk.GetHeight(_x, _z); _y++)
                                 {
                                     GlobalVoxelCoordinates coords = new GlobalVoxelCoordinates(x + _x, _y, z + _z);
-                                    var data = world.GetBlockData(coords);
-                                    var provider = world.BlockRepository.GetBlockProvider(data.ID);
-                                    provider.BlockUpdate(data, data, Server, world);
+                                    var data = dimension.GetBlockData(coords);
+                                    var provider = dimension.BlockRepository.GetBlockProvider(data.ID);
+                                    provider.BlockUpdate(data, data, Server, dimension);
                                 }
                             }
                         }
@@ -99,7 +99,7 @@ namespace TrueCraft
                     while (lighter.TryLightNext()) ;
                 }
             }
-            world.Save();
+            dimension.Save();
 
             Server.Start(new IPEndPoint(IPAddress.Parse(ServerConfiguration.ServerAddress), ServerConfiguration.ServerPort));
             Console.CancelKeyPress += HandleCancelKeyPress;
@@ -114,7 +114,7 @@ namespace TrueCraft
         static void SaveWorlds(IMultiplayerServer server)
         {
             Server.Log(LogCategory.Notice, "Saving world...");
-            foreach (var w in Server.Worlds)
+            foreach (var w in Server.Dimensions)
                 w.Save();
             Server.Log(LogCategory.Notice, "Done.");
             server.Scheduler.ScheduleEvent("world.save", null,

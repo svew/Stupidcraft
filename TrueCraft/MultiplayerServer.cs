@@ -31,9 +31,9 @@ namespace TrueCraft
 
         public IPacketReader PacketReader { get; private set; }
         public IList<IRemoteClient> Clients { get; private set; }
-        public IList<IDimension> Worlds { get; private set; }
+        public IList<IDimension> Dimensions { get; private set; }
         public IList<IEntityManager> EntityManagers { get; private set; }
-        public IList<WorldLighting> WorldLighters { get; set; }
+        public IList<Lighting> WorldLighters { get; set; }
         public IEventScheduler Scheduler { get; private set; }
         public IBlockRepository BlockRepository { get; private set; }
         public IItemRepository ItemRepository { get; private set; }
@@ -48,7 +48,7 @@ namespace TrueCraft
         private struct BlockUpdate
         {
             public GlobalVoxelCoordinates Coordinates;
-            public IDimension World;
+            public IDimension Dimension;
         }
         private Queue<BlockUpdate> PendingBlockUpdates { get; set; }
         public bool BlockUpdatesEnabled
@@ -104,7 +104,7 @@ namespace TrueCraft
             _cde = new CountdownEvent(_lstAutoResetEvents.Count);
 
             PacketHandlers = new PacketHandler[0x100];
-            Worlds = new List<IDimension>();
+            Dimensions = new List<IDimension>();
             EntityManagers = new List<IEntityManager>();
             LogProviders = new List<ILogProvider>();
             Scheduler = new EventScheduler(this);
@@ -120,7 +120,7 @@ namespace TrueCraft
             PendingBlockUpdates = new Queue<BlockUpdate>();
             EnableClientLogging = false;
             QueryProtocol = new TrueCraft.QueryProtocol(this);
-            WorldLighters = new List<WorldLighting>();
+            WorldLighters = new List<Lighting>();
             ChunksToSchedule = new ConcurrentBag<Tuple<IDimension, IChunk>>();
             Time = new Stopwatch();
 
@@ -200,7 +200,7 @@ namespace TrueCraft
             Listener.Stop();
             if(Program.ServerConfiguration.Query)
                 QueryProtocol.Stop();
-            foreach (var w in Worlds)
+            foreach (var w in Dimensions)
                 w.Save();
 
             // NOTE: DisconnectClient modifies the Clients collection!
@@ -208,19 +208,19 @@ namespace TrueCraft
                 DisconnectClient(Clients[j]);
         }
 
-        public void AddWorld(IDimension world)
+        public void AddDimension(IDimension dimension)
         {
-            Worlds.Add(world);
-            world.BlockRepository = BlockRepository;
-            world.ChunkGenerated += HandleChunkGenerated;
-            world.ChunkLoaded += HandleChunkLoaded;
-            world.BlockChanged += HandleBlockChanged;
-            var manager = new EntityManager(this, world);
+            Dimensions.Add(dimension);
+            dimension.BlockRepository = BlockRepository;
+            dimension.ChunkGenerated += HandleChunkGenerated;
+            dimension.ChunkLoaded += HandleChunkLoaded;
+            dimension.BlockChanged += HandleBlockChanged;
+            var manager = new EntityManager(this, dimension);
             EntityManagers.Add(manager);
-            var lighter = new WorldLighting(world, BlockRepository);
+            var lighter = new Lighting(dimension, BlockRepository);
             WorldLighters.Add(lighter);
-            foreach (var chunk in world)
-                HandleChunkLoaded(world, new ChunkLoadedEventArgs(chunk));
+            foreach (var chunk in dimension)
+                HandleChunkLoaded(dimension, new ChunkLoadedEventArgs(chunk));
         }
 
         void HandleChunkLoaded(object sender, ChunkLoadedEventArgs e)
@@ -229,7 +229,7 @@ namespace TrueCraft
                 ChunksToSchedule.Add(new Tuple<IDimension, IChunk>(sender as IDimension, e.Chunk));
             if (Program.ServerConfiguration.EnableLighting)
             {
-                var lighter = WorldLighters.SingleOrDefault(l => l.World == sender);
+                var lighter = WorldLighters.SingleOrDefault(l => l.Dimension == sender);
                 lighter.InitialLighting(e.Chunk, false);
             }
         }
@@ -243,17 +243,17 @@ namespace TrueCraft
                 {
                     var client = (RemoteClient)Clients[i];
                     // TODO: Confirm that the client knows of this block
-                    if (client.LoggedIn && client.World == sender)
+                    if (client.LoggedIn && client.Dimension == sender)
                     {
                         client.QueuePacket(new BlockChangePacket(e.Position.X, (sbyte)e.Position.Y, e.Position.Z,
                                 (sbyte)e.NewBlock.ID, (sbyte)e.NewBlock.Metadata));
                     }
                 }
-                PendingBlockUpdates.Enqueue(new BlockUpdate { Coordinates = e.Position, World = sender as IDimension });
+                PendingBlockUpdates.Enqueue(new BlockUpdate { Coordinates = e.Position, Dimension = sender as IDimension });
                 ProcessBlockUpdates();
                 if (Program.ServerConfiguration.EnableLighting)
                 {
-                    var lighter = WorldLighters.SingleOrDefault(l => l.World == sender);
+                    var lighter = WorldLighters.SingleOrDefault(l => l.Dimension == sender);
                     if (lighter != null)
                     {
                         Vector3 posA = new Vector3(e.Position.X, 0, e.Position.Z);
@@ -269,7 +269,7 @@ namespace TrueCraft
         {
             if (Program.ServerConfiguration.EnableLighting)
             {
-                var lighter = new WorldLighting(sender as IDimension, BlockRepository);
+                var lighter = new Lighting(sender as IDimension, BlockRepository);
                 lighter.InitialLighting(e.Chunk, false);
             }
             else
@@ -282,7 +282,7 @@ namespace TrueCraft
             HandleChunkLoaded(sender, e);
         }
 
-        void ScheduleUpdatesForChunk(IDimension world, IChunk chunk)
+        void ScheduleUpdatesForChunk(IDimension dimension, IChunk chunk)
         {
             chunk.UpdateHeightMap();
             int _x = chunk.Coordinates.X * Chunk.Width;
@@ -301,7 +301,7 @@ namespace TrueCraft
                             continue;
                         coords = new GlobalVoxelCoordinates(_x + x, y, _z + z);
                         var provider = BlockRepository.GetBlockProvider(id);
-                        provider.BlockLoadedFromChunk(coords, this, world);
+                        provider.BlockLoadedFromChunk(coords, this, dimension);
                     }
                 }
             }
@@ -315,13 +315,13 @@ namespace TrueCraft
             while (PendingBlockUpdates.Count != 0)
             {
                 var update = PendingBlockUpdates.Dequeue();
-                var source = update.World.GetBlockData(update.Coordinates);
+                var source = update.Dimension.GetBlockData(update.Coordinates);
                 foreach (var offset in Vector3i.Neighbors6)
                 {
-                    var descriptor = update.World.GetBlockData(update.Coordinates + offset);
+                    var descriptor = update.Dimension.GetBlockData(update.Coordinates + offset);
                     var provider = BlockRepository.GetBlockProvider(descriptor.ID);
                     if (provider != null)
-                        provider.BlockUpdate(descriptor, source, this, update.World);
+                        provider.BlockUpdate(descriptor, source, this, update.Dimension);
                 }
             }
         }
@@ -340,12 +340,12 @@ namespace TrueCraft
             }
         }
 
-        public IEntityManager GetEntityManagerForWorld(IDimension world)
+        public IEntityManager GetEntityManagerForWorld(IDimension dimension)
         {
             for (int i = 0; i < EntityManagers.Count; i++)
             {
                 var manager = EntityManagers[i] as EntityManager;
-                if (manager.World == world)
+                if (manager.Dimension == dimension)
                     return manager;
             }
             return null;
@@ -440,8 +440,8 @@ namespace TrueCraft
             if (client.LoggedIn)
             {
                 SendMessage(ChatColor.Yellow + "{0} has left the server.", client.Username);
-                GetEntityManagerForWorld(client.World).DespawnEntity(client.Entity);
-                GetEntityManagerForWorld(client.World).FlushDespawns();
+                GetEntityManagerForWorld(client.Dimension).DespawnEntity(client.Entity);
+                GetEntityManagerForWorld(client.Dimension).FlushDespawns();
             }
             client.Save();
             client.Disconnect();

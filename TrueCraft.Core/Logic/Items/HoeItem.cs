@@ -15,14 +15,14 @@ namespace TrueCraft.Core.Logic.Items
             }
         }
 
-        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension world, IRemoteClient user)
+        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension dimension, IRemoteClient user)
         {
-            var id = world.GetBlockID(coordinates);
+            var id = dimension.GetBlockID(coordinates);
             if (id == DirtBlock.BlockID || id == GrassBlock.BlockID)
             {
-                world.SetBlockID(coordinates, FarmlandBlock.BlockID);
+                dimension.SetBlockID(coordinates, FarmlandBlock.BlockID);
                 user.Server.BlockRepository.GetBlockProvider(FarmlandBlock.BlockID).BlockPlaced(
-                    new BlockDescriptor { Coordinates = coordinates }, face, world, user);
+                    new BlockDescriptor { Coordinates = coordinates }, face, dimension, user);
             }
         }
     }

@@ -19,10 +19,12 @@ namespace TrueCraft.Core.Networking
         /// Returns true if this client has data pending in the network stream.
         /// </summary>
         bool DataAvailable { get; }
+
         /// <summary>
-        /// The world this client is present in.
+        /// The Dimension this client is present in.
         /// </summary>
-        IDimension World { get; }
+        IDimension Dimension { get; }
+
         /// <summary>
         /// The entity associated with this client.
         /// </summary>

@@ -26,21 +26,21 @@ namespace TrueCraft.Inventory
             Hotbar = 4
         }
 
-        private readonly IDimension _world;
+        private readonly IDimension _dimension;
         private readonly GlobalVoxelCoordinates _location;
 
         private const int _outputSlotIndex = 2;
         public FurnaceWindow(IItemRepository itemRepository,
             ISlotFactory<IServerSlot> slotFactory, sbyte windowID, IFurnaceSlots furnaceSlots,
             ISlots<IServerSlot> mainInventory,
-            ISlots<IServerSlot> hotBar, IDimension world, GlobalVoxelCoordinates location) :
+            ISlots<IServerSlot> hotBar, IDimension dimension, GlobalVoxelCoordinates location) :
             base(itemRepository, windowID, Core.Windows.WindowType.Furnace, "Furnace",
                 new ISlots<IServerSlot>[] { new ServerSlots(itemRepository, new List<IServerSlot> {furnaceSlots.IngredientSlot }),
                     new ServerSlots(itemRepository, new List<IServerSlot> { furnaceSlots.FuelSlot }),
                     new ServerSlots(itemRepository, new List<IServerSlot> {furnaceSlots.OutputSlot }),
                     mainInventory, hotBar })
         {
-            _world = world;
+            _dimension = dimension;
             _location = location;
 
             int slotIndex = 0;
@@ -143,7 +143,7 @@ namespace TrueCraft.Inventory
                 client.QueuePacket(new TransactionStatusPacket(packet.WindowID, packet.TransactionID, handled));
 
                 FurnaceBlock furnace = (FurnaceBlock)BlockRepository.Get().GetBlockProvider(0x3D);  // TODO hard-coded block id.
-                furnace.TryStartFurnace(MultiplayerServer.Get().Scheduler, _world, _location, ItemRepository);
+                furnace.TryStartFurnace(MultiplayerServer.Get().Scheduler, _dimension, _location, ItemRepository);
             }
             else
             {

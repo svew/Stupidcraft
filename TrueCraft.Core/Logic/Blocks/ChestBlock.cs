@@ -53,7 +53,7 @@ namespace TrueCraft.Core.Logic.Blocks
             Vector3i.East
         };
 
-        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension world, IRemoteClient user)
+        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension dimension, IRemoteClient user)
         {
             int adjacent = 0;
             GlobalVoxelCoordinates coords = coordinates + MathHelper.BlockFaceToCoordinates(face);
@@ -61,7 +61,7 @@ namespace TrueCraft.Core.Logic.Blocks
             // Check for adjacent chests. We can only allow one adjacent check block.
             for (int i = 0; i < AdjacentBlocks.Length; i++)
             {
-                if (world.GetBlockID(coords + AdjacentBlocks[i]) == ChestBlock.BlockID)
+                if (dimension.GetBlockID(coords + AdjacentBlocks[i]) == ChestBlock.BlockID)
                 {
                     _ = coords + AdjacentBlocks[i];
                     adjacent++;
@@ -74,21 +74,21 @@ namespace TrueCraft.Core.Logic.Blocks
                     // Confirm that adjacent chest is not a double chest
                     for (int i = 0; i < AdjacentBlocks.Length; i++)
                     {
-                        if (world.GetBlockID(_ + AdjacentBlocks[i]) == ChestBlock.BlockID)
+                        if (dimension.GetBlockID(_ + AdjacentBlocks[i]) == ChestBlock.BlockID)
                             adjacent++;
                     }
                 }
                 if (adjacent <= 1)
-                    base.ItemUsedOnBlock(coordinates, item, face, world, user);
+                    base.ItemUsedOnBlock(coordinates, item, face, dimension, user);
             }
         }
 
-        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
+        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
-            world.SetMetadata(descriptor.Coordinates, (byte)MathHelper.DirectionByRotationFlat(user.Entity.Yaw, true));
+            dimension.SetMetadata(descriptor.Coordinates, (byte)MathHelper.DirectionByRotationFlat(user.Entity.Yaw, true));
         }
 
-        public override bool BlockRightClicked(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
+        public override bool BlockRightClicked(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
             ServerOnly.Assert();
 
@@ -97,16 +97,16 @@ namespace TrueCraft.Core.Logic.Blocks
             for (int i = 0; i < AdjacentBlocks.Length; i++)
             {
                 var test = self + AdjacentBlocks[i];
-                if (world.GetBlockID(test) == ChestBlock.BlockID)
+                if (dimension.GetBlockID(test) == ChestBlock.BlockID)
                 {
                     adjacent = test;
-                    var up = world.BlockRepository.GetBlockProvider(world.GetBlockID(test + Vector3i.Up));
+                    var up = dimension.BlockRepository.GetBlockProvider(dimension.GetBlockID(test + Vector3i.Up));
                     if (up.Opaque && !(up is WallSignBlock)) // Wall sign blocks are an exception
                         return false; // Obstructed
                     break;
                 }
             }
-            var upSelf = world.BlockRepository.GetBlockProvider(world.GetBlockID(self + Vector3i.Up));
+            var upSelf = dimension.BlockRepository.GetBlockProvider(dimension.GetBlockID(self + Vector3i.Up));
             if (upSelf.Opaque && !(upSelf is WallSignBlock))
                 return false; // Obstructed
 
@@ -129,17 +129,17 @@ namespace TrueCraft.Core.Logic.Blocks
             sbyte windowID = WindowIDs.GetWindowID();
             IChestWindow<IServerSlot> window = factory.NewChestWindow(itemRepository,
                 slotFactory, windowID, user.Inventory, user.Hotbar,
-                world, descriptor.Coordinates, adjacent);
+                dimension, descriptor.Coordinates, adjacent);
 
             user.OpenWindow(window);
             return false;
         }
 
-        public override void BlockMined(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
+        public override void BlockMined(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
             var self = descriptor.Coordinates;
-            var entity = world.GetTileEntity(self);
-            var manager = user.Server.GetEntityManagerForWorld(world);
+            var entity = dimension.GetTileEntity(self);
+            var manager = user.Server.GetEntityManagerForWorld(dimension);
             if (entity != null)
             {
                 foreach (var item in (NbtList)entity["Items"])
@@ -148,8 +148,8 @@ namespace TrueCraft.Core.Logic.Blocks
                     manager.SpawnEntity(new ItemEntity(new Vector3(descriptor.Coordinates.X + 0.5, descriptor.Coordinates.Y + 0.5, descriptor.Coordinates.Z + 0.5), slot));
                 }
             }
-            world.SetTileEntity(self, null);
-            base.BlockMined(descriptor, face, world, user);
+            dimension.SetTileEntity(self, null);
+            base.BlockMined(descriptor, face, dimension, user);
         }
     }
 }

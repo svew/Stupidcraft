@@ -75,12 +75,12 @@ namespace TrueCraft.Core.Logic.Blocks
             }
         }
 
-        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension world, IRemoteClient user)
+        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension dimension, IRemoteClient user)
         {
             ServerOnly.Assert();
 
             coordinates += MathHelper.BlockFaceToCoordinates(face);
-            var descriptor = world.GetBlockData(coordinates);
+            var descriptor = dimension.GetBlockData(coordinates);
             LadderDirection direction;
             switch (MathHelper.DirectionByRotationFlat(user.Entity.Yaw))
             {
@@ -98,10 +98,10 @@ namespace TrueCraft.Core.Logic.Blocks
                     break;
             }
             descriptor.Metadata = (byte)direction;
-            if (IsSupported(descriptor, user.Server, world))
+            if (IsSupported(descriptor, user.Server, dimension))
             {
-                world.SetBlockID(descriptor.Coordinates, BlockID);
-                world.SetMetadata(descriptor.Coordinates, (byte)direction);
+                dimension.SetBlockID(descriptor.Coordinates, BlockID);
+                dimension.SetMetadata(descriptor.Coordinates, (byte)direction);
                 item.Count--;
                 user.Hotbar[user.SelectedSlot].Item = item;
             }

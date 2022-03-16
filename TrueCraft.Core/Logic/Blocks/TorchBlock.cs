@@ -54,7 +54,7 @@ namespace TrueCraft.Core.Logic.Blocks
             }
         }
 
-        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
+        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
             TorchDirection[] preferredDirections =
             {
@@ -83,20 +83,20 @@ namespace TrueCraft.Core.Logic.Blocks
             }
             int i = 0;
             descriptor.Metadata = (byte)direction;
-            while (!IsSupported(descriptor, user.Server, world) && i < preferredDirections.Length)
+            while (!IsSupported(descriptor, user.Server, dimension) && i < preferredDirections.Length)
             {
                 direction = preferredDirections[i++];
                 descriptor.Metadata = (byte)direction;
             }
-            world.SetBlockData(descriptor.Coordinates, descriptor);
+            dimension.SetBlockData(descriptor.Coordinates, descriptor);
         }
 
-        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension world, IRemoteClient user)
+        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension dimension, IRemoteClient user)
         {
             ServerOnly.Assert();
 
             coordinates += MathHelper.BlockFaceToCoordinates(face);
-            var old = world.GetBlockData(coordinates);
+            var old = dimension.GetBlockData(coordinates);
             byte[] overwritable =
             {
                 AirBlock.BlockID,
@@ -107,14 +107,14 @@ namespace TrueCraft.Core.Logic.Blocks
             };
             if (overwritable.Any(b => b == old.ID))
             {
-                var data = world.GetBlockData(coordinates);
+                var data = dimension.GetBlockData(coordinates);
                 data.ID = ID;
                 data.Metadata = (byte)item.Metadata;
 
-                BlockPlaced(data, face, world, user);
+                BlockPlaced(data, face, dimension, user);
 
-                if (!IsSupported(world.GetBlockData(coordinates), user.Server, world))
-                    world.SetBlockData(coordinates, old);
+                if (!IsSupported(dimension.GetBlockData(coordinates), user.Server, dimension))
+                    dimension.SetBlockData(coordinates, old);
                 else
                 {
                     item.Count--;

@@ -20,13 +20,13 @@ namespace TrueCraft.Core.TerrainGen.Decorations
             return true;
         }
 
-        public override bool GenerateAt(IDimension world, IChunk chunk, LocalVoxelCoordinates location)
+        public override bool GenerateAt(IDimension dimension, IChunk chunk, LocalVoxelCoordinates location)
         {
             Console.WriteLine("Dungeon in chunk {0}", chunk.Coordinates);
             if (!ValidLocation(location))
                 return false;
 
-            var random = new Random(world.Seed);
+            var random = new Random(dimension.Seed);
 
             //Generate room
             GenerateCuboid(chunk, location, Size, CobblestoneBlock.BlockID, 0x0, 0x2);

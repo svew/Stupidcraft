@@ -23,7 +23,7 @@ namespace TrueCraft.Launcher.Singleplayer
                 Singleplayer = true
             };
             world.BlockRepository = Server.BlockRepository;
-            Server.AddWorld(world);
+            Server.AddDimension(world);
             Server.AddLogProvider(new ConsoleLogProvider(LogCategory.Notice | LogCategory.Warning | LogCategory.Error | LogCategory.Debug));
         }
 

@@ -10,9 +10,9 @@ namespace TrueCraft.Core.World
     {
         IList<IChunkDecorator> ChunkDecorators { get; }
 
-        IChunk GenerateChunk(IDimension world, GlobalChunkCoordinates coordinates);
+        IChunk GenerateChunk(IDimension dimension, GlobalChunkCoordinates coordinates);
 
-        GlobalVoxelCoordinates GetSpawn(IDimension world);
-        void Initialize(IDimension world);
+        GlobalVoxelCoordinates GetSpawn(IDimension dimension);
+        void Initialize(IDimension dimension);
     }
 }

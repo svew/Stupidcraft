@@ -30,20 +30,20 @@ namespace TrueCraft.Inventory
 
         public IChestWindow<IServerSlot> NewChestWindow(IItemRepository itemRepository,
             ISlotFactory<IServerSlot> slotFactory, sbyte windowID, ISlots<IServerSlot> mainInventory,
-            ISlots<IServerSlot> hotBar, IDimension world, GlobalVoxelCoordinates location,
+            ISlots<IServerSlot> hotBar, IDimension dimension, GlobalVoxelCoordinates location,
             GlobalVoxelCoordinates otherHalf)
         {
             return new ChestWindow(itemRepository, slotFactory, windowID,
-                mainInventory, hotBar, world, location, otherHalf);
+                mainInventory, hotBar, dimension, location, otherHalf);
         }
 
         public IFurnaceWindow<IServerSlot> NewFurnaceWindow(IItemRepository itemRepository,
             ISlotFactory<IServerSlot> slotFactory, sbyte windowID, IFurnaceSlots furnaceSlots,
             ISlots<IServerSlot> mainInventory,
-            ISlots<IServerSlot> hotBar, IDimension world, GlobalVoxelCoordinates location)
+            ISlots<IServerSlot> hotBar, IDimension dimension, GlobalVoxelCoordinates location)
         {
             return new FurnaceWindow(itemRepository, slotFactory, windowID,
-                furnaceSlots, mainInventory, hotBar, world, location);
+                furnaceSlots, mainInventory, hotBar, dimension, location);
         }
     }
 }

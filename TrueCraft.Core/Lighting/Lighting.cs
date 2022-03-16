@@ -11,7 +11,7 @@ namespace TrueCraft.Core.Lighting
     // https://github.com/SirCmpwn/TrueCraft/wiki/Lighting
 
     // Note: Speed-critical code
-    public class WorldLighting
+    public class Lighting
     {
         private struct LightingOperation
         {
@@ -21,7 +21,7 @@ namespace TrueCraft.Core.Lighting
         }
 
         private readonly IBlockRepository _blockRepository;
-        public IDimension World { get; set; }
+        public IDimension Dimension { get; }
 
         private ConcurrentQueue<LightingOperation> PendingOperations { get; set; }
 
@@ -30,20 +30,20 @@ namespace TrueCraft.Core.Lighting
         /// </summary>
         private Dictionary<GlobalChunkCoordinates, byte[,]> HeightMaps { get; set; }
 
-        public WorldLighting(IDimension world, IBlockRepository blockRepository)
+        public Lighting(IDimension dimension, IBlockRepository blockRepository)
         {
             _blockRepository = blockRepository;
-            World = world;
+            Dimension = dimension;
             PendingOperations = new ConcurrentQueue<LightingOperation>();
             HeightMaps = new Dictionary<GlobalChunkCoordinates, byte[,]>();
-            world.ChunkGenerated += (sender, e) => GenerateHeightMap(e.Chunk);
-            world.ChunkLoaded += (sender, e) => GenerateHeightMap(e.Chunk);
-            world.BlockChanged += (sender, e) =>
+            dimension.ChunkGenerated += (sender, e) => GenerateHeightMap(e.Chunk);
+            dimension.ChunkLoaded += (sender, e) => GenerateHeightMap(e.Chunk);
+            dimension.BlockChanged += (sender, e) =>
             {
                 if (e.NewBlock.ID != e.OldBlock.ID)
                     UpdateHeightMap(e.Position);
             };
-            foreach (var chunk in world)
+            foreach (var chunk in dimension)
                 GenerateHeightMap(chunk);
         }
 
@@ -78,7 +78,7 @@ namespace TrueCraft.Core.Lighting
         private void UpdateHeightMap(GlobalVoxelCoordinates coords)
         {
             IChunk chunk;
-            LocalVoxelCoordinates adjusted = World.FindBlockPosition(coords, out chunk, generate: false);
+            LocalVoxelCoordinates adjusted = Dimension.FindBlockPosition(coords, out chunk, generate: false);
 
             if (!HeightMaps.ContainsKey(chunk.Coordinates))
                 return;
@@ -103,7 +103,7 @@ namespace TrueCraft.Core.Lighting
 
         private void LightBox(LightingOperation op)
         {
-            IChunk chunk = World.FindChunk((GlobalVoxelCoordinates)op.Box.Center, generate: false);
+            IChunk chunk = Dimension.FindChunk((GlobalVoxelCoordinates)op.Box.Center, generate: false);
             if (chunk == null || !chunk.TerrainPopulated)
                 return;
             Profiler.Start("lighting.box");
@@ -122,16 +122,16 @@ namespace TrueCraft.Core.Lighting
         private void PropegateLightEvent(int x, int y, int z, byte value, LightingOperation op)
         {
             var coords = new GlobalVoxelCoordinates(x, y, z);
-            if (!World.IsValidPosition(coords))
+            if (!Dimension.IsValidPosition(coords))
                 return;
             IChunk chunk;
-            var adjustedCoords = World.FindBlockPosition(coords, out chunk, generate: false);
+            var adjustedCoords = Dimension.FindBlockPosition(coords, out chunk, generate: false);
             if (chunk == null || !chunk.TerrainPopulated)
                 return;
-            byte current = op.SkyLight ? World.GetSkyLight(coords) : World.GetBlockLight(coords);
+            byte current = op.SkyLight ? Dimension.GetSkyLight(coords) : Dimension.GetBlockLight(coords);
             if (value == current)
                 return;
-            var provider = _blockRepository.GetBlockProvider(World.GetBlockID(coords));
+            var provider = _blockRepository.GetBlockProvider(Dimension.GetBlockID(coords));
             if (op.Initial)
             {
                 byte emissiveness = provider.Luminance;
@@ -151,14 +151,14 @@ namespace TrueCraft.Core.Lighting
             GlobalVoxelCoordinates coords = new GlobalVoxelCoordinates(x, y, z);
 
             IChunk chunk;
-            var adjustedCoords = World.FindBlockPosition(coords, out chunk, generate: false);
+            var adjustedCoords = Dimension.FindBlockPosition(coords, out chunk, generate: false);
 
             if (chunk == null || !chunk.TerrainPopulated) // Move on if this chunk is empty
                 return;
 
             Profiler.Start("lighting.voxel");
 
-            var id = World.GetBlockID(coords);
+            var id = Dimension.GetBlockID(coords);
             var provider = _blockRepository.GetBlockProvider(id);
 
             // The opacity of the block determines the amount of light it receives from
@@ -166,7 +166,7 @@ namespace TrueCraft.Core.Lighting
             // block values. We must subtract at least 1.
             byte opacity = Math.Max(provider.LightOpacity, (byte)1);
 
-            byte current = op.SkyLight ? World.GetSkyLight(coords) : World.GetBlockLight(coords);
+            byte current = op.SkyLight ? Dimension.GetSkyLight(coords) : Dimension.GetBlockLight(coords);
             byte final = 0;
 
             // Calculate emissiveness
@@ -202,10 +202,10 @@ namespace TrueCraft.Core.Lighting
                     //    have been previously generated, this recursion will cause a stack overflow.
                     //    We must neither load nor generate neighbouring chunks that are not
                     //    already loaded.
-                    if (World.IsValidPosition(neighbor) && World.IsChunkLoaded(neighbor))
+                    if (Dimension.IsValidPosition(neighbor) && Dimension.IsChunkLoaded(neighbor))
                     {
                         IChunk c;
-                        var adjusted = World.FindBlockPosition(neighbor, out c, generate: false);
+                        var adjusted = Dimension.FindBlockPosition(neighbor, out c, generate: false);
                         if (c != null) // We don't want to generate new chunks just to light this voxel
                         {
                             byte val;

@@ -17,7 +17,7 @@ namespace TrueCraft
     public class EntityManager : IEntityManager
     {
         public TimeSpan TimeSinceLastUpdate { get; private set; }
-        public IDimension World { get; set; }
+        public IDimension Dimension { get; }
         public IMultiplayerServer Server { get; set; }
         public PhysicsEngine PhysicsEngine { get; set; }
 
@@ -27,11 +27,11 @@ namespace TrueCraft
         private ConcurrentBag<IEntity> PendingDespawns { get; set; }
         private DateTime LastUpdate { get; set; }
 
-        public EntityManager(IMultiplayerServer server, IDimension world)
+        public EntityManager(IMultiplayerServer server, IDimension dimension)
         {
             Server = server;
-            World = world;
-            PhysicsEngine = new PhysicsEngine(world, (BlockRepository)server.BlockRepository);
+            Dimension = dimension;
+            PhysicsEngine = new PhysicsEngine(dimension, (BlockRepository)server.BlockRepository);
             PendingDespawns = new ConcurrentBag<IEntity>();
             Entities = new List<IEntity>();
             // TODO: Handle loading worlds that already have entities
@@ -231,7 +231,7 @@ namespace TrueCraft
                 return;
             entity.SpawnTime = DateTime.UtcNow;
             entity.EntityManager = this;
-            entity.World = World;
+            entity.Dimension = Dimension;
             entity.EntityID = NextEntityID++;
             entity.PropertyChanged -= HandlePropertyChanged;
             entity.PropertyChanged += HandlePropertyChanged;

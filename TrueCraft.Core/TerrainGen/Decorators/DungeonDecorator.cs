@@ -14,11 +14,11 @@ namespace TrueCraft.Core.TerrainGen.Decorators
             this.BaseLevel = groundLevel;
         }
 
-        public void Decorate(IDimension world, IChunk chunk, IBiomeRepository biomes)
+        public void Decorate(IDimension dimension, IChunk chunk, IBiomeRepository biomes)
         {
             for (int attempts = 0; attempts < 8; attempts++)
             {
-                var noise = new Perlin(world.Seed - (chunk.Coordinates.X + chunk.Coordinates.Z));
+                var noise = new Perlin(dimension.Seed - (chunk.Coordinates.X + chunk.Coordinates.Z));
                 var offsetNoise = new ClampNoise(noise);
                 offsetNoise.MaxValue = 3;
                 var x = 0;
@@ -34,7 +34,7 @@ namespace TrueCraft.Core.TerrainGen.Decorators
                 var spawnValue = offsetNoise.Value2D(blockX, blockZ);
                 if (spawnValue > 1.95 && spawnValue < 2.09)
                 {
-                    var generated = new Dungeon().GenerateAt(world, chunk, new LocalVoxelCoordinates(finalX, y, finalZ));
+                    var generated = new Dungeon().GenerateAt(dimension, chunk, new LocalVoxelCoordinates(finalX, y, finalZ));
                     if (generated)
                         break;
                 }

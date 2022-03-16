@@ -71,7 +71,7 @@ namespace TrueCraft
         public string Username { get; internal set; }
         public bool LoggedIn { get; internal set; }
         public IMultiplayerServer Server { get; }
-        public IDimension World { get; internal set; }
+        public IDimension Dimension { get; internal set; }
 
         /// <summary>
         /// Gets the Player's Inventory.
@@ -174,7 +174,7 @@ namespace TrueCraft
             // TODO: Should this packet even be sent to the originating client?
             //       It's used to provide the pickup animation.
             QueuePacket(packet);
-            IEntityManager manager = Server.GetEntityManagerForWorld(World);
+            IEntityManager manager = Server.GetEntityManagerForWorld(Dimension);
             foreach (IRemoteClient client in manager.ClientsForEntity(Entity))
                 client.QueuePacket(packet);
 
@@ -238,7 +238,7 @@ namespace TrueCraft
         {
             var path = Path.Combine(Directory.GetCurrentDirectory(), "players", Username + ".nbt");
             if (Program.ServerConfiguration.Singleplayer)
-                path = Path.Combine(((Dimension)World).BaseDirectory, "player.nbt");
+                path = Path.Combine(((Dimension)Dimension).BaseDirectory, "player.nbt");
             if (!File.Exists(path))
                 return false;
             try
@@ -260,12 +260,12 @@ namespace TrueCraft
         public void Save()
         {
             // The remote client may be disconnected prior to setting the World property.
-            if (object.ReferenceEquals(World, null))
+            if (object.ReferenceEquals(Dimension, null))
                 return;
 
             var path = Path.Combine(Directory.GetCurrentDirectory(), "players", Username + ".nbt");
             if (Program.ServerConfiguration.Singleplayer)
-                path = Path.Combine(((Dimension)World).BaseDirectory, "player.nbt");
+                path = Path.Combine(((Dimension)Dimension).BaseDirectory, "player.nbt");
             if (!Directory.Exists(Path.GetDirectoryName(path)))
                 Directory.CreateDirectory(Path.GetDirectoryName(path));
             if (Entity == null) // I didn't think this could happen but null reference exceptions have been repoted here
@@ -523,7 +523,7 @@ namespace TrueCraft
                         GlobalChunkCoordinates coords = new GlobalChunkCoordinates(entityChunk.X + x, entityChunk.Z + z);
                         if (!_loadedChunks.Contains(coords))
                             toLoad.Add(new Tuple<GlobalChunkCoordinates, IChunk>(
-                                coords, World.GetChunk(coords, generate: block)));
+                                coords, Dimension.GetChunk(coords, generate: block)));
                     }
                 }
             Profiler.Done();
@@ -536,7 +536,7 @@ namespace TrueCraft
                     var coords = tup.Item1;
                     var chunk = tup.Item2;
                     if (chunk == null)
-                        chunk = World.GetChunk(coords);
+                        chunk = Dimension.GetChunk(coords);
                     chunk.LastAccessed = DateTime.UtcNow;
                     LoadChunk(chunk);
                 }
@@ -555,7 +555,7 @@ namespace TrueCraft
             Profiler.Done();
 
             Profiler.Start("client.update-entities");
-            ((EntityManager)Server.GetEntityManagerForWorld(World)).UpdateClientEntities(this);
+            ((EntityManager)Server.GetEntityManagerForWorld(Dimension)).UpdateClientEntities(this);
             Profiler.Done();
         }
 

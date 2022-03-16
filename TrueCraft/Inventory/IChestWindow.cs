@@ -6,7 +6,7 @@ namespace TrueCraft.Inventory
 {
     public interface IChestWindow : TrueCraft.Core.Inventory.IChestWindow<IServerSlot>
     {
-        IDimension World { get; }
+        IDimension Dimension { get; }
 
         GlobalVoxelCoordinates Location { get; }
 

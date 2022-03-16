@@ -28,7 +28,7 @@ namespace TrueCraft.Handlers
                 remoteClient.QueuePacket(new DisconnectPacket("Client outdated! Use beta 1.7.3."));
             else if (loginRequestPacket.ProtocolVersion > server.PacketReader.ProtocolVersion)
                 remoteClient.QueuePacket(new DisconnectPacket("Server outdated! Use beta 1.7.3."));
-            else if (server.Worlds.Count == 0)
+            else if (server.Dimensions.Count == 0)
                 remoteClient.QueuePacket(new DisconnectPacket("Server has no worlds configured."));
             else if (!server.PlayerIsWhitelisted(remoteClient.Username) && server.PlayerIsBlacklisted(remoteClient.Username))
                 remoteClient.QueuePacket(new DisconnectPacket("You're banned from this server"));
@@ -38,16 +38,16 @@ namespace TrueCraft.Handlers
             {
                 remoteClient.LoggedIn = true;
                 remoteClient.Entity = new PlayerEntity(remoteClient.Username);
-                remoteClient.World = server.Worlds[0];
+                remoteClient.Dimension = server.Dimensions[0];
                 remoteClient.ChunkRadius = 2;
 
                 if (!remoteClient.Load())
-                    remoteClient.Entity.Position = (Vector3)remoteClient.World.SpawnPoint;
+                    remoteClient.Entity.Position = (Vector3)remoteClient.Dimension.SpawnPoint;
                 // Make sure they don't spawn in the ground
                 var collision = new Func<bool>(() =>
                 {
-                    byte feet = client.World.GetBlockID((GlobalVoxelCoordinates)client.Entity.Position);
-                    byte head = client.World.GetBlockID((GlobalVoxelCoordinates)(client.Entity.Position + Vector3.Up));
+                    byte feet = client.Dimension.GetBlockID((GlobalVoxelCoordinates)client.Entity.Position);
+                    byte head = client.Dimension.GetBlockID((GlobalVoxelCoordinates)(client.Entity.Position + Vector3.Up));
                     var feetBox = server.BlockRepository.GetBlockProvider(feet).BoundingBox;
                     var headBox = server.BlockRepository.GetBlockProvider(head).BoundingBox;
                     return feetBox != null || headBox != null;
@@ -55,7 +55,7 @@ namespace TrueCraft.Handlers
                 while (collision())
                     client.Entity.Position += Vector3.Up;
 
-                var entityManager = server.GetEntityManagerForWorld(remoteClient.World);
+                IEntityManager entityManager = server.GetEntityManagerForWorld(remoteClient.Dimension);
                 entityManager.SpawnEntity(remoteClient.Entity);
 
                 // Send setup packets
@@ -69,7 +69,7 @@ namespace TrueCraft.Handlers
                         remoteClient.Entity.Position.Y + 1,
                         remoteClient.Entity.Position.Y + remoteClient.Entity.Size.Height + 1,
                         remoteClient.Entity.Position.Z, remoteClient.Entity.Yaw, remoteClient.Entity.Pitch, true));
-                remoteClient.QueuePacket(new TimeUpdatePacket(remoteClient.World.Time));
+                remoteClient.QueuePacket(new TimeUpdatePacket(remoteClient.Dimension.Time));
 
                 // Start housekeeping for this client
                 entityManager.SendEntitiesToClient(remoteClient);

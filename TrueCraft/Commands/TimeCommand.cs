@@ -27,7 +27,7 @@ namespace TrueCraft.Commands
             switch (arguments.Length)
             {
                 case 0:
-                    client.SendMessage(client.World.Time.ToString());
+                    client.SendMessage(client.Dimension.Time.ToString());
                     break;
                 case 2:
                     if (!arguments[0].Equals("set"))
@@ -38,11 +38,11 @@ namespace TrueCraft.Commands
                     if(!Int32.TryParse(arguments[1], out newTime))
                         Help(client, alias, arguments);
 
-                    client.World.Time = newTime;
+                    client.Dimension.Time = newTime;
 
                     client.SendMessage(string.Format("Setting time to {0}", arguments[1]));
 
-                    foreach (var remoteClient in client.Server.Clients.Where(c => c.World.Equals(client.World)))
+                    foreach (var remoteClient in client.Server.Clients.Where(c => c.Dimension.Equals(client.Dimension)))
                         remoteClient.QueuePacket(new TimeUpdatePacket(newTime));
                     
                     break;

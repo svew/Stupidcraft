@@ -55,7 +55,7 @@ namespace TrueCraft.Core.Logic.Blocks
             return new Tuple<int, int>(7, 5);
         }
 
-        public bool IsHydrated(GlobalVoxelCoordinates coordinates, IDimension world)
+        public bool IsHydrated(GlobalVoxelCoordinates coordinates, IDimension dimension)
         {
             var min = new GlobalVoxelCoordinates(-6 + coordinates.X, coordinates.Y, -6 + coordinates.Z);
             var max = new GlobalVoxelCoordinates(6 + coordinates.X, coordinates.Y + 1, 6 + coordinates.Z);
@@ -65,7 +65,7 @@ namespace TrueCraft.Core.Logic.Blocks
                 {
                     for (int z = min.Z; z < max.Z; z++)
                     {
-                        var id = world.GetBlockID(new GlobalVoxelCoordinates(x, y, z));
+                        var id = dimension.GetBlockID(new GlobalVoxelCoordinates(x, y, z));
                         if (id == WaterBlock.BlockID || id == StationaryWaterBlock.BlockID)
                             return true;
                     }
@@ -74,50 +74,50 @@ namespace TrueCraft.Core.Logic.Blocks
             return false;
         }
 
-        void HydrationCheckEvent(IMultiplayerServer server, GlobalVoxelCoordinates coords, IDimension world)
+        void HydrationCheckEvent(IMultiplayerServer server, GlobalVoxelCoordinates coords, IDimension dimension)
         {
-            if (world.GetBlockID(coords) != BlockID)
+            if (dimension.GetBlockID(coords) != BlockID)
                 return;
             if (MathHelper.Random.Next(3) == 0)
             {
-                var meta = world.GetMetadata(coords);
-                if (IsHydrated(coords, world) && meta != 15)
+                var meta = dimension.GetMetadata(coords);
+                if (IsHydrated(coords, dimension) && meta != 15)
                     meta++;
                 else
                 {
                     meta--;
                     if (meta == 0)
                     {
-                        world.SetBlockID(coords, BlockID);
+                        dimension.SetBlockID(coords, BlockID);
                         return;
                     }
                 }
-                world.SetMetadata(coords, meta);
+                dimension.SetMetadata(coords, meta);
             }
-            var chunk = world.FindChunk(coords);
+            var chunk = dimension.FindChunk(coords);
             server.Scheduler.ScheduleEvent("farmland", chunk,
                 TimeSpan.FromSeconds(UpdateIntervalSeconds),
-                _server => HydrationCheckEvent(_server, coords, world));
+                _server => HydrationCheckEvent(_server, coords, dimension));
         }
 
-        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
+        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
-            if (IsHydrated(descriptor.Coordinates, world))
+            if (IsHydrated(descriptor.Coordinates, dimension))
             {
-                world.SetMetadata(descriptor.Coordinates, 1);
+                dimension.SetMetadata(descriptor.Coordinates, 1);
             }
-            var chunk = world.FindChunk(descriptor.Coordinates);
+            var chunk = dimension.FindChunk(descriptor.Coordinates);
             user.Server.Scheduler.ScheduleEvent("farmland", chunk,
                 TimeSpan.FromSeconds(UpdateIntervalSeconds),
-                server => HydrationCheckEvent(server, descriptor.Coordinates, world));
+                server => HydrationCheckEvent(server, descriptor.Coordinates, dimension));
         }
 
-        public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IDimension world)
+        public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IDimension dimension)
         {
-            var chunk = world.FindChunk(coords);
+            var chunk = dimension.FindChunk(coords);
             server.Scheduler.ScheduleEvent("farmland", chunk,
                 TimeSpan.FromSeconds(UpdateIntervalSeconds),
-                s => HydrationCheckEvent(s, coords, world));
+                s => HydrationCheckEvent(s, coords, dimension));
         }
     }
 }

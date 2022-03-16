@@ -35,7 +35,7 @@ namespace TrueCraft.Core.Logic.Blocks
             }
         }
 
-        public override bool BlockRightClicked(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
+        public override bool BlockRightClicked(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
             Server.ServerOnly.Assert();
 
@@ -49,7 +49,7 @@ namespace TrueCraft.Core.Logic.Blocks
             window.WindowClosed += (sender, e) =>
             {
                 // TODO BUG: this does not appear to be called (Items do not spawn, and remain in 2x2 (3x3?) Crafting Grid for next opening).
-                var entityManager = user.Server.GetEntityManagerForWorld(world);
+                var entityManager = user.Server.GetEntityManagerForWorld(dimension);
                 ItemStack[,] inputs = window.CraftingGrid.GetItemStacks();
                 foreach(ItemStack item in inputs)
                 {

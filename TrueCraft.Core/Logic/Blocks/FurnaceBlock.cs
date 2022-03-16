@@ -173,9 +173,9 @@ namespace TrueCraft.Core.Logic.Blocks
                 set => InternalSlotSet(OutputIndex, value);
             }
 
-            public void Save(IDimension world, GlobalVoxelCoordinates coordinates)
+            public void Save(IDimension dimension, GlobalVoxelCoordinates coordinates)
             {
-                world.SetTileEntity(coordinates, _furnaceState);
+                dimension.SetTileEntity(coordinates, _furnaceState);
             }
 
             #region IFurnaceSlots
@@ -372,7 +372,7 @@ namespace TrueCraft.Core.Logic.Blocks
         protected static Dictionary<GlobalVoxelCoordinates, List<FurnaceWindowUser>> _trackedFurnaceWindows = new Dictionary<GlobalVoxelCoordinates, List<FurnaceWindowUser>>();
         protected static Dictionary<GlobalVoxelCoordinates, FurnaceState> _trackedFurnaceStates = new Dictionary<GlobalVoxelCoordinates, FurnaceState>();
 
-        private FurnaceState GetState(IDimension world, GlobalVoxelCoordinates coords)
+        private FurnaceState GetState(IDimension dimension, GlobalVoxelCoordinates coords)
         {
             ServerOnly.Assert();
 
@@ -380,11 +380,11 @@ namespace TrueCraft.Core.Logic.Blocks
                 return _trackedFurnaceStates[coords];
 
             FurnaceState rv;
-            NbtCompound tileEntity = world.GetTileEntity(coords);
+            NbtCompound tileEntity = dimension.GetTileEntity(coords);
             if (tileEntity == null)
             {
                 rv = new FurnaceState();
-                rv.Save(world, coords);
+                rv.Save(dimension, coords);
             }
             else
             {
@@ -430,51 +430,51 @@ namespace TrueCraft.Core.Logic.Blocks
                 window.WindowID, UpdateProgressPacket.ProgressTarget.AvailableHeat, burn));
         }
 
-        private void SetState(IDimension world, GlobalVoxelCoordinates coords, FurnaceState state)
+        private void SetState(IDimension dimension, GlobalVoxelCoordinates coords, FurnaceState state)
         {
-            state.Save(world, coords);
+            state.Save(dimension, coords);
             UpdateWindows(coords, state);
         }
 
-        public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IDimension world)
+        public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IDimension dimension)
         {
             ServerOnly.Assert();
 
-            FurnaceState state = GetState(world, coords);
+            FurnaceState state = GetState(dimension, coords);
             if (state.BurnTimeRemaining > 0)
-                ScheduleFurnace(server.Scheduler, world, coords, ItemRepository.Get());
+                ScheduleFurnace(server.Scheduler, dimension, coords, ItemRepository.Get());
         }
 
-        public override void BlockMined(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
+        public override void BlockMined(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
             ServerOnly.Assert();
 
             // TODO clean up running Furnace
 
-            var entity = world.GetTileEntity(descriptor.Coordinates);
+            var entity = dimension.GetTileEntity(descriptor.Coordinates);
             if (entity != null)
             {
                 foreach (var item in (NbtList)entity["Items"])
                 {
-                    var manager = user.Server.GetEntityManagerForWorld(world);
+                    var manager = user.Server.GetEntityManagerForWorld(dimension);
                     var slot = ItemStack.FromNbt((NbtCompound)item);
                     manager.SpawnEntity(new ItemEntity(new Vector3(descriptor.Coordinates.X + 0.5, descriptor.Coordinates.Y + 0.5, descriptor.Coordinates.Z + 0.5), slot));
                 }
-                world.SetTileEntity(descriptor.Coordinates, null);
+                dimension.SetTileEntity(descriptor.Coordinates, null);
             }
-            base.BlockMined(descriptor, face, world, user);
+            base.BlockMined(descriptor, face, dimension, user);
         }
 
-        public override bool BlockRightClicked(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
+        public override bool BlockRightClicked(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
             ServerOnly.Assert();
 
-            FurnaceState state = GetState(world, descriptor.Coordinates);
+            FurnaceState state = GetState(dimension, descriptor.Coordinates);
             IInventoryFactory<IServerSlot> factory = new InventoryFactory<IServerSlot>();
             IFurnaceWindow<IServerSlot> window = factory.NewFurnaceWindow(user.Server.ItemRepository,
                 SlotFactory<IServerSlot>.Get(), WindowIDs.GetWindowID(),
                 state, user.Inventory, user.Hotbar,
-                world, descriptor.Coordinates);
+                dimension, descriptor.Coordinates);
 
             user.OpenWindow(window);
             if (!_trackedFurnaceWindows.ContainsKey(descriptor.Coordinates))
@@ -493,17 +493,17 @@ namespace TrueCraft.Core.Logic.Blocks
         /// Tries to change the Furnace from the Off state to the Lit state.
         /// </summary>
         /// <param name="scheduler"></param>
-        /// <param name="world"></param>
+        /// <param name="dimension"></param>
         /// <param name="coords"></param>
         /// <param name="itemRepository"></param>
-        public void TryStartFurnace(IEventScheduler scheduler, IDimension world,
+        public void TryStartFurnace(IEventScheduler scheduler, IDimension dimension,
             GlobalVoxelCoordinates coords, IItemRepository itemRepository)
         {
             // If the furnace is already scheduled, it is already lit.
             if (_scheduledFurnaces.ContainsKey(coords))
                 return;
 
-            FurnaceState state = GetState(world, coords);
+            FurnaceState state = GetState(dimension, coords);
             ItemStack inputStack = state.Ingredient;
             ItemStack fuelStack = state.Fuel;
             ItemStack outputStack = state.Output;
@@ -514,9 +514,9 @@ namespace TrueCraft.Core.Logic.Blocks
             if (!CanStartBurningFuel(itemRepository, fuel, input, outputStack))
                 return;
 
-            ScheduleFurnace(scheduler, world, coords, itemRepository);
+            ScheduleFurnace(scheduler, dimension, coords, itemRepository);
 
-            world.SetBlockID(coords, LitFurnaceBlock.BlockID);
+            dimension.SetBlockID(coords, LitFurnaceBlock.BlockID);
 
             state.BurnTimeTotal = (short)(fuel.BurnTime.TotalSeconds * 20);  // TODO hard-coded ticks per second
             state.BurnTimeRemaining = state.BurnTimeTotal;
@@ -566,23 +566,23 @@ namespace TrueCraft.Core.Logic.Blocks
         }
 
         private void ScheduleFurnace(IEventScheduler scheduler,
-            IDimension world, GlobalVoxelCoordinates coords, IItemRepository itemRepository)
+            IDimension dimension, GlobalVoxelCoordinates coords, IItemRepository itemRepository)
         {
             FurnaceEventSubject subject = new FurnaceEventSubject();
             _scheduledFurnaces[coords] = subject;
             // TODO hard-coded TimeSpan that must be coordinated with hard-coded values in other places.
             scheduler.ScheduleEvent("smelting", subject, TimeSpan.FromSeconds(1),
-                server => UpdateFurnace(server.Scheduler, world, coords, itemRepository));
+                server => UpdateFurnace(server.Scheduler, dimension, coords, itemRepository));
         }
 
-        private void UpdateFurnace(IEventScheduler scheduler, IDimension world, GlobalVoxelCoordinates coords, IItemRepository itemRepository)
+        private void UpdateFurnace(IEventScheduler scheduler, IDimension dimension, GlobalVoxelCoordinates coords, IItemRepository itemRepository)
         {
             // This furnace is no longer scheduled, so remove it.
             if (!_scheduledFurnaces.ContainsKey(coords))
                 return;
             _scheduledFurnaces.Remove(coords);
 
-            FurnaceState state = GetState(world, coords);
+            FurnaceState state = GetState(dimension, coords);
             ItemStack inputStack = state.Ingredient;
             ItemStack fuelStack = state.Fuel;
             ItemStack outputStack = state.Output;
@@ -641,7 +641,7 @@ namespace TrueCraft.Core.Logic.Blocks
             }
 
             if (state.BurnTimeRemaining > 0)
-                ScheduleFurnace(scheduler, world, coords, itemRepository);
+                ScheduleFurnace(scheduler, dimension, coords, itemRepository);
 
             UpdateWindows(coords, state);
         }
@@ -651,9 +651,9 @@ namespace TrueCraft.Core.Logic.Blocks
             return new Tuple<int, int>(13, 2);
         }
 
-        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
+        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
-            world.SetMetadata(descriptor.Coordinates, (byte)MathHelper.DirectionByRotationFlat(user.Entity.Yaw, true));
+            dimension.SetMetadata(descriptor.Coordinates, (byte)MathHelper.DirectionByRotationFlat(user.Entity.Yaw, true));
         }
     }
 

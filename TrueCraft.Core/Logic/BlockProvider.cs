@@ -27,13 +27,13 @@ namespace TrueCraft.Core.Logic
 
         public static IBlockRepository BlockRepository { get; set; }
 
-        public virtual void BlockLeftClicked(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
+        public virtual void BlockLeftClicked(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
             ServerOnly.Assert();
 
             var coords = descriptor.Coordinates + MathHelper.BlockFaceToCoordinates(face);
-            if (world.IsValidPosition(coords) && world.GetBlockID(coords) == FireBlock.BlockID)
-                world.SetBlockID(coords, 0);
+            if (dimension.IsValidPosition(coords) && dimension.GetBlockID(coords) == FireBlock.BlockID)
+                dimension.SetBlockID(coords, 0);
         }
 
         /// <summary>
@@ -41,36 +41,36 @@ namespace TrueCraft.Core.Logic
         /// </summary>
         /// <param name="descriptor"></param>
         /// <param name="face"></param>
-        /// <param name="world"></param>
+        /// <param name="dimension"></param>
         /// <param name="user"></param>
         /// <returns>True if the right-click has been handled; false otherwise.</returns>
-        public virtual bool BlockRightClicked(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
+        public virtual bool BlockRightClicked(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
             ServerOnly.Assert();
 
             return true;
         }
 
-        public virtual void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
+        public virtual void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
             ServerOnly.Assert();
 
             // This space intentionally left blank
         }
 
-        public virtual void BlockMined(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
+        public virtual void BlockMined(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
             ServerOnly.Assert();
 
-            GenerateDropEntity(descriptor, world, user.Server, user.SelectedItem);
-            world.SetBlockID(descriptor.Coordinates, 0);
+            GenerateDropEntity(descriptor, dimension, user.Server, user.SelectedItem);
+            dimension.SetBlockID(descriptor.Coordinates, 0);
         }
 
-        public void GenerateDropEntity(BlockDescriptor descriptor, IDimension world, IMultiplayerServer server, ItemStack item)
+        public void GenerateDropEntity(BlockDescriptor descriptor, IDimension dimension, IMultiplayerServer server, ItemStack item)
         {
             ServerOnly.Assert();
 
-            var entityManager = server.GetEntityManagerForWorld(world);
+            var entityManager = server.GetEntityManagerForWorld(dimension);
             var items = new ItemStack[0];
             var type = ToolType.None;
             var material = ToolMaterial.None;
@@ -97,28 +97,28 @@ namespace TrueCraft.Core.Logic
             }
         }
 
-        public virtual bool IsSupported(BlockDescriptor descriptor, IMultiplayerServer server, IDimension world)
+        public virtual bool IsSupported(BlockDescriptor descriptor, IMultiplayerServer server, IDimension dimension)
         {
             ServerOnly.Assert();
 
             var support = GetSupportDirection(descriptor);
             if (support != Vector3i.Zero)
             {
-                var supportingBlock = server.BlockRepository.GetBlockProvider(world.GetBlockID(descriptor.Coordinates + support));
+                var supportingBlock = server.BlockRepository.GetBlockProvider(dimension.GetBlockID(descriptor.Coordinates + support));
                 if (!supportingBlock.Opaque)
                     return false;
             }
             return true;
         }
 
-        public virtual void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IDimension world)
+        public virtual void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IDimension dimension)
         {
             ServerOnly.Assert();
 
-            if (!IsSupported(descriptor, server, world))
+            if (!IsSupported(descriptor, server, dimension))
             {
-                GenerateDropEntity(descriptor, world, server, ItemStack.EmptyStack);
-                world.SetBlockID(descriptor.Coordinates, 0);
+                GenerateDropEntity(descriptor, dimension, server, ItemStack.EmptyStack);
+                dimension.SetBlockID(descriptor.Coordinates, 0);
             }
         }
 
@@ -127,14 +127,14 @@ namespace TrueCraft.Core.Logic
             return new[] { new ItemStack(descriptor.ID, 1, descriptor.Metadata) };
         }
 
-        public virtual void ItemUsedOnEntity(ItemStack item, IEntity usedOn, IDimension world, IRemoteClient user)
+        public virtual void ItemUsedOnEntity(ItemStack item, IEntity usedOn, IDimension dimension, IRemoteClient user)
         {
             ServerOnly.Assert();
 
             // This space intentionally left blank
         }
 
-        public virtual void ItemUsedOnNothing(ItemStack item, IDimension world, IRemoteClient user)
+        public virtual void ItemUsedOnNothing(ItemStack item, IDimension dimension, IRemoteClient user)
         {
             ServerOnly.Assert();
 
@@ -151,15 +151,15 @@ namespace TrueCraft.Core.Logic
             SnowfallBlock.BlockID
         };
 
-        public virtual void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension world, IRemoteClient user)
+        public virtual void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension dimension, IRemoteClient user)
         {
             ServerOnly.Assert();
 
-            var old = world.GetBlockData(coordinates);
+            var old = dimension.GetBlockData(coordinates);
             if (!Overwritable.Any(b => b == old.ID))
             {
                 coordinates += MathHelper.BlockFaceToCoordinates(face);
-                old = world.GetBlockData(coordinates);
+                old = dimension.GetBlockData(coordinates);
                 if (!Overwritable.Any(b => b == old.ID))
                     return;
             }
@@ -167,7 +167,7 @@ namespace TrueCraft.Core.Logic
             // Test for entities
             if (BoundingBox.HasValue)
             {
-                var em = user.Server.GetEntityManagerForWorld(world);
+                var em = user.Server.GetEntityManagerForWorld(dimension);
                 var entities = em.EntitiesInRange((Vector3)coordinates, 3);
                 var box = new BoundingBox(BoundingBox.Value.Min + (Vector3)coordinates,
                     BoundingBox.Value.Max + (Vector3)coordinates);
@@ -190,13 +190,13 @@ namespace TrueCraft.Core.Logic
             }
 
             // Place block
-            world.SetBlockID(coordinates, ID);
-            world.SetMetadata(coordinates, (byte)item.Metadata);
+            dimension.SetBlockID(coordinates, ID);
+            dimension.SetMetadata(coordinates, (byte)item.Metadata);
 
-            BlockPlaced(world.GetBlockData(coordinates), face, world, user);
+            BlockPlaced(dimension.GetBlockData(coordinates), face, dimension, user);
 
-            if (!IsSupported(world.GetBlockData(coordinates), user.Server, world))
-                world.SetBlockData(coordinates, old);
+            if (!IsSupported(dimension.GetBlockData(coordinates), user.Server, dimension))
+                dimension.SetBlockData(coordinates, old);
             else
             {
                 item.Count--;
@@ -204,14 +204,14 @@ namespace TrueCraft.Core.Logic
             }
         }
 
-        public virtual void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IDimension world)
+        public virtual void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IDimension dimension)
         {
             ServerOnly.Assert();
 
             // This space intentionally left blank
         }
 
-        public virtual void TileEntityLoadedForClient(BlockDescriptor descriptor, IDimension world, NbtCompound entity, IRemoteClient client)
+        public virtual void TileEntityLoadedForClient(BlockDescriptor descriptor, IDimension dimension, NbtCompound entity, IRemoteClient client)
         {
             ServerOnly.Assert();
 

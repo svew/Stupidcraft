@@ -19,7 +19,7 @@ namespace TrueCraft.Core.Entities
 
         public int EntityID { get; set; }
         public IEntityManager EntityManager { get; set; }
-        public IDimension World { get; set; }
+        public IDimension Dimension { get; set; }
 
         protected Vector3 _Position;
         public virtual Vector3 Position

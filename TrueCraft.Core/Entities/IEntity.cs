@@ -18,7 +18,7 @@ namespace TrueCraft.Core.Entities
         MetadataDictionary Metadata { get; }
         Size Size { get; }
         IEntityManager EntityManager { get; set; }
-        IDimension World { get; set; }
+        IDimension Dimension { get; set;  }
         bool SendMetadataToClients { get; }
         void Update(IEntityManager entityManager);
     }

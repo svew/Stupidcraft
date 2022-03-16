@@ -34,7 +34,7 @@ namespace TrueCraft.Core.World
         /// </summary>
         public RegionCoordinates Position { get; }
 
-        public Dimension World { get; }
+        public Dimension Dimension { get; }  // TODO should be IDimension
 
         private HashSet<LocalChunkCoordinates> DirtyChunks { get; } = new HashSet<LocalChunkCoordinates>(Width * Depth);
 
@@ -47,19 +47,19 @@ namespace TrueCraft.Core.World
         /// </summary>
         /// <params>
         /// <param name="position"></param>
-        /// <param name="world"></param>
+        /// <param name="dimension"></param>
         /// </params>
-        public Region(RegionCoordinates position, Dimension world)
+        public Region(RegionCoordinates position, IDimension dimension)
         {
             _chunks = new ConcurrentDictionary<LocalChunkCoordinates, IChunk>(Environment.ProcessorCount, Width * Depth);
             Position = position;
-            World = world;
+            Dimension = (Dimension)dimension;
         }
 
         /// <summary>
         /// Creates a region from the given region file.
         /// </summary>
-        public Region(RegionCoordinates position, Dimension world, string file) : this(position, world)
+        public Region(RegionCoordinates position, IDimension dimension, string file) : this(position, dimension)
         {
             if (File.Exists(file))
             {
@@ -100,7 +100,7 @@ namespace TrueCraft.Core.World
                     var chunkData = GetChunkFromTable(position);
                     if (chunkData == null)
                     {
-                        if (World.ChunkProvider == null)
+                        if (Dimension.ChunkProvider == null)
                             throw new ArgumentException("The requested chunk is not loaded.", "position");
                         if (generate)
                             GenerateChunk(position);
@@ -138,9 +138,9 @@ namespace TrueCraft.Core.World
                     //    then cross over from one thread to another, leading to each thread trying to obtain
                     //    a lock owned by the other - a deadlock.  Moving the lighting operations outside the
                     //    lock is to resolve this.
-                    World.OnChunkLoaded(new ChunkLoadedEventArgs(chunk));
+                    Dimension.OnChunkLoaded(new ChunkLoadedEventArgs(chunk));
                 }
-                else if (World.ChunkProvider == null)
+                else if (Dimension.ChunkProvider == null)
                     throw new ArgumentException("The requested chunk is not loaded.", nameof(position));
                 else
                 {
@@ -161,12 +161,12 @@ namespace TrueCraft.Core.World
         public void GenerateChunk(LocalChunkCoordinates position)
         {
             GlobalChunkCoordinates globalPosition = this.Position.GetGlobalChunkCoordinates(position);
-            var chunk = World.ChunkProvider.GenerateChunk(World, globalPosition);
+            var chunk = Dimension.ChunkProvider.GenerateChunk(Dimension, globalPosition);
             chunk.IsModified = true;
             chunk.ParentRegion = this;
             DirtyChunks.Add(position);
             _chunks[position] = chunk;
-            World.OnChunkGenerated(new ChunkLoadedEventArgs(chunk));
+            Dimension.OnChunkGenerated(new ChunkLoadedEventArgs(chunk));
         }
 
         /// <summary>

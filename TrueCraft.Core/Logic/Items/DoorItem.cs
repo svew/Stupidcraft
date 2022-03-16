@@ -25,13 +25,13 @@ namespace TrueCraft.Core.Logic.Items
 
         public override sbyte MaximumStack { get { return 1; } }
 
-        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension world, IRemoteClient user)
+        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension dimension, IRemoteClient user)
         {
             ServerOnly.Assert();
 
             var bottom = coordinates + MathHelper.BlockFaceToCoordinates(face);
             var top = bottom + Vector3i.Up;
-            if (world.GetBlockID(top) != 0 || world.GetBlockID(bottom) != 0)
+            if (dimension.GetBlockID(top) != 0 || dimension.GetBlockID(bottom) != 0)
                 return;
             DoorFlags direction;
             switch (MathHelper.DirectionByRotationFlat(user.Entity.Yaw))
@@ -50,10 +50,10 @@ namespace TrueCraft.Core.Logic.Items
                     break;
             }
             user.Server.BlockUpdatesEnabled = false;
-            world.SetBlockID(bottom, BlockID);
-            world.SetMetadata(bottom, (byte)direction);
-            world.SetBlockID(top, BlockID);
-            world.SetMetadata(top, (byte)(direction | DoorFlags.Upper));
+            dimension.SetBlockID(bottom, BlockID);
+            dimension.SetMetadata(bottom, (byte)direction);
+            dimension.SetBlockID(top, BlockID);
+            dimension.SetMetadata(top, (byte)(direction | DoorFlags.Upper));
             user.Server.BlockUpdatesEnabled = true;
             item.Count--;
             user.Hotbar[user.SelectedSlot].Item = item;

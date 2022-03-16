@@ -41,20 +41,20 @@ namespace TrueCraft.Core.Inventory
         public IChestWindow<T> NewChestWindow(IItemRepository itemRepository,
             ISlotFactory<T> slotFactory,
             sbyte windowID, ISlots<T> mainInventory, ISlots<T> hotBar,
-            IDimension world,
+            IDimension dimension,
             GlobalVoxelCoordinates location, GlobalVoxelCoordinates otherHalf)
         {
             return _impl.NewChestWindow(itemRepository, slotFactory, windowID,
-                mainInventory, hotBar, world, location, otherHalf);
+                mainInventory, hotBar, dimension, location, otherHalf);
         }
 
         public IFurnaceWindow<T> NewFurnaceWindow(IItemRepository itemRepository, ISlotFactory<T> slotFactory,
             sbyte windowID, IFurnaceSlots furnaceSlots,
             ISlots<T> mainInventory, ISlots<T> hotBar,
-            IDimension world, GlobalVoxelCoordinates location)
+            IDimension dimension, GlobalVoxelCoordinates location)
         {
             return _impl.NewFurnaceWindow(itemRepository, slotFactory, windowID,
-                furnaceSlots, mainInventory, hotBar, world, location);
+                furnaceSlots, mainInventory, hotBar, dimension, location);
         }
     }
 }

@@ -18,12 +18,12 @@ namespace TrueCraft.Core.TerrainGen.Decorations
             return true;
         }
 
-        public override bool GenerateAt(IDimension world, IChunk chunk, LocalVoxelCoordinates location)
+        public override bool GenerateAt(IDimension dimension, IChunk chunk, LocalVoxelCoordinates location)
         {
             if (!ValidLocation(location))
                 return false;
 
-            var random = new Random(world.Seed);
+            var random = new Random(dimension.Seed);
             int height = random.Next(4, 5);
             GenerateColumn(chunk, location, height, WoodBlock.BlockID, 0x0);
             LocalVoxelCoordinates LeafLocation = new LocalVoxelCoordinates(location.X, location.Y + height, location.Z);

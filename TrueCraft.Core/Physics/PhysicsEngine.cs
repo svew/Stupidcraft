@@ -7,15 +7,16 @@ namespace TrueCraft.Core.Physics
 {
     public class PhysicsEngine : IPhysicsEngine
     {
-        public PhysicsEngine(IDimension world, IBlockPhysicsProvider physicsProvider)
+        private IDimension _dimension;
+
+        public PhysicsEngine(IDimension dimension, IBlockPhysicsProvider physicsProvider)
         {
-            World = world;
+            _dimension = dimension;
             Entities = new List<IPhysicsEntity>();
             EntityLock = new object();
             BlockPhysicsProvider = physicsProvider;
         }
 
-        public IDimension World { get; set; }
         public IBlockPhysicsProvider BlockPhysicsProvider { get; set; }
         public List<IPhysicsEntity> Entities { get; set; }
         private object EntityLock { get; set; }
@@ -133,10 +134,10 @@ namespace TrueCraft.Core.Physics
                     for (int y = (int)(Math.Floor(testBox.Min.Y)); y <= (int)(Math.Ceiling(testBox.Max.Y)); y++)
                     {
                         var coords = new GlobalVoxelCoordinates(x, y, z);
-                        if (!World.IsValidPosition(coords))
+                        if (!_dimension.IsValidPosition(coords))
                             continue;
 
-                        var _box = BlockPhysicsProvider.GetBoundingBox(World, coords);
+                        var _box = BlockPhysicsProvider.GetBoundingBox(_dimension, coords);
                         if (_box == null)
                             continue;
 
@@ -201,10 +202,10 @@ namespace TrueCraft.Core.Physics
                     for (int y = (int)(Math.Floor(testBox.Min.Y)); y <= (int)(Math.Ceiling(testBox.Max.Y)); y++)
                     {
                         var coords = new GlobalVoxelCoordinates(x, y, z);
-                        if (!World.IsValidPosition(coords))
+                        if (!_dimension.IsValidPosition(coords))
                             continue;
 
-                        var _box = BlockPhysicsProvider.GetBoundingBox(World, coords);
+                        var _box = BlockPhysicsProvider.GetBoundingBox(_dimension, coords);
                         if (_box == null)
                             continue;
 
@@ -290,10 +291,10 @@ namespace TrueCraft.Core.Physics
                     for (int y = (int)(Math.Floor(testBox.Min.Y)); y <= (int)(Math.Ceiling(testBox.Max.Y)); y++)
                     {
                         var coords = new GlobalVoxelCoordinates(x, y, z);
-                        if (!World.IsValidPosition(coords))
+                        if (!_dimension.IsValidPosition(coords))
                             continue;
 
-                        var _box = BlockPhysicsProvider.GetBoundingBox(World, coords);
+                        var _box = BlockPhysicsProvider.GetBoundingBox(_dimension, coords);
                         if (_box == null)
                             continue;
 
@@ -379,10 +380,10 @@ namespace TrueCraft.Core.Physics
                     for (int y = (int)(Math.Floor(testBox.Min.Y)); y <= (int)(Math.Ceiling(testBox.Max.Y)); y++)
                     {
                         var coords = new GlobalVoxelCoordinates(x, y, z);
-                        if (!World.IsValidPosition(coords))
+                        if (!_dimension.IsValidPosition(coords))
                             continue;
 
-                        var _box = BlockPhysicsProvider.GetBoundingBox(World, coords);
+                        var _box = BlockPhysicsProvider.GetBoundingBox(_dimension, coords);
                         if (_box == null)
                             continue;
 

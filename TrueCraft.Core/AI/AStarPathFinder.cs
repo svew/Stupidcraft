@@ -38,23 +38,23 @@ namespace TrueCraft.Core.AI
             return new PathResult { Waypoints = list };
         }
 
-        private bool CanOccupyVoxel(IDimension world, BoundingBox box, GlobalVoxelCoordinates voxel)
+        private bool CanOccupyVoxel(IDimension dimension, BoundingBox box, GlobalVoxelCoordinates voxel)
         {
-            var id = world.GetBlockID(voxel);
-            if (world.BlockRepository == null)
+            var id = dimension.GetBlockID(voxel);
+            if (dimension.BlockRepository == null)
                 return id == 0;
-            var provider = world.BlockRepository.GetBlockProvider(id);
+            var provider = dimension.BlockRepository.GetBlockProvider(id);
             if (provider == null)
                 return true;
             return provider.BoundingBox == null;
         }
 
-        private IEnumerable<GlobalVoxelCoordinates> GetNeighbors(IDimension world, BoundingBox subject, GlobalVoxelCoordinates current)
+        private IEnumerable<GlobalVoxelCoordinates> GetNeighbors(IDimension dimension, BoundingBox subject, GlobalVoxelCoordinates current)
         {
             for (int i = 0; i < Neighbors.Length; i++)
             {
                 var next = Neighbors[i] + current;
-                if (CanOccupyVoxel(world, subject, next))
+                if (CanOccupyVoxel(dimension, subject, next))
                     yield return next;
             }
             for (int i = 0; i < DiagonalNeighbors.Length; i++)
@@ -62,14 +62,14 @@ namespace TrueCraft.Core.AI
                 var pair = DiagonalNeighbors[i];
                 var next = pair[0] + pair[1] + current;
 
-                if (CanOccupyVoxel(world, subject, next)
-                    && CanOccupyVoxel(world, subject, pair[0] + current)
-                    && CanOccupyVoxel(world, subject, pair[1] + current))
+                if (CanOccupyVoxel(dimension, subject, next)
+                    && CanOccupyVoxel(dimension, subject, pair[0] + current)
+                    && CanOccupyVoxel(dimension, subject, pair[1] + current))
                     yield return next;
             }
         }
 
-        public PathResult FindPath(IDimension world, BoundingBox subject, GlobalVoxelCoordinates start, GlobalVoxelCoordinates goal)
+        public PathResult FindPath(IDimension dimension, BoundingBox subject, GlobalVoxelCoordinates start, GlobalVoxelCoordinates goal)
         {
             // Thanks to www.redblobgames.com/pathfinding/a-star/implementation.html
             var parents = new Dictionary<GlobalVoxelCoordinates, GlobalVoxelCoordinates>();
@@ -89,7 +89,7 @@ namespace TrueCraft.Core.AI
 
                 closedset.Add(current);
 
-                foreach (var next in GetNeighbors(world, subject, current))
+                foreach (var next in GetNeighbors(dimension, subject, current))
                 {
                     if (closedset.Contains(next))
                         continue;

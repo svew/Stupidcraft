@@ -21,12 +21,12 @@ namespace TrueCraft.Core.Inventory
         public IChestWindow<T> NewChestWindow(IItemRepository itemRepository,
             ISlotFactory<T> slotFactory,
             sbyte windowID, ISlots<T> mainInventory, ISlots<T> hotBar,
-            IDimension world,
+            IDimension dimension,
             GlobalVoxelCoordinates location, GlobalVoxelCoordinates otherHalf);
 
         public IFurnaceWindow<T> NewFurnaceWindow(IItemRepository itemRepository, ISlotFactory<T> slotFactory,
             sbyte windowID, IFurnaceSlots furnaceSlots,
             ISlots<T> mainInventory, ISlots<T> hotBar,
-            IDimension world, GlobalVoxelCoordinates location);
+            IDimension dimension, GlobalVoxelCoordinates location);
     }
 }

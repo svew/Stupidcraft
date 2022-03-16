@@ -68,63 +68,63 @@ namespace TrueCraft.Core.Logic.Blocks
             Vector3i.South
         };
 
-        public void DoUpdate(IMultiplayerServer server, IDimension world, BlockDescriptor descriptor)
+        public void DoUpdate(IMultiplayerServer server, IDimension dimension, BlockDescriptor descriptor)
         {
             var down = descriptor.Coordinates + Vector3i.Down;
 
-            var current = world.GetBlockID(descriptor.Coordinates);
+            var current = dimension.GetBlockID(descriptor.Coordinates);
             if (current != FireBlock.BlockID && current != LavaBlock.BlockID && current != StationaryLavaBlock.BlockID)
                 return;
 
             // Decay
-            var meta = world.GetMetadata(descriptor.Coordinates);
+            var meta = dimension.GetMetadata(descriptor.Coordinates);
             meta++;
             if (meta == 0xE)
             {
-                if (!world.IsValidPosition(down) || world.GetBlockID(down) != NetherrackBlock.BlockID)
+                if (!dimension.IsValidPosition(down) || dimension.GetBlockID(down) != NetherrackBlock.BlockID)
                 {
-                    world.SetBlockID(descriptor.Coordinates, AirBlock.BlockID);
+                    dimension.SetBlockID(descriptor.Coordinates, AirBlock.BlockID);
                     return;
                 }
             }
-            world.SetMetadata(descriptor.Coordinates, meta);
+            dimension.SetMetadata(descriptor.Coordinates, meta);
 
             if (meta > 9)
             {
                 var pick = AdjacentBlocks[meta % AdjacentBlocks.Length];
                 var provider = BlockRepository
-                    .GetBlockProvider(world.GetBlockID(pick + descriptor.Coordinates));
+                    .GetBlockProvider(dimension.GetBlockID(pick + descriptor.Coordinates));
                 if (provider.Flammable)
-                    world.SetBlockID(pick + descriptor.Coordinates, AirBlock.BlockID);
+                    dimension.SetBlockID(pick + descriptor.Coordinates, AirBlock.BlockID);
             }
 
             // Spread
-            DoSpread(server, world, descriptor);
+            DoSpread(server, dimension, descriptor);
 
             // Schedule next event
-            ScheduleUpdate(server, world, descriptor);
+            ScheduleUpdate(server, dimension, descriptor);
         }
 
-        public void DoSpread(IMultiplayerServer server, IDimension world, BlockDescriptor descriptor)
+        public void DoSpread(IMultiplayerServer server, IDimension dimension, BlockDescriptor descriptor)
         {
             foreach (var coord in SpreadableBlocks)
             {
                 var check = descriptor.Coordinates + coord;
-                if (world.GetBlockID(check) == AirBlock.BlockID)
+                if (dimension.GetBlockID(check) == AirBlock.BlockID)
                 {
                     // Check if this is adjacent to a flammable block
                     foreach (var adj in AdjacentBlocks)
                     {
                         var provider = BlockRepository.GetBlockProvider(
-                           world.GetBlockID(check + adj));
+                           dimension.GetBlockID(check + adj));
                         if (provider.Flammable)
                         {
                             if (provider.Hardness == 0)
                                 check = check + adj;
 
                             // Spread to this block
-                            world.SetBlockID(check, FireBlock.BlockID);
-                            ScheduleUpdate(server, world, world.GetBlockData(check));
+                            dimension.SetBlockID(check, FireBlock.BlockID);
+                            ScheduleUpdate(server, dimension, dimension.GetBlockData(check));
                             break;
                         }
                     }
@@ -132,17 +132,17 @@ namespace TrueCraft.Core.Logic.Blocks
             }
         }
 
-        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
+        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
-            ScheduleUpdate(user.Server, world, descriptor);
+            ScheduleUpdate(user.Server, dimension, descriptor);
         }
 
-        public void ScheduleUpdate(IMultiplayerServer server, IDimension world, BlockDescriptor descriptor)
+        public void ScheduleUpdate(IMultiplayerServer server, IDimension dimension, BlockDescriptor descriptor)
         {
-            var chunk = world.FindChunk(descriptor.Coordinates);
+            var chunk = dimension.FindChunk(descriptor.Coordinates);
             server.Scheduler.ScheduleEvent("fire.spread", chunk,
                 TimeSpan.FromSeconds(MathHelper.Random.Next(MinSpreadTime, MaxSpreadTime)),
-                s => DoUpdate(s, world, descriptor));
+                s => DoUpdate(s, dimension, descriptor));
         }
     }
 }

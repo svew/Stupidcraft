@@ -49,11 +49,11 @@ namespace TrueCraft.Core.Entities
                     id = GravelBlock.BlockID;
                 EntityManager.DespawnEntity(this);
                 Vector3 position = collisionPoint + Vector3i.Up;
-                var hit = World.BlockRepository.GetBlockProvider(World.GetBlockID((GlobalVoxelCoordinates)position));
+                var hit = Dimension.BlockRepository.GetBlockProvider(Dimension.GetBlockID((GlobalVoxelCoordinates)position));
                 if (hit.BoundingBox == null && !BlockProvider.Overwritable.Any(o => o == hit.ID))
                     EntityManager.SpawnEntity(new ItemEntity(position + new Vector3(0.5), new ItemStack(id)));
                 else
-                    World.SetBlockID((GlobalVoxelCoordinates)position, id);
+                    Dimension.SetBlockID((GlobalVoxelCoordinates)position, id);
             }
         }
 

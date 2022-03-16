@@ -66,68 +66,68 @@ namespace TrueCraft.Core.Logic.Blocks
             public byte Level;
         }
 
-        public void ScheduleNextEvent(GlobalVoxelCoordinates coords, IDimension world, IMultiplayerServer server)
+        public void ScheduleNextEvent(GlobalVoxelCoordinates coords, IDimension dimension, IMultiplayerServer server)
         {
-            if (world.GetBlockID(coords) == StillID)
+            if (dimension.GetBlockID(coords) == StillID)
                 return;
-            var chunk = world.FindChunk(coords);
+            var chunk = dimension.FindChunk(coords);
             server.Scheduler.ScheduleEvent("fluid", chunk,
                 TimeSpan.FromSeconds(SecondsBetweenUpdates), (_server) =>
-                AutomataUpdate(_server, world, coords));
+                AutomataUpdate(_server, dimension, coords));
         }
 
-        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
+        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
             if (ID == FlowingID)
-                ScheduleNextEvent(descriptor.Coordinates, world, user.Server);
+                ScheduleNextEvent(descriptor.Coordinates, dimension, user.Server);
         }
 
-        public override void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IDimension world)
+        public override void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IDimension dimension)
         {
             if (ID == StillID)
             {
-                var outward = DetermineOutwardFlow(world, descriptor.Coordinates);
-                var inward = DetermineInwardFlow(world, descriptor.Coordinates);
+                var outward = DetermineOutwardFlow(dimension, descriptor.Coordinates);
+                var inward = DetermineInwardFlow(dimension, descriptor.Coordinates);
                 if (outward.Length != 0 || inward != descriptor.Metadata)
                 {
-                    world.SetBlockID(descriptor.Coordinates, FlowingID);
-                    ScheduleNextEvent(descriptor.Coordinates, world, server);
+                    dimension.SetBlockID(descriptor.Coordinates, FlowingID);
+                    ScheduleNextEvent(descriptor.Coordinates, dimension, server);
                 }
             }
         }
 
-        public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IDimension world)
+        public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IDimension dimension)
         {
-            ScheduleNextEvent(coords, world, server);
+            ScheduleNextEvent(coords, dimension, server);
         }
 
-        private void AutomataUpdate(IMultiplayerServer server, IDimension world, GlobalVoxelCoordinates coords)
+        private void AutomataUpdate(IMultiplayerServer server, IDimension dimension, GlobalVoxelCoordinates coords)
         {
-            if (world.GetBlockID(coords) != FlowingID && world.GetBlockID(coords) != StillID)
+            if (dimension.GetBlockID(coords) != FlowingID && dimension.GetBlockID(coords) != StillID)
                 return;
             server.BlockUpdatesEnabled = false;
-            var again = DoAutomata(server, world, coords);
+            var again = DoAutomata(server, dimension, coords);
             server.BlockUpdatesEnabled = true;
             if (again)
             {
-                var chunk = world.FindChunk(coords);
+                var chunk = dimension.FindChunk(coords);
                 server.Scheduler.ScheduleEvent("fluid", chunk,
                     TimeSpan.FromSeconds(SecondsBetweenUpdates), (_server) =>
-                    AutomataUpdate(_server, world, coords));
+                    AutomataUpdate(_server, dimension, coords));
             }
         }
 
-        public bool DoAutomata(IMultiplayerServer server, IDimension world, GlobalVoxelCoordinates coords)
+        public bool DoAutomata(IMultiplayerServer server, IDimension dimension, GlobalVoxelCoordinates coords)
         {
-            var previousLevel = world.GetMetadata(coords);
+            var previousLevel = dimension.GetMetadata(coords);
 
-            var inward = DetermineInwardFlow(world, coords);
-            var outward = DetermineOutwardFlow(world, coords);
+            var inward = DetermineInwardFlow(dimension, coords);
+            var outward = DetermineOutwardFlow(dimension, coords);
 
             if (outward.Length == 1 && outward[0].TargetBlock == coords + Vector3i.Down)
             {
                 // Exit early if we have placed a fluid block beneath us (and we aren't a source block)
-                FlowOutward(world, outward[0], server);
+                FlowOutward(dimension, outward[0], server);
                 if (previousLevel != 0)
                     return true;
             }
@@ -135,10 +135,10 @@ namespace TrueCraft.Core.Logic.Blocks
             // Process inward flow
             if (inward > MaximumFluidDepletion)
             {
-                world.SetBlockID(coords, 0);
+                dimension.SetBlockID(coords, 0);
                 return true;
             }
-            world.SetMetadata(coords, inward);
+            dimension.SetMetadata(coords, inward);
             if (inward == 0 && previousLevel != 0)
             {
                 // Exit early if we have become a source block
@@ -147,42 +147,42 @@ namespace TrueCraft.Core.Logic.Blocks
 
             // Process outward flow
             for (int i = 0; i < outward.Length; i++)
-                FlowOutward(world, outward[i], server);
+                FlowOutward(dimension, outward[i], server);
             // Set our block to still fluid if we are done spreading.
             if (outward.Length == 0 && inward == previousLevel)
             {
-                world.SetBlockID(coords, StillID);
+                dimension.SetBlockID(coords, StillID);
                 return false;
             }
             return true;
         }
 
-        private void FlowOutward(IDimension world, LiquidFlow target, IMultiplayerServer server)
+        private void FlowOutward(IDimension dimension, LiquidFlow target, IMultiplayerServer server)
         {
             // For each block we can flow into, generate an item entity if appropriate
-            var provider = world.BlockRepository.GetBlockProvider(world.GetBlockID(target.TargetBlock));
-            provider.GenerateDropEntity(new BlockDescriptor { Coordinates = target.TargetBlock, ID = provider.ID }, world, server, ItemStack.EmptyStack);
+            var provider = dimension.BlockRepository.GetBlockProvider(dimension.GetBlockID(target.TargetBlock));
+            provider.GenerateDropEntity(new BlockDescriptor { Coordinates = target.TargetBlock, ID = provider.ID }, dimension, server, ItemStack.EmptyStack);
             // And overwrite the block with a new fluid block.
-            world.SetBlockID(target.TargetBlock, FlowingID);
-            world.SetMetadata(target.TargetBlock, target.Level);
-            var chunk = world.FindChunk(target.TargetBlock);
+            dimension.SetBlockID(target.TargetBlock, FlowingID);
+            dimension.SetMetadata(target.TargetBlock, target.Level);
+            var chunk = dimension.FindChunk(target.TargetBlock);
             server.Scheduler.ScheduleEvent("fluid", chunk,
                 TimeSpan.FromSeconds(SecondsBetweenUpdates),
-                s => AutomataUpdate(s, world, target.TargetBlock));
+                s => AutomataUpdate(s, dimension, target.TargetBlock));
             if (FlowingID == LavaBlock.BlockID)
             {
                 (BlockRepository.GetBlockProvider(FireBlock.BlockID) as FireBlock).ScheduleUpdate(
-                    server, world, world.GetBlockData(target.TargetBlock));
+                    server, dimension, dimension.GetBlockData(target.TargetBlock));
             }
         }
 
         /// <summary>
         /// Examines neighboring blocks and determines the new fluid level that this block should adopt.
         /// </summary>
-        protected byte DetermineInwardFlow(IDimension world, GlobalVoxelCoordinates coords)
+        protected byte DetermineInwardFlow(IDimension dimension, GlobalVoxelCoordinates coords)
         {
-            var currentLevel = world.GetMetadata(coords);
-            var up = world.GetBlockID(coords + Vector3i.Up);
+            var currentLevel = dimension.GetMetadata(coords);
+            var up = dimension.GetBlockID(coords + Vector3i.Up);
             if (up == FlowingID || up == StillID) // Check for fluid above us
                 return currentLevel;
             else
@@ -193,10 +193,10 @@ namespace TrueCraft.Core.Logic.Blocks
                     int neighboringSourceBlocks = 0;
                     for (int i = 0; i < Neighbors.Length; i++)
                     {
-                        var nId = world.GetBlockID(coords + Neighbors[i]);
+                        var nId = dimension.GetBlockID(coords + Neighbors[i]);
                         if (nId == FlowingID || nId == StillID)
                         {
-                            var neighborLevel = world.GetMetadata(coords + Neighbors[i]);
+                            var neighborLevel = dimension.GetMetadata(coords + Neighbors[i]);
                             if (neighborLevel < highestNeighboringFluid)
                                 highestNeighboringFluid = neighborLevel;
                             if (neighborLevel == 0)
@@ -215,15 +215,15 @@ namespace TrueCraft.Core.Logic.Blocks
         /// <summary>
         /// Produces a list of outward flow targets that this block may flow towards.
         /// </summary>
-        protected LiquidFlow[] DetermineOutwardFlow(IDimension world, GlobalVoxelCoordinates coords)
+        protected LiquidFlow[] DetermineOutwardFlow(IDimension dimension, GlobalVoxelCoordinates coords)
         {
             // The maximum distance we will search for lower ground to flow towards
             const int dropCheckDistance = 5;
 
             var outwardFlow = new List<LiquidFlow>(5);
 
-            var currentLevel = world.GetMetadata(coords);
-            var blockBelow = world.BlockRepository.GetBlockProvider(world.GetBlockID(coords + Vector3i.Down));
+            var currentLevel = dimension.GetMetadata(coords);
+            var blockBelow = dimension.BlockRepository.GetBlockProvider(dimension.GetBlockID(coords + Vector3i.Down));
             if (blockBelow.Hardness == 0 && blockBelow.ID != FlowingID && blockBelow.ID != StillID)
             {
                 outwardFlow.Add(new LiquidFlow(coords + Vector3i.Down, 1));
@@ -249,10 +249,10 @@ namespace TrueCraft.Core.Logic.Blocks
                         if (Math.Abs(z) + Math.Abs(x) > dropCheckDistance)
                             continue;
                         Vector3i check = new Vector3i(x, -1, z);
-                        var c = world.BlockRepository.GetBlockProvider(world.GetBlockID(check + coords));
+                        var c = dimension.BlockRepository.GetBlockProvider(dimension.GetBlockID(check + coords));
                         if (c.Hardness == 0)
                         {
-                            if (!LineOfSight(world, check + coords, coords))
+                            if (!LineOfSight(dimension, check + coords, coords))
                                 continue;
                             if (coords.DistanceTo(check + coords) == coords.DistanceTo(nearestCandidate + coords))
                                 candidateFlowPoints.Add(check);
@@ -283,8 +283,8 @@ namespace TrueCraft.Core.Logic.Blocks
                     var xCoordinateCheck = new GlobalVoxelCoordinates(coords.X + location.X, coords.Y, coords.Z);
                     var zCoordinateCheck = new GlobalVoxelCoordinates(coords.X, coords.Y, coords.Z + location.Z);
 
-                    var xID = world.BlockRepository.GetBlockProvider(world.GetBlockID(xCoordinateCheck));
-                    var zID = world.BlockRepository.GetBlockProvider(world.GetBlockID(zCoordinateCheck));
+                    var xID = dimension.BlockRepository.GetBlockProvider(dimension.GetBlockID(xCoordinateCheck));
+                    var zID = dimension.BlockRepository.GetBlockProvider(dimension.GetBlockID(zCoordinateCheck));
 
                     if (xID.Hardness == 0 && xID.ID != FlowingID && xID.ID != StillID)
                     {
@@ -305,7 +305,7 @@ namespace TrueCraft.Core.Logic.Blocks
                 {
                     for (int i = 0; i < Neighbors.Length; i++)
                     {
-                        var b = world.BlockRepository.GetBlockProvider(world.GetBlockID(coords + Neighbors[i]));
+                        var b = dimension.BlockRepository.GetBlockProvider(dimension.GetBlockID(coords + Neighbors[i]));
                         if (b.Hardness == 0 && b.ID != StillID && b.ID != FlowingID)
                             outwardFlow.Add(new LiquidFlow(Neighbors[i] + coords, (byte)(currentLevel + 1)));
                     }
@@ -317,7 +317,7 @@ namespace TrueCraft.Core.Logic.Blocks
         /// <summary>
         /// Returns true if the given candidate coordinate has a line-of-sight to the given target coordinate.
         /// </summary>
-        private bool LineOfSight(IDimension world, GlobalVoxelCoordinates candidate, GlobalVoxelCoordinates target)
+        private bool LineOfSight(IDimension dimension, GlobalVoxelCoordinates candidate, GlobalVoxelCoordinates target)
         {
             GlobalVoxelCoordinates sight = new GlobalVoxelCoordinates(candidate.X, candidate.Y + 1, candidate.Z);
             Vector3i direction = (target - candidate).Clamp(1);
@@ -327,7 +327,7 @@ namespace TrueCraft.Core.Logic.Blocks
                 int z = candidate.Z;
                 do
                 {
-                    var p = world.BlockRepository.GetBlockProvider(world.GetBlockID(candidate));
+                    var p = dimension.BlockRepository.GetBlockProvider(dimension.GetBlockID(candidate));
                     if (p.Hardness != 0)
                         return false;
                     sight = new GlobalVoxelCoordinates(sight.X, sight.Y, sight.Z + direction.Z);

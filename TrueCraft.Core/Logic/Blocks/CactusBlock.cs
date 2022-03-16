@@ -42,19 +42,19 @@ namespace TrueCraft.Core.Logic.Blocks
             return new Tuple<int, int>(6, 4);
         }
 
-        public bool ValidCactusPosition(BlockDescriptor descriptor, IBlockRepository repository, IDimension world, bool checkNeighbor = true, bool checkSupport = true)
+        public bool ValidCactusPosition(BlockDescriptor descriptor, IBlockRepository repository, IDimension dimension, bool checkNeighbor = true, bool checkSupport = true)
         {
             if (checkNeighbor)
             {
                 GlobalVoxelCoordinates coords = descriptor.Coordinates;
                 foreach (Vector3i neighbor in Vector3i.Neighbors4)
-                    if (world.GetBlockID(coords + neighbor) != AirBlock.BlockID)
+                    if (dimension.GetBlockID(coords + neighbor) != AirBlock.BlockID)
                         return false;
             }
 
             if (checkSupport)
             {
-                var supportingBlock = repository.GetBlockProvider(world.GetBlockID(descriptor.Coordinates + Vector3i.Down));
+                var supportingBlock = repository.GetBlockProvider(dimension.GetBlockID(descriptor.Coordinates + Vector3i.Down));
                 if ((supportingBlock.ID != CactusBlock.BlockID) && (supportingBlock.ID != SandBlock.BlockID))
                     return false;
             }
@@ -62,43 +62,43 @@ namespace TrueCraft.Core.Logic.Blocks
             return true;
         }
 
-        private void TryGrowth(IMultiplayerServer server, GlobalVoxelCoordinates coords, IDimension world)
+        private void TryGrowth(IMultiplayerServer server, GlobalVoxelCoordinates coords, IDimension dimension)
         {
-            if (world.GetBlockID(coords) != BlockID)
+            if (dimension.GetBlockID(coords) != BlockID)
                 return;
             // Find current height of stalk
             int height = 0;
             for (int y = -MaxGrowHeight; y <= MaxGrowHeight; y++)
             {
-                if (world.GetBlockID(coords + (Vector3i.Down * y)) == BlockID)
+                if (dimension.GetBlockID(coords + (Vector3i.Down * y)) == BlockID)
                     height++;
             }
             if (height < MaxGrowHeight)
             {
-                var meta = world.GetMetadata(coords);
+                var meta = dimension.GetMetadata(coords);
                 meta++;
-                world.SetMetadata(coords, meta);
-                var chunk = world.FindChunk(coords);
+                dimension.SetMetadata(coords, meta);
+                var chunk = dimension.FindChunk(coords);
                 if (meta == 15)
                 {
-                    if (world.GetBlockID(coords + Vector3i.Up) == 0)
+                    if (dimension.GetBlockID(coords + Vector3i.Up) == 0)
                     {
-                        world.SetBlockID(coords + Vector3i.Up, BlockID);
+                        dimension.SetBlockID(coords + Vector3i.Up, BlockID);
                         server.Scheduler.ScheduleEvent("cactus", chunk,
                             TimeSpan.FromSeconds(MathHelper.Random.Next(MinGrowthSeconds, MaxGrowthSeconds)),
-                            (_server) => TryGrowth(_server, coords + Vector3i.Up, world));
+                            (_server) => TryGrowth(_server, coords + Vector3i.Up, dimension));
                     }
                 }
                 else
                 {
                     server.Scheduler.ScheduleEvent("cactus", chunk,
                         TimeSpan.FromSeconds(MathHelper.Random.Next(MinGrowthSeconds, MaxGrowthSeconds)),
-                        (_server) => TryGrowth(_server, coords, world));
+                        (_server) => TryGrowth(_server, coords, dimension));
                 }
             }
         }
 
-        public void DestroyCactus(BlockDescriptor descriptor, IMultiplayerServer server, IDimension world)
+        public void DestroyCactus(BlockDescriptor descriptor, IMultiplayerServer server, IDimension dimension)
         {
             var toDrop = 0;
 
@@ -106,9 +106,9 @@ namespace TrueCraft.Core.Logic.Blocks
             for (int y = descriptor.Coordinates.Y; y < 127; y++)
             {
                 var coordinates = new GlobalVoxelCoordinates(descriptor.Coordinates.X, y, descriptor.Coordinates.Z);
-                if (world.GetBlockID(coordinates) == CactusBlock.BlockID)
+                if (dimension.GetBlockID(coordinates) == CactusBlock.BlockID)
                 {
-                    world.SetBlockID(coordinates, AirBlock.BlockID);
+                    dimension.SetBlockID(coordinates, AirBlock.BlockID);
                     toDrop++;
                 }
             }
@@ -117,53 +117,53 @@ namespace TrueCraft.Core.Logic.Blocks
             for (int y = descriptor.Coordinates.Y - 1; y > 0; y--)
             {
                 var coordinates = new GlobalVoxelCoordinates(descriptor.Coordinates.X, y, descriptor.Coordinates.Z);
-                if (world.GetBlockID(coordinates) == CactusBlock.BlockID)
+                if (dimension.GetBlockID(coordinates) == CactusBlock.BlockID)
                 {
-                    world.SetBlockID(coordinates, AirBlock.BlockID);
+                    dimension.SetBlockID(coordinates, AirBlock.BlockID);
                     toDrop++;
                 }
             }
 
-            var manager = server.GetEntityManagerForWorld(world);
+            var manager = server.GetEntityManagerForWorld(dimension);
             manager.SpawnEntity(
                 new ItemEntity((Vector3)(descriptor.Coordinates + Vector3i.Up),
                     new ItemStack(CactusBlock.BlockID, (sbyte)toDrop)));
         }
 
-        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
+        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
-            if (ValidCactusPosition(descriptor, user.Server.BlockRepository, world))
-                base.BlockPlaced(descriptor, face, world, user);
+            if (ValidCactusPosition(descriptor, user.Server.BlockRepository, dimension))
+                base.BlockPlaced(descriptor, face, dimension, user);
             else
             {
-                world.SetBlockID(descriptor.Coordinates, AirBlock.BlockID);
+                dimension.SetBlockID(descriptor.Coordinates, AirBlock.BlockID);
 
-                var manager = user.Server.GetEntityManagerForWorld(world);
+                var manager = user.Server.GetEntityManagerForWorld(dimension);
                 manager.SpawnEntity(
                     new ItemEntity((Vector3)(descriptor.Coordinates + Vector3i.Up),
                         new ItemStack(CactusBlock.BlockID, (sbyte)1)));
                 // user.Inventory.PickUpStack() wasn't working?
             }
 
-            var chunk = world.FindChunk(descriptor.Coordinates);
+            var chunk = dimension.FindChunk(descriptor.Coordinates);
             user.Server.Scheduler.ScheduleEvent("cactus", chunk,
                 TimeSpan.FromSeconds(MathHelper.Random.Next(MinGrowthSeconds, MaxGrowthSeconds)),
-                (server) => TryGrowth(server, descriptor.Coordinates, world));
+                (server) => TryGrowth(server, descriptor.Coordinates, dimension));
         }
 
-        public override void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IDimension world)
+        public override void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IDimension dimension)
         {
-            if (!ValidCactusPosition(descriptor, server.BlockRepository, world))
-                DestroyCactus(descriptor, server, world);
-            base.BlockUpdate(descriptor, source, server, world);
+            if (!ValidCactusPosition(descriptor, server.BlockRepository, dimension))
+                DestroyCactus(descriptor, server, dimension);
+            base.BlockUpdate(descriptor, source, server, dimension);
         }
 
-        public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IDimension world)
+        public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IDimension dimension)
         {
-            var chunk = world.FindChunk(coords);
+            var chunk = dimension.FindChunk(coords);
             server.Scheduler.ScheduleEvent("cactus", chunk,
                 TimeSpan.FromSeconds(MathHelper.Random.Next(MinGrowthSeconds, MaxGrowthSeconds)),
-                s => TryGrowth(s, coords, world));
+                s => TryGrowth(s, coords, dimension));
         }
     }
 }

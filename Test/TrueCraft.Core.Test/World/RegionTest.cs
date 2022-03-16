@@ -15,9 +15,9 @@ namespace TrueCraft.Core.Test.World
         [OneTimeSetUp]
         public void SetUp()
         {
-            var world = new TrueCraft.Core.World.Dimension();
+            IDimension dimension = new TrueCraft.Core.World.Dimension();
             var assemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            Region = new Region(RegionCoordinates.Zero, world,
+            Region = new Region(RegionCoordinates.Zero, dimension,
                 Path.Combine(assemblyDir, "Files", "r.0.0.mca"));
         }
 

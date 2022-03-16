@@ -92,25 +92,25 @@ namespace TrueCraft.Core.World
             if (!Directory.Exists(baseDirectory))
                 throw new DirectoryNotFoundException();
 
-            var world = new Dimension(Path.GetFileName(baseDirectory));
-            world.BaseDirectory = baseDirectory;
+            Dimension dimension = new Dimension(Path.GetFileName(baseDirectory));
+            dimension.BaseDirectory = baseDirectory;
 
             if (File.Exists(Path.Combine(baseDirectory, "manifest.nbt")))
             {
                 var file = new NbtFile(Path.Combine(baseDirectory, "manifest.nbt"));
-                world.SpawnPoint = new GlobalVoxelCoordinates(file.RootTag["SpawnPoint"]["X"].IntValue,
+                dimension.SpawnPoint = new GlobalVoxelCoordinates(file.RootTag["SpawnPoint"]["X"].IntValue,
                     file.RootTag["SpawnPoint"]["Y"].IntValue,
                     file.RootTag["SpawnPoint"]["Z"].IntValue);
-                world.Seed = file.RootTag["Seed"].IntValue;
+                dimension.Seed = file.RootTag["Seed"].IntValue;
                 var providerName = file.RootTag["ChunkProvider"].StringValue;
                 var provider = (IChunkProvider)Activator.CreateInstance(Type.GetType(providerName));
-                provider.Initialize(world);
+                provider.Initialize(dimension);
                 if (file.RootTag.Contains("Name"))
-                    world.Name = file.RootTag["Name"].StringValue;
-                world.ChunkProvider = provider;
+                    dimension.Name = file.RootTag["Name"].StringValue;
+                dimension.ChunkProvider = provider;
             }
 
-            return world;
+            return dimension;
         }
 
         /// <summary>
@@ -436,15 +436,13 @@ namespace TrueCraft.Core.World
 
         public class ChunkEnumerator : IEnumerator<IChunk>
         {
-            public Dimension World { get; set; }
             private int Index { get; set; }
             private IList<IChunk> Chunks { get; set; }
 
-            public ChunkEnumerator(Dimension world)
+            public ChunkEnumerator(Dimension dimension)
             {
-                World = world;
                 Index = -1;
-                var regions = world._regions.Values.ToList();
+                var regions = dimension._regions.Values.ToList();
                 var chunks = new List<IChunk>();
                 foreach (var region in regions)
                     chunks.AddRange(region.Chunks);

@@ -24,47 +24,47 @@ namespace TrueCraft.Core.Logic.Items
 
         protected virtual byte? RelevantBlockType { get { return null; } }
 
-        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension world, IRemoteClient user)
+        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension dimension, IRemoteClient user)
         {
             ServerOnly.Assert();
 
             coordinates += MathHelper.BlockFaceToCoordinates(face);
             if (item.ID == ItemID) // Empty bucket
             {
-                var block = world.GetBlockID(coordinates);
+                var block = dimension.GetBlockID(coordinates);
                 if (block == WaterBlock.BlockID || block == StationaryWaterBlock.BlockID)
                 {
-                    var meta = world.GetMetadata(coordinates);
+                    var meta = dimension.GetMetadata(coordinates);
                     if (meta == 0) // Is source block?
                     {
                         user.Hotbar[user.SelectedSlot].Item = new ItemStack(WaterBucketItem.ItemID);
-                        world.SetBlockID(coordinates, 0);
+                        dimension.SetBlockID(coordinates, 0);
                     }
                 }
                 else if (block == LavaBlock.BlockID || block == StationaryLavaBlock.BlockID)
                 {
-                    var meta = world.GetMetadata(coordinates);
+                    var meta = dimension.GetMetadata(coordinates);
                     if (meta == 0) // Is source block?
                     {
                         user.Hotbar[user.SelectedSlot].Item = new ItemStack(LavaBucketItem.ItemID);
-                        world.SetBlockID(coordinates, 0);
+                        dimension.SetBlockID(coordinates, 0);
                     }
                 }
             }
             else
             {
-                var provider = user.Server.BlockRepository.GetBlockProvider(world.GetBlockID(coordinates));
+                var provider = user.Server.BlockRepository.GetBlockProvider(dimension.GetBlockID(coordinates));
                 if (!provider.Opaque)
                 {
                     if (RelevantBlockType != null)
                     {
                         var blockType = RelevantBlockType.Value;
                         user.Server.BlockUpdatesEnabled = false;
-                        world.SetBlockID(coordinates, blockType);
-                        world.SetMetadata(coordinates, 0); // Source block
+                        dimension.SetBlockID(coordinates, blockType);
+                        dimension.SetMetadata(coordinates, 0); // Source block
                         user.Server.BlockUpdatesEnabled = true;
-                        var liquidProvider = world.BlockRepository.GetBlockProvider(blockType);
-                        liquidProvider.BlockPlaced(new BlockDescriptor { Coordinates = coordinates }, face, world, user);
+                        var liquidProvider = dimension.BlockRepository.GetBlockProvider(blockType);
+                        liquidProvider.BlockPlaced(new BlockDescriptor { Coordinates = coordinates }, face, dimension, user);
                     }
                     user.Hotbar[user.SelectedSlot].Item = new ItemStack(BucketItem.ItemID);
                 }

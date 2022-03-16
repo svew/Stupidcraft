@@ -38,12 +38,12 @@ namespace TrueCraft.Core.TerrainGen
             ChunkDecorators.Add(new DungeonDecorator(GroundLevel));
         }
 
-        public void Initialize(IDimension world)
+        public void Initialize(IDimension dimension)
         {
-            HighNoise = new Perlin(world.Seed);
-            LowNoise = new Perlin(world.Seed);
-            BottomNoise = new Perlin(world.Seed);
-            CaveNoise = new Perlin(world.Seed);
+            HighNoise = new Perlin(dimension.Seed);
+            LowNoise = new Perlin(dimension.Seed);
+            BottomNoise = new Perlin(dimension.Seed);
+            CaveNoise = new Perlin(dimension.Seed);
             
             CaveNoise.Octaves = 3;
             CaveNoise.Amplitude = 0.05;
@@ -89,12 +89,12 @@ namespace TrueCraft.Core.TerrainGen
         public bool SingleBiome { get; private set; }
         public byte GenerationBiome { get; private set; }
 
-        public IChunk GenerateChunk(IDimension world, GlobalChunkCoordinates coordinates)
+        public IChunk GenerateChunk(IDimension dimension, GlobalChunkCoordinates coordinates)
         {
             const int featurePointDistance = 400;
 
             // TODO: Create a terrain generator initializer function that gets passed the seed etc
-            int seed = world.Seed;
+            int seed = dimension.Seed;
             var worley = new CellNoise(seed);
             HighNoise.Seed = seed;
             LowNoise.Seed = seed;
@@ -127,18 +127,18 @@ namespace TrueCraft.Core.TerrainGen
 
                     var cellValue = worley.Value2D(blockX, blockZ);
                     GlobalColumnCoordinates location = new GlobalColumnCoordinates(blockX, blockZ);
-                    if (world.BiomeDiagram.BiomeCells.Count < 1
+                    if (dimension.BiomeDiagram.BiomeCells.Count < 1
                         || cellValue.Equals(1)
-                        && world.BiomeDiagram.ClosestCellPoint(location) >= featurePointDistance)
+                        && dimension.BiomeDiagram.ClosestCellPoint(location) >= featurePointDistance)
                     {
                         byte id = (SingleBiome) ? GenerationBiome
-                            : world.BiomeDiagram.GenerateBiome(seed, Biomes, location,
+                            : dimension.BiomeDiagram.GenerateBiome(seed, Biomes, location,
                                 IsSpawnCoordinate(location.X, location.Z));
                         var cell = new BiomeCell(id, location);
-                        world.BiomeDiagram.AddCell(cell);
+                        dimension.BiomeDiagram.AddCell(cell);
                     }
 
-                    Biome biomeId = (Biome)GetBiome(world, location);
+                    Biome biomeId = (Biome)GetBiome(dimension, location);
                     IBiomeProvider biome = Biomes.GetBiome(biomeId);
                     chunk.SetBiome(x, z, biomeId);
 
@@ -182,24 +182,24 @@ namespace TrueCraft.Core.TerrainGen
                 }
             }
             foreach (var decorator in ChunkDecorators)
-                decorator.Decorate(world, chunk, Biomes);
+                decorator.Decorate(dimension, chunk, Biomes);
             chunk.TerrainPopulated = true;
             chunk.UpdateHeightMap();
             return chunk;
         }
 
-        public GlobalVoxelCoordinates GetSpawn(IDimension world)
+        public GlobalVoxelCoordinates GetSpawn(IDimension dimension)
         {
-            var chunk = GenerateChunk(world, new GlobalChunkCoordinates(0, 0));
+            var chunk = GenerateChunk(dimension, new GlobalChunkCoordinates(0, 0));
             int spawnPointHeight = chunk.GetHeight(0, 0);
             return new GlobalVoxelCoordinates(0, spawnPointHeight + 1, 0);
         }
 
-        byte GetBiome(IDimension world, GlobalColumnCoordinates location)
+        byte GetBiome(IDimension dimension, GlobalColumnCoordinates location)
         {
             if (SingleBiome)
                 return GenerationBiome;
-            return world.BiomeDiagram.GetBiome(location);
+            return dimension.BiomeDiagram.GetBiome(location);
         }
 
         // TODO:  for the following values of (x,z), this will return true:

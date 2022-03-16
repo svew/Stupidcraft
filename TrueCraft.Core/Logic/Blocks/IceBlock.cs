@@ -38,10 +38,10 @@ namespace TrueCraft.Core.Logic.Blocks
             return new Tuple<int, int>(3, 4);
         }
 
-        public override void BlockMined(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
+        public override void BlockMined(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
-            world.SetBlockID(descriptor.Coordinates, WaterBlock.BlockID);
-            BlockRepository.GetBlockProvider(WaterBlock.BlockID).BlockPlaced(descriptor, face, world, user);
+            dimension.SetBlockID(descriptor.Coordinates, WaterBlock.BlockID);
+            BlockRepository.GetBlockProvider(WaterBlock.BlockID).BlockPlaced(descriptor, face, dimension, user);
         }
     }
 }

@@ -6,7 +6,6 @@ namespace TrueCraft.Core.Physics
 {
     public interface IPhysicsEngine
     {
-        IDimension World { get; set; }
         void AddEntity(IPhysicsEntity entity);
         void RemoveEntity(IPhysicsEntity entity);
         void Update(TimeSpan time);

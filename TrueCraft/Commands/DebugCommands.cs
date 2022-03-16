@@ -5,8 +5,10 @@ using System.Threading.Tasks;
 using TrueCraft.Core;
 using TrueCraft.Core.AI;
 using TrueCraft.Core.Entities;
+using TrueCraft.Core.Lighting;
 using TrueCraft.Core.Networking;
 using TrueCraft.Core.Networking.Packets;
+using TrueCraft.Core.Server;
 using TrueCraft.Core.World;
 
 namespace TrueCraft.Commands
@@ -68,7 +70,7 @@ namespace TrueCraft.Commands
                 Help(client, alias, arguments);
                 return;
             }
-            client.World.Save();
+            client.Dimension.Save();
         }
 
         public override void Help(IRemoteClient client, string alias, string[] arguments)
@@ -99,7 +101,7 @@ namespace TrueCraft.Commands
             int mod = 0;
             if (arguments.Length == 1)
                 int.TryParse(arguments[0], out mod);
-            client.SendMessage(client.World.GetSkyLight(
+            client.SendMessage(client.Dimension.GetSkyLight(
                 (GlobalVoxelCoordinates)(client.Entity.Position + new Vector3(0, -mod, 0))).ToString());
         }
 
@@ -150,8 +152,8 @@ namespace TrueCraft.Commands
                 client.SendMessage(ChatColor.Red + "Unknown entity type.");
                 return;
             }
-            var entity = (IEntity)Activator.CreateInstance(type);
-            var em = client.Server.GetEntityManagerForWorld(client.World);
+            IEntity entity = (IEntity)Activator.CreateInstance(type);
+            IEntityManager em = client.Server.GetEntityManagerForWorld(client.Dimension);
             entity.Position = client.Entity.Position + MathHelper.FowardVector(client.Entity.Yaw) * 3;
             em.SpawnEntity(entity);
         }
@@ -194,7 +196,7 @@ namespace TrueCraft.Commands
                 return;
             }
 
-            var manager = client.Server.GetEntityManagerForWorld(client.World);
+            IEntityManager manager = client.Server.GetEntityManagerForWorld(client.Dimension);
             var entity = manager.GetEntityByID(id) as MobEntity;
             if (entity == null)
             {
@@ -205,7 +207,7 @@ namespace TrueCraft.Commands
             Task.Factory.StartNew(() =>
             {
                 var astar = new AStarPathFinder();
-                var path = astar.FindPath(client.World, entity.BoundingBox, (GlobalVoxelCoordinates)entity.Position, (GlobalVoxelCoordinates)client.Entity.Position);
+                PathResult path = astar.FindPath(client.Dimension, entity.BoundingBox, (GlobalVoxelCoordinates)entity.Position, (GlobalVoxelCoordinates)client.Entity.Position);
                 if (path == null)
                 {
                     client.SendMessage(ChatColor.Red + "It is impossible for this entity to reach you.");
@@ -257,7 +259,7 @@ namespace TrueCraft.Commands
                 return;
             }
 
-            var manager = client.Server.GetEntityManagerForWorld(client.World);
+            IEntityManager manager = client.Server.GetEntityManagerForWorld(client.Dimension);
             var entity = manager.GetEntityByID(id);
             if (entity == null)
             {
@@ -315,7 +317,7 @@ namespace TrueCraft.Commands
                 return;
             }
 
-            var manager = client.Server.GetEntityManagerForWorld(client.World);
+            IEntityManager manager = client.Server.GetEntityManagerForWorld(client.Dimension);
             var entity = manager.GetEntityByID(id) as MobEntity;
             if (entity == null)
             {
@@ -529,8 +531,8 @@ namespace TrueCraft.Commands
                 return;
             }
             var server = client.Server as MultiplayerServer;
-            var chunk = client.World.FindChunk((GlobalVoxelCoordinates)client.Entity.Position);
-            var lighter = server.WorldLighters.SingleOrDefault(l => l.World == client.World);
+            IChunk chunk = client.Dimension.FindChunk((GlobalVoxelCoordinates)client.Entity.Position);
+            Lighting lighter = server.WorldLighters.SingleOrDefault(l => l.Dimension == client.Dimension);
             if (lighter != null)
             {
                 lighter.InitialLighting(chunk, true);

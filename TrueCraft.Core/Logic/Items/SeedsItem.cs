@@ -21,13 +21,13 @@ namespace TrueCraft.Core.Logic.Items
             return "Seeds";
         }
 
-        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension world, IRemoteClient user)
+        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension dimension, IRemoteClient user)
         {
-            if (world.GetBlockID(coordinates) == FarmlandBlock.BlockID)
+            if (dimension.GetBlockID(coordinates) == FarmlandBlock.BlockID)
             {
-                world.SetBlockID(coordinates + MathHelper.BlockFaceToCoordinates(face), CropsBlock.BlockID);
-                world.BlockRepository.GetBlockProvider(CropsBlock.BlockID).BlockPlaced(
-                    new BlockDescriptor { Coordinates = coordinates }, face, world, user);
+                dimension.SetBlockID(coordinates + MathHelper.BlockFaceToCoordinates(face), CropsBlock.BlockID);
+                dimension.BlockRepository.GetBlockProvider(CropsBlock.BlockID).BlockPlaced(
+                    new BlockDescriptor { Coordinates = coordinates }, face, dimension, user);
             }
         }
     }

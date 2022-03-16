@@ -53,19 +53,19 @@ namespace TrueCraft.Core.Logic.Blocks
             return new Tuple<int, int>(4, 5);
         }
 
-        public override void BlockLeftClicked(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
+        public override void BlockLeftClicked(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
-            BlockRightClicked(descriptor, face, world, user);
+            BlockRightClicked(descriptor, face, dimension, user);
         }
 
-        public override bool BlockRightClicked(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
+        public override bool BlockRightClicked(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
             // Flip bit back and forth between Open and Closed
-            world.SetMetadata(descriptor.Coordinates, (byte)(descriptor.Metadata ^ (byte)TrapdoorFlags.Open));
+            dimension.SetMetadata(descriptor.Coordinates, (byte)(descriptor.Metadata ^ (byte)TrapdoorFlags.Open));
             return false;
         }
 
-        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension world, IRemoteClient user)
+        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension dimension, IRemoteClient user)
         {
             if (face == BlockFace.PositiveY || face == BlockFace.NegativeY)
             {
@@ -93,7 +93,7 @@ namespace TrueCraft.Core.Logic.Blocks
                     return;
             }
 
-            base.ItemUsedOnBlock(coordinates, item, face, world, user);
+            base.ItemUsedOnBlock(coordinates, item, face, dimension, user);
         }
 
         protected override ItemStack[] GetDrop(BlockDescriptor descriptor, ItemStack item)

@@ -39,11 +39,11 @@ namespace TrueCraft.Core.AI
                     (int)(cast.Position.Z + (MathHelper.Random.Next(Distance) - Distance / 2))
                 );
                 IChunk chunk;
-                var adjusted = entity.World.FindBlockPosition(target, out chunk, generate: false);
+                var adjusted = entity.Dimension.FindBlockPosition(target, out chunk, generate: false);
                 target = new GlobalVoxelCoordinates(target.X, chunk.GetHeight((byte)adjusted.X, (byte)adjusted.Z), target.Z);
                 Task.Factory.StartNew(() =>
                 {
-                    entity.CurrentPath = PathFinder.FindPath(entity.World, entity.BoundingBox,
+                    entity.CurrentPath = PathFinder.FindPath(entity.Dimension, entity.BoundingBox,
                         (GlobalVoxelCoordinates)cast.Position, target);
                 });
             }

@@ -63,9 +63,9 @@ namespace TrueCraft.Core.Logic.Blocks
             return new[] { new ItemStack(SugarCanesItem.ItemID) };
         }
 
-        public static bool ValidPlacement(BlockDescriptor descriptor, IDimension world)
+        public static bool ValidPlacement(BlockDescriptor descriptor, IDimension dimension)
         {
-            var below = world.GetBlockID(descriptor.Coordinates + Vector3i.Down);
+            var below = dimension.GetBlockID(descriptor.Coordinates + Vector3i.Down);
             if (below != SugarcaneBlock.BlockID && below != GrassBlock.BlockID && below != DirtBlock.BlockID)
                 return false;
             var toCheck = new[]
@@ -80,7 +80,7 @@ namespace TrueCraft.Core.Logic.Blocks
                 bool foundWater = false;
                 for (int i = 0; i < toCheck.Length; i++)
                 {
-                    var id = world.GetBlockID(descriptor.Coordinates + toCheck[i]);
+                    var id = dimension.GetBlockID(descriptor.Coordinates + toCheck[i]);
                     if (id == WaterBlock.BlockID || id == StationaryWaterBlock.BlockID)
                     {
                         foundWater = true;
@@ -92,66 +92,66 @@ namespace TrueCraft.Core.Logic.Blocks
             return true;
         }
 
-        public override void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IDimension world)
+        public override void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IDimension dimension)
         {
-            if (!ValidPlacement(descriptor, world))
+            if (!ValidPlacement(descriptor, dimension))
             {
                 // Destroy self
-                world.SetBlockID(descriptor.Coordinates, 0);
-                GenerateDropEntity(descriptor, world, server, ItemStack.EmptyStack);
+                dimension.SetBlockID(descriptor.Coordinates, 0);
+                GenerateDropEntity(descriptor, dimension, server, ItemStack.EmptyStack);
             }
         }
 
-        private void TryGrowth(IMultiplayerServer server, GlobalVoxelCoordinates coords, IDimension world)
+        private void TryGrowth(IMultiplayerServer server, GlobalVoxelCoordinates coords, IDimension dimension)
         {
-            if (world.GetBlockID(coords) != BlockID)
+            if (dimension.GetBlockID(coords) != BlockID)
                 return;
             // Find current height of stalk
             int height = 0;
             for (int y = -MaxGrowHeight; y <= MaxGrowHeight; y++)
             {
-                if (world.GetBlockID(coords + (Vector3i.Down * y)) == BlockID)
+                if (dimension.GetBlockID(coords + (Vector3i.Down * y)) == BlockID)
                     height++;
             }
             if (height < MaxGrowHeight)
             {
-                var meta = world.GetMetadata(coords);
+                var meta = dimension.GetMetadata(coords);
                 meta++;
-                world.SetMetadata(coords, meta);
-                var chunk = world.FindChunk(coords);
+                dimension.SetMetadata(coords, meta);
+                var chunk = dimension.FindChunk(coords);
                 if (meta == 15)
                 {
-                    if (world.GetBlockID(coords + Vector3i.Up) == 0)
+                    if (dimension.GetBlockID(coords + Vector3i.Up) == 0)
                     {
-                        world.SetBlockID(coords + Vector3i.Up, BlockID);
+                        dimension.SetBlockID(coords + Vector3i.Up, BlockID);
                         server.Scheduler.ScheduleEvent("sugarcane", chunk,
                             TimeSpan.FromSeconds(MathHelper.Random.Next(MinGrowthSeconds, MaxGrowthSeconds)),
-                            (_server) => TryGrowth(_server, coords + Vector3i.Up, world));
+                            (_server) => TryGrowth(_server, coords + Vector3i.Up, dimension));
                     }
                 }
                 else
                 {
                     server.Scheduler.ScheduleEvent("sugarcane", chunk,
                         TimeSpan.FromSeconds(MathHelper.Random.Next(MinGrowthSeconds, MaxGrowthSeconds)),
-                        (_server) => TryGrowth(_server, coords, world));
+                        (_server) => TryGrowth(_server, coords, dimension));
                 }
             }
         }
 
-        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
+        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
-            var chunk = world.FindChunk(descriptor.Coordinates);
+            var chunk = dimension.FindChunk(descriptor.Coordinates);
             user.Server.Scheduler.ScheduleEvent("sugarcane", chunk,
                 TimeSpan.FromSeconds(MathHelper.Random.Next(MinGrowthSeconds, MaxGrowthSeconds)),
-                (server) => TryGrowth(server, descriptor.Coordinates, world));
+                (server) => TryGrowth(server, descriptor.Coordinates, dimension));
         }
 
-        public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IDimension world)
+        public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IDimension dimension)
         {
-            var chunk = world.FindChunk(coords);
+            var chunk = dimension.FindChunk(coords);
             server.Scheduler.ScheduleEvent("sugarcane", chunk,
                 TimeSpan.FromSeconds(MathHelper.Random.Next(MinGrowthSeconds, MaxGrowthSeconds)),
-                s => TryGrowth(s, coords, world));
+                s => TryGrowth(s, coords, dimension));
         }
     }
 }

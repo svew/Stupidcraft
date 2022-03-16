@@ -25,15 +25,15 @@ namespace TrueCraft.Core.Logic.Items
             return "Cake";
         }
 
-        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension world, IRemoteClient user)
+        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension dimension, IRemoteClient user)
         {
             ServerOnly.Assert();
 
             coordinates += MathHelper.BlockFaceToCoordinates(face);
-            var old = world.BlockRepository.GetBlockProvider(world.GetBlockID(coordinates));
+            var old = dimension.BlockRepository.GetBlockProvider(dimension.GetBlockID(coordinates));
             if (old.Hardness == 0)
             {
-                world.SetBlockID(coordinates, CakeBlock.BlockID);
+                dimension.SetBlockID(coordinates, CakeBlock.BlockID);
                 item.Count--;
                 user.Hotbar[user.SelectedSlot].Item = item;
             }

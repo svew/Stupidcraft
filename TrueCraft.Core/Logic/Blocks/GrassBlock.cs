@@ -64,61 +64,61 @@ namespace TrueCraft.Core.Logic.Blocks
             return new[] { new ItemStack(DirtBlock.BlockID, 1) };
         }
 
-        private void ScheduledUpdate(IDimension world, GlobalVoxelCoordinates coords)
+        private void ScheduledUpdate(IDimension dimension, GlobalVoxelCoordinates coords)
         {
-            if (world.IsValidPosition(coords + Vector3i.Up))
+            if (dimension.IsValidPosition(coords + Vector3i.Up))
             {
-                var id = world.GetBlockID(coords + Vector3i.Up);
-                var provider = world.BlockRepository.GetBlockProvider(id);
+                var id = dimension.GetBlockID(coords + Vector3i.Up);
+                var provider = dimension.BlockRepository.GetBlockProvider(id);
                 if (provider.Opaque)
-                    world.SetBlockID(coords, DirtBlock.BlockID);
+                    dimension.SetBlockID(coords, DirtBlock.BlockID);
             }
         }
 
-        public override void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IDimension world)
+        public override void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IDimension dimension)
         {
             if (source.Coordinates == descriptor.Coordinates + Vector3i.Up)
             {
-                var provider = world.BlockRepository.GetBlockProvider(source.ID);
+                var provider = dimension.BlockRepository.GetBlockProvider(source.ID);
                 if (provider.Opaque)
                 {
-                    var chunk = world.FindChunk(descriptor.Coordinates, generate: false);
+                    var chunk = dimension.FindChunk(descriptor.Coordinates, generate: false);
                     server.Scheduler.ScheduleEvent("grass", chunk,
                     TimeSpan.FromSeconds(MathHelper.Random.Next(MinDecayTime, MaxDecayTime)), s =>
                     {
-                        ScheduledUpdate(world, descriptor.Coordinates);
+                        ScheduledUpdate(dimension, descriptor.Coordinates);
                     });
                 }
             }
         }
 
-        public void TrySpread(GlobalVoxelCoordinates coords, IDimension world, IMultiplayerServer server)
+        public void TrySpread(GlobalVoxelCoordinates coords, IDimension dimension, IMultiplayerServer server)
         {
-            if (!world.IsValidPosition(coords + Vector3i.Up))
+            if (!dimension.IsValidPosition(coords + Vector3i.Up))
                 return;
-            var sky = world.GetSkyLight(coords + Vector3i.Up);
-            var block = world.GetBlockLight(coords + Vector3i.Up);
+            var sky = dimension.GetSkyLight(coords + Vector3i.Up);
+            var block = dimension.GetBlockLight(coords + Vector3i.Up);
             if (sky < 9 && block < 9)
                 return;
             for (int i = 0, j = MathHelper.Random.Next(GrowthCandidates.Length); i < GrowthCandidates.Length; i++, j++)
             {
                 var candidate = GrowthCandidates[j % GrowthCandidates.Length] + coords;
-                if (!world.IsValidPosition(candidate) || !world.IsValidPosition(candidate + Vector3i.Up))
+                if (!dimension.IsValidPosition(candidate) || !dimension.IsValidPosition(candidate + Vector3i.Up))
                     continue;
-                var id = world.GetBlockID(candidate);
+                var id = dimension.GetBlockID(candidate);
                 if (id == DirtBlock.BlockID)
                 {
-                    var _sky = world.GetSkyLight(candidate + Vector3i.Up);
-                    var _block = world.GetBlockLight(candidate + Vector3i.Up);
+                    var _sky = dimension.GetSkyLight(candidate + Vector3i.Up);
+                    var _block = dimension.GetBlockLight(candidate + Vector3i.Up);
                     if (_sky < 4 && _block < 4)
                         continue;
                     IChunk chunk;
-                    var _candidate = world.FindBlockPosition(candidate, out chunk);
+                    var _candidate = dimension.FindBlockPosition(candidate, out chunk);
                     bool grow = true;
                     for (int y = candidate.Y; y < chunk.GetHeight((byte)_candidate.X, (byte)_candidate.Z); y++)
                     {
-                        var b = world.GetBlockID(new GlobalVoxelCoordinates(candidate.X, y, candidate.Z));
-                        var p = world.BlockRepository.GetBlockProvider(b);
+                        var b = dimension.GetBlockID(new GlobalVoxelCoordinates(candidate.X, y, candidate.Z));
+                        var p = dimension.BlockRepository.GetBlockProvider(b);
                         if (p.LightOpacity >= 2)
                         {
                             grow = false;
@@ -127,30 +127,30 @@ namespace TrueCraft.Core.Logic.Blocks
                     }
                     if (grow)
                     {
-                        world.SetBlockID(candidate, GrassBlock.BlockID);
+                        dimension.SetBlockID(candidate, GrassBlock.BlockID);
                         server.Scheduler.ScheduleEvent("grass", chunk,
                             TimeSpan.FromSeconds(MathHelper.Random.Next(MinGrowthTime, MaxGrowthTime)),
-                            s => TrySpread(candidate, world, server));
+                            s => TrySpread(candidate, dimension, server));
                     }
                     break;
                 }
             }
         }
 
-        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
+        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
-            var chunk = world.FindChunk(descriptor.Coordinates);
+            var chunk = dimension.FindChunk(descriptor.Coordinates);
             user.Server.Scheduler.ScheduleEvent("grass", chunk,
                 TimeSpan.FromSeconds(MathHelper.Random.Next(MinGrowthTime, MaxGrowthTime)),
-                s => TrySpread(descriptor.Coordinates, world, user.Server));
+                s => TrySpread(descriptor.Coordinates, dimension, user.Server));
         }
 
-        public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IDimension world)
+        public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IDimension dimension)
         {
-            var chunk = world.FindChunk(coords);
+            var chunk = dimension.FindChunk(coords);
             server.Scheduler.ScheduleEvent("grass", chunk,
                 TimeSpan.FromSeconds(MathHelper.Random.Next(MinGrowthTime, MaxGrowthTime)),
-                s => TrySpread(coords, world, server));
+                s => TrySpread(coords, dimension, server));
         }
     }
 }

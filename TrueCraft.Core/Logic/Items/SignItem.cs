@@ -23,17 +23,17 @@ namespace TrueCraft.Core.Logic.Items
             return "Sign";
         }
 
-        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension world, IRemoteClient user)
+        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension dimension, IRemoteClient user)
         {
             if (face == BlockFace.PositiveY)
             {
                 var provider = user.Server.BlockRepository.GetBlockProvider(UprightSignBlock.BlockID);
-                (provider as IItemProvider).ItemUsedOnBlock(coordinates, item, face, world, user);
+                (provider as IItemProvider).ItemUsedOnBlock(coordinates, item, face, dimension, user);
             }
             else
             {
                 var provider = user.Server.BlockRepository.GetBlockProvider(WallSignBlock.BlockID);
-                (provider as IItemProvider).ItemUsedOnBlock(coordinates, item, face, world, user);
+                (provider as IItemProvider).ItemUsedOnBlock(coordinates, item, face, dimension, user);
             }
         }
     }

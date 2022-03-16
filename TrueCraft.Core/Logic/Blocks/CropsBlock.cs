@@ -56,45 +56,45 @@ namespace TrueCraft.Core.Logic.Blocks
                 return new[] { new ItemStack(SeedsItem.ItemID) };
         }
 
-        private void GrowBlock(IMultiplayerServer server, IDimension world, GlobalVoxelCoordinates coords)
+        private void GrowBlock(IMultiplayerServer server, IDimension dimension, GlobalVoxelCoordinates coords)
         {
-            if (world.GetBlockID(coords) != BlockID)
+            if (dimension.GetBlockID(coords) != BlockID)
                 return;
-            var meta = world.GetMetadata(coords);
+            var meta = dimension.GetMetadata(coords);
             meta++;
-            world.SetMetadata(coords, meta);
+            dimension.SetMetadata(coords, meta);
             if (meta < 7)
             {
-                var chunk = world.FindChunk(coords);
+                var chunk = dimension.FindChunk(coords);
                 server.Scheduler.ScheduleEvent("crops",
                     chunk, TimeSpan.FromSeconds(MathHelper.Random.Next(30, 60)),
-                   (_server) => GrowBlock(_server, world, coords));
+                   (_server) => GrowBlock(_server, dimension, coords));
             }
         }
 
-        public override void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IDimension world)
+        public override void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IDimension dimension)
         {
-            if (world.GetBlockID(descriptor.Coordinates + Vector3i.Down) != FarmlandBlock.BlockID)
+            if (dimension.GetBlockID(descriptor.Coordinates + Vector3i.Down) != FarmlandBlock.BlockID)
             {
-                GenerateDropEntity(descriptor, world, server, ItemStack.EmptyStack);
-                world.SetBlockID(descriptor.Coordinates, 0);
+                GenerateDropEntity(descriptor, dimension, server, ItemStack.EmptyStack);
+                dimension.SetBlockID(descriptor.Coordinates, 0);
             }
         }
 
-        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
+        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
-            var chunk = world.FindChunk(descriptor.Coordinates);
+            var chunk = dimension.FindChunk(descriptor.Coordinates);
             user.Server.Scheduler.ScheduleEvent("crops", chunk,
                 TimeSpan.FromSeconds(MathHelper.Random.Next(30, 60)),
-                (server) => GrowBlock(server, world, descriptor.Coordinates + MathHelper.BlockFaceToCoordinates(face)));
+                (server) => GrowBlock(server, dimension, descriptor.Coordinates + MathHelper.BlockFaceToCoordinates(face)));
         }
 
-        public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IDimension world)
+        public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IDimension dimension)
         {
-            var chunk = world.FindChunk(coords);
+            var chunk = dimension.FindChunk(coords);
             server.Scheduler.ScheduleEvent("crops", chunk,
                 TimeSpan.FromSeconds(MathHelper.Random.Next(30, 60)),
-                (s) => GrowBlock(s, world, coords));
+                (s) => GrowBlock(s, dimension, coords));
         }
     }
 }

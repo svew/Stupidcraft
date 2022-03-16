@@ -218,7 +218,7 @@ namespace TrueCraft
                 {"game_id", "TRUECRAFT"},
                 {"version", "1.0"},
                 {"plugins", "TrueCraft"},
-                {"map", Server.Worlds.First().Name},
+                {"map", Server.Dimensions.First().Name},
                 {"numplayers", Server.Clients.Count.ToString()},
                 {"maxplayers", "64"},
                 {"hostport", Program.ServerConfiguration.ServerPort.ToString()},

@@ -10,12 +10,12 @@ namespace TrueCraft.Core.Logic.Blocks
     {
         public abstract short ItemID { get; }
 
-        public override void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IDimension world)
+        public override void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IDimension dimension)
         {
             bool upper = ((DoorItem.DoorFlags)descriptor.Metadata & DoorItem.DoorFlags.Upper) == DoorItem.DoorFlags.Upper;
             var other = upper ? Vector3i.Down : Vector3i.Up;
-            if (world.GetBlockID(descriptor.Coordinates + other) != ID)
-                world.SetBlockID(descriptor.Coordinates, 0);
+            if (dimension.GetBlockID(descriptor.Coordinates + other) != ID)
+                dimension.SetBlockID(descriptor.Coordinates, 0);
         }
 
         protected override ItemStack[] GetDrop(BlockDescriptor descriptor, ItemStack item)
@@ -58,18 +58,18 @@ namespace TrueCraft.Core.Logic.Blocks
             return new Tuple<int, int>(1, 6);
         }
 
-        public override void BlockLeftClicked(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
+        public override void BlockLeftClicked(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
-            BlockRightClicked(descriptor, face, world, user);
+            BlockRightClicked(descriptor, face, dimension, user);
         }
 
-        public override bool BlockRightClicked(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
+        public override bool BlockRightClicked(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
             bool upper = ((DoorItem.DoorFlags)descriptor.Metadata & DoorItem.DoorFlags.Upper) == DoorItem.DoorFlags.Upper;
             var other = upper ? Vector3i.Down : Vector3i.Up;
-            var otherMeta = world.GetMetadata(descriptor.Coordinates + other);
-            world.SetMetadata(descriptor.Coordinates, (byte)(descriptor.Metadata ^ (byte)DoorItem.DoorFlags.Open));
-            world.SetMetadata(descriptor.Coordinates + other, (byte)(otherMeta ^ (byte)DoorItem.DoorFlags.Open));
+            var otherMeta = dimension.GetMetadata(descriptor.Coordinates + other);
+            dimension.SetMetadata(descriptor.Coordinates, (byte)(descriptor.Metadata ^ (byte)DoorItem.DoorFlags.Open));
+            dimension.SetMetadata(descriptor.Coordinates + other, (byte)(otherMeta ^ (byte)DoorItem.DoorFlags.Open));
             return false;
         }
     }

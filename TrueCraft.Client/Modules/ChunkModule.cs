@@ -21,7 +21,7 @@ namespace TrueCraft.Client.Modules
 
         private List<ChunkMesh> ChunkMeshes { get; set; }
         private ConcurrentBag<Mesh> IncomingChunks { get; set; }
-        private WorldLighting WorldLighting { get; set; }
+        private Lighting WorldLighting { get; set; }
 
         private BasicEffect OpaqueEffect { get; set; }
         private AlphaTestEffect TransparentEffect { get; set; }
@@ -37,7 +37,7 @@ namespace TrueCraft.Client.Modules
             Game.Client.BlockChanged += Game_Client_BlockChanged;
             ChunkRenderer.MeshCompleted += MeshCompleted;
             ChunkRenderer.Start();
-            WorldLighting = new WorldLighting(Game.Client.World.World, Game.BlockRepository);
+            WorldLighting = new Lighting(Game.Client.World.World, Game.BlockRepository);
 
             OpaqueEffect = new BasicEffect(Game.GraphicsDevice);
             OpaqueEffect.TextureEnabled = true;

@@ -46,17 +46,17 @@ namespace TrueCraft.Core.Logic.Blocks
                 return new ItemStack[0];
         }
 
-        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user)
+        public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
-            BlockUpdate(descriptor, descriptor, user.Server, world);
+            BlockUpdate(descriptor, descriptor, user.Server, dimension);
         }
 
-        public override void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IDimension world)
+        public override void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IDimension dimension)
         {
-            if (world.GetBlockID(descriptor.Coordinates + Vector3i.Down) == AirBlock.BlockID)
+            if (dimension.GetBlockID(descriptor.Coordinates + Vector3i.Down) == AirBlock.BlockID)
             {
-                world.SetBlockID(descriptor.Coordinates, AirBlock.BlockID);
-                server.GetEntityManagerForWorld(world).SpawnEntity(new FallingGravelEntity((Vector3)descriptor.Coordinates));
+                dimension.SetBlockID(descriptor.Coordinates, AirBlock.BlockID);
+                server.GetEntityManagerForWorld(dimension).SpawnEntity(new FallingGravelEntity((Vector3)descriptor.Coordinates));
             }
         }
     }

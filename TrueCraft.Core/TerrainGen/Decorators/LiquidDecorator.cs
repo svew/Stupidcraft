@@ -8,7 +8,7 @@ namespace TrueCraft.Core.TerrainGen.Decorators
     {
         public static readonly int WaterLevel = 40;
 
-        public void Decorate(IDimension world, IChunk chunk, IBiomeRepository biomes)
+        public void Decorate(IDimension dimension, IChunk chunk, IBiomeRepository biomes)
         {
             for (int x = 0; x < Chunk.Width; x++)
             {
@@ -28,7 +28,7 @@ namespace TrueCraft.Core.TerrainGen.Decorators
                             {
                                 if (!biome.WaterBlock.Equals(LavaBlock.BlockID) && !biome.WaterBlock.Equals(StationaryLavaBlock.BlockID))
                                 {
-                                    var random = new Random(world.Seed);
+                                    var random = new Random(dimension.Seed);
                                     if (random.Next(100) < 40)
                                     {
                                         chunk.SetBlockID(below, ClayBlock.BlockID);

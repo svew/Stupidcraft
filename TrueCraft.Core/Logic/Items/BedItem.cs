@@ -24,7 +24,7 @@ namespace TrueCraft.Core.Logic.Items
             return "Bed";
         }
 
-        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension world, IRemoteClient user)
+        public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension dimension, IRemoteClient user)
         {
             ServerOnly.Assert();
 
@@ -53,16 +53,16 @@ namespace TrueCraft.Core.Logic.Items
             }
             var bedProvider = (BedBlock)user.Server.BlockRepository.GetBlockProvider(BedBlock.BlockID);
             if (!bedProvider.ValidBedPosition(new BlockDescriptor { Coordinates = head },
-                user.Server.BlockRepository, user.World, false, true) ||
+                user.Server.BlockRepository, user.Dimension, false, true) ||
                 !bedProvider.ValidBedPosition(new BlockDescriptor { Coordinates = foot },
-                user.Server.BlockRepository, user.World, false, true))
+                user.Server.BlockRepository, user.Dimension, false, true))
             {
                 return;
             }
             user.Server.BlockUpdatesEnabled = false;
-            world.SetBlockData(head, new BlockDescriptor
+            dimension.SetBlockData(head, new BlockDescriptor
                 { ID = BedBlock.BlockID, Metadata = (byte)((byte)direction | (byte)BedBlock.BedType.Head) });
-            world.SetBlockData(foot, new BlockDescriptor
+            dimension.SetBlockData(foot, new BlockDescriptor
                 { ID = BedBlock.BlockID, Metadata = (byte)((byte)direction | (byte)BedBlock.BedType.Foot) });
             user.Server.BlockUpdatesEnabled = true;
             item.Count--;
