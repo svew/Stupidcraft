@@ -13,9 +13,9 @@ namespace TrueCraft.Core.TerrainGen.Decorators
         public Perlin Noise { get; set; }
         public ClampNoise ChanceNoise { get; set; }
 
-        public void Decorate(IDimension dimension, IChunk chunk, IBiomeRepository biomes)
+        public void Decorate(int seed, IChunk chunk, IBlockRepository blockRepository, IBiomeRepository biomes)
         {
-            Noise = new Perlin(dimension.Seed);
+            Noise = new Perlin(seed);
             ChanceNoise = new ClampNoise(Noise);
             ChanceNoise.MaxValue = 2;
             LocalColumnCoordinates lastTree = null;
@@ -35,7 +35,7 @@ namespace TrueCraft.Core.TerrainGen.Decorators
                     {
                         LocalVoxelCoordinates location = new LocalVoxelCoordinates(x, height, z);
                         byte id = chunk.GetBlockID(location);
-                        IBlockProvider provider = dimension.BlockRepository.GetBlockProvider(id);
+                        IBlockProvider provider = blockRepository.GetBlockProvider(id);
                         if (id == DirtBlock.BlockID || id == GrassBlock.BlockID || id == SnowfallBlock.BlockID
                             || (id != StationaryWaterBlock.BlockID && id != WaterBlock.BlockID
                                 && id != LavaBlock.BlockID && id != StationaryLavaBlock.BlockID
@@ -50,7 +50,7 @@ namespace TrueCraft.Core.TerrainGen.Decorators
                             LocalVoxelCoordinates baseCoordinates = new LocalVoxelCoordinates(location.X, location.Y + 1, location.Z);
                             if (biome.Trees.Contains(TreeSpecies.Oak) && oakNoise > 1.01 && oakNoise < 1.25)
                             {
-                                var oak = new OakTree().GenerateAt(dimension, chunk, baseCoordinates);
+                                var oak = new OakTree().GenerateAt(seed, chunk, baseCoordinates);
                                 if (oak)
                                 {
                                     lastTree = new LocalColumnCoordinates(x, z);
@@ -59,7 +59,7 @@ namespace TrueCraft.Core.TerrainGen.Decorators
                             }
                             if (biome.Trees.Contains(TreeSpecies.Birch) && birchNoise > 0.3 && birchNoise < 0.95)
                             {
-                                var birch = new BirchTree().GenerateAt(dimension, chunk, baseCoordinates);
+                                var birch = new BirchTree().GenerateAt(seed, chunk, baseCoordinates);
                                 if (birch)
                                 {
                                     lastTree = new LocalColumnCoordinates(x, z);
@@ -68,13 +68,13 @@ namespace TrueCraft.Core.TerrainGen.Decorators
                             }
                             if (biome.Trees.Contains(TreeSpecies.Spruce) && spruceNoise < 0.75)
                             {
-                                var random = new Random(dimension.Seed);
+                                var random = new Random(seed);
                                 var type = random.Next(1, 2);
                                 var generated = false;
                                 if (type.Equals(1))
-                                    generated = new PineTree().GenerateAt(dimension, chunk, baseCoordinates);
+                                    generated = new PineTree().GenerateAt(seed, chunk, baseCoordinates);
                                 else
-                                    generated = new ConiferTree().GenerateAt(dimension, chunk, baseCoordinates);
+                                    generated = new ConiferTree().GenerateAt(seed, chunk, baseCoordinates);
 
                                 if (generated)
                                 {

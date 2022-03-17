@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using TrueCraft.Core.Logic;
 using TrueCraft.Core.Logic.Blocks;
 using TrueCraft.Core.TerrainGen.Noise;
 using TrueCraft.Core.World;
@@ -49,15 +50,15 @@ namespace TrueCraft.Core.TerrainGen.Decorators
             Ores.Add(redstone);
         }
 
-        public void Decorate(IDimension dimension, IChunk chunk, IBiomeRepository biomes)
+        public void Decorate(int seed, IChunk chunk, IBlockRepository _, IBiomeRepository biomes)
         {
-            var perlin = new Perlin(dimension.Seed);
+            var perlin = new Perlin(seed);
             perlin.Lacunarity = 1;
             perlin.Amplitude = 7;
             perlin.Frequency = 0.015;
             var chanceNoise = new ClampNoise(perlin);
             var noise = new ScaledNoise(perlin);
-            var random = new Random(dimension.Seed);
+            var random = new Random(seed);
             var lowWeightOffset = new int[2] { 2, 3 };
             var highWeightOffset = new int[2] { 2, 2 };
             foreach (var data in Ores)

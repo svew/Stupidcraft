@@ -177,7 +177,8 @@ namespace TrueCraft.Core.TerrainGen
                 }
             }
             foreach (var decorator in ChunkDecorators)
-                decorator.Decorate(_dimension, chunk, Biomes);
+                // TODO: pass the BlockRepository in as a parameter.
+                decorator.Decorate(_seed, chunk, Logic.BlockRepository.Get(), Biomes);
             chunk.TerrainPopulated = true;
             chunk.UpdateHeightMap();
             return chunk;

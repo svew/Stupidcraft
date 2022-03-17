@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using TrueCraft.Core.Logic;
 using TrueCraft.Core.Logic.Blocks;
 using TrueCraft.Core.TerrainGen.Noise;
 using TrueCraft.Core.World;
@@ -8,9 +9,9 @@ namespace TrueCraft.Core.TerrainGen.Decorators
 {
     public class PlantDecorator : IChunkDecorator
     {
-        public void Decorate(IDimension dimension, IChunk chunk, IBiomeRepository biomes)
+        public void Decorate(int seed, IChunk chunk, IBlockRepository _, IBiomeRepository biomes)
         {
-            var noise = new Perlin(dimension.Seed);
+            var noise = new Perlin(seed);
             var chanceNoise = new ClampNoise(noise);
             chanceNoise.MaxValue = 2;
             for (int x = 0; x < Chunk.Width; x++)

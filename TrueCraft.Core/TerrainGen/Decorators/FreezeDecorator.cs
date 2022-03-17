@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using TrueCraft.Core.Logic;
 using TrueCraft.Core.Logic.Blocks;
 using TrueCraft.Core.World;
 
@@ -7,7 +8,7 @@ namespace TrueCraft.Core.TerrainGen.Decorators
 {
     class FreezeDecorator : IChunkDecorator
     {
-        public void Decorate(IDimension dimension, IChunk chunk, IBiomeRepository biomes)
+        public void Decorate(int seed, IChunk chunk, IBlockRepository _, IBiomeRepository biomes)
         {
             for (int x = 0; x < Chunk.Width; x++)
             {
