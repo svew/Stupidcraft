@@ -2,24 +2,23 @@
 using System.Collections.Generic;
 using TrueCraft.Core.World;
 
-namespace TrueCraft.Core
+namespace TrueCraft.Core.TerrainGen
 {
-    public class EmptyGenerator : IChunkProvider
+    public class EmptyGenerator : Generator
     {
-        public IChunk GenerateChunk(IDimension dimension, GlobalChunkCoordinates coordinates)
+        public EmptyGenerator(int seed, IDimension dimension) : base(seed, dimension)
+        {
+
+        }
+
+        public override IChunk GenerateChunk(GlobalChunkCoordinates coordinates)
         {
             return new Chunk(coordinates);
         }
 
-        public GlobalVoxelCoordinates GetSpawn(IDimension dimension)
+        public override GlobalVoxelCoordinates GetSpawn(IDimension dimension)
         {
             return GlobalVoxelCoordinates.Zero;
         }
-
-        public void Initialize(IDimension world)
-        {
-        }
-
-        public IList<IChunkDecorator> ChunkDecorators { get; set; }
     }
 }

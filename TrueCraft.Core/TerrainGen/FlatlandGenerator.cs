@@ -4,26 +4,16 @@ using TrueCraft.Core.World;
 
 namespace TrueCraft.Core.TerrainGen
 {
-    public class FlatlandGenerator : IChunkProvider
+    public class FlatlandGenerator : Generator
     {
         static FlatlandGenerator()
         {
             DefaultGeneratorOptions = "1;7,2x3,2;1";
         }
 
-        public FlatlandGenerator()
+        public FlatlandGenerator(int seed, IDimension dimension) : base(seed, dimension)
         {
             GeneratorOptions = DefaultGeneratorOptions;
-            ChunkDecorators = new List<IChunkDecorator>();
-        }
-
-        public FlatlandGenerator(string generatorOptions)
-        {
-            GeneratorOptions = generatorOptions;
-        }
-
-        public void Initialize(IDimension dimension)
-        {
         }
 
         public static string DefaultGeneratorOptions { get; set; }
@@ -58,7 +48,7 @@ namespace TrueCraft.Core.TerrainGen
             Biome = (Biome)byte.Parse(parts[2]);
         }
 
-        public IChunk GenerateChunk(IDimension dimension, GlobalChunkCoordinates position)
+        public override IChunk GenerateChunk(GlobalChunkCoordinates position)
         {
             var chunk = new Chunk(position);
             int y = 0;
@@ -96,9 +86,7 @@ namespace TrueCraft.Core.TerrainGen
 
         public long Seed { get; set; }
 
-        public IList<IChunkDecorator> ChunkDecorators { get; set; }
-
-        public GlobalVoxelCoordinates GetSpawn(IDimension dimension)
+        public override GlobalVoxelCoordinates GetSpawn(IDimension dimension)
         {
             return new GlobalVoxelCoordinates(0, 5, 0);
         }

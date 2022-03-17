@@ -10,7 +10,7 @@ namespace TrueCraft.Core.TerrainGen
     /// <summary>
     /// This terrain generator is still under heavy development. Use at your own risk.
     /// </summary>
-    public class StandardGenerator : IChunkProvider
+    public class StandardGenerator : Generator
     {
         BiomeRepository Biomes = new BiomeRepository();
         Perlin HighNoise;
@@ -24,10 +24,10 @@ namespace TrueCraft.Core.TerrainGen
         bool EnableCaves;
         private const int GroundLevel = 50;
 
-        public StandardGenerator()
+        public StandardGenerator(int seed, IDimension dimension) : base(seed, dimension)
         {
             EnableCaves = true;
-            ChunkDecorators = new List<IChunkDecorator>();
+
             ChunkDecorators.Add(new LiquidDecorator());
             ChunkDecorators.Add(new OreDecorator());
             ChunkDecorators.Add(new PlantDecorator());
@@ -36,14 +36,11 @@ namespace TrueCraft.Core.TerrainGen
             ChunkDecorators.Add(new CactusDecorator());
             ChunkDecorators.Add(new SugarCaneDecorator());
             ChunkDecorators.Add(new DungeonDecorator(GroundLevel));
-        }
 
-        public void Initialize(IDimension dimension)
-        {
-            HighNoise = new Perlin(dimension.Seed);
-            LowNoise = new Perlin(dimension.Seed);
-            BottomNoise = new Perlin(dimension.Seed);
-            CaveNoise = new Perlin(dimension.Seed);
+            HighNoise = new Perlin(seed);
+            LowNoise = new Perlin(seed);
+            BottomNoise = new Perlin(seed);
+            CaveNoise = new Perlin(seed);
             
             CaveNoise.Octaves = 3;
             CaveNoise.Amplitude = 0.05;
@@ -84,21 +81,19 @@ namespace TrueCraft.Core.TerrainGen
             FinalNoise = new ModifyNoise(HighClamp, LowClamp, NoiseModifier.Add);
         }
 
-        public IList<IChunkDecorator> ChunkDecorators { get; private set; }
         public Vector3 SpawnPoint { get; private set; }
         public bool SingleBiome { get; private set; }
         public byte GenerationBiome { get; private set; }
 
-        public IChunk GenerateChunk(IDimension dimension, GlobalChunkCoordinates coordinates)
+        public override IChunk GenerateChunk(GlobalChunkCoordinates coordinates)
         {
             const int featurePointDistance = 400;
 
             // TODO: Create a terrain generator initializer function that gets passed the seed etc
-            int seed = dimension.Seed;
-            var worley = new CellNoise(seed);
-            HighNoise.Seed = seed;
-            LowNoise.Seed = seed;
-            CaveNoise.Seed = seed;
+            var worley = new CellNoise(_seed);
+            HighNoise.Seed = _seed;
+            LowNoise.Seed = _seed;
+            CaveNoise.Seed = _seed;
 
             var chunk = new Chunk(coordinates);
 
@@ -127,18 +122,18 @@ namespace TrueCraft.Core.TerrainGen
 
                     var cellValue = worley.Value2D(blockX, blockZ);
                     GlobalColumnCoordinates location = new GlobalColumnCoordinates(blockX, blockZ);
-                    if (dimension.BiomeDiagram.BiomeCells.Count < 1
+                    if (_dimension.BiomeDiagram.BiomeCells.Count < 1
                         || cellValue.Equals(1)
-                        && dimension.BiomeDiagram.ClosestCellPoint(location) >= featurePointDistance)
+                        && _dimension.BiomeDiagram.ClosestCellPoint(location) >= featurePointDistance)
                     {
                         byte id = (SingleBiome) ? GenerationBiome
-                            : dimension.BiomeDiagram.GenerateBiome(seed, Biomes, location,
+                            : _dimension.BiomeDiagram.GenerateBiome(_seed, Biomes, location,
                                 IsSpawnCoordinate(location.X, location.Z));
                         var cell = new BiomeCell(id, location);
-                        dimension.BiomeDiagram.AddCell(cell);
+                        _dimension.BiomeDiagram.AddCell(cell);
                     }
 
-                    Biome biomeId = (Biome)GetBiome(dimension, location);
+                    Biome biomeId = (Biome)GetBiome(_dimension, location);
                     IBiomeProvider biome = Biomes.GetBiome(biomeId);
                     chunk.SetBiome(x, z, biomeId);
 
@@ -182,15 +177,15 @@ namespace TrueCraft.Core.TerrainGen
                 }
             }
             foreach (var decorator in ChunkDecorators)
-                decorator.Decorate(dimension, chunk, Biomes);
+                decorator.Decorate(_dimension, chunk, Biomes);
             chunk.TerrainPopulated = true;
             chunk.UpdateHeightMap();
             return chunk;
         }
 
-        public GlobalVoxelCoordinates GetSpawn(IDimension dimension)
+        public override GlobalVoxelCoordinates GetSpawn(IDimension dimension)
         {
-            var chunk = GenerateChunk(dimension, new GlobalChunkCoordinates(0, 0));
+            var chunk = GenerateChunk(new GlobalChunkCoordinates(0, 0));
             int spawnPointHeight = chunk.GetHeight(0, 0);
             return new GlobalVoxelCoordinates(0, spawnPointHeight + 1, 0);
         }
