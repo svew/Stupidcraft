@@ -7,7 +7,7 @@ namespace TrueCraft.Core.TerrainGen.Decorations
     {
         public virtual bool ValidLocation(LocalVoxelCoordinates location) { return true; }
 
-        public abstract bool GenerateAt(IDimension dimension, IChunk chunk, LocalVoxelCoordinates location);
+        public abstract bool GenerateAt(int seed, IChunk chunk, LocalVoxelCoordinates location);
 
         protected static bool IsCuboidWall(LocalVoxelCoordinates location, LocalVoxelCoordinates start, Vector3 size)
         {
