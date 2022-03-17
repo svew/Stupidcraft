@@ -14,6 +14,8 @@ namespace TrueCraft.Core.Test.Logic
     [TestFixture]
     public class BlockProviderTest
     {
+        private const int _testSeed = 314159;
+
         public Mock<IDimension> Dimension { get; set; }
         public Mock<IMultiplayerServer> Server { get; set; }
         public Mock<IEntityManager> EntityManager { get; set; }
@@ -76,7 +78,7 @@ namespace TrueCraft.Core.Test.Logic
         public void TestSupport()
         {
             // We need an actual world for this
-            IDimension dimension = new TrueCraft.Core.World.Dimension("test", new FlatlandGenerator());
+            IDimension dimension = new TrueCraft.Core.World.Dimension(string.Empty, "test", new FlatlandGenerator(_testSeed));
             dimension.SetBlockID(GlobalVoxelCoordinates.Zero, 1);
             GlobalVoxelCoordinates oneY = new GlobalVoxelCoordinates(0, 1, 0);
             dimension.SetBlockID(oneY, 2);
