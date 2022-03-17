@@ -6,7 +6,7 @@ namespace TrueCraft.Core.TerrainGen
 {
     public class EmptyGenerator : Generator
     {
-        public EmptyGenerator(int seed, IDimension dimension) : base(seed, dimension)
+        public EmptyGenerator(int seed) : base(seed)
         {
 
         }

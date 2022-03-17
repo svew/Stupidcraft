@@ -11,7 +11,7 @@ namespace TrueCraft.Core.TerrainGen
             DefaultGeneratorOptions = "1;7,2x3,2;1";
         }
 
-        public FlatlandGenerator(int seed, IDimension dimension) : base(seed, dimension)
+        public FlatlandGenerator(int seed) : base(seed)
         {
             GeneratorOptions = DefaultGeneratorOptions;
         }

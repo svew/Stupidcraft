@@ -8,14 +8,11 @@ namespace TrueCraft.Core.TerrainGen
     {
         protected readonly int _seed;
 
-        protected readonly IDimension _dimension;
-
         private readonly List<IChunkDecorator> _decorators;
 
-        protected Generator(int seed, IDimension dimension)
+        protected Generator(int seed)
         {
             _seed = seed;
-            _dimension = dimension;
             _decorators = new List<IChunkDecorator>();
         }
 

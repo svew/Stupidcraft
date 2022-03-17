@@ -24,9 +24,13 @@ namespace TrueCraft.Core.TerrainGen
         bool EnableCaves;
         private const int GroundLevel = 50;
 
-        public StandardGenerator(int seed, IDimension dimension) : base(seed, dimension)
+        private readonly IBiomeMap _biomeMap;
+
+        public StandardGenerator(int seed) : base(seed)
         {
             EnableCaves = true;
+
+            _biomeMap = new BiomeMap(seed);
 
             ChunkDecorators.Add(new LiquidDecorator());
             ChunkDecorators.Add(new OreDecorator());
@@ -122,18 +126,18 @@ namespace TrueCraft.Core.TerrainGen
 
                     var cellValue = worley.Value2D(blockX, blockZ);
                     GlobalColumnCoordinates location = new GlobalColumnCoordinates(blockX, blockZ);
-                    if (_dimension.BiomeDiagram.BiomeCells.Count < 1
+                    if (_biomeMap.BiomeCells.Count < 1
                         || cellValue.Equals(1)
-                        && _dimension.BiomeDiagram.ClosestCellPoint(location) >= featurePointDistance)
+                        && _biomeMap.ClosestCellPoint(location) >= featurePointDistance)
                     {
                         byte id = (SingleBiome) ? GenerationBiome
-                            : _dimension.BiomeDiagram.GenerateBiome(_seed, Biomes, location,
+                            : _biomeMap.GenerateBiome(_seed, Biomes, location,
                                 IsSpawnCoordinate(location.X, location.Z));
                         var cell = new BiomeCell(id, location);
-                        _dimension.BiomeDiagram.AddCell(cell);
+                        _biomeMap.AddCell(cell);
                     }
 
-                    Biome biomeId = (Biome)GetBiome(_dimension, location);
+                    Biome biomeId = (Biome)GetBiome(location);
                     IBiomeProvider biome = Biomes.GetBiome(biomeId);
                     chunk.SetBiome(x, z, biomeId);
 
@@ -191,11 +195,11 @@ namespace TrueCraft.Core.TerrainGen
             return new GlobalVoxelCoordinates(0, spawnPointHeight + 1, 0);
         }
 
-        byte GetBiome(IDimension dimension, GlobalColumnCoordinates location)
+        private byte GetBiome(GlobalColumnCoordinates location)
         {
             if (SingleBiome)
                 return GenerationBiome;
-            return dimension.BiomeDiagram.GetBiome(location);
+            return _biomeMap.GetBiome(location);
         }
 
         // TODO:  for the following values of (x,z), this will return true:
