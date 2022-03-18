@@ -1,44 +1,52 @@
 ﻿using System;
-using System.IO;
-using TrueCraft.Core.World;
 using System.Collections.Generic;
-using TrueCraft.Core.TerrainGen;
+using System.IO;
+using System.Linq;
 using TrueCraft.Core;
 using TrueCraft.Core.Logic;
-using System.Linq;
+using TrueCraft.Core.TerrainGen;
+using TrueCraft.Core.World;
+using TrueCraft.World;
 
 namespace TrueCraft.Launcher.Singleplayer
 {
     public class Worlds
     {
+        private List<IWorld> _savedWorlds;
+
         public static Worlds Local { get; set; }
 
-        public Dimension[] Saves { get; set; }
+        public IEnumerable<IWorld> Saves { get; }
 
         public void Load()
         {
             if (!Directory.Exists(Paths.Worlds))
                 Directory.CreateDirectory(Paths.Worlds);
 
-            var directories = Directory.GetDirectories(Paths.Worlds);
-            var saves = new List<Dimension>();
-            foreach (var d in directories)
+            string[] directories = Directory.GetDirectories(Paths.Worlds);
+            _savedWorlds = new List<IWorld>(directories.Length);
+            foreach (string d in directories)
             {
                 try
                 {
-                    var w = Dimension.LoadWorld(d);
-                    saves.Add(w);
+                    // TODO: Instead of "loading" every world, have a method to check for validity.
+                    IWorld w = TrueCraft.World.World.LoadWorld(d);
+                    _savedWorlds.Add(w);
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine(e);
-                    /* Who cares */
                 }
             }
-            Saves = saves.ToArray();
         }
 
-        public Dimension CreateNewWorld(string name, string seed)
+        /// <summary>
+        /// Creates a new World.
+        /// </summary>
+        /// <param name="name">The World name, as entered by the Player</param>
+        /// <param name="seed">The seed for generating the new World.</param>
+        /// <returns></returns>
+        public IWorld CreateNewWorld(string name, string seed)
         {
             int s;
             if (!int.TryParse(seed, out s))
@@ -46,17 +54,15 @@ namespace TrueCraft.Launcher.Singleplayer
                 // TODO: Hash seed string
                 s = MathHelper.Random.Next();
             }
-            var world = new Dimension(name, s, new StandardGenerator());
 
             Discover.DoDiscovery(new Discover());
-            world.BlockRepository = BlockRepository.Get();
 
-            var safeName = name;
-            foreach (var c in Path.GetInvalidFileNameChars())
-                safeName = safeName.Replace(c.ToString(), "");
-            world.Name = name;
-            world.Save(Path.Combine(Paths.Worlds, safeName));
-            Saves = Saves.Concat(new[] { world }).ToArray();
+            PanDimensionalVoxelCoordinates spawnPoint = new PanDimensionalVoxelCoordinates(DimensionID.Overworld, 0, 0, 0);
+            IDimensionFactory factory = new DimensionFactory();
+            IWorld world = new TrueCraft.World.World(s, Paths.Worlds, name, factory, spawnPoint);
+            world.Save();
+            _savedWorlds.Add(world);
+
             return world;
         }
     }
