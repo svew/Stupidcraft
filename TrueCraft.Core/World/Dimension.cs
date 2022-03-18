@@ -9,21 +9,14 @@ using TrueCraft.Core.Logic;
 
 namespace TrueCraft.Core.World
 {
-    public class Dimension : IDisposable, IDimension, IEnumerable<IChunk>
+    public class Dimension : IDisposable, IDimension, IEnumerable<IChunk>, IEquatable<IDimension>
     {
         public static readonly int Height = 128;
 
+        private readonly DimensionID _dimensionID;
+
         public string Name { get; set; }
-        private int _Seed;
-        public int Seed
-        {
-            get { return _Seed; }
-            private set
-            {
-                _Seed = value;
-                BiomeDiagram = new BiomeMap(_Seed);
-            }
-        }
+
         private GlobalVoxelCoordinates _SpawnPoint = null;
 
         public GlobalVoxelCoordinates SpawnPoint
@@ -39,11 +32,10 @@ namespace TrueCraft.Core.World
                 _SpawnPoint = value;
             }
         }
-        public string BaseDirectory { get; internal set; }
+        public string BaseDirectory { get; }
 
         private IDictionary<RegionCoordinates, IRegion> _regions;
 
-        public IBiomeMap BiomeDiagram { get; set; }
         public IChunkProvider ChunkProvider { get; set; }
         public IBlockRepository BlockRepository { get; set; }
         public DateTime BaseTime { get; set; }
@@ -68,50 +60,53 @@ namespace TrueCraft.Core.World
         {
             _regions = new Dictionary<RegionCoordinates, IRegion>();
             BaseTime = DateTime.UtcNow;
+            _dimensionID = DimensionID.Overworld;
         }
 
-        public Dimension(string name) : this()
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="baseDirectory"></param>
+        /// <param name="name"></param>
+        public Dimension(string baseDirectory, string name) : this()
         {
             Name = name;
-            Seed = MathHelper.Random.Next();
         }
 
-        public Dimension(string name, IChunkProvider chunkProvider) : this(name)
+        public Dimension(string baseDirectory, string name, IChunkProvider chunkProvider) : this(baseDirectory, name)
         {
             ChunkProvider = chunkProvider;
-            ChunkProvider.Initialize(this);
         }
 
-        public Dimension(string name, int seed, IChunkProvider chunkProvider) : this(name, chunkProvider)
+        #region object overrides
+        public override int GetHashCode()
         {
-            Seed = seed;
+            return _dimensionID.GetHashCode();
         }
 
-        public static Dimension LoadWorld(string baseDirectory)
+        public override bool Equals(object obj)
         {
-            if (!Directory.Exists(baseDirectory))
-                throw new DirectoryNotFoundException();
-
-            Dimension dimension = new Dimension(Path.GetFileName(baseDirectory));
-            dimension.BaseDirectory = baseDirectory;
-
-            if (File.Exists(Path.Combine(baseDirectory, "manifest.nbt")))
-            {
-                var file = new NbtFile(Path.Combine(baseDirectory, "manifest.nbt"));
-                dimension.SpawnPoint = new GlobalVoxelCoordinates(file.RootTag["SpawnPoint"]["X"].IntValue,
-                    file.RootTag["SpawnPoint"]["Y"].IntValue,
-                    file.RootTag["SpawnPoint"]["Z"].IntValue);
-                dimension.Seed = file.RootTag["Seed"].IntValue;
-                var providerName = file.RootTag["ChunkProvider"].StringValue;
-                var provider = (IChunkProvider)Activator.CreateInstance(Type.GetType(providerName));
-                provider.Initialize(dimension);
-                if (file.RootTag.Contains("Name"))
-                    dimension.Name = file.RootTag["Name"].StringValue;
-                dimension.ChunkProvider = provider;
-            }
-
-            return dimension;
+            return Equals(obj as IDimension);
         }
+
+        public override string ToString()
+        {
+            return Name;
+        }
+        #endregion
+
+        #region IEquatable<IDimension>
+        public bool Equals(IDimension other)
+        {
+            if (other is null)
+                return false;
+
+            return _dimensionID == other.ID;
+        }
+        #endregion
+
+        /// <inheritdoc />
+        public DimensionID ID { get => _dimensionID; }
 
         /// <summary>
         /// Finds a chunk that contains the specified block coordinates.
@@ -309,25 +304,6 @@ namespace TrueCraft.Core.World
                 foreach (var region in _regions)
                     region.Value.Save(Path.Combine(BaseDirectory, Region.GetRegionFileName(region.Key)));
             }
-            var file = new NbtFile();
-            file.RootTag.Add(new NbtCompound("SpawnPoint", new[]
-            {
-                new NbtInt("X", this.SpawnPoint.X),
-                new NbtInt("Y", this.SpawnPoint.Y),
-                new NbtInt("Z", this.SpawnPoint.Z)
-            }));
-            file.RootTag.Add(new NbtInt("Seed", this.Seed));
-            file.RootTag.Add(new NbtString("ChunkProvider", this.ChunkProvider.GetType().FullName));
-            file.RootTag.Add(new NbtString("Name", Name));
-            file.SaveToFile(Path.Combine(this.BaseDirectory, "manifest.nbt"), NbtCompression.ZLib);
-        }
-
-        public void Save(string path)
-        {
-            if (!Directory.Exists(path))
-                Directory.CreateDirectory(path);
-            BaseDirectory = path;
-            Save();
         }
 
         private Dictionary<Thread, IChunk> ChunkCache = new Dictionary<Thread, IChunk>();

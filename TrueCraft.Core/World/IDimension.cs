@@ -11,10 +11,14 @@ namespace TrueCraft.Core.World
     /// </summary>
     public interface IDimension : IEnumerable<IChunk>
     {
+        /// <summary>
+        /// Gets the ID of this Dimension
+        /// </summary>
+        DimensionID ID { get; }
+
         string Name { get; set; }
         IBlockRepository BlockRepository { get; set; }
-        int Seed { get; }
-        IBiomeMap BiomeDiagram { get; set; }
+
         IChunkProvider ChunkProvider { get; set; }
 
         GlobalVoxelCoordinates SpawnPoint { get; set; }
@@ -53,6 +57,5 @@ namespace TrueCraft.Core.World
         bool IsChunkLoaded(GlobalVoxelCoordinates coordinates);
 
         void Save();
-        void Save(string path);
     }
 }

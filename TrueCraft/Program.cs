@@ -9,6 +9,8 @@ using TrueCraft.Core.World;
 using TrueCraft.Commands;
 using TrueCraft.Core;
 using TrueCraft.Profiling;
+using TrueCraft.World;
+using System.Collections.Generic;
 
 namespace TrueCraft
 {
@@ -48,33 +50,47 @@ namespace TrueCraft
                 if (Directory.Exists("players"))
                     Directory.Delete("players", true);
             }
-            IDimension dimension;
+            IWorld world;
             try
             {
-                dimension = Dimension.LoadWorld("world");
-                Server.AddDimension(dimension);
+                world = TrueCraft.World.World.LoadWorld("world");
+                // TODO: add the Nether
+                // TODO: delete method AddDimension
+                Server.AddDimension(world[DimensionID.Overworld]);
             }
-            catch
+            catch(DirectoryNotFoundException)
             {
-                dimension = new Dimension("default", new StandardGenerator());
-                dimension.BlockRepository = Server.BlockRepository;
-                dimension.Save("world");
-                Server.AddDimension(dimension);
+                int seed = MathHelper.Random.Next();
+                IChunkProvider chunkProvider = new StandardGenerator(seed);
+                IDimension overWorld = new Dimension(".", "OverWorld", chunkProvider);
+                List<IDimension> dimensions = new List<IDimension>(2);
+                dimensions.Add(null);   // TODO nether
+                dimensions.Add(overWorld);
+                world = new TrueCraft.World.World(seed, "world", dimensions,
+                    new PanDimensionalVoxelCoordinates(DimensionID.Overworld, 0, 0, 0));
+                world.Save();
+
+                // TODO: add the Nether
+                // TODO: delete method AddDimension
+                Server.AddDimension(overWorld);
+
+                int chunkRadius = 5;
                 Server.Log(LogCategory.Notice, "Generating world around spawn point...");
-                for (int x = -5; x < 5; x++)
+                for (int x = -chunkRadius; x < chunkRadius; x++)
                 {
-                    for (int z = -5; z < 5; z++)
-                        dimension.GetChunk(new GlobalChunkCoordinates(x, z));
-                    int progress = (int)(((x + 5) / 10.0) * 100);
-                    if (progress % 10 == 0)
+                    for (int z = -chunkRadius; z < chunkRadius; z++)
+                        overWorld.GetChunk(new GlobalChunkCoordinates(x, z));
+                    int progress = (int)(((x + chunkRadius) / (2.0 * chunkRadius)) * 100);
+                    if (progress % 10 == 0)  // TODO changing chunkRadius will break progress updates
                         Server.Log(LogCategory.Notice, "{0}% complete", progress + 10);
                 }
+
                 Server.Log(LogCategory.Notice, "Simulating the world for a moment...");
-                for (int x = -5; x < 5; x++)
+                for (int x = -chunkRadius; x < chunkRadius; x++)
                 {
-                    for (int z = -5; z < 5; z++)
+                    for (int z = -chunkRadius; z < chunkRadius; z++)
                     {
-                        var chunk = dimension.GetChunk(new GlobalChunkCoordinates(x, z));
+                        var chunk = overWorld.GetChunk(new GlobalChunkCoordinates(x, z));
                         for (byte _x = 0; _x < Chunk.Width; _x++)
                         {
                             for (byte _z = 0; _z < Chunk.Depth; _z++)
@@ -82,24 +98,25 @@ namespace TrueCraft
                                 for (int _y = 0; _y < chunk.GetHeight(_x, _z); _y++)
                                 {
                                     GlobalVoxelCoordinates coords = new GlobalVoxelCoordinates(x + _x, _y, z + _z);
-                                    var data = dimension.GetBlockData(coords);
-                                    var provider = dimension.BlockRepository.GetBlockProvider(data.ID);
-                                    provider.BlockUpdate(data, data, Server, dimension);
+                                    var data = overWorld.GetBlockData(coords);
+                                    var provider = overWorld.BlockRepository.GetBlockProvider(data.ID);
+                                    provider.BlockUpdate(data, data, Server, overWorld);
                                 }
                             }
                         }
                     }
-                    int progress = (int)(((x + 5) / 10.0) * 100);
-                    if (progress % 10 == 0)
+                    int progress = (int)(((x + chunkRadius) / (2.0 * chunkRadius)) * 100);
+                    if (progress % 10 == 0)  // TODO changing chunkRadius will break progress updates
                         Server.Log(LogCategory.Notice, "{0}% complete", progress + 10);
                 }
+
                 Server.Log(LogCategory.Notice, "Lighting the world (this will take a moment)...");
                 foreach (var lighter in Server.WorldLighters)
                 {
                     while (lighter.TryLightNext()) ;
                 }
             }
-            dimension.Save();
+            world.Save();
 
             Server.Start(new IPEndPoint(IPAddress.Parse(ServerConfiguration.ServerAddress), ServerConfiguration.ServerPort));
             Console.CancelKeyPress += HandleCancelKeyPress;

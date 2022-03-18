@@ -161,7 +161,7 @@ namespace TrueCraft.Core.World
         public void GenerateChunk(LocalChunkCoordinates position)
         {
             GlobalChunkCoordinates globalPosition = this.Position.GetGlobalChunkCoordinates(position);
-            var chunk = Dimension.ChunkProvider.GenerateChunk(Dimension, globalPosition);
+            var chunk = Dimension.ChunkProvider.GenerateChunk(globalPosition);
             chunk.IsModified = true;
             chunk.ParentRegion = this;
             DirtyChunks.Add(position);
