@@ -13,23 +13,23 @@ namespace TrueCraft.Launcher.Views
     public class SingleplayerView : VBox
     {
         private LauncherWindow _window;
-        public Label SingleplayerLabel { get; set; }
+        public Label _singleplayerLabel;
 
         private TreeView _worldListView;
         private ListStore _worldListStore;
 
-        public Button CreateWorldButton { get; set; }
-        public Button DeleteWorldButton { get; set; }
-        public Button PlayButton { get; set; }
-        public Button BackButton { get; set; }
-        public VBox CreateWorldBox { get; set; }
-        public Entry NewWorldName { get; set; }
-        public Entry NewWorldSeed { get; set; }
-        public Button NewWorldCommit { get; set; }
-        public Button NewWorldCancel { get; set; }
-        public Label ProgressLabel { get; set; }
-        public ProgressBar ProgressBar { get; set; }
-        public SingleplayerServer Server { get; set; }
+        public Button _createWorldButton;
+        public Button _deleteWorldButton;
+        public Button _playButton;
+        public Button _backButton;
+        public VBox _createWorldBox;
+        public Entry _newWorldName;
+        public Entry _newWorldSeed;
+        public Button _newWorldCommit;
+        public Button _newWorldCancel;
+        public Label _progressLabel;
+        public ProgressBar _progressBar;
+        public SingleplayerServer _server;
 
         public SingleplayerView(LauncherWindow window)
         {
@@ -39,7 +39,7 @@ namespace TrueCraft.Launcher.Views
             _window = window;
             this.SetSizeRequest(250, -1);
 
-            SingleplayerLabel = new Label("Singleplayer")
+            _singleplayerLabel = new Label("Singleplayer")
             {
                 Justify = Justification.Center
             };
@@ -54,41 +54,41 @@ namespace TrueCraft.Launcher.Views
             worldListSelection.Changed += (sender, e) =>
             {
                int selectedCount = worldListSelection.CountSelectedRows();
-               PlayButton.Sensitive = (selectedCount == 1);
-               DeleteWorldButton.Sensitive = (selectedCount == 1);
+               _playButton.Sensitive = (selectedCount == 1);
+               _deleteWorldButton.Sensitive = (selectedCount == 1);
             };
 
-            CreateWorldButton = new Button("New world");
-            DeleteWorldButton = new Button("Delete") { Sensitive = false };
-            PlayButton = new Button("Play") { Sensitive = false };
-            BackButton = new Button("Back");
-            CreateWorldBox = new VBox() { Visible = false };
-            NewWorldName = new Entry() { PlaceholderText = "Name" };
-            NewWorldSeed = new Entry() { PlaceholderText = "Seed (optional)" };
-            NewWorldCommit = new Button("Create") { Sensitive = false };
-            NewWorldCancel = new Button("Cancel");
+            _createWorldButton = new Button("New world");
+            _deleteWorldButton = new Button("Delete") { Sensitive = false };
+            _playButton = new Button("Play") { Sensitive = false };
+            _backButton = new Button("Back");
+            _createWorldBox = new VBox() { Visible = false };
+            _newWorldName = new Entry() { PlaceholderText = "Name" };
+            _newWorldSeed = new Entry() { PlaceholderText = "Seed (optional)" };
+            _newWorldCommit = new Button("Create") { Sensitive = false };
+            _newWorldCancel = new Button("Cancel");
 
-            ProgressLabel = new Label("Loading world...") { Visible = false };
+            _progressLabel = new Label("Loading world...") { Visible = false };
             // TODO: we have to call Pulse on the Progress Bar once in a while.
-            ProgressBar = new ProgressBar() { Visible = false, Fraction = 0 };
+            _progressBar = new ProgressBar() { Visible = false, Fraction = 0 };
 
-            BackButton.Clicked += (sender, e) => _window.ShowMainMenuView();
-            CreateWorldButton.Clicked += (sender, e) =>
+            _backButton.Clicked += (sender, e) => _window.ShowMainMenuView();
+            _createWorldButton.Clicked += (sender, e) =>
             {
-                CreateWorldBox.Visible = true;
+                _createWorldBox.Visible = true;
             };
-            NewWorldCancel.Clicked += (sender, e) =>
+            _newWorldCancel.Clicked += (sender, e) =>
             {
-                CreateWorldBox.Visible = false;
+                _createWorldBox.Visible = false;
             };
-            NewWorldName.Changed += (sender, e) =>
+            _newWorldName.Changed += (sender, e) =>
             {
-                NewWorldCommit.Sensitive = !string.IsNullOrEmpty(NewWorldName.Text);
+                _newWorldCommit.Sensitive = !string.IsNullOrEmpty(_newWorldName.Text);
             };
-            NewWorldCommit.Clicked += NewWorldCommit_Clicked;
+            _newWorldCommit.Clicked += NewWorldCommit_Clicked;
 
-            PlayButton.Clicked += PlayButton_Clicked;
-            DeleteWorldButton.Clicked += (sender, e) => 
+            _playButton.Clicked += PlayButton_Clicked;
+            _deleteWorldButton.Clicked += (sender, e) => 
             {
                 TreeIter iter;
                 ITreeModel model;
@@ -112,24 +112,24 @@ namespace TrueCraft.Launcher.Views
             }
 
             var createDeleteHbox = new HBox();
-            createDeleteHbox.PackStart(CreateWorldButton, true, false, 0);
-            createDeleteHbox.PackStart(DeleteWorldButton, true, false, 0);
+            createDeleteHbox.PackStart(_createWorldButton, true, false, 0);
+            createDeleteHbox.PackStart(_deleteWorldButton, true, false, 0);
 
-            CreateWorldBox.PackStart(NewWorldName, true, false, 0);
-            CreateWorldBox.PackStart(NewWorldSeed, true, false, 0);
+            _createWorldBox.PackStart(_newWorldName, true, false, 0);
+            _createWorldBox.PackStart(_newWorldSeed, true, false, 0);
             var newWorldHbox = new HBox();
-            newWorldHbox.PackStart(NewWorldCommit, true, false, 0);
-            newWorldHbox.PackStart(NewWorldCancel, true, false, 0);
-            CreateWorldBox.PackStart(newWorldHbox, true, false, 0);
+            newWorldHbox.PackStart(_newWorldCommit, true, false, 0);
+            newWorldHbox.PackStart(_newWorldCancel, true, false, 0);
+            _createWorldBox.PackStart(newWorldHbox, true, false, 0);
 
-            this.PackStart(SingleplayerLabel, true, false, 0);
+            this.PackStart(_singleplayerLabel, true, false, 0);
             this.PackStart(_worldListView, true, false, 0);
             this.PackStart(createDeleteHbox, true, false, 0);
-            this.PackStart(PlayButton, true, false, 0);
-            this.PackStart(CreateWorldBox, true, false, 0);
-            this.PackStart(ProgressLabel, true, false, 0);
-            this.PackStart(ProgressBar, true, false, 0);
-            this.PackEnd(BackButton, true, false, 0);
+            this.PackStart(_playButton, true, false, 0);
+            this.PackStart(_createWorldBox, true, false, 0);
+            this.PackStart(_progressLabel, true, false, 0);
+            this.PackStart(_progressBar, true, false, 0);
+            this.PackEnd(_backButton, true, false, 0);
         }
 
         private static void AddWorldColumns(TreeView worldView)
@@ -147,30 +147,30 @@ namespace TrueCraft.Launcher.Views
             string worldName = (string)_worldListStore.GetValue(iter, 0);
             // TODO: Do world names have to be unique?
             TrueCraft.Core.World.Dimension world = Worlds.Local.Saves.Where(s => s.Name == worldName).First<TrueCraft.Core.World.Dimension>();
-            Server = new SingleplayerServer(world);
+            _server = new SingleplayerServer(world);
 
-            PlayButton.Sensitive = BackButton.Sensitive = CreateWorldButton.Sensitive =
-                CreateWorldBox.Visible = _worldListView.Sensitive = false;
-            ProgressBar.Visible = ProgressLabel.Visible = true;
+            _playButton.Sensitive = _backButton.Sensitive = _createWorldButton.Sensitive =
+                _createWorldBox.Visible = _worldListView.Sensitive = false;
+            _progressBar.Visible = _progressLabel.Visible = true;
             Task.Factory.StartNew(() =>
             {
-                Server.Initialize((value, stage) =>
+                _server.Initialize((value, stage) =>
                     Application.Invoke((sender, e) =>
                     {
-                        ProgressLabel.Text = stage;
-                        ProgressBar.Fraction = value;
+                        _progressLabel.Text = stage;
+                        _progressBar.Fraction = value;
                     }));
-                Server.Start();
+                _server.Start();
                 Application.Invoke((sender, e) =>
                 {
-                    PlayButton.Sensitive = BackButton.Sensitive = CreateWorldButton.Sensitive = _worldListView.Sensitive = true;
+                    _playButton.Sensitive = _backButton.Sensitive = _createWorldButton.Sensitive = _worldListView.Sensitive = true;
                     var process = new Process();
 
                     string clientLocation = Assembly.GetExecutingAssembly().Location;
                     clientLocation = System.IO.Path.GetDirectoryName(clientLocation);
                     clientLocation = System.IO.Path.Combine(clientLocation, "TrueCraft.Client.dll");
 
-                    string launchParams = string.Format("{0} {1} {2} {3}", clientLocation, Server.Server.EndPoint, _window.User.Username, _window.User.SessionId);
+                    string launchParams = string.Format("{0} {1} {2} {3}", clientLocation, _server.Server.EndPoint, _window.User.Username, _window.User.SessionId);
 
                     process.StartInfo = new ProcessStartInfo($"dotnet",
                              launchParams);
@@ -178,10 +178,10 @@ namespace TrueCraft.Launcher.Views
                     process.EnableRaisingEvents = true;
                     process.Exited += (s, a) => Application.Invoke((s, a) =>
                     {
-                        ProgressBar.Visible = ProgressLabel.Visible = false;
+                        _progressBar.Visible = _progressLabel.Visible = false;
                         _window.Show();
-                        Server.Stop();
-                        Server.World.Save();
+                        _server.Stop();
+                        _server.World.Save();
                     });
                     process.Start();
                     _window.Hide();
@@ -203,8 +203,8 @@ namespace TrueCraft.Launcher.Views
                           msg.Run();
                        }
 
-                        ProgressBar.Visible = ProgressLabel.Visible = false;
-                        PlayButton.Sensitive = BackButton.Sensitive = CreateWorldButton.Sensitive =
+                        _progressBar.Visible = _progressLabel.Visible = false;
+                        _playButton.Sensitive = _backButton.Sensitive = _createWorldButton.Sensitive =
                             _worldListView.Sensitive = true;
                     });
                 }
@@ -213,8 +213,8 @@ namespace TrueCraft.Launcher.Views
 
         void NewWorldCommit_Clicked(object sender, EventArgs e)
         {
-            var world = Worlds.Local.CreateNewWorld(NewWorldName.Text, NewWorldSeed.Text);
-            CreateWorldBox.Visible = false;
+            var world = Worlds.Local.CreateNewWorld(_newWorldName.Text, _newWorldSeed.Text);
+            _createWorldBox.Visible = false;
             TreeIter row = _worldListStore.Append();
             _worldListStore.SetValue(row, 0, world.Name);
         }
