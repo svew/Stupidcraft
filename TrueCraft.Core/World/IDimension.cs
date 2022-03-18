@@ -21,8 +21,6 @@ namespace TrueCraft.Core.World
 
         IChunkProvider ChunkProvider { get; set; }
 
-        GlobalVoxelCoordinates SpawnPoint { get; set; }
-
         long Time { get; set; }
 
         event EventHandler<BlockChangeEventArgs> BlockChanged;

@@ -38,11 +38,11 @@ namespace TrueCraft.Handlers
             {
                 remoteClient.LoggedIn = true;
                 remoteClient.Entity = new PlayerEntity(remoteClient.Username);
-                remoteClient.Dimension = server.Dimensions[0];
+                remoteClient.Dimension = server.Dimensions[1];  // TODO read dimension from saved player data.
                 remoteClient.ChunkRadius = 2;
 
                 if (!remoteClient.Load())
-                    remoteClient.Entity.Position = (Vector3)remoteClient.Dimension.SpawnPoint;
+                    remoteClient.Entity.Position = new Vector3(0, 0, 0);  // TODO read default Spawn Point from World object.
                 // Make sure they don't spawn in the ground
                 var collision = new Func<bool>(() =>
                 {

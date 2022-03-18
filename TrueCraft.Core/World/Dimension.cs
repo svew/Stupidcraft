@@ -19,19 +19,6 @@ namespace TrueCraft.Core.World
 
         private GlobalVoxelCoordinates _SpawnPoint = null;
 
-        public GlobalVoxelCoordinates SpawnPoint
-        {
-            get
-            {
-                if (object.ReferenceEquals(_SpawnPoint, null))
-                    _SpawnPoint = ChunkProvider.GetSpawn(this);
-                return _SpawnPoint;
-            }
-            set
-            {
-                _SpawnPoint = value;
-            }
-        }
         public string BaseDirectory { get; }
 
         private IDictionary<RegionCoordinates, IRegion> _regions;
