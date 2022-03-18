@@ -15,16 +15,44 @@ namespace TrueCraft.World
 
         private readonly string _baseDirectory;
 
+        /// <summary>
+        /// The name of the World, as seen by the Player
+        /// </summary>
         private readonly string _name;
+
+        /// <summary>
+        /// The full path to the folder where the world is saved.
+        /// </summary>
+        /// <remarks>The last element of this path is a sanitized (for filesystem)
+        /// version of _name.</remarks>
+        private readonly string _folderName;
 
         private PanDimensionalVoxelCoordinates _spawnPoint;
 
-        public World(int seed, string name, List<IDimension> dimensions, PanDimensionalVoxelCoordinates spawnPoint)
+        /// <summary>
+        /// Creates a new World
+        /// </summary>
+        /// <param name="seed">The seed to be used to generate the World.</param>
+        /// <param name="baseDirectory">The folder where worlds are saved.</param>
+        /// <param name="name">The name of the World, as seen by the Player.</param>
+        /// <param name="dimensionFactory">A Factory for building the set of Dimensions.</param>
+        /// <param name="spawnPoint">The default Spawn Point for all Players.</param>
+        public World(int seed, string baseDirectory, string name, IDimensionFactory dimensionFactory, PanDimensionalVoxelCoordinates spawnPoint)
         {
             _seed = seed;
             _name = name;
-            _dimensions = dimensions;
+            _baseDirectory = baseDirectory;
+
+            IList<IDimension> dimensions = dimensionFactory.BuildDimensions(baseDirectory, seed);
+            _dimensions = new List<IDimension>(dimensions.Count);
+            _dimensions.AddRange(dimensions);
+
             _spawnPoint = spawnPoint;
+
+            string safeName = name;
+            foreach (char c in Path.GetInvalidFileNameChars())
+                safeName = safeName.Replace(c.ToString(), string.Empty);
+            _folderName = Path.Combine(baseDirectory, safeName);
         }
 
         public static IWorld LoadWorld(string baseDirectory)
@@ -60,12 +88,8 @@ namespace TrueCraft.World
                 // dimension.ChunkProvider = provider;
             }
 
-            IDimension overWorld = new Dimension(baseDirectory, "OverWorld");
-            List<IDimension> dimensions = new List<IDimension>(1);
-            dimensions.Add(null);   // TODO space reserved for Nether
-            dimensions.Add(overWorld);
-
-            return new World(seed, name, dimensions, spawnPoint);
+            IDimensionFactory factory = new DimensionFactory();
+            return new World(seed, baseDirectory, name, factory, spawnPoint);
         }
 
         #region IWorld

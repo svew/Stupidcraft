@@ -61,17 +61,14 @@ namespace TrueCraft
             catch(DirectoryNotFoundException)
             {
                 int seed = MathHelper.Random.Next();
-                IChunkProvider chunkProvider = new StandardGenerator(seed);
-                IDimension overWorld = new Dimension(".", "OverWorld", chunkProvider);
-                List<IDimension> dimensions = new List<IDimension>(2);
-                dimensions.Add(null);   // TODO nether
-                dimensions.Add(overWorld);
-                world = new TrueCraft.World.World(seed, "world", dimensions,
+                IDimensionFactory factory = new DimensionFactory();
+                world = new TrueCraft.World.World(seed, Paths.Worlds, "world", factory,
                     new PanDimensionalVoxelCoordinates(DimensionID.Overworld, 0, 0, 0));
                 world.Save();
 
                 // TODO: add the Nether
                 // TODO: delete method AddDimension
+                IDimension overWorld = world[DimensionID.Overworld];
                 Server.AddDimension(overWorld);
 
                 int chunkRadius = 5;
