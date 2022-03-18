@@ -15,7 +15,7 @@ namespace TrueCraft.Core.World
 
         private readonly DimensionID _dimensionID;
 
-        public string Name { get; set; }
+        public string Name { get; }
 
         private GlobalVoxelCoordinates _SpawnPoint = null;
 

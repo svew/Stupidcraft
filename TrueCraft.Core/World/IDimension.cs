@@ -16,7 +16,11 @@ namespace TrueCraft.Core.World
         /// </summary>
         DimensionID ID { get; }
 
-        string Name { get; set; }
+        /// <summary>
+        /// Gets the name of this Dimension
+        /// </summary>
+        string Name { get; }
+
         IBlockRepository BlockRepository { get; set; }
 
         IChunkProvider ChunkProvider { get; set; }
