@@ -23,7 +23,7 @@ namespace TrueCraft.Core.World
 
         IBlockRepository BlockRepository { get; set; }
 
-        IChunkProvider ChunkProvider { get; set; }
+        IChunkProvider ChunkProvider { get; }
 
         long Time { get; set; }
 

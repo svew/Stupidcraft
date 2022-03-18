@@ -23,7 +23,7 @@ namespace TrueCraft.Core.World
 
         private IDictionary<RegionCoordinates, IRegion> _regions;
 
-        public IChunkProvider ChunkProvider { get; set; }
+        public IChunkProvider ChunkProvider { get; }
         public IBlockRepository BlockRepository { get; set; }
         public DateTime BaseTime { get; set; }
 
