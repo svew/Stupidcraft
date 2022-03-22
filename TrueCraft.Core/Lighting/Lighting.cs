@@ -36,28 +36,31 @@ namespace TrueCraft.Core.Lighting
             Dimension = dimension;
             PendingOperations = new ConcurrentQueue<LightingOperation>();
             HeightMaps = new Dictionary<GlobalChunkCoordinates, byte[,]>();
-            dimension.ChunkGenerated += (sender, e) => GenerateHeightMap(e.Chunk);
-            dimension.ChunkLoaded += (sender, e) => GenerateHeightMap(e.Chunk);
-            dimension.BlockChanged += (sender, e) =>
-            {
-                if (e.NewBlock.ID != e.OldBlock.ID)
-                    UpdateHeightMap(e.Position);
-            };
-            foreach (var chunk in dimension)
-                GenerateHeightMap(chunk);
+
+            // TODO restore maintenance of lighting Height Maps
+            //dimension.ChunkGenerated += (sender, e) => GenerateHeightMap(e.Chunk);
+            //dimension.ChunkLoaded += (sender, e) => GenerateHeightMap(e.Chunk);
+            //dimension.BlockChanged += (sender, e) =>
+            //{
+            //    if (e.NewBlock.ID != e.OldBlock.ID)
+            //        UpdateHeightMap(e.Position);
+            //};
+
+            //foreach (var chunk in dimension)
+            //    GenerateHeightMap(chunk);
         }
 
         private void GenerateHeightMap(IChunk chunk)
         {
             LocalVoxelCoordinates coords;
-            var map = new byte[Chunk.Width, Chunk.Depth];
-            for (byte x = 0; x < Chunk.Width; x++)
+            var map = new byte[WorldConstants.ChunkWidth, WorldConstants.ChunkDepth];
+            for (byte x = 0; x < WorldConstants.ChunkWidth; x++)
             {
-                for (byte z = 0; z < Chunk.Depth; z++)
+                for (byte z = 0; z < WorldConstants.ChunkDepth; z++)
                 {
                     for (byte y = (byte)(chunk.GetHeight(x, z) + 2); y > 0; y--)
                     {
-                        if (y >= Chunk.Height)
+                        if (y >= WorldConstants.Height)
                             continue;
                         coords = new LocalVoxelCoordinates(x, y - 1, z);
                         var id = chunk.GetBlockID(coords);
@@ -77,16 +80,16 @@ namespace TrueCraft.Core.Lighting
 
         private void UpdateHeightMap(GlobalVoxelCoordinates coords)
         {
-            IChunk chunk;
-            LocalVoxelCoordinates adjusted = Dimension.FindBlockPosition(coords, out chunk, generate: false);
+            IChunk? chunk;
+            LocalVoxelCoordinates adjusted = Dimension.FindBlockPosition(coords, out chunk);
 
-            if (!HeightMaps.ContainsKey(chunk.Coordinates))
+            if (!HeightMaps.ContainsKey(chunk!.Coordinates))
                 return;
 
             var map = HeightMaps[chunk.Coordinates];
             byte x = (byte)adjusted.X; byte z = (byte)adjusted.Z;
             LocalVoxelCoordinates localCoords;
-            for (byte y = (byte)(Math.Min(Chunk.Height, chunk.GetHeight(x, z) + 2)); y > 0; y--)
+            for (byte y = (byte)(Math.Min(WorldConstants.Height, chunk.GetHeight(x, z) + 2)); y > 0; y--)
             {
                 localCoords = new LocalVoxelCoordinates(x, y - 1, z);
                 var id = chunk.GetBlockID(localCoords);
@@ -103,8 +106,8 @@ namespace TrueCraft.Core.Lighting
 
         private void LightBox(LightingOperation op)
         {
-            IChunk chunk = Dimension.FindChunk((GlobalVoxelCoordinates)op.Box.Center, generate: false);
-            if (chunk == null || !chunk.TerrainPopulated)
+            IChunk? chunk = Dimension.GetChunk((GlobalVoxelCoordinates)op.Box.Center);
+            if (chunk is null || !chunk.TerrainPopulated)
                 return;
             Profiler.Start("lighting.box");
             for (int x = (int)op.Box.Min.X; x < (int)op.Box.Max.X; x++)
@@ -124,9 +127,9 @@ namespace TrueCraft.Core.Lighting
             var coords = new GlobalVoxelCoordinates(x, y, z);
             if (!Dimension.IsValidPosition(coords))
                 return;
-            IChunk chunk;
-            var adjustedCoords = Dimension.FindBlockPosition(coords, out chunk, generate: false);
-            if (chunk == null || !chunk.TerrainPopulated)
+            IChunk? chunk;
+            var adjustedCoords = Dimension.FindBlockPosition(coords, out chunk);
+            if (chunk is null || !chunk.TerrainPopulated)
                 return;
             byte current = op.SkyLight ? Dimension.GetSkyLight(coords) : Dimension.GetBlockLight(coords);
             if (value == current)
@@ -150,10 +153,10 @@ namespace TrueCraft.Core.Lighting
         {
             GlobalVoxelCoordinates coords = new GlobalVoxelCoordinates(x, y, z);
 
-            IChunk chunk;
-            var adjustedCoords = Dimension.FindBlockPosition(coords, out chunk, generate: false);
+            IChunk? chunk;
+            var adjustedCoords = Dimension.FindBlockPosition(coords, out chunk);
 
-            if (chunk == null || !chunk.TerrainPopulated) // Move on if this chunk is empty
+            if (chunk is null || !chunk.TerrainPopulated) // Move on if this chunk is empty
                 return;
 
             Profiler.Start("lighting.voxel");
@@ -204,9 +207,9 @@ namespace TrueCraft.Core.Lighting
                     //    already loaded.
                     if (Dimension.IsValidPosition(neighbor) && Dimension.IsChunkLoaded(neighbor))
                     {
-                        IChunk c;
-                        var adjusted = Dimension.FindBlockPosition(neighbor, out c, generate: false);
-                        if (c != null) // We don't want to generate new chunks just to light this voxel
+                        IChunk? c;
+                        var adjusted = Dimension.FindBlockPosition(neighbor, out c);
+                        if (c is not null) // We don't want to generate new chunks just to light this voxel
                         {
                             byte val;
                             if (op.SkyLight)
@@ -283,9 +286,9 @@ namespace TrueCraft.Core.Lighting
         /// <param name="chunk">The Chunk to operate on.</param>
         private void SetUpperVoxels(IChunk chunk)
         {
-            for (int x = 0; x < Chunk.Width; x++)
-            for (int z = 0; z < Chunk.Depth; z++)
-            for (int y = chunk.MaxHeight + 1; y < Chunk.Height; y++)
+            for (int x = 0; x < WorldConstants.ChunkWidth; x++)
+            for (int z = 0; z < WorldConstants.ChunkDepth; z++)
+            for (int y = chunk.MaxHeight + 1; y < WorldConstants.Height; y++)
                 chunk.SetSkyLight(new LocalVoxelCoordinates(x, y, z), 15);
         }
 
@@ -298,7 +301,7 @@ namespace TrueCraft.Core.Lighting
             SetUpperVoxels(chunk);
             GlobalVoxelCoordinates coords = (GlobalVoxelCoordinates)chunk.Coordinates;
             EnqueueOperation(new BoundingBox(new Vector3(coords.X, 0, coords.Z),
-                new Vector3(coords.X + Chunk.Width, chunk.MaxHeight + 2, coords.Z + Chunk.Depth)),
+                new Vector3(coords.X + WorldConstants.ChunkWidth, chunk.MaxHeight + 2, coords.Z + WorldConstants.ChunkDepth)),
                 true, true);
             TryLightNext();
             while (flush && TryLightNext())
