@@ -101,7 +101,7 @@ namespace TrueCraft.World
                     var chunkData = GetChunkFromTable(position);
                     if (chunkData == null)
                     {
-                        if (Dimension.ChunkProvider == null)
+                        if (Dimension._chunkProvider == null)
                             throw new ArgumentException("The requested chunk is not loaded.", "position");
                         if (generate)
                             GenerateChunk(position);
@@ -131,7 +131,6 @@ namespace TrueCraft.World
                         }
                     }
                     IChunk chunk = Chunk.FromNbt(nbt);
-                    chunk.ParentRegion = this;
                     _chunks[position] = chunk;
                     // TODO: NOTE OnChunkLoaded will cause a lighting operation to be queued for this chunk.
                     //    There are 2 threads enqueuing and dequeueing lighting operations (DoEnvironment,
@@ -141,7 +140,7 @@ namespace TrueCraft.World
                     //    lock is to resolve this.
                     Dimension.OnChunkLoaded(new ChunkLoadedEventArgs(chunk));
                 }
-                else if (Dimension.ChunkProvider == null)
+                else if (Dimension._chunkProvider == null)
                     throw new ArgumentException("The requested chunk is not loaded.", nameof(position));
                 else
                 {
@@ -162,9 +161,7 @@ namespace TrueCraft.World
         public void GenerateChunk(LocalChunkCoordinates position)
         {
             GlobalChunkCoordinates globalPosition = this.Position.GetGlobalChunkCoordinates(position);
-            var chunk = Dimension.ChunkProvider.GenerateChunk(globalPosition);
-            chunk.IsModified = true;
-            chunk.ParentRegion = this;
+            var chunk = Dimension._chunkProvider.GenerateChunk(globalPosition);
             DirtyChunks.Add(position);
             _chunks[position] = chunk;
             Dimension.OnChunkGenerated(new ChunkLoadedEventArgs(chunk));
@@ -176,9 +173,7 @@ namespace TrueCraft.World
         public void SetChunk(LocalChunkCoordinates position, IChunk chunk)
         {
             _chunks[position] = chunk;
-            chunk.IsModified = true;
             DirtyChunks.Add(position);
-            chunk.ParentRegion = this;
         }
 
         /// <summary>
@@ -222,8 +217,6 @@ namespace TrueCraft.World
                         new MinecraftStream(_regionFile).WriteInt32(raw.Length);
                         _regionFile.WriteByte(2); // Compressed with zlib
                         _regionFile.Write(raw, 0, raw.Length);
-
-                        chunk.IsModified = false;
                     }
                     if ((DateTime.UtcNow - chunk.LastAccessed).TotalMinutes > 5)
                         toRemove.Add(coords);

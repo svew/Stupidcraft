@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using fNbt;
 using fNbt.Serialization;
+using TrueCraft.Core;
 using TrueCraft.Core.Logic.Blocks;
 using TrueCraft.Core.Server;
+using TrueCraft.Core.World;
 
-namespace TrueCraft.Core.World
+namespace TrueCraft.World
 {
     public class Chunk : INbtSerializable, IChunk
     {
@@ -117,8 +119,8 @@ namespace TrueCraft.Core.World
 
         public bool TerrainPopulated { get; set; }
 
-        [NbtIgnore]
-        public IRegion ParentRegion { get; set; }
+        //[NbtIgnore]
+        //public IRegion ParentRegion { get; set; }
 
         public byte GetBlockID(LocalVoxelCoordinates coordinates)
         {
@@ -151,8 +153,6 @@ namespace TrueCraft.Core.World
         public void SetBlockID(LocalVoxelCoordinates coordinates, byte value)
         {
             IsModified = true;
-            if (ParentRegion != null)
-                ParentRegion.DamageChunk((LocalChunkCoordinates)Coordinates);
             int index = coordinates.Y + (coordinates.Z * Height) + (coordinates.X * Height * Width);
             Data[index] = value;
             if (value == AirBlock.BlockID)
@@ -190,8 +190,6 @@ namespace TrueCraft.Core.World
         public void SetMetadata(LocalVoxelCoordinates coordinates, byte value)
         {
             IsModified = true;
-            if (ParentRegion != null)
-                ParentRegion.DamageChunk((LocalChunkCoordinates)Coordinates);
             int index = coordinates.Y + (coordinates.Z * Height) + (coordinates.X * Height * Width);
             Metadata[index] = value;
         }
@@ -203,8 +201,6 @@ namespace TrueCraft.Core.World
         public void SetSkyLight(LocalVoxelCoordinates coordinates, byte value)
         {
             IsModified = true;
-            if (ParentRegion != null)
-                ParentRegion.DamageChunk((LocalChunkCoordinates)Coordinates);
             int index = coordinates.Y + (coordinates.Z * Height) + (coordinates.X * Height * Width);
             SkyLight[index] = value;
         }
@@ -216,8 +212,6 @@ namespace TrueCraft.Core.World
         public void SetBlockLight(LocalVoxelCoordinates coordinates, byte value)
         {
             IsModified = true;
-            if (ParentRegion != null)
-                ParentRegion.DamageChunk((LocalChunkCoordinates)Coordinates);
             int index = coordinates.Y + (coordinates.Z * Height) + (coordinates.X * Height * Width);
             BlockLight[index] = value;
         }
@@ -242,8 +236,6 @@ namespace TrueCraft.Core.World
             else
                 _tileEntities[coordinates] = value;
             IsModified = true;
-            if (ParentRegion != null)
-                ParentRegion.DamageChunk((LocalChunkCoordinates)Coordinates);
         }
 
         #region Height Map

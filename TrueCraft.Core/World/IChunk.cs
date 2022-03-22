@@ -1,6 +1,7 @@
 ﻿using System;
 using fNbt;
-using System.Collections.Generic;
+using TrueCraft.Core;
+using TrueCraft.Core.World;
 
 namespace TrueCraft.Core.World
 {
@@ -37,7 +38,7 @@ namespace TrueCraft.Core.World
         int GetHeight(int x, int z);
         void UpdateHeightMap();
 
-        bool IsModified { get; set; }
+        bool IsModified { get; }
         bool LightPopulated { get; set; }
 
         /// <summary>
@@ -55,7 +56,7 @@ namespace TrueCraft.Core.World
         NibbleSlice Metadata { get; }
         NibbleSlice BlockLight { get; }
         NibbleSlice SkyLight { get; }
-        IRegion ParentRegion { get; set; }
+        //IRegion ParentRegion { get; set; }
 
         byte GetBlockID(LocalVoxelCoordinates coordinates);
         byte GetMetadata(LocalVoxelCoordinates coordinates);
