@@ -11,10 +11,9 @@ namespace TrueCraft.World
 {
     /// <summary>
     /// Represents a 32x32 area of <see cref="Chunk"/> objects.
-    /// Not all of these chunks are represented at any given time, and
-    /// will be loaded from disk or generated when the need arises.
+    /// Not all of these chunks are in memory at any given time.
     /// </summary>
-    public class Region : IDisposable, IRegion
+    internal class Region : IDisposable, IRegion
     {
         /// <summary>
         /// The number of chunks within the region in the X-direction.
@@ -26,16 +25,12 @@ namespace TrueCraft.World
         /// </summary>
         public const int Depth = WorldConstants.RegionDepth;
 
-        private ConcurrentDictionary<LocalChunkCoordinates, IChunk> _chunks { get; }
-
-        public IEnumerable<IChunk> Chunks { get => _chunks.Values;  }
+        private readonly IChunk[,] _chunks = new IChunk[Width, Depth];
 
         /// <summary>
         /// The location of this region in the overworld.
         /// </summary>
         public RegionCoordinates Position { get; }
-
-        public Dimension Dimension { get; }  // TODO should be IDimension
 
         private HashSet<LocalChunkCoordinates> DirtyChunks { get; } = new HashSet<LocalChunkCoordinates>(Width * Depth);
 
@@ -47,133 +42,86 @@ namespace TrueCraft.World
         /// the given World.
         /// </summary>
         /// <params>
-        /// <param name="position"></param>
-        /// <param name="dimension"></param>
+        /// <param name="position">The Position of the Region within the parent Dimension</param>
+        /// <param name="baseDirectory">The folder in which the parent Dimension is stored.</param>
         /// </params>
-        public Region(RegionCoordinates position, IDimension dimension)
+        public Region(RegionCoordinates position, string baseDirectory)
         {
-            _chunks = new ConcurrentDictionary<LocalChunkCoordinates, IChunk>(Environment.ProcessorCount, Width * Depth);
             Position = position;
-            Dimension = (Dimension)dimension;
-        }
 
-        /// <summary>
-        /// Creates a region from the given region file.
-        /// </summary>
-        public Region(RegionCoordinates position, IDimension dimension, string file) : this(position, dimension)
-        {
-            if (File.Exists(file))
+            string filename = Path.Combine(baseDirectory, "region", GetRegionFileName(position));
+
+            if (File.Exists(filename))
             {
-                _regionFile = File.Open(file, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
+                _regionFile = File.Open(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
                 _regionFile.Read(HeaderCache, 0, 8192);
             }
             else
             {
-                _regionFile = File.Open(file, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
+                _regionFile = File.Open(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
                 CreateRegionHeader();
             }
         }
 
-        public void DamageChunk(LocalChunkCoordinates coords)
-        {
-            DirtyChunks.Add(coords);
-        }
-
         public bool IsChunkLoaded(LocalChunkCoordinates position)
         {
-            return _chunks.ContainsKey(position);
+            return _chunks[position.X, position.Z] is not null;
         }
 
         /// <summary>
-        /// Retrieves the requested chunk from the region, or
-        /// generates it if a world generator is provided.
+        /// Retrieves the requested chunk from the region.
         /// </summary>
         /// <params>
         /// <param name="position">The position of the requested local chunk coordinates.</param>
         /// </params>
-        public IChunk GetChunk(LocalChunkCoordinates position, bool generate = true)
+        /// <returns>The requested Chunk or null if no Chunk has been saved to disk at this position.</returns>
+        public IChunk? GetChunk(LocalChunkCoordinates position)
         {
-            if (!_chunks.ContainsKey(position))
-            {
-                if (_regionFile != null)
-                {
-                    // Search the stream for that region
-                    var chunkData = GetChunkFromTable(position);
-                    if (chunkData == null)
-                    {
-                        if (Dimension._chunkProvider == null)
-                            throw new ArgumentException("The requested chunk is not loaded.", "position");
-                        if (generate)
-                            GenerateChunk(position);
-                        else
-                            return null;
-                        // TODO BUG On client exit, an exception was thrown here
-                        //     due to position not being in the Dictionary.
-                        return _chunks[position];
-                    }
+            int chunkX = position.X;
+            int chunkZ = position.Z;
 
-                    NbtFile nbt = new NbtFile();
-                    lock (_streamLock)
-                    {
-                        _regionFile.Seek(chunkData.Item1, SeekOrigin.Begin);
-                        /*int length = */
-                        new MinecraftStream(_regionFile).ReadInt32(); // TODO: Avoid making new objects here, and in the WriteInt32
-                        int compressionMode = _regionFile.ReadByte();
-                        switch (compressionMode)
-                        {
-                            case 1: // gzip
-                                throw new NotImplementedException("gzipped chunks are not implemented");
-                            case 2: // zlib
-                                nbt.LoadFromStream(_regionFile, NbtCompression.ZLib, null);
-                                break;
-                            default:
-                                throw new InvalidDataException("Invalid compression scheme provided by region file.");
-                        }
-                    }
-                    IChunk chunk = Chunk.FromNbt(nbt);
-                    _chunks[position] = chunk;
-                    // TODO: NOTE OnChunkLoaded will cause a lighting operation to be queued for this chunk.
-                    //    There are 2 threads enqueuing and dequeueing lighting operations (DoEnvironment,
-                    //    and the thread responding to the login packet).  Such lighting operations would
-                    //    then cross over from one thread to another, leading to each thread trying to obtain
-                    //    a lock owned by the other - a deadlock.  Moving the lighting operations outside the
-                    //    lock is to resolve this.
-                    Dimension.OnChunkLoaded(new ChunkLoadedEventArgs(chunk));
-                }
-                else if (Dimension._chunkProvider == null)
-                    throw new ArgumentException("The requested chunk is not loaded.", nameof(position));
-                else
+            if (_chunks[chunkX, chunkZ] is not null)
+                return _chunks[chunkX, chunkZ];
+
+            Tuple<int, int>? tableEntry = GetChunkFromTable(position);
+            if (tableEntry is null)
+                return null;
+
+            int chunkDataOffset = tableEntry.Item1;
+            NbtFile nbt = new NbtFile();
+            lock (_streamLock)
+            {
+                // Add 4 to the chunkDataOffset to skip reading the length.
+                _regionFile.Seek(chunkDataOffset + 4, SeekOrigin.Begin);
+                int compressionMode = _regionFile.ReadByte();
+                switch (compressionMode)
                 {
-                    if (generate)
-                        GenerateChunk(position);
-                    else
-                        return null;
+                    case 1: // gzip
+                        throw new NotImplementedException("gzipped chunks are not implemented");
+                    case 2: // zlib
+                        nbt.LoadFromStream(_regionFile, NbtCompression.ZLib, null);
+                        break;
+                    default:
+                        throw new InvalidDataException("Invalid compression scheme provided by region file.");
                 }
             }
-            // TODO BUG: Just after Client exit, this threw an exception because
-            //    position was not in the Dictionary.  It's happened for Grass
-            //    growing and also for expanding the Client's Chunk Radius (exit
-            //    was nearly immediately after entry, so the chunk radius was not
-            //    fully expanded).
-            return _chunks[position];
+            IChunk chunk = Chunk.FromNbt(nbt);  // TODO remove dependency on Chunk class
+            _chunks[chunkX, chunkZ] = chunk;
+
+            return chunk;
         }
 
-        public void GenerateChunk(LocalChunkCoordinates position)
+        /// <inheritdoc />
+        public void AddChunk(IChunk chunk)
         {
-            GlobalChunkCoordinates globalPosition = this.Position.GetGlobalChunkCoordinates(position);
-            var chunk = Dimension._chunkProvider.GenerateChunk(globalPosition);
-            DirtyChunks.Add(position);
-            _chunks[position] = chunk;
-            Dimension.OnChunkGenerated(new ChunkLoadedEventArgs(chunk));
-        }
+            LocalChunkCoordinates position = (LocalChunkCoordinates)chunk.Coordinates;
 
-        /// <summary>
-        /// Sets the chunk at the specified local position to the given value.
-        /// </summary>
-        public void SetChunk(LocalChunkCoordinates position, IChunk chunk)
-        {
-            _chunks[position] = chunk;
-            DirtyChunks.Add(position);
+#if DEBUG
+            if (_chunks[position.X, position.Z] is not null)
+                throw new ApplicationException("Attempt to add a Chunk that is already loaded.");
+#endif
+
+            _chunks[position.X, position.Z] = chunk;
         }
 
         /// <summary>
@@ -198,37 +146,32 @@ namespace TrueCraft.World
         {
             lock (_streamLock)
             {
-                var toRemove = new List<LocalChunkCoordinates>();
-                var chunks = DirtyChunks.ToList();
-                DirtyChunks.Clear();
-                foreach (var coords in chunks)
-                {
-                    var chunk = GetChunk(coords, generate: false);
-                    if (chunk.IsModified)
+                for (int x = 0; x < Width; x++)
+                    for (int z = 0; z < Depth; z ++)
                     {
-                        var data = ((Chunk)chunk).ToNbt();
-                        byte[] raw = data.SaveToBuffer(NbtCompression.ZLib);
+                        IChunk? chunk = _chunks[x, z];
+                        if (chunk?.IsModified ?? false)
+                        {
+                            NbtFile data = ((Chunk)chunk).ToNbt();  // TODO remove cast and dependency on Chunk class
+                            byte[] raw = data.SaveToBuffer(NbtCompression.ZLib);
 
-                        var header = GetChunkFromTable(coords);
-                        if (header == null || header.Item2 > raw.Length)
-                            header = AllocateNewChunks(coords, raw.Length);
+                            // Locate/obtain storage for the Chunk
+                            LocalChunkCoordinates coords = new LocalChunkCoordinates(x, z);
+                            var header = GetChunkFromTable(coords);
+                            if (header == null || header.Item2 > raw.Length)
+                                header = AllocateNewChunks(coords, raw.Length);
 
-                        _regionFile.Seek(header.Item1, SeekOrigin.Begin);
-                        new MinecraftStream(_regionFile).WriteInt32(raw.Length);
-                        _regionFile.WriteByte(2); // Compressed with zlib
-                        _regionFile.Write(raw, 0, raw.Length);
+                            // Write the Chunk
+                            _regionFile.Seek(header.Item1, SeekOrigin.Begin);
+                            byte[] rawLength = BitConverter.GetBytes(raw.Length);
+                            if (BitConverter.IsLittleEndian)
+                                rawLength.Reverse();
+                            _regionFile.Write(rawLength, 0, rawLength.Length);
+                            _regionFile.WriteByte(2); // Compressed with zlib
+                            _regionFile.Write(raw, 0, raw.Length);
+                        }
                     }
-                    if ((DateTime.UtcNow - chunk.LastAccessed).TotalMinutes > 5)
-                        toRemove.Add(coords);
-                }
                 _regionFile.Flush();
-                // Unload idle chunks
-                foreach (var chunk in toRemove)
-                {
-                    IChunk c;
-                    _chunks.Remove(chunk, out c);
-                    c.Dispose();
-                }
             }
         }
 
@@ -236,18 +179,38 @@ namespace TrueCraft.World
 
         private const int ChunkSizeMultiplier = 4096;
         private byte[] HeaderCache = new byte[8192];
-        
-        private Tuple<int, int> GetChunkFromTable(LocalChunkCoordinates position) // <offset, length>
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="position"></param>
+        /// <returns>
+        /// <para>
+        /// If there is no Chunk stored at this position, null is returned.
+        /// </para>
+        /// <para>The first integer of the tuple specifies the offset from the beginning
+        /// of the file in bytes.  The second integer specifies the
+        /// available space for the Chunk, in bytes.</para>
+        /// </returns>
+        private Tuple<int, int>? GetChunkFromTable(LocalChunkCoordinates position) // <offset, length>
         {
             int tableOffset = GetTableOffset(position);
-            byte[] offsetBuffer = new byte[4];
-            Buffer.BlockCopy(HeaderCache, tableOffset, offsetBuffer, 0, 3);
-            Array.Reverse(offsetBuffer);
+
+            // The first three bytes at location tableOffset give a 24-bit
+            // integer which specifies the offset from the beginning of the file
+            // where the Chunk is stored.  This offset is in units of 4k "sectors".
+            int chunkOffset = HeaderCache[tableOffset] << 16 |
+                HeaderCache[tableOffset + 1] << 8 |
+                HeaderCache[tableOffset + 2];
+
+            // The length of the Chunk storage in 4k "sectors".
             int length = HeaderCache[tableOffset + 3];
-            int offset = BitConverter.ToInt32(offsetBuffer, 0) << 4;
-            if (offset == 0 || length == 0)
+
+            // Check if the Chunk has never been saved.
+            if (chunkOffset == 0 || length == 0)
                 return null;
-            return new Tuple<int, int>(offset,
+
+            return new Tuple<int, int>(chunkOffset * ChunkSizeMultiplier,
                 length * ChunkSizeMultiplier);
         }
 
@@ -281,6 +244,12 @@ namespace TrueCraft.World
             return new Tuple<int, int>(dataOffset, length * ChunkSizeMultiplier);
         }
 
+        /// <summary>
+        /// Gets the offset (in bytes) of the Chunk location and sector count
+        /// information within the Header table.
+        /// </summary>
+        /// <param name="pos"></param>
+        /// <returns></returns>
         private int GetTableOffset(LocalChunkCoordinates pos)
         {
             return (pos.X + pos.Z * Width) * 4;
@@ -290,13 +259,7 @@ namespace TrueCraft.World
 
         public static string GetRegionFileName(RegionCoordinates position)
         {
-            return string.Format("r.{0}.{1}.mca", position.X, position.Z);
-        }
-
-        public void UnloadChunk(LocalChunkCoordinates position)
-        {
-            IChunk c;
-            _chunks.Remove(position, out c);
+            return string.Format("r.{0}.{1}.mcr", position.X, position.Z);
         }
 
         public void Dispose()
