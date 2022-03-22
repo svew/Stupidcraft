@@ -27,7 +27,7 @@ namespace TrueCraft.Commands
             switch (arguments.Length)
             {
                 case 0:
-                    client.SendMessage(client.Dimension.Time.ToString());
+                    client.SendMessage(client.Dimension.TimeOfDay.ToString());
                     break;
                 case 2:
                     if (!arguments[0].Equals("set"))
@@ -38,7 +38,7 @@ namespace TrueCraft.Commands
                     if(!Int32.TryParse(arguments[1], out newTime))
                         Help(client, alias, arguments);
 
-                    client.Dimension.Time = newTime;
+                    client.Dimension.TimeOfDay = newTime;
 
                     client.SendMessage(string.Format("Setting time to {0}", arguments[1]));
 

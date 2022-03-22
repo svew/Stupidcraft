@@ -65,7 +65,7 @@ namespace TrueCraft.Core.Logic.Blocks
             dimension.SetMetadata(coords, meta);
             if (meta < 7)
             {
-                var chunk = dimension.FindChunk(coords);
+                var chunk = dimension.GetChunk(coords);
                 server.Scheduler.ScheduleEvent("crops",
                     chunk, TimeSpan.FromSeconds(MathHelper.Random.Next(30, 60)),
                    (_server) => GrowBlock(_server, dimension, coords));
@@ -83,7 +83,7 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
-            var chunk = dimension.FindChunk(descriptor.Coordinates);
+            var chunk = dimension.GetChunk(descriptor.Coordinates);
             user.Server.Scheduler.ScheduleEvent("crops", chunk,
                 TimeSpan.FromSeconds(MathHelper.Random.Next(30, 60)),
                 (server) => GrowBlock(server, dimension, descriptor.Coordinates + MathHelper.BlockFaceToCoordinates(face)));
@@ -91,7 +91,7 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IDimension dimension)
         {
-            var chunk = dimension.FindChunk(coords);
+            var chunk = dimension.GetChunk(coords);
             server.Scheduler.ScheduleEvent("crops", chunk,
                 TimeSpan.FromSeconds(MathHelper.Random.Next(30, 60)),
                 (s) => GrowBlock(s, dimension, coords));

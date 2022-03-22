@@ -69,7 +69,7 @@ namespace TrueCraft.Handlers
                         remoteClient.Entity.Position.Y + 1,
                         remoteClient.Entity.Position.Y + remoteClient.Entity.Size.Height + 1,
                         remoteClient.Entity.Position.Z, remoteClient.Entity.Yaw, remoteClient.Entity.Pitch, true));
-                remoteClient.QueuePacket(new TimeUpdatePacket(remoteClient.Dimension.Time));
+                remoteClient.QueuePacket(new TimeUpdatePacket(remoteClient.Dimension.TimeOfDay));
 
                 // Start housekeeping for this client
                 entityManager.SendEntitiesToClient(remoteClient);

@@ -137,10 +137,11 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override void BlockMined(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
-            var self = descriptor.Coordinates;
-            var entity = dimension.GetTileEntity(self);
-            var manager = user.Server.GetEntityManagerForWorld(dimension);
-            if (entity != null)
+            IDimensionServer dimensionServer = (IDimensionServer)dimension;
+            GlobalVoxelCoordinates self = descriptor.Coordinates;
+            NbtCompound? entity = dimensionServer.GetTileEntity(self);
+            IEntityManager manager = user.Server.GetEntityManagerForWorld(dimension);
+            if (entity is not null)
             {
                 foreach (var item in (NbtList)entity["Items"])
                 {
@@ -148,7 +149,7 @@ namespace TrueCraft.Core.Logic.Blocks
                     manager.SpawnEntity(new ItemEntity(new Vector3(descriptor.Coordinates.X + 0.5, descriptor.Coordinates.Y + 0.5, descriptor.Coordinates.Z + 0.5), slot));
                 }
             }
-            dimension.SetTileEntity(self, null);
+            dimensionServer.SetTileEntity(self, null);
             base.BlockMined(descriptor, face, dimension, user);
         }
     }

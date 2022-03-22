@@ -82,8 +82,9 @@ namespace TrueCraft.Core.Logic.Blocks
                 var provider = dimension.BlockRepository.GetBlockProvider(source.ID);
                 if (provider.Opaque)
                 {
-                    var chunk = dimension.FindChunk(descriptor.Coordinates, generate: false);
-                    server.Scheduler.ScheduleEvent("grass", chunk,
+                    IChunk? chunk = dimension.GetChunk(descriptor.Coordinates);
+                    server.Scheduler.ScheduleEvent("grass",
+                        chunk!,     // won't be null as a block update was just done in this chunk.
                     TimeSpan.FromSeconds(MathHelper.Random.Next(MinDecayTime, MaxDecayTime)), s =>
                     {
                         ScheduledUpdate(dimension, descriptor.Coordinates);
@@ -112,8 +113,12 @@ namespace TrueCraft.Core.Logic.Blocks
                     var _block = dimension.GetBlockLight(candidate + Vector3i.Up);
                     if (_sky < 4 && _block < 4)
                         continue;
-                    IChunk chunk;
-                    var _candidate = dimension.FindBlockPosition(candidate, out chunk);
+                    IChunk? chunk;
+                    LocalVoxelCoordinates _candidate = dimension.FindBlockPosition(candidate, out chunk);
+                    if (chunk is null)
+                        // Don't try to spread into unloaded Chunks.
+                        continue;
+
                     bool grow = true;
                     for (int y = candidate.Y; y < chunk.GetHeight((byte)_candidate.X, (byte)_candidate.Z); y++)
                     {
@@ -139,16 +144,18 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
-            var chunk = dimension.FindChunk(descriptor.Coordinates);
-            user.Server.Scheduler.ScheduleEvent("grass", chunk,
+            IChunk? chunk = dimension.GetChunk(descriptor.Coordinates);
+            user.Server.Scheduler.ScheduleEvent("grass",
+                chunk!,    // very unlikely to be null as the block can't be placed in an unloaded Chunk.
                 TimeSpan.FromSeconds(MathHelper.Random.Next(MinGrowthTime, MaxGrowthTime)),
                 s => TrySpread(descriptor.Coordinates, dimension, user.Server));
         }
 
         public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IDimension dimension)
         {
-            var chunk = dimension.FindChunk(coords);
-            server.Scheduler.ScheduleEvent("grass", chunk,
+            IChunk? chunk = dimension.GetChunk(coords);
+            server.Scheduler.ScheduleEvent("grass",
+                chunk!,    // Chunk loading caused this method to be called.
                 TimeSpan.FromSeconds(MathHelper.Random.Next(MinGrowthTime, MaxGrowthTime)),
                 s => TrySpread(coords, dimension, server));
         }

@@ -70,7 +70,7 @@ namespace TrueCraft.Core.Logic.Blocks
         {
             if (dimension.GetBlockID(coords) == StillID)
                 return;
-            var chunk = dimension.FindChunk(coords);
+            var chunk = dimension.GetChunk(coords);
             server.Scheduler.ScheduleEvent("fluid", chunk,
                 TimeSpan.FromSeconds(SecondsBetweenUpdates), (_server) =>
                 AutomataUpdate(_server, dimension, coords));
@@ -110,7 +110,7 @@ namespace TrueCraft.Core.Logic.Blocks
             server.BlockUpdatesEnabled = true;
             if (again)
             {
-                var chunk = dimension.FindChunk(coords);
+                var chunk = dimension.GetChunk(coords);
                 server.Scheduler.ScheduleEvent("fluid", chunk,
                     TimeSpan.FromSeconds(SecondsBetweenUpdates), (_server) =>
                     AutomataUpdate(_server, dimension, coords));
@@ -165,7 +165,7 @@ namespace TrueCraft.Core.Logic.Blocks
             // And overwrite the block with a new fluid block.
             dimension.SetBlockID(target.TargetBlock, FlowingID);
             dimension.SetMetadata(target.TargetBlock, target.Level);
-            var chunk = dimension.FindChunk(target.TargetBlock);
+            var chunk = dimension.GetChunk(target.TargetBlock);
             server.Scheduler.ScheduleEvent("fluid", chunk,
                 TimeSpan.FromSeconds(SecondsBetweenUpdates),
                 s => AutomataUpdate(s, dimension, target.TargetBlock));

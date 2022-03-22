@@ -38,8 +38,12 @@ namespace TrueCraft.Core.AI
                     0,
                     (int)(cast.Position.Z + (MathHelper.Random.Next(Distance) - Distance / 2))
                 );
-                IChunk chunk;
-                var adjusted = entity.Dimension.FindBlockPosition(target, out chunk, generate: false);
+
+                IChunk? chunk;
+                LocalVoxelCoordinates adjusted = entity.Dimension.FindBlockPosition(target, out chunk);
+                if (chunk is null)
+                    return;
+
                 target = new GlobalVoxelCoordinates(target.X, chunk.GetHeight((byte)adjusted.X, (byte)adjusted.Z), target.Z);
                 Task.Factory.StartNew(() =>
                 {

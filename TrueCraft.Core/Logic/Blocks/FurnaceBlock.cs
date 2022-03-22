@@ -175,7 +175,7 @@ namespace TrueCraft.Core.Logic.Blocks
 
             public void Save(IDimension dimension, GlobalVoxelCoordinates coordinates)
             {
-                dimension.SetTileEntity(coordinates, _furnaceState);
+                ((IDimensionServer)dimension).SetTileEntity(coordinates, _furnaceState);
             }
 
             #region IFurnaceSlots
@@ -380,8 +380,8 @@ namespace TrueCraft.Core.Logic.Blocks
                 return _trackedFurnaceStates[coords];
 
             FurnaceState rv;
-            NbtCompound tileEntity = dimension.GetTileEntity(coords);
-            if (tileEntity == null)
+            NbtCompound? tileEntity = ((IDimensionServer)dimension).GetTileEntity(coords);
+            if (tileEntity is null)
             {
                 rv = new FurnaceState();
                 rv.Save(dimension, coords);
@@ -451,8 +451,9 @@ namespace TrueCraft.Core.Logic.Blocks
 
             // TODO clean up running Furnace
 
-            var entity = dimension.GetTileEntity(descriptor.Coordinates);
-            if (entity != null)
+            IDimensionServer dimensionServer = (IDimensionServer)dimension;
+            NbtCompound? entity = dimensionServer.GetTileEntity(descriptor.Coordinates);
+            if (entity is not null)
             {
                 foreach (var item in (NbtList)entity["Items"])
                 {
@@ -460,7 +461,7 @@ namespace TrueCraft.Core.Logic.Blocks
                     var slot = ItemStack.FromNbt((NbtCompound)item);
                     manager.SpawnEntity(new ItemEntity(new Vector3(descriptor.Coordinates.X + 0.5, descriptor.Coordinates.Y + 0.5, descriptor.Coordinates.Z + 0.5), slot));
                 }
-                dimension.SetTileEntity(descriptor.Coordinates, null);
+                dimensionServer.SetTileEntity(descriptor.Coordinates, null);
             }
             base.BlockMined(descriptor, face, dimension, user);
         }

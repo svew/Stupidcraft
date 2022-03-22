@@ -22,10 +22,10 @@ namespace TrueCraft.Core.Test.World
         [Test]
         public void TestFindChunk()
         {
-            var a = _dimension.FindChunk(new GlobalVoxelCoordinates(0, 0, 0));
-            var b = _dimension.FindChunk(new GlobalVoxelCoordinates(-1, 0, 0));
-            var c = _dimension.FindChunk(new GlobalVoxelCoordinates(-1, 0, -1));
-            var d = _dimension.FindChunk(new GlobalVoxelCoordinates(16, 0, 0));
+            var a = _dimension.GetChunk(new GlobalVoxelCoordinates(0, 0, 0));
+            var b = _dimension.GetChunk(new GlobalVoxelCoordinates(-1, 0, 0));
+            var c = _dimension.GetChunk(new GlobalVoxelCoordinates(-1, 0, -1));
+            var d = _dimension.GetChunk(new GlobalVoxelCoordinates(16, 0, 0));
             Assert.AreEqual(new GlobalChunkCoordinates(0, 0), a.Coordinates);
             Assert.AreEqual(new GlobalChunkCoordinates(-1, 0), b.Coordinates);
             Assert.AreEqual(new GlobalChunkCoordinates(-1, -1), c.Coordinates);

@@ -139,7 +139,7 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public void ScheduleUpdate(IMultiplayerServer server, IDimension dimension, BlockDescriptor descriptor)
         {
-            var chunk = dimension.FindChunk(descriptor.Coordinates);
+            var chunk = dimension.GetChunk(descriptor.Coordinates);
             server.Scheduler.ScheduleEvent("fire.spread", chunk,
                 TimeSpan.FromSeconds(MathHelper.Random.Next(MinSpreadTime, MaxSpreadTime)),
                 s => DoUpdate(s, dimension, descriptor));

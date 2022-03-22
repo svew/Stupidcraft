@@ -17,4 +17,22 @@ namespace TrueCraft.Core.World
         /// </summary>
         Overworld = 0
     }
+
+    public static class DimensionInfo
+    {
+        public static string GetName(DimensionID id)
+        {
+            switch(id)
+            {
+                case DimensionID.Overworld:
+                    return "OverWord";
+
+                case DimensionID.Nether:
+                    return "Nether";
+
+                default:
+                    return "Default";
+            }
+        }
+    }
 }

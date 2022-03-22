@@ -4,6 +4,7 @@ using fNbt;
 using TrueCraft.Core.Networking.Packets;
 using TrueCraft.Core.Networking;
 using TrueCraft.Core.World;
+using TrueCraft.Core.Server;
 
 namespace TrueCraft.Core.Logic.Blocks
 {
@@ -65,7 +66,7 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override void BlockMined(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
-            dimension.SetTileEntity(descriptor.Coordinates, null);
+            ((IDimensionServer)dimension).SetTileEntity(descriptor.Coordinates, null);
             base.BlockMined(descriptor, face, dimension, user);
         }
 

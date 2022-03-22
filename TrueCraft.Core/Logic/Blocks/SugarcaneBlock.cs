@@ -118,7 +118,7 @@ namespace TrueCraft.Core.Logic.Blocks
                 var meta = dimension.GetMetadata(coords);
                 meta++;
                 dimension.SetMetadata(coords, meta);
-                var chunk = dimension.FindChunk(coords);
+                var chunk = dimension.GetChunk(coords);
                 if (meta == 15)
                 {
                     if (dimension.GetBlockID(coords + Vector3i.Up) == 0)
@@ -140,7 +140,7 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
-            var chunk = dimension.FindChunk(descriptor.Coordinates);
+            var chunk = dimension.GetChunk(descriptor.Coordinates);
             user.Server.Scheduler.ScheduleEvent("sugarcane", chunk,
                 TimeSpan.FromSeconds(MathHelper.Random.Next(MinGrowthSeconds, MaxGrowthSeconds)),
                 (server) => TryGrowth(server, descriptor.Coordinates, dimension));
@@ -148,7 +148,7 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IDimension dimension)
         {
-            var chunk = dimension.FindChunk(coords);
+            var chunk = dimension.GetChunk(coords);
             server.Scheduler.ScheduleEvent("sugarcane", chunk,
                 TimeSpan.FromSeconds(MathHelper.Random.Next(MinGrowthSeconds, MaxGrowthSeconds)),
                 s => TryGrowth(s, coords, dimension));

@@ -531,7 +531,7 @@ namespace TrueCraft.Commands
                 return;
             }
             var server = client.Server as MultiplayerServer;
-            IChunk chunk = client.Dimension.FindChunk((GlobalVoxelCoordinates)client.Entity.Position);
+            IChunk chunk = client.Dimension.GetChunk((GlobalVoxelCoordinates)client.Entity.Position);
             Lighting lighter = server.WorldLighters.SingleOrDefault(l => l.Dimension == client.Dimension);
             if (lighter != null)
             {
