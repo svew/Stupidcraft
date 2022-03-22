@@ -165,14 +165,16 @@ namespace TrueCraft.Core
             return RadiansToDegrees(-pitch);
         }
 
+        [Obsolete]
         public static int ChunkToBlockX(int BlockCoord, int ChunkX)
         {
-            return ChunkX * Chunk.Width + BlockCoord;
+            return ChunkX * WorldConstants.ChunkWidth + BlockCoord;
         }
 
+        [Obsolete]
         public static int ChunkToBlockZ(int BlockCoord, int ChunkZ)
         {
-            return ChunkZ * Chunk.Depth + BlockCoord;
+            return ChunkZ * WorldConstants.ChunkDepth + BlockCoord;
         }
 
         /// <summary>
