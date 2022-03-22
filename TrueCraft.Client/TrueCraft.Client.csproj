@@ -5,6 +5,7 @@
     <TargetFramework>net5.0</TargetFramework>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Deterministic>false</Deterministic>
+    <Nullable>enable</Nullable>
     <!-- Suppress missing XML comments.  There are so many they obscure other warnings. -->
     <!-- TODO fill in missing XML comments and remove NoWarn. -->
     <NoWarn>CS1591</NoWarn>
