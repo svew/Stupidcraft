@@ -211,7 +211,7 @@ namespace TrueCraft
         public void AddDimension(IDimension dimension)
         {
             Dimensions.Add(dimension);
-            dimension.BlockRepository = BlockRepository;
+
             dimension.ChunkGenerated += HandleChunkGenerated;
             dimension.ChunkLoaded += HandleChunkLoaded;
             dimension.BlockChanged += HandleBlockChanged;
@@ -285,13 +285,13 @@ namespace TrueCraft
         void ScheduleUpdatesForChunk(IDimension dimension, IChunk chunk)
         {
             chunk.UpdateHeightMap();
-            int _x = chunk.Coordinates.X * Chunk.Width;
-            int _z = chunk.Coordinates.Z * Chunk.Depth;
+            int _x = chunk.Coordinates.X * WorldConstants.ChunkWidth;
+            int _z = chunk.Coordinates.Z * WorldConstants.ChunkDepth;
             LocalVoxelCoordinates _coords;
             GlobalVoxelCoordinates coords;
-            for (byte x = 0; x < Chunk.Width; x++)
+            for (byte x = 0; x < WorldConstants.ChunkWidth; x++)
             {
-                for (byte z = 0; z < Chunk.Depth; z++)
+                for (byte z = 0; z < WorldConstants.ChunkDepth; z++)
                 {
                     for (int y = 0; y <= chunk.GetHeight(x, z); y++)
                     {

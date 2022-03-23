@@ -5,6 +5,7 @@ using TrueCraft.Core.Logic.Blocks;
 using TrueCraft.TerrainGen.Noise;
 using TrueCraft.TerrainGen.Decorators;
 using TrueCraft.World;
+using TrueCraft.Core;
 
 namespace TrueCraft.TerrainGen
 {
@@ -183,7 +184,7 @@ namespace TrueCraft.TerrainGen
             }
             foreach (var decorator in ChunkDecorators)
                 // TODO: pass the BlockRepository in as a parameter.
-                decorator.Decorate(_seed, chunk, Logic.BlockRepository.Get(), Biomes);
+                decorator.Decorate(_seed, chunk, Core.Logic.BlockRepository.Get(), Biomes);
             chunk.TerrainPopulated = true;
             chunk.UpdateHeightMap();
             return chunk;

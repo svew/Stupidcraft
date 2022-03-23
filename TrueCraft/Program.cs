@@ -4,7 +4,6 @@ using System.Net;
 using System.Threading;
 using TrueCraft.Core.Logging;
 using TrueCraft.Core.Server;
-using TrueCraft.Core.TerrainGen;
 using TrueCraft.Core.World;
 using TrueCraft.Commands;
 using TrueCraft.Core;
@@ -129,7 +128,7 @@ namespace TrueCraft
         {
             Server.Log(LogCategory.Notice, "Saving world...");
             foreach (var w in Server.Dimensions)
-                w.Save();
+                ((IDimensionServer)w).Save();
             Server.Log(LogCategory.Notice, "Done.");
             server.Scheduler.ScheduleEvent("world.save", null,
                 TimeSpan.FromSeconds(ServerConfiguration.WorldSaveInterval), SaveWorlds);

@@ -337,13 +337,7 @@ namespace TrueCraft.World
                     return (Region)_regions[coordinates];
             }
 
-            IRegion region;
-            string file = Path.Combine(_baseDirectory, Region.GetRegionFileName(coordinates));
-            if (File.Exists(file))
-                region = new Region(coordinates, this, file);
-            else
-                region = new Region(coordinates, this);
-
+            IRegion region = new Region(coordinates, _baseDirectory);
             lock (_regions)
                 _regions[coordinates] = region;
 
@@ -371,56 +365,14 @@ namespace TrueCraft.World
                 ChunkLoaded(this, e);
         }
 
-        public class ChunkEnumerator : IEnumerator<IChunk>
-        {
-            private int Index { get; set; }
-            private IList<IChunk> Chunks { get; set; }
-
-            public ChunkEnumerator(Dimension dimension)
-            {
-                Index = -1;
-                var regions = dimension._regions.Values.ToList();
-                var chunks = new List<IChunk>();
-                foreach (var region in regions)
-                    chunks.AddRange(region.Chunks);
-                Chunks = chunks;
-            }
-
-            public bool MoveNext()
-            {
-                Index++;
-                return Index < Chunks.Count;
-            }
-
-            public void Reset()
-            {
-                Index = -1;
-            }
-
-            public void Dispose()
-            {
-            }
-
-            public IChunk Current
-            {
-                get
-                {
-                    return Chunks[Index];
-                }
-            }
-
-            object IEnumerator.Current
-            {
-                get
-                {
-                    return Current;
-                }
-            }
-        }
-
         public IEnumerator<IChunk> GetEnumerator()
         {
-            return new ChunkEnumerator(this);
+            List<IChunk> chunks = new List<IChunk>();
+            foreach (IRegion region in _regions.Values)
+                foreach (IChunk chunk in region.Chunks)
+                    chunks.Add(chunk);
+
+            return chunks.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()

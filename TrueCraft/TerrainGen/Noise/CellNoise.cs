@@ -17,6 +17,7 @@
  * THE SOFTWARE.
  */
 using System;
+using TrueCraft.Core;
 
 namespace TrueCraft.TerrainGen.Noise
 {

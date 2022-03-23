@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using TrueCraft.Core.Server;
 using TrueCraft.Core.World;
 
 namespace TrueCraft.World
@@ -12,6 +13,6 @@ namespace TrueCraft.World
         /// <param name="baseDirectory">The folder containing the World Saves.</param>
         /// <param name="seed">The seed for generating the World.</param>
         /// <returns></returns>
-        IList<IDimension> BuildDimensions(string baseDirectory, int seed);
+        IList<IDimensionServer> BuildDimensions(string baseDirectory, int seed);
     }
 }

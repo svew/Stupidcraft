@@ -1,5 +1,7 @@
 ﻿using System;
+using TrueCraft.Core;
 using TrueCraft.Core.World;
+using TrueCraft.World;
 
 namespace TrueCraft.TerrainGen.Decorations
 {
@@ -32,7 +34,7 @@ namespace TrueCraft.TerrainGen.Decorations
                 int x = location.X + neighbor.X;
                 int y = location.Y + neighbor.Y;
                 int z = location.Z + neighbor.Z;
-                if (x < 0 || x >= Chunk.Width || z < 0 || z >= Chunk.Depth || y < 0 || y >= Chunk.Height)
+                if (x < 0 || x >= WorldConstants.ChunkWidth || z < 0 || z >= WorldConstants.ChunkDepth || y < 0 || y >= WorldConstants.Height)
                     return false;
                 LocalVoxelCoordinates toCheck = new LocalVoxelCoordinates(x, y, z);
                 if (chunk.GetBlockID(toCheck).Equals(block))
@@ -50,7 +52,7 @@ namespace TrueCraft.TerrainGen.Decorations
         {
             for (int offset = 0; offset < height; offset++)
             {
-                if (location.Y + offset >= Chunk.Height)
+                if (location.Y + offset >= WorldConstants.Height)
                     return;
                 LocalVoxelCoordinates blockLocation = new LocalVoxelCoordinates(location.X, location.Y + offset, location.Z);
                 chunk.SetBlockID(blockLocation, block);
@@ -79,7 +81,7 @@ namespace TrueCraft.TerrainGen.Decorations
                 {
                     for (int h = location.Y; h < location.Y + size.Y; h++)
                     {
-                        if (w < 0 || w >= Chunk.Width || l < 0 || l >= Chunk.Depth || h < 0 || h >= Chunk.Height)
+                        if (w < 0 || w >= WorldConstants.ChunkWidth || l < 0 || l >= WorldConstants.ChunkDepth || h < 0 || h >= WorldConstants.Height)
                             continue;
 
                         LocalVoxelCoordinates BlockLocation = new LocalVoxelCoordinates(w, h, l);
@@ -103,7 +105,7 @@ namespace TrueCraft.TerrainGen.Decorations
             for (int yOffset = -radius; yOffset <= radius; yOffset = (yOffset + 1))
             {
                 int y = location.Y + yOffset;
-                if (y > Chunk.Height)
+                if (y > WorldConstants.Height)
                     continue;
                 GenerateVanillaCircle(chunk, new LocalVoxelCoordinates(location.X, y, location.Z), radiusOffset, block, meta);
                 if (yOffset != -radius && yOffset % 2 == 0)
@@ -153,7 +155,7 @@ namespace TrueCraft.TerrainGen.Decorations
                         int x = location.X + i;
                         int z = location.Z + j;
 
-                        if (x < 0 || x >= Chunk.Width || z < 0 || z >= Chunk.Depth)
+                        if (x < 0 || x >= WorldConstants.ChunkWidth || z < 0 || z >= WorldConstants.ChunkDepth)
                             continue;
 
                         var currentBlock = new LocalVoxelCoordinates(x, location.Y, z);
@@ -182,7 +184,7 @@ namespace TrueCraft.TerrainGen.Decorations
                             int y = location.Y + k;
                             int z = location.Z + j;
 
-                            if (x < 0 || x >= Chunk.Width || z < 0 || z >= Chunk.Depth || y < 0 || y >= Chunk.Height)
+                            if (x < 0 || x >= WorldConstants.ChunkWidth || z < 0 || z >= WorldConstants.ChunkDepth || y < 0 || y >= WorldConstants.Height)
                                 continue;
 
                             var currentBlock = new LocalVoxelCoordinates(x, y, z);

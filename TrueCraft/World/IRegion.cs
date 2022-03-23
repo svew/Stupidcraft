@@ -11,6 +11,8 @@ namespace TrueCraft.World
         /// </summary>
         RegionCoordinates Position { get; }
 
+        IEnumerable<IChunk> Chunks { get; }
+
         /// <summary>
         /// Gets the Chunk at the given location within the Region.
         /// </summary>

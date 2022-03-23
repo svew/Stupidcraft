@@ -13,7 +13,6 @@ using TrueCraft.Core.Physics;
 using TrueCraft.Core.World;
 using TrueCraft.Core.Inventory;
 using TrueCraft.Client.Inventory;
-using TrueCraft.Core.TerrainGen;
 
 namespace TrueCraft.Client
 {

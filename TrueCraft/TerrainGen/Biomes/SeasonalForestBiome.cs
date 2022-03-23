@@ -1,4 +1,6 @@
 ﻿using System;
+using TrueCraft.Core;
+using TrueCraft.Core.World;
 
 namespace TrueCraft.TerrainGen.Biomes
 {

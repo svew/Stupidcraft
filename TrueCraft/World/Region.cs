@@ -63,6 +63,23 @@ namespace TrueCraft.World
             }
         }
 
+        public IEnumerable<IChunk> Chunks
+        {
+            get
+            {
+                List<IChunk> lst = new List<IChunk>();
+                for (int j = 0; j < Width; j++)
+                    for (int k = 0; k < Depth; k++)
+                    {
+                        IChunk? chunk = _chunks[j, k];
+                        if (chunk is not null)
+                            lst.Add(chunk);
+                    }
+
+                return lst;
+            }
+        }
+
         public bool IsChunkLoaded(LocalChunkCoordinates position)
         {
             return _chunks[position.X, position.Z] is not null;

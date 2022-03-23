@@ -30,7 +30,7 @@ namespace TrueCraft.Inventory
 
         private void Load()
         {
-            NbtCompound entity = Dimension.GetTileEntity(Location);
+            NbtCompound entity = ((IDimensionServer)Dimension).GetTileEntity(Location);
             ISlots<IServerSlot> chestInventory = this.ChestInventory;
             if (entity != null)
             {
@@ -44,7 +44,7 @@ namespace TrueCraft.Inventory
             // Add adjacent items
             if (!object.ReferenceEquals(OtherHalf, null))
             {
-                entity = Dimension.GetTileEntity(OtherHalf);
+                entity = ((IDimensionServer)Dimension).GetTileEntity(OtherHalf);
                 if (entity != null)
                 {
                     foreach (var item in (NbtList)entity["Items"])
@@ -285,21 +285,21 @@ namespace TrueCraft.Inventory
                 }
             }
 
-            NbtCompound newEntity = Dimension.GetTileEntity(Location);
-            if (newEntity == null)
+            NbtCompound? newEntity = ((IDimensionServer)Dimension).GetTileEntity(Location);
+            if (newEntity is null)
                 newEntity = new NbtCompound(new[] { entitySelf });
             else
                 newEntity["Items"] = entitySelf;
-            Dimension.SetTileEntity(Location, newEntity);
+            ((IDimensionServer)Dimension).SetTileEntity(Location, newEntity);
 
             if (DoubleChest)
             {
-                newEntity = Dimension.GetTileEntity(OtherHalf);
-                if (newEntity == null)
+                newEntity = ((IDimensionServer)Dimension).GetTileEntity(OtherHalf);
+                if (newEntity is null)
                     newEntity = new NbtCompound(new[] { entityAdjacent });
                 else
                     newEntity["Items"] = entityAdjacent;
-                Dimension.SetTileEntity(OtherHalf, newEntity);
+                ((IDimensionServer)Dimension).SetTileEntity(OtherHalf, newEntity);
             }
         }
     }

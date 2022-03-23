@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.IO;
 using fNbt;
 using TrueCraft.Core;
+using TrueCraft.Core.Server;
 using TrueCraft.Core.World;
 
 namespace TrueCraft.World
 {
     public class World : IWorld
     {
-        private readonly List<IDimension> _dimensions;
+        private readonly List<IDimensionServer> _dimensions;
 
         private readonly int _seed;
 
@@ -43,8 +44,8 @@ namespace TrueCraft.World
             _name = name;
             _baseDirectory = baseDirectory;
 
-            IList<IDimension> dimensions = dimensionFactory.BuildDimensions(baseDirectory, seed);
-            _dimensions = new List<IDimension>(dimensions.Count);
+            IList<IDimensionServer> dimensions = dimensionFactory.BuildDimensions(baseDirectory, seed);
+            _dimensions = new List<IDimensionServer>(dimensions.Count);
             _dimensions.AddRange(dimensions);
 
             _spawnPoint = spawnPoint;
@@ -129,7 +130,7 @@ namespace TrueCraft.World
             file.RootTag.Add(new NbtString("Name", Name));
             file.SaveToFile(Path.Combine(this._baseDirectory, "manifest.nbt"), NbtCompression.ZLib);
 
-            foreach (IDimension dimension in _dimensions)
+            foreach (IDimensionServer dimension in _dimensions)
                 dimension.Save();
         }
         #endregion

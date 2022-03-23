@@ -11,9 +11,9 @@ namespace TrueCraft.TerrainGen.Decorations
         public override bool ValidLocation(LocalVoxelCoordinates location)
         {
             if (location.X - LeafRadius < 0
-                || location.X + LeafRadius >= Chunk.Width
+                || location.X + LeafRadius >= WorldConstants.ChunkWidth
                 || location.Z - LeafRadius < 0
-                || location.Z + LeafRadius >= Chunk.Depth)
+                || location.Z + LeafRadius >= WorldConstants.ChunkDepth)
                 return false;
             return true;
         }
@@ -53,7 +53,7 @@ namespace TrueCraft.TerrainGen.Decorations
             LocalVoxelCoordinates top = new LocalVoxelCoordinates(location.X, location.Y + 1, location.Z);
             chunk.SetBlockID(top, LeavesBlock.BlockID);
             chunk.SetMetadata(top, 0x1);
-            if (type == 0x1 && top.Y + 1 < Chunk.Height)
+            if (type == 0x1 && top.Y + 1 < WorldConstants.Height)
             {
                 top = new LocalVoxelCoordinates(top.X, top.Y + 1, top.Z);
                 GenerateVanillaCircle(chunk, top, sectionRadius, LeavesBlock.BlockID, 0x1); 

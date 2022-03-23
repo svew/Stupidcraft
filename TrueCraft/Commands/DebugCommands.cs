@@ -70,7 +70,7 @@ namespace TrueCraft.Commands
                 Help(client, alias, arguments);
                 return;
             }
-            client.Dimension.Save();
+            ((IDimensionServer)client.Dimension).Save();
         }
 
         public override void Help(IRemoteClient client, string alias, string[] arguments)

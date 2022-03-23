@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using TrueCraft.Core.TerrainGen.Biomes;
+using TrueCraft.TerrainGen.Biomes;
 using TrueCraft.Core.World;
 
 namespace TrueCraft.TerrainGen

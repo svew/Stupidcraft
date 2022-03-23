@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
+using Moq;
 using NUnit.Framework;
-using TrueCraft.Core.TerrainGen;
 using TrueCraft.Core.AI;
+using TrueCraft.Core.Logic;
 using TrueCraft.Core.World;
+using TrueCraft.TerrainGen;
 
 namespace TrueCraft.Core.Test.AI
 {
@@ -11,6 +13,18 @@ namespace TrueCraft.Core.Test.AI
     public class PathFindingTest
     {
         private const int _testSeed = 314159;
+
+        private IBlockRepository _blockRepository;
+
+        public PathFindingTest()
+        {
+            Mock<IBlockProvider> mockProvider = new Mock<IBlockProvider>(MockBehavior.Strict);
+            mockProvider.Setup(x => x.ID).Returns(3);
+
+            Mock<IBlockRepository> mockRepository = new Mock<IBlockRepository>(MockBehavior.Strict);
+            mockRepository.Setup(x => x.GetBlockProvider(It.Is<byte>(b => b == 3))).Returns(mockProvider.Object);
+            _blockRepository = mockRepository.Object;
+        }
 
         private void DrawGrid(PathResult path, IDimension dimension)
         {
@@ -37,7 +51,7 @@ namespace TrueCraft.Core.Test.AI
         [Test]
         public void TestAStarLinearPath()
         {
-            IDimension dimension = new TrueCraft.Core.World.Dimension(string.Empty, "default", new FlatlandGenerator(_testSeed));
+            IDimension dimension = new TrueCraft.World.Dimension(string.Empty, DimensionID.Overworld, new FlatlandGenerator(_testSeed), _blockRepository);
             var astar = new AStarPathFinder();
 
             var watch = new Stopwatch();
@@ -64,7 +78,7 @@ namespace TrueCraft.Core.Test.AI
         [Test]
         public void TestAStarDiagonalPath()
         {
-            IDimension dimension = new TrueCraft.Core.World.Dimension(string.Empty, "default", new FlatlandGenerator(_testSeed));
+            IDimension dimension = new TrueCraft.World.Dimension(string.Empty, DimensionID.Overworld, new FlatlandGenerator(_testSeed), _blockRepository);
             var astar = new AStarPathFinder();
             GlobalVoxelCoordinates start = new GlobalVoxelCoordinates(0, 4, 0);
             GlobalVoxelCoordinates end = new GlobalVoxelCoordinates(5, 4, 5);
@@ -84,7 +98,7 @@ namespace TrueCraft.Core.Test.AI
         [Test]
         public void TestAStarObstacle()
         {
-            IDimension dimension = new TrueCraft.Core.World.Dimension(string.Empty, "default", new FlatlandGenerator(_testSeed));
+            IDimension dimension = new TrueCraft.World.Dimension(string.Empty, DimensionID.Overworld, new FlatlandGenerator(_testSeed), _blockRepository);
             var astar = new AStarPathFinder();
             GlobalVoxelCoordinates start = new GlobalVoxelCoordinates(0, 4, 0);
             GlobalVoxelCoordinates end = new GlobalVoxelCoordinates(5, 4, 0);
@@ -106,7 +120,7 @@ namespace TrueCraft.Core.Test.AI
         [Test]
         public void TestAStarImpossible()
         {
-            IDimension dimension = new TrueCraft.Core.World.Dimension(string.Empty, "default", new FlatlandGenerator(_testSeed));
+            IDimension dimension = new TrueCraft.World.Dimension(string.Empty, DimensionID.Overworld, new FlatlandGenerator(_testSeed), _blockRepository);
             var astar = new AStarPathFinder();
             GlobalVoxelCoordinates start = new GlobalVoxelCoordinates(0, 4, 0);
             GlobalVoxelCoordinates end = new GlobalVoxelCoordinates(5, 4, 0);
@@ -128,7 +142,7 @@ namespace TrueCraft.Core.Test.AI
         [Test]
         public void TestAStarExitRoom()
         {
-            IDimension dimension = new TrueCraft.Core.World.Dimension(string.Empty, "default", new FlatlandGenerator(_testSeed));
+            IDimension dimension = new TrueCraft.World.Dimension(string.Empty, DimensionID.Overworld, new FlatlandGenerator(_testSeed), _blockRepository);
             var astar = new AStarPathFinder();
             GlobalVoxelCoordinates start = new GlobalVoxelCoordinates(0, 4, 0);
             GlobalVoxelCoordinates end = new GlobalVoxelCoordinates(5, 4, 0);
@@ -158,7 +172,7 @@ namespace TrueCraft.Core.Test.AI
         [Test]
         public void TestAStarAvoidRoom()
         {
-            IDimension dimension = new TrueCraft.Core.World.Dimension(string.Empty, "default", new FlatlandGenerator(_testSeed));
+            IDimension dimension = new TrueCraft.World.Dimension(string.Empty, DimensionID.Overworld, new FlatlandGenerator(_testSeed), _blockRepository);
             var astar = new AStarPathFinder();
             GlobalVoxelCoordinates start = new GlobalVoxelCoordinates(-5, 4, 0);
             GlobalVoxelCoordinates end = new GlobalVoxelCoordinates(5, 4, 0);

@@ -88,7 +88,7 @@ namespace TrueCraft
             for (int i = 0; i < client.KnownEntities.Count; i++)
             {
                 var knownEntity = client.KnownEntities[i];
-                if (knownEntity.Position.DistanceTo(entity.Position) > client.ChunkRadius * Chunk.Depth)
+                if (knownEntity.Position.DistanceTo(entity.Position) > client.ChunkRadius * WorldConstants.ChunkDepth)
                 {
                     client.QueuePacket(new DestroyEntityPacket(knownEntity.EntityID));
                     client.KnownEntities.Remove(knownEntity);
@@ -162,8 +162,8 @@ namespace TrueCraft
 
         private bool IsInRange(Vector3 a, Vector3 b, int range)
         {
-            return Math.Abs(a.X - b.X) < range * Chunk.Width &&
-                Math.Abs(a.Z - b.Z) < range * Chunk.Depth;
+            return Math.Abs(a.X - b.X) < range * WorldConstants.ChunkWidth &&
+                Math.Abs(a.Z - b.Z) < range * WorldConstants.ChunkDepth;
         }
 
         private IEntity[] GetEntitiesInRange(IEntity entity, int maxChunks)

@@ -11,9 +11,9 @@ namespace TrueCraft.TerrainGen.Decorations
         public override bool ValidLocation(LocalVoxelCoordinates location)
         {
             if (location.X - LeafRadius < 0
-                || location.X + LeafRadius >= Chunk.Width
+                || location.X + LeafRadius >= WorldConstants.ChunkWidth
                 || location.Z - LeafRadius < 0
-                || location.Z + LeafRadius >= Chunk.Depth)
+                || location.Z + LeafRadius >= WorldConstants.ChunkDepth)
             {
                 return false;
             }

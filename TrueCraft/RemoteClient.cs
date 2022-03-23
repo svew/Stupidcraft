@@ -523,7 +523,7 @@ namespace TrueCraft
                         GlobalChunkCoordinates coords = new GlobalChunkCoordinates(entityChunk.X + x, entityChunk.Z + z);
                         if (!_loadedChunks.Contains(coords))
                             toLoad.Add(new Tuple<GlobalChunkCoordinates, IChunk>(
-                                coords, Dimension.GetChunk(coords, generate: block)));
+                                coords, Dimension.GetChunk(coords)));
                     }
                 }
             Profiler.Done();
@@ -645,8 +645,8 @@ namespace TrueCraft
             }
             Profiler.Done();
 
-            return new ChunkDataPacket(X * Chunk.Width, 0, Z * Chunk.Depth,
-                Chunk.Width, Chunk.Height, Chunk.Depth, result);
+            return new ChunkDataPacket(X * WorldConstants.ChunkWidth, 0, Z * WorldConstants.ChunkDepth,
+                WorldConstants.ChunkWidth, WorldConstants.Height, WorldConstants.ChunkDepth, result);
         }
 
         public void Dispose()

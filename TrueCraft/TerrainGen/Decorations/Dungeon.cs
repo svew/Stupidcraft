@@ -1,4 +1,5 @@
 ﻿using System;
+using TrueCraft.Core;
 using TrueCraft.Core.Logic.Blocks;
 using TrueCraft.Core.World;
 
@@ -13,9 +14,9 @@ namespace TrueCraft.TerrainGen.Decorations
         public override bool ValidLocation(LocalVoxelCoordinates location)
         {
             var OffsetSize = Size + new Vector3(1, 1, 1);
-            if (location.X + (int)OffsetSize.X >= Chunk.Width
-                || location.Z + (int)OffsetSize.Z >= Chunk.Depth
-                || location.Y + (int)OffsetSize.Y >= Chunk.Height)
+            if (location.X + (int)OffsetSize.X >= WorldConstants.ChunkWidth
+                || location.Z + (int)OffsetSize.Z >= WorldConstants.ChunkDepth
+                || location.Y + (int)OffsetSize.Y >= WorldConstants.Height)
                 return false;
             return true;
         }
@@ -72,9 +73,9 @@ namespace TrueCraft.TerrainGen.Decorations
                         && !IsCuboidCorner(new LocalVoxelCoordinates(X, 0, Z), location, Size))
                     {
                         var blockLocation = new LocalVoxelCoordinates(X, location.Y + 1, Z);
-                        if (blockLocation.X < 0 || blockLocation.X >= Chunk.Width
-                            || blockLocation.Z < 0 || blockLocation.Z >= Chunk.Depth
-                            || blockLocation.Y < 0 || blockLocation.Y >= Chunk.Height)
+                        if (blockLocation.X < 0 || blockLocation.X >= WorldConstants.ChunkWidth
+                            || blockLocation.Z < 0 || blockLocation.Z >= WorldConstants.ChunkDepth
+                            || blockLocation.Y < 0 || blockLocation.Y >= WorldConstants.Height)
                             continue;
                         chunk.SetBlockID(blockLocation, AirBlock.BlockID);
                         chunk.SetBlockID(new LocalVoxelCoordinates(X, location.Y + 2, Z), AirBlock.BlockID);
@@ -90,9 +91,9 @@ namespace TrueCraft.TerrainGen.Decorations
             {
                 for (int z = location.Z; z < location.Z + Size.Z; z++)
                 {
-                    if (x < 0 || x >= Chunk.Width
-                            || z < 0 || z >= Chunk.Depth
-                            || location.Y < 0 || location.Y >= Chunk.Height)
+                    if (x < 0 || x >= WorldConstants.ChunkWidth
+                            || z < 0 || z >= WorldConstants.ChunkDepth
+                            || location.Y < 0 || location.Y >= WorldConstants.Height)
                             continue;
                     if (random.Next(0, 3) == 0)
                         chunk.SetBlockID(new LocalVoxelCoordinates(x, location.Y, z), MossStoneBlock.BlockID);
@@ -114,9 +115,9 @@ namespace TrueCraft.TerrainGen.Decorations
                     {
                         if (NeighboursBlock(chunk, new LocalVoxelCoordinates(x, aboveY, z), CobblestoneBlock.BlockID))
                         {
-                            if (x < 0 || x >= Chunk.Width
-                                || z < 0 || z >= Chunk.Depth
-                                || aboveY < 0 || aboveY >= Chunk.Height)
+                            if (x < 0 || x >= WorldConstants.ChunkWidth
+                                || z < 0 || z >= WorldConstants.ChunkDepth
+                                || aboveY < 0 || aboveY >= WorldConstants.Height)
                             continue;
                             chunk.SetBlockID(new LocalVoxelCoordinates(x, aboveY, z), ChestBlock.BlockID);
                             break;

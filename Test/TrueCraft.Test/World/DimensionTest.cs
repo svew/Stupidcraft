@@ -1,11 +1,14 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
+using Moq;
 using NUnit.Framework;
-using TrueCraft.Core.TerrainGen;
+using TrueCraft.Core.Logic;
 using TrueCraft.Core.World;
+using TrueCraft.TerrainGen;
+using TrueCraft.World;
 
-namespace TrueCraft.Core.Test.World
+namespace TrueCraft.Test.World
 {
     [TestFixture]
     public class DimensionTest
@@ -15,8 +18,14 @@ namespace TrueCraft.Core.Test.World
         [OneTimeSetUp]
         public void SetUp()
         {
+            Mock<IBlockProvider> mockProvider = new Mock<IBlockProvider>(MockBehavior.Strict);
+            mockProvider.Setup(x => x.ID).Returns(3);
+
+            Mock<IBlockRepository> mockRepository = new Mock<IBlockRepository>(MockBehavior.Strict);
+            mockRepository.Setup(x => x.GetBlockProvider(It.Is<byte>(b => b == 3))).Returns(mockProvider.Object);
+
             string assemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            _dimension = new Dimension(assemblyDir, "default");
+            _dimension = new Dimension(assemblyDir, DimensionID.Overworld, new FlatlandGenerator(1234), mockRepository.Object);
         }
 
         [Test]

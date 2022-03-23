@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using TrueCraft.Core;
-using TrueCraft.Core.TerrainGen;
+using TrueCraft.Core.Logic;
+using TrueCraft.Core.Server;
 using TrueCraft.Core.World;
+using TrueCraft.TerrainGen;
 
 namespace TrueCraft.World
 {
@@ -13,14 +15,14 @@ namespace TrueCraft.World
         }
 
         /// <inheritdoc />
-        public IList<IDimension> BuildDimensions(string baseDirectory, int seed)
+        public IList<IDimensionServer> BuildDimensions(string baseDirectory, int seed)
         {
-            List<IDimension> dimensions = new List<IDimension>(2);
+            List<IDimensionServer> dimensions = new List<IDimensionServer>(2);
 
-            dimensions.Add(null);   // TODO nether
+            dimensions.Add(null!);   // TODO nether
 
             IChunkProvider chunkProvider = new StandardGenerator(seed);
-            IDimension overWorld = new Dimension(baseDirectory, "OverWorld", chunkProvider);
+            IDimensionServer overWorld = new Dimension(baseDirectory, DimensionID.Overworld, chunkProvider, BlockRepository.Get());
             dimensions.Add(overWorld);
 
             return dimensions;

@@ -281,7 +281,7 @@ namespace TrueCraft.Handlers
                 var block = client.Dimension.GetBlockID(coords);
                 if (block == UprightSignBlock.BlockID || block == WallSignBlock.BlockID)
                 {
-                    client.Dimension.SetTileEntity(coords, new NbtCompound(new[]
+                    ((IDimensionServer)client.Dimension).SetTileEntity(coords, new NbtCompound(new[]
                     {
                         new NbtString("Text1", packet.Text[0]),
                         new NbtString("Text2", packet.Text[1]),

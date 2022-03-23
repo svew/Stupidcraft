@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using TrueCraft.Core.World;
+using TrueCraft.World;
 
 namespace TrueCraft.TerrainGen
 {
