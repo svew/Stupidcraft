@@ -27,7 +27,13 @@ namespace TrueCraft.Core.Server
         IAccessConfiguration AccessConfiguration { get; }
         IPacketReader PacketReader { get; }
         IList<IRemoteClient> Clients { get; }
-        IList<IDimension> Dimensions { get; }   // TODO should have one World, because it is a collection of Dimensions
+
+        // TODO: this returns an IWorld interface.
+        /// <summary>
+        /// 
+        /// </summary>
+        object World { get; }
+
         IEventScheduler Scheduler { get; }
         IBlockRepository BlockRepository { get; }
 
@@ -39,7 +45,7 @@ namespace TrueCraft.Core.Server
         void Start(IPEndPoint endPoint);
         void Stop();
         void RegisterPacketHandler(byte packetId, PacketHandler handler);
-        void AddDimension(IDimension dimension);   // TODO REMOVE this method - the world should load itself
+
         void AddLogProvider(ILogProvider provider);
         void Log(LogCategory category, string text, params object[] parameters);
         IEntityManager GetEntityManagerForWorld(IDimension dimension);

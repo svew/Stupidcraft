@@ -5,13 +5,17 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using fNbt;
+using TrueCraft.Core;
+using TrueCraft.Core.Lighting;
 using TrueCraft.Core.Logic;
 using TrueCraft.Core.Logic.Blocks;
+using TrueCraft.Core.Server;
 using TrueCraft.Core.World;
+using TrueCraft.Profiling;
 
 namespace TrueCraft.World
 {
-    public class Dimension : IDisposable, IDimension, IEnumerable<IChunk>, IEquatable<IDimension>
+    public class Dimension : IDisposable, IDimensionServer, IEnumerable<IChunk>, IEquatable<IDimension>
     {
         public static readonly int Height = 128;
 
@@ -27,6 +31,20 @@ namespace TrueCraft.World
         private readonly IChunkProvider _chunkProvider;
 
         private readonly IBlockRepository _blockRepository;
+
+        /// <summary>
+        /// Chunks in this Queue are waiting to have their BlockLoaded methods called for each block.
+        /// </summary>
+        private readonly Queue<IChunk> _recentlyLoadedChunks = new Queue<IChunk>();
+
+        private bool _blockUpdatesEnabled = true;
+
+        /// <summary>
+        /// A list of coordinates where block updates are pending.
+        /// </summary>
+        private readonly Queue<GlobalVoxelCoordinates> _pendingBlockUpdates = new Queue<GlobalVoxelCoordinates>();
+
+        private readonly ILighter _lighter;
 
         /// <inheritdoc/>
         public IBlockRepository BlockRepository { get => _blockRepository; }
@@ -56,12 +74,14 @@ namespace TrueCraft.World
         /// <param name="dimensionID"></param>
         /// <param name="chunkProvider"></param>
         /// <param name="blockRepository"></param>
-        public Dimension(string baseDirectory, DimensionID dimensionID, IChunkProvider chunkProvider, IBlockRepository blockRepository)
+        public Dimension(string baseDirectory, DimensionID dimensionID,
+            IChunkProvider chunkProvider, ILighter lighter, IBlockRepository blockRepository)
         {
             _dimensionID = dimensionID; ;
             _baseDirectory = baseDirectory;
             Name = DimensionInfo.GetName(dimensionID);
             _chunkProvider = chunkProvider;
+            _lighter = lighter;
             _blockRepository = blockRepository;
             _regions = new Dictionary<RegionCoordinates, IRegion>();
             _baseTime = DateTime.UtcNow;
@@ -190,12 +210,13 @@ namespace TrueCraft.World
                 return;
 
             BlockDescriptor old = GetBlockDataFromChunk(adjustedCoordinates, chunk, coordinates);
+            if (old.ID == descriptor.ID && old.Metadata == descriptor.Metadata)
+                return;
 
             chunk.SetBlockID(adjustedCoordinates, descriptor.ID);
             chunk.SetMetadata(adjustedCoordinates, descriptor.Metadata);
 
-            if (BlockChanged != null)
-                BlockChanged(this, new BlockChangeEventArgs(coordinates, old, GetBlockDataFromChunk(adjustedCoordinates, chunk, coordinates)));
+            OnBlockChanged(new BlockChangeEventArgs(coordinates, old, GetBlockDataFromChunk(adjustedCoordinates, chunk, coordinates)));
         }
 
         private BlockDescriptor GetBlockDataFromChunk(LocalVoxelCoordinates adjustedCoordinates, IChunk chunk, GlobalVoxelCoordinates coordinates)
@@ -218,14 +239,13 @@ namespace TrueCraft.World
             if (chunk is null)
                 return;
 
-            BlockDescriptor old = new BlockDescriptor();
-            if (BlockChanged != null)
-                old = GetBlockDataFromChunk(adjustedCoordinates, chunk, coordinates);
+            BlockDescriptor old = GetBlockDataFromChunk(adjustedCoordinates, chunk, coordinates);
+            if (old.ID == value)
+                return;
 
             chunk.SetBlockID(adjustedCoordinates, value);
 
-            if (BlockChanged != null)
-                BlockChanged(this, new BlockChangeEventArgs(coordinates, old, GetBlockDataFromChunk(adjustedCoordinates, chunk, coordinates)));
+            OnBlockChanged(new BlockChangeEventArgs(coordinates, old, GetBlockDataFromChunk(adjustedCoordinates, chunk, coordinates)));
         }
 
         /// <inheritdoc />
@@ -236,14 +256,13 @@ namespace TrueCraft.World
             if (chunk is null)
                 return;
 
-            BlockDescriptor old = new BlockDescriptor();
-            if (BlockChanged != null)
-                old = GetBlockDataFromChunk(adjustedCoordinates, chunk, coordinates);
+            BlockDescriptor old = GetBlockDataFromChunk(adjustedCoordinates, chunk, coordinates);
+            if (old.Metadata == value)
+                return;
 
             chunk.SetMetadata(adjustedCoordinates, value);
 
-            if (BlockChanged != null)
-                BlockChanged(this, new BlockChangeEventArgs(coordinates, old, GetBlockDataFromChunk(adjustedCoordinates, chunk, coordinates)));
+            OnBlockChanged(new BlockChangeEventArgs(coordinates, old, GetBlockDataFromChunk(adjustedCoordinates, chunk, coordinates)));
         }
 
         /// <inheritdoc />
@@ -254,14 +273,7 @@ namespace TrueCraft.World
             if (chunk is null)
                 return;
 
-            BlockDescriptor old = new BlockDescriptor();
-            if (BlockChanged != null)
-                old = GetBlockDataFromChunk(adjustedCoordinates, chunk, coordinates);
-
             chunk.SetSkyLight(adjustedCoordinates, value);
-
-            if (BlockChanged != null)
-                BlockChanged(this, new BlockChangeEventArgs(coordinates, old, GetBlockDataFromChunk(adjustedCoordinates, chunk, coordinates)));
         }
 
         /// <inheritdoc />
@@ -272,14 +284,7 @@ namespace TrueCraft.World
             if (chunk is null)
                 return;
 
-            BlockDescriptor old = new BlockDescriptor();
-            if (BlockChanged != null)
-                old = GetBlockDataFromChunk(adjustedCoordinates, chunk, coordinates);
-
             chunk.SetBlockLight(adjustedCoordinates, value);
-
-            if (BlockChanged != null)
-                BlockChanged(this, new BlockChangeEventArgs(coordinates, old, GetBlockDataFromChunk(adjustedCoordinates, chunk, coordinates)));
         }
 
         /// <inheritdoc />
@@ -353,18 +358,74 @@ namespace TrueCraft.World
             ChunkLoaded = null;
         }
 
+        protected internal void OnBlockChanged(BlockChangeEventArgs e)
+        {
+            // TODO: Move processing of block updates to the tick method.
+            _pendingBlockUpdates.Enqueue(e.Position);
+            ProcessBlockUpdates();
+
+            if (Program.ServerConfiguration.EnableLighting)
+            {
+                Vector3 posA = new Vector3(e.Position.X, 0, e.Position.Z);
+                Vector3 posB = new Vector3(e.Position.X + 1, Dimension.Height, e.Position.Z + 1);
+                _lighter.EnqueueOperation(new BoundingBox(posA, posB), true);
+                _lighter.EnqueueOperation(new BoundingBox(posA, posB), false);
+            }
+
+            BlockChanged?.Invoke(this, e);
+        }
+
+        private void ProcessBlockUpdates()
+        {
+            if (!_blockUpdatesEnabled)
+                return;
+
+            while (_pendingBlockUpdates.Count != 0)
+            {
+                GlobalVoxelCoordinates update = _pendingBlockUpdates.Dequeue();
+                BlockDescriptor source = GetBlockData(update);
+                foreach (Vector3i offset in Vector3i.Neighbors6)
+                {
+                    BlockDescriptor descriptor = GetBlockData(update + offset);
+                    IBlockProvider provider = BlockRepository.GetBlockProvider(descriptor.ID);
+                    provider?.BlockUpdate(descriptor, source, XXXMultiplayerServer, this);
+                }
+            }
+        }
+
         protected internal void OnChunkGenerated(ChunkLoadedEventArgs e)
         {
-            if (ChunkGenerated != null)
-                ChunkGenerated(this, e);
+            if (Program.ServerConfiguration.EnableLighting)
+            {
+                var lighter = new Lighting(this, BlockRepository);
+                lighter.InitialLighting(e.Chunk, false);
+            }
+            else
+            {
+                IChunk chunk = e.Chunk;
+                for (int i = 0, iul = chunk.SkyLight.Length; i < iul ; i++)
+                {
+                    chunk.SkyLight[i] = 0x0F;
+                    chunk.BlockLight[i] = 0x0F;
+                }
+            }
+
+            ChunkGenerated?.Invoke(this, e);
         }
 
-        protected internal void OnChunkLoaded(ChunkLoadedEventArgs e)
+        // TODO call this when a chunk is loaded
+        protected internal void OnChunkLoaded(IChunk chunk)
         {
-            if (ChunkLoaded != null)
-                ChunkLoaded(this, e);
+            if (Program.ServerConfiguration.EnableEventLoading)
+                _recentlyLoadedChunks.Enqueue(chunk);
+
+            if (Program.ServerConfiguration.EnableLighting)
+                _lighter.InitialLighting(chunk, false);
+
+            ChunkLoaded?.Invoke(this, new ChunkLoadedEventArgs(chunk));
         }
 
+        #region IEnumerable<IChunk>
         public IEnumerator<IChunk> GetEnumerator()
         {
             List<IChunk> chunks = new List<IChunk>();
@@ -379,5 +440,6 @@ namespace TrueCraft.World
         {
             return this.GetEnumerator();
         }
+        #endregion
     }
 }

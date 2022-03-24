@@ -16,6 +16,7 @@ using TrueCraft.Core.Lighting;
 using TrueCraft.Core.World;
 using TrueCraft.Profiling;
 using TrueCraft.Commands;
+using TrueCraft.World;
 
 namespace TrueCraft
 {
@@ -27,45 +28,7 @@ namespace TrueCraft
         public event EventHandler<PlayerJoinedQuitEventArgs> PlayerJoined;
         public event EventHandler<PlayerJoinedQuitEventArgs> PlayerQuit;
 
-        public IAccessConfiguration AccessConfiguration { get; internal set; }
-
-        public IPacketReader PacketReader { get; private set; }
-        public IList<IRemoteClient> Clients { get; private set; }
-        public IList<IDimension> Dimensions { get; private set; }
-        public IList<IEntityManager> EntityManagers { get; private set; }
-        public IList<Lighting> WorldLighters { get; set; }
-        public IEventScheduler Scheduler { get; private set; }
-        public IBlockRepository BlockRepository { get; private set; }
-        public IItemRepository ItemRepository { get; private set; }
-
-        public bool EnableClientLogging { get; set; }
-        public IPEndPoint EndPoint { get; private set; }
-
-        private static readonly int MillisecondsPerTick = 1000 / 20;
-
-        private bool _BlockUpdatesEnabled = true;
-
-        private struct BlockUpdate
-        {
-            public GlobalVoxelCoordinates Coordinates;
-            public IDimension Dimension;
-        }
-        private Queue<BlockUpdate> PendingBlockUpdates { get; set; }
-        public bool BlockUpdatesEnabled
-        {
-            get
-            {
-                return _BlockUpdatesEnabled;
-            }
-            set
-            {
-                _BlockUpdatesEnabled = value;
-                if (_BlockUpdatesEnabled)
-                {
-                    ProcessBlockUpdates();
-                }
-            }
-        }
+        private IWorld _world;
 
         private Thread _masterTick;
         private List<AutoResetEvent> _lstAutoResetEvents;
@@ -81,11 +44,9 @@ namespace TrueCraft
         private Stopwatch Time;
         private ConcurrentBag<Tuple<IDimension, IChunk>> ChunksToSchedule;
         internal object ClientLock = new object();
-        
+
         private QueryProtocol QueryProtocol;
 
-        internal bool ShuttingDown { get; private set; }
-        
         private MultiplayerServer()
         {
             TrueCraft.Core.WhoAmI.Answer = Core.IAm.Server;
@@ -104,7 +65,11 @@ namespace TrueCraft
             _cde = new CountdownEvent(_lstAutoResetEvents.Count);
 
             PacketHandlers = new PacketHandler[0x100];
-            Dimensions = new List<IDimension>();
+            _world = TrueCraft.World.World.LoadWorld(Paths.Worlds);
+            foreach (IDimensionServer d in _world)
+                d.BlockChanged += HandleBlockChanged;
+
+
             EntityManagers = new List<IEntityManager>();
             LogProviders = new List<ILogProvider>();
             Scheduler = new EventScheduler(this);
@@ -137,6 +102,53 @@ namespace TrueCraft
 
             return _singleton;
         }
+
+        public IAccessConfiguration AccessConfiguration { get; internal set; }
+
+        public IPacketReader PacketReader { get; private set; }
+        public IList<IRemoteClient> Clients { get; private set; }
+
+        // <inheritdoc />
+        public object World { get => _world; }
+
+        public IList<IEntityManager> EntityManagers { get; private set; }
+        public IList<Lighting> WorldLighters { get; set; }
+        public IEventScheduler Scheduler { get; private set; }
+        public IBlockRepository BlockRepository { get; private set; }
+        public IItemRepository ItemRepository { get; private set; }
+
+        public bool EnableClientLogging { get; set; }
+        public IPEndPoint EndPoint { get; private set; }
+
+        private static readonly int MillisecondsPerTick = 1000 / 20;
+
+        private bool _BlockUpdatesEnabled = true;
+
+        private struct BlockUpdate
+        {
+            public GlobalVoxelCoordinates Coordinates;
+            public IDimension Dimension;
+        }
+        private Queue<BlockUpdate> PendingBlockUpdates { get; set; }
+
+        public bool BlockUpdatesEnabled
+        {
+            get
+            {
+                return _BlockUpdatesEnabled;
+            }
+            set
+            {
+                _BlockUpdatesEnabled = value;
+                if (_BlockUpdatesEnabled)
+                {
+                    ProcessBlockUpdates();
+                }
+            }
+        }
+
+        internal bool ShuttingDown { get; private set; }
+        
 
         private long lastTick = 0;
 
@@ -200,86 +212,12 @@ namespace TrueCraft
             Listener.Stop();
             if(Program.ServerConfiguration.Query)
                 QueryProtocol.Stop();
-            foreach (var w in Dimensions)
-                w.Save();
+
+            _world.Save();
 
             // NOTE: DisconnectClient modifies the Clients collection!
             for (int j = Clients.Count - 1; j >= 0; j --)
                 DisconnectClient(Clients[j]);
-        }
-
-        public void AddDimension(IDimension dimension)
-        {
-            Dimensions.Add(dimension);
-
-            dimension.ChunkGenerated += HandleChunkGenerated;
-            dimension.ChunkLoaded += HandleChunkLoaded;
-            dimension.BlockChanged += HandleBlockChanged;
-            var manager = new EntityManager(this, dimension);
-            EntityManagers.Add(manager);
-            var lighter = new Lighting(dimension, BlockRepository);
-            WorldLighters.Add(lighter);
-            foreach (var chunk in dimension)
-                HandleChunkLoaded(dimension, new ChunkLoadedEventArgs(chunk));
-        }
-
-        void HandleChunkLoaded(object sender, ChunkLoadedEventArgs e)
-        {
-            if (Program.ServerConfiguration.EnableEventLoading)
-                ChunksToSchedule.Add(new Tuple<IDimension, IChunk>(sender as IDimension, e.Chunk));
-            if (Program.ServerConfiguration.EnableLighting)
-            {
-                var lighter = WorldLighters.SingleOrDefault(l => l.Dimension == sender);
-                lighter.InitialLighting(e.Chunk, false);
-            }
-        }
-
-        void HandleBlockChanged(object sender, BlockChangeEventArgs e)
-        {
-            // TODO: Propegate lighting changes to client (not possible with beta 1.7.3 protocol)
-            if (e.NewBlock.ID != e.OldBlock.ID || e.NewBlock.Metadata != e.OldBlock.Metadata)
-            {
-                for (int i = 0, ClientsCount = Clients.Count; i < ClientsCount; i++)
-                {
-                    var client = (RemoteClient)Clients[i];
-                    // TODO: Confirm that the client knows of this block
-                    if (client.LoggedIn && client.Dimension == sender)
-                    {
-                        client.QueuePacket(new BlockChangePacket(e.Position.X, (sbyte)e.Position.Y, e.Position.Z,
-                                (sbyte)e.NewBlock.ID, (sbyte)e.NewBlock.Metadata));
-                    }
-                }
-                PendingBlockUpdates.Enqueue(new BlockUpdate { Coordinates = e.Position, Dimension = sender as IDimension });
-                ProcessBlockUpdates();
-                if (Program.ServerConfiguration.EnableLighting)
-                {
-                    var lighter = WorldLighters.SingleOrDefault(l => l.Dimension == sender);
-                    if (lighter != null)
-                    {
-                        Vector3 posA = new Vector3(e.Position.X, 0, e.Position.Z);
-                        Vector3 posB = new Vector3(e.Position.X + 1, Dimension.Height, e.Position.Z + 1);
-                        lighter.EnqueueOperation(new BoundingBox(posA, posB), true);
-                        lighter.EnqueueOperation(new BoundingBox(posA, posB), false);
-                    }
-                }
-            }
-        }
-
-        void HandleChunkGenerated(object sender, ChunkLoadedEventArgs e)
-        {
-            if (Program.ServerConfiguration.EnableLighting)
-            {
-                var lighter = new Lighting(sender as IDimension, BlockRepository);
-                lighter.InitialLighting(e.Chunk, false);
-            }
-            else
-            {
-                for (int i = 0; i < e.Chunk.SkyLight.Length * 2; i++)
-                {
-                    e.Chunk.SkyLight[i] = 0xF;
-                }
-            }
-            HandleChunkLoaded(sender, e);
         }
 
         void ScheduleUpdatesForChunk(IDimension dimension, IChunk chunk)
@@ -307,6 +245,7 @@ namespace TrueCraft
             }
         }
 
+        // TODO: remove this method; it belongs to the dimension
         private void ProcessBlockUpdates()
         {
             if (!BlockUpdatesEnabled)
@@ -530,6 +469,18 @@ namespace TrueCraft
             }
 
             Profiler.Done(MillisecondsPerTick);
+        }
+
+        private void HandleBlockChanged(object? sender, BlockChangeEventArgs e)
+        {
+            IDimensionServer sendingDimension = (IDimensionServer)sender!;
+
+            foreach (IRemoteClient client in Clients)
+                // TODO: Confirm that the block is within this Client's Chunk Radius.
+                // TODO: what if client just logged out?
+                if (client.Dimension == sendingDimension)
+                    client.QueuePacket(new BlockChangePacket(e.Position.X, (sbyte)e.Position.Y, e.Position.Z,
+                            (sbyte)e.NewBlock.ID, (sbyte)e.NewBlock.Metadata));
         }
 
         public bool PlayerIsWhitelisted(string client)

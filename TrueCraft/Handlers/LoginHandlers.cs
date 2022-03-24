@@ -28,7 +28,7 @@ namespace TrueCraft.Handlers
                 remoteClient.QueuePacket(new DisconnectPacket("Client outdated! Use beta 1.7.3."));
             else if (loginRequestPacket.ProtocolVersion > server.PacketReader.ProtocolVersion)
                 remoteClient.QueuePacket(new DisconnectPacket("Server outdated! Use beta 1.7.3."));
-            else if (server.Dimensions.Count == 0)
+            else if (server.World.Count == 0)
                 remoteClient.QueuePacket(new DisconnectPacket("Server has no worlds configured."));
             else if (!server.PlayerIsWhitelisted(remoteClient.Username) && server.PlayerIsBlacklisted(remoteClient.Username))
                 remoteClient.QueuePacket(new DisconnectPacket("You're banned from this server"));
@@ -38,7 +38,7 @@ namespace TrueCraft.Handlers
             {
                 remoteClient.LoggedIn = true;
                 remoteClient.Entity = new PlayerEntity(remoteClient.Username);
-                remoteClient.Dimension = server.Dimensions[1];  // TODO read dimension from saved player data.
+                remoteClient.Dimension = server.World[1];  // TODO read dimension from saved player data.
                 remoteClient.ChunkRadius = 2;
 
                 if (!remoteClient.Load())

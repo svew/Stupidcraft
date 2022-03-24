@@ -127,7 +127,7 @@ namespace TrueCraft
         static void SaveWorlds(IMultiplayerServer server)
         {
             Server.Log(LogCategory.Notice, "Saving world...");
-            foreach (var w in Server.Dimensions)
+            foreach (var w in Server.World)
                 ((IDimensionServer)w).Save();
             Server.Log(LogCategory.Notice, "Done.");
             server.Scheduler.ScheduleEvent("world.save", null,
