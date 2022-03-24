@@ -1,5 +1,6 @@
 using System;
-using TrueCraft.Core;
+using System.Collections.Generic;
+using TrueCraft.Core.Server;
 using TrueCraft.Core.World;
 
 namespace TrueCraft.World
@@ -7,7 +8,7 @@ namespace TrueCraft.World
     /// <summary>
     /// A World is a "collection" of Dimensions.
     /// </summary>
-    public interface IWorld
+    public interface IWorld : IEnumerable<IDimensionServer>
     {
         /// <summary>
         /// Gets the Seed used to generate the World

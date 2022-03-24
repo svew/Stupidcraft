@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using fNbt;
@@ -132,6 +133,16 @@ namespace TrueCraft.World
 
             foreach (IDimensionServer dimension in _dimensions)
                 dimension.Save();
+        }
+
+        public IEnumerator<IDimensionServer> GetEnumerator()
+        {
+            return _dimensions.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return _dimensions.GetEnumerator();
         }
         #endregion
     }
