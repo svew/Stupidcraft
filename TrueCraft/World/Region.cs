@@ -37,6 +37,8 @@ namespace TrueCraft.World
         private Stream _regionFile;
         private object _streamLock = new object();
 
+        public event EventHandler<ChunkLoadedEventArgs>? ChunkLoaded;
+
         /// <summary>
         /// Creates a new Region for server-side use at the given position in
         /// the given World.
@@ -125,7 +127,14 @@ namespace TrueCraft.World
             IChunk chunk = Chunk.FromNbt(nbt);  // TODO remove dependency on Chunk class
             _chunks[chunkX, chunkZ] = chunk;
 
+            OnChunkLoaded(chunk);
+
             return chunk;
+        }
+
+        protected void OnChunkLoaded(IChunk chunk)
+        {
+            ChunkLoaded?.Invoke(this, new ChunkLoadedEventArgs(chunk));
         }
 
         /// <inheritdoc />

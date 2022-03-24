@@ -343,6 +343,8 @@ namespace TrueCraft.World
             }
 
             IRegion region = new Region(coordinates, _baseDirectory);
+            region.ChunkLoaded += HandleChunkLoaded;
+
             lock (_regions)
                 _regions[coordinates] = region;
 
@@ -351,8 +353,13 @@ namespace TrueCraft.World
 
         public void Dispose()
         {
-            foreach (var region in _regions)
-                region.Value.Dispose();
+            foreach (IRegion region in _regions.Values)
+            {
+                region.ChunkLoaded -= HandleChunkLoaded;
+                region.Dispose();
+            }
+            _regions.Clear();
+
             BlockChanged = null;
             ChunkGenerated = null;
             ChunkLoaded = null;
@@ -413,16 +420,17 @@ namespace TrueCraft.World
             ChunkGenerated?.Invoke(this, e);
         }
 
-        // TODO call this when a chunk is loaded
-        protected internal void OnChunkLoaded(IChunk chunk)
+        private void HandleChunkLoaded(object? sender, ChunkLoadedEventArgs e)
         {
+            IChunk chunk = e.Chunk;
+
             if (Program.ServerConfiguration.EnableEventLoading)
                 _recentlyLoadedChunks.Enqueue(chunk);
 
             if (Program.ServerConfiguration.EnableLighting)
                 _lighter.InitialLighting(chunk, false);
 
-            ChunkLoaded?.Invoke(this, new ChunkLoadedEventArgs(chunk));
+            ChunkLoaded?.Invoke(this, e);
         }
 
         #region IEnumerable<IChunk>

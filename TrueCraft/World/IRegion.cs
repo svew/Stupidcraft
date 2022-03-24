@@ -33,5 +33,7 @@ namespace TrueCraft.World
         bool IsChunkLoaded(LocalChunkCoordinates position);
 
         void Save(string path);
+
+        event EventHandler<ChunkLoadedEventArgs> ChunkLoaded;
     }
 }
