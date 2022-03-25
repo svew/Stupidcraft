@@ -128,18 +128,41 @@ namespace TrueCraft.World
         /// <inheritdoc />
         public IChunk? GetChunk(GlobalVoxelCoordinates coordinates)
         {
-            IRegion region = GetRegion((RegionCoordinates)coordinates);
-            return region.GetChunk((LocalChunkCoordinates)coordinates);
+            RegionCoordinates regionCoordinates = (RegionCoordinates)coordinates;
+            IRegion region;
+
+            lock (_regions)
+            {
+                if (!_regions.ContainsKey(regionCoordinates))
+                    return null;
+                region = _regions[regionCoordinates];
+
+                LocalChunkCoordinates chunkCoordinates = (LocalChunkCoordinates)coordinates;
+                if (!region.IsChunkLoaded(chunkCoordinates))
+                    return null;
+
+                return region.GetChunk(chunkCoordinates);
+            }
         }
 
         /// <inheritdoc />
-        public IChunk? GetChunk(GlobalChunkCoordinates chunkCoords)
+        public IChunk? GetChunk(GlobalChunkCoordinates coordinates)
         {
-            RegionCoordinates regionCoords = (RegionCoordinates)chunkCoords;
+            RegionCoordinates regionCoordinates = (RegionCoordinates)coordinates;
+            IRegion region;
 
-            IRegion region = GetRegion(regionCoords);
+            lock (_regions)
+            {
+                if (!_regions.ContainsKey(regionCoordinates))
+                    return null;
+                region = _regions[regionCoordinates];
 
-            return region.GetChunk((LocalChunkCoordinates)chunkCoords);
+                LocalChunkCoordinates chunkCoordinates = (LocalChunkCoordinates)coordinates;
+                if (!region.IsChunkLoaded(chunkCoordinates))
+                    return null;
+
+                return region.GetChunk(chunkCoordinates);
+            }
         }
 
         /// <inheritdoc />
