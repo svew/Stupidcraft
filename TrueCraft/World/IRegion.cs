@@ -25,6 +25,15 @@ namespace TrueCraft.World
         IChunk? GetChunk(LocalChunkCoordinates position);
 
         /// <summary>
+        /// Gets the Chunk at the given location within the Region
+        /// </summary>
+        /// <param name="position">The location of the Chunk to return.</param>
+        /// <returns>If the Chunk is in memory, it will be returned.
+        /// If the Chunk is not in memory, but is on disk, it will be loaded
+        /// into memory and returned.</returns>
+        IChunk? LoadChunk(LocalChunkCoordinates position);
+
+        /// <summary>
         /// Sets the chunk at the specified local position to the given value.
         /// </summary>
         /// <param name="chunk">The Chunk to add to this Region.</param>

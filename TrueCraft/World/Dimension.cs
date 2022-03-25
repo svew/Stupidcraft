@@ -28,7 +28,7 @@ namespace TrueCraft.World
 
         private readonly IDictionary<RegionCoordinates, IRegion> _regions;
 
-        private readonly IChunkProvider _chunkProvider;
+        private readonly IChunkProvider _chunkProvider;
 
         private readonly IBlockRepository _blockRepository;
 
@@ -166,35 +166,86 @@ namespace TrueCraft.World
         }
 
         /// <inheritdoc />
+        public IChunk? GetChunk(GlobalChunkCoordinates coordinates, LoadEffort loadEffort)
+        {
+            RegionCoordinates regionCoordinates = (RegionCoordinates)coordinates;
+
+            lock (_regions)
+            {
+                IRegion region;
+                if (!_regions.ContainsKey(regionCoordinates) && loadEffort == LoadEffort.InMemory)
+                    return null;
+
+                region = _regions[regionCoordinates];
+                LocalChunkCoordinates chunkCoordinates = (LocalChunkCoordinates)coordinates;
+                if (!region.IsChunkLoaded(chunkCoordinates) && loadEffort == LoadEffort.InMemory)
+                    return null;
+
+                IChunk? chunk = region.GetChunk(chunkCoordinates);
+                if (chunk is null && (loadEffort == LoadEffort.Load || loadEffort == LoadEffort.Generate))
+                {
+                    chunk = region.LoadChunk(chunkCoordinates);
+                    if (chunk is null && loadEffort == LoadEffort.Generate)
+                    {
+                        chunk = _chunkProvider.GenerateChunk(coordinates);
+                        region.AddChunk(chunk);
+                        OnChunkGenerated(new ChunkLoadedEventArgs(chunk));
+                    }
+                }
+
+                return chunk;
+            }
+        }
+
+        /// <inheritdoc />
         public byte GetBlockID(GlobalVoxelCoordinates coordinates)
         {
-            IChunk? chunk;
-            LocalVoxelCoordinates local = FindBlockPosition(coordinates, out chunk);
-            return chunk?.GetBlockID(local) ?? AirBlock.BlockID;
+            return GetBlockID(coordinates, LoadEffort.InMemory);
+        }
+
+        /// <inheritdoc />
+        public byte GetBlockID(GlobalVoxelCoordinates coordinates, LoadEffort loadEffort)
+        {
+            IChunk? chunk = GetChunk((GlobalChunkCoordinates)coordinates, loadEffort);
+            return chunk?.GetBlockID((LocalVoxelCoordinates)coordinates) ?? AirBlock.BlockID;
         }
 
         /// <inheritdoc />
         public byte GetMetadata(GlobalVoxelCoordinates coordinates)
         {
-            IChunk? chunk;
-            LocalVoxelCoordinates local = FindBlockPosition(coordinates, out chunk);
-            return chunk?.GetMetadata(local) ?? 0;
+            return GetMetadata(coordinates, LoadEffort.InMemory);
         }
 
-        /// <inheritdoc />
-        public byte GetSkyLight(GlobalVoxelCoordinates coordinates)
+        public byte GetMetadata(GlobalVoxelCoordinates coordinates, LoadEffort loadEffort)
         {
-            IChunk? chunk;
-            LocalVoxelCoordinates local = FindBlockPosition(coordinates, out chunk);
-            return chunk?.GetSkyLight(local) ?? 0;
+            IChunk? chunk = GetChunk((GlobalChunkCoordinates)coordinates, loadEffort);
+            return chunk?.GetMetadata((LocalVoxelCoordinates)coordinates) ?? 0;
         }
 
         /// <inheritdoc />
         public byte GetBlockLight(GlobalVoxelCoordinates coordinates)
         {
-            IChunk? chunk;
-            LocalVoxelCoordinates local = FindBlockPosition(coordinates, out chunk);
-            return chunk?.GetBlockLight(local) ?? 0;
+            return GetBlockLight(coordinates, LoadEffort.InMemory);
+        }
+
+        /// <inheritdoc />
+        public byte GetBlockLight(GlobalVoxelCoordinates coordinates, LoadEffort loadEffort)
+        {
+            IChunk? chunk = GetChunk((GlobalChunkCoordinates)coordinates, loadEffort);
+            return chunk?.GetBlockLight((LocalVoxelCoordinates)coordinates) ?? 0;
+        }
+
+        /// <inheritdoc />
+        public byte GetSkyLight(GlobalVoxelCoordinates coordinates)
+        {
+            return GetSkyLight(coordinates, LoadEffort.InMemory);
+        }
+
+        /// <inheritdoc />
+        public byte GetSkyLight(GlobalVoxelCoordinates coordinates, LoadEffort loadEffort)
+        {
+            IChunk? chunk = GetChunk((GlobalChunkCoordinates)coordinates, loadEffort);
+            return chunk?.GetSkyLight((LocalVoxelCoordinates)coordinates) ?? 0;
         }
 
         /// <inheritdoc />

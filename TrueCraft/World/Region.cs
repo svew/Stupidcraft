@@ -96,6 +96,12 @@ namespace TrueCraft.World
         /// <returns>The requested Chunk or null if no Chunk has been saved to disk at this position.</returns>
         public IChunk? GetChunk(LocalChunkCoordinates position)
         {
+            return _chunks[position.X, position.Z];
+        }
+
+        /// <inheritdoc />
+        public IChunk? LoadChunk(LocalChunkCoordinates position)
+        {
             int chunkX = position.X;
             int chunkZ = position.Z;
 
