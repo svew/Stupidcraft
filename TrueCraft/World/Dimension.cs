@@ -44,7 +44,7 @@ namespace TrueCraft.World
         /// </summary>
         private readonly Queue<GlobalVoxelCoordinates> _pendingBlockUpdates = new Queue<GlobalVoxelCoordinates>();
 
-        private readonly ILighter _lighter;
+        private readonly ILightingQueue _lightingQueue;
 
         /// <inheritdoc/>
         public IBlockRepository BlockRepository { get => _blockRepository; }
@@ -73,15 +73,16 @@ namespace TrueCraft.World
         /// <param name="baseDirectory"></param>
         /// <param name="dimensionID"></param>
         /// <param name="chunkProvider"></param>
+        /// <param name="lightingQueue">The Lighting Queue for lighting this Dimension</param>
         /// <param name="blockRepository"></param>
         public Dimension(string baseDirectory, DimensionID dimensionID,
-            IChunkProvider chunkProvider, ILighter lighter, IBlockRepository blockRepository)
+            IChunkProvider chunkProvider, ILightingQueue lightingQueue, IBlockRepository blockRepository)
         {
             _dimensionID = dimensionID; ;
             _baseDirectory = baseDirectory;
             Name = DimensionInfo.GetName(dimensionID);
             _chunkProvider = chunkProvider;
-            _lighter = lighter;
+            _lightingQueue = lightingQueue;
             _blockRepository = blockRepository;
             _regions = new Dictionary<RegionCoordinates, IRegion>();
             _baseTime = DateTime.UtcNow;
@@ -449,8 +450,8 @@ namespace TrueCraft.World
             {
                 Vector3 posA = new Vector3(e.Position.X, 0, e.Position.Z);
                 Vector3 posB = new Vector3(e.Position.X + 1, Dimension.Height, e.Position.Z + 1);
-                _lighter.EnqueueOperation(new BoundingBox(posA, posB), true);
-                _lighter.EnqueueOperation(new BoundingBox(posA, posB), false);
+                _lightingQueue.Enqueue(new BoundingBox(posA, posB), true);
+                _lightingQueue.Enqueue(new BoundingBox(posA, posB), false);
             }
 
             BlockChanged?.Invoke(this, e);
@@ -502,7 +503,12 @@ namespace TrueCraft.World
                 _recentlyLoadedChunks.Enqueue(chunk);
 
             if (Program.ServerConfiguration.EnableLighting)
-                _lighter.InitialLighting(chunk, false);
+            {
+                Vector3 a = (Vector3)(GlobalVoxelCoordinates)chunk.Coordinates;
+                Vector3 b = new Vector3(a.X + WorldConstants.ChunkWidth - 1, WorldConstants.Height, a.Z + WorldConstants.ChunkDepth - 1);
+                _lightingQueue.Enqueue(new BoundingBox(a, b), true);
+                _lightingQueue.Enqueue(new BoundingBox(a, b), false);
+            }
 
             ChunkLoaded?.Invoke(this, e);
         }
