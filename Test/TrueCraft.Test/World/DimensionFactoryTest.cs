@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using NUnit.Framework;
-using TrueCraft.Core;
+using TrueCraft.Core.Server;
 using TrueCraft.Core.World;
 using TrueCraft.World;
 
@@ -19,7 +19,7 @@ namespace TrueCraft.Test.World
             string baseDirectory = "FakeBaseDirectory";
             IDimensionFactory factory = new DimensionFactory();
 
-            IList<IDimension> actual = factory.BuildDimensions(baseDirectory, 314159);
+            IList<IDimensionServer> actual = factory.BuildDimensions(baseDirectory, 314159);
 
             Assert.AreEqual(2, actual.Count);
 
