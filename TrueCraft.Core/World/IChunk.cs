@@ -36,6 +36,8 @@ namespace TrueCraft.Core.World
         /// <param name="z">The z-coordinate of the column relative to the chunk.</param>
         /// <returns>The y-coordinate of the highest block</returns>
         int GetHeight(int x, int z);
+
+        [Obsolete("Should be server-side only and only needed during construction.")]
         void UpdateHeightMap();
 
         bool IsModified { get; }
