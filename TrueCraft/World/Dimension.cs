@@ -448,10 +448,22 @@ namespace TrueCraft.World
 
             if (Program.ServerConfiguration.EnableLighting)
             {
-                Vector3 posA = new Vector3(e.Position.X, 0, e.Position.Z);
-                Vector3 posB = new Vector3(e.Position.X + 1, Dimension.Height, e.Position.Z + 1);
-                _lightingQueue.Enqueue(new BoundingBox(posA, posB), true);
-                _lightingQueue.Enqueue(new BoundingBox(posA, posB), false);
+                IBlockProvider oldBlock = BlockRepository.GetBlockProvider(e.OldBlock.ID);
+                IBlockProvider newBlock = BlockRepository.GetBlockProvider(e.NewBlock.ID);
+
+                if (newBlock.Luminance > oldBlock.Luminance)
+                {
+                    _lightingQueue.Enqueue(e.Position, LightingOperationMode.Add, LightingOperationKind.Block, newBlock.Luminance);
+                }
+                else if (oldBlock.Luminance > newBlock.Luminance)
+                {
+                    _lightingQueue.Enqueue(e.Position, LightingOperationMode.Subtract, LightingOperationKind.Block, newBlock.Luminance);
+                }
+                else if (oldBlock.LightOpacity != newBlock.LightOpacity)
+                {
+                    _lightingQueue.Enqueue(e.Position, LightingOperationMode.BlockUpdate, LightingOperationKind.Block, 0);
+                    _lightingQueue.Enqueue(e.Position, LightingOperationMode.BlockUpdate, LightingOperationKind.Sky, 0);
+                }
             }
 
             BlockChanged?.Invoke(this, e);
@@ -503,12 +515,7 @@ namespace TrueCraft.World
                 _recentlyLoadedChunks.Enqueue(chunk);
 
             if (Program.ServerConfiguration.EnableLighting)
-            {
-                Vector3 a = (Vector3)(GlobalVoxelCoordinates)chunk.Coordinates;
-                Vector3 b = new Vector3(a.X + WorldConstants.ChunkWidth - 1, WorldConstants.Height, a.Z + WorldConstants.ChunkDepth - 1);
-                _lightingQueue.Enqueue(new BoundingBox(a, b), true);
-                _lightingQueue.Enqueue(new BoundingBox(a, b), false);
-            }
+                _lightingQueue.Enqueue((GlobalVoxelCoordinates)chunk.Coordinates, LightingOperationMode.Add, LightingOperationKind.Initial, 15);
 
             ChunkLoaded?.Invoke(this, e);
         }

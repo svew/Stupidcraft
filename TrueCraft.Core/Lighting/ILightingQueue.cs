@@ -1,4 +1,5 @@
 using System;
+using TrueCraft.Core.World;
 
 namespace TrueCraft.Core.Lighting
 {
@@ -7,9 +8,13 @@ namespace TrueCraft.Core.Lighting
         /// <summary>
         /// Creates a Lighting Operation and adds it to the Queue.
         /// </summary>
-        /// <param name="box">The Bounding Box within which Lighting will be updated.</param>
-        /// <param name="skyLight">True for a SkyLight operation; false for Block Lighting.</param>
-        void Enqueue(BoundingBox box, bool skyLight);
+        /// <param name="seed">The coordinates of the light source that was placed/broken.</param>
+        /// <param name="mode">Specifies whether the light source was added or removed.</param>
+        /// <param name="kind">Specifies the type of lighting operation to enqueue.</param>
+        /// <param name="lightLevel">The level of the light source that was added/removed.</param>
+        /// <remarks>If the kind is LightingOperationKind.Initial, the mode and lightLevel do not matter.</remarks>
+        void Enqueue(GlobalVoxelCoordinates seed, LightingOperationMode mode,
+            LightingOperationKind kind, byte lightLevel);
 
         /// <summary>
         /// Dequeues a Lighting Operation from the Lighting Queue.
