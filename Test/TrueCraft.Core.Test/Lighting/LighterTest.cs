@@ -5,6 +5,7 @@ using NUnit.Framework;
 using TrueCraft.Core.Lighting;
 using TrueCraft.Core.Logic;
 using TrueCraft.Core.Logic.Blocks;
+using TrueCraft.Core.Test.World;
 using TrueCraft.Core.World;
 
 namespace TrueCraft.Core.Test.Lighting
@@ -36,12 +37,14 @@ namespace TrueCraft.Core.Test.Lighting
         public void TestBasicLighting()
         {
             var repository = GetBlockRepository();
-            IDimension dimension = new TrueCraft.Core.World.Dimension(string.Empty, DimensionID.Overworld, new FlatlandGenerator(_testSeed), _blockRepository);
-            var lighter = new Core.Lighting.Lighting(dimension, repository);
-            dimension.GetBlockID(GlobalVoxelCoordinates.Zero); // Generate a chunk
-            lighter.InitialLighting(dimension.GetChunk(GlobalChunkCoordinates.Zero));
+            IDimension dimension = new FakeDimension(GetBlockRepository());
+            ILighter lighter = new OverWorldLighter(dimension, null!);
+            IChunk chunk = dimension.GetChunk(GlobalChunkCoordinates.Zero)!;
+            int ground = chunk.GetHeight(0, 0);
 
-            for (int y = 5; y >= 0; y--)
+            lighter.DoLightingOperation(new LightingOperation(GlobalVoxelCoordinates.Zero, LightingOperationMode.Add, LightingOperationKind.Initial, 15));
+
+            for (int y = ground + 5; y >= ground; y--)
             {
                 Console.Write("Y: {0} ", y);
                 Console.Write(dimension.GetBlockID(new GlobalVoxelCoordinates(0, y, 0)));
@@ -56,8 +59,8 @@ namespace TrueCraft.Core.Test.Lighting
                 {
                     for (int z = 0; z < WorldConstants.ChunkDepth; z++)
                     {
-                        var coords = new GlobalVoxelCoordinates(x, y, z);
-                        var sky = dimension.GetSkyLight(coords);
+                        GlobalVoxelCoordinates coords = new GlobalVoxelCoordinates(x, y, z);
+                        int sky = dimension.GetSkyLight(coords);
                         if (y < 4)
                             Assert.AreEqual(0, sky, coords.ToString());
                         else
@@ -71,74 +74,74 @@ namespace TrueCraft.Core.Test.Lighting
         public void TestShortPropegation()
         {
             var repository = GetBlockRepository();
-            IDimension dimension = new TrueCraft.Core.World.Dimension(string.Empty, "TEST", new FlatlandGenerator(_testSeed), _blockRepository);
-            var lighter = new Core.Lighting.Lighting(dimension, repository);
-            dimension.GetBlockID(GlobalVoxelCoordinates.Zero); // Generate a chunk
-            lighter.InitialLighting(dimension.GetChunk(GlobalChunkCoordinates.Zero));
+            IDimension dimension = new FakeDimension(GetBlockRepository());
+            IChunk chunk = dimension.GetChunk(GlobalChunkCoordinates.Zero)!;
+            //var lighter = new Core.Lighting.Lighting(dimension, repository);
+            ILighter lighter = new OverWorldLighter(dimension, null!);
+            int xHole = 5;
+            int zHole = 5;
+            int yGround = chunk.GetHeight(xHole, zHole);
 
-            dimension.SetBlockID(new GlobalVoxelCoordinates(5, 3, 5), 0); // Create area that looks like so:
-            dimension.SetBlockID(new GlobalVoxelCoordinates(5, 2, 5), 0); // x x  Light goes like so: |
-            dimension.SetBlockID(new GlobalVoxelCoordinates(5, 1, 5), 0); // x x                      |
-            dimension.SetBlockID(new GlobalVoxelCoordinates(4, 1, 5), 0); //   x                     -/
+            dimension.SetBlockID(new GlobalVoxelCoordinates(xHole, yGround, zHole), 0);         // Create area that looks like so:
+            dimension.SetBlockID(new GlobalVoxelCoordinates(xHole, yGround - 1, zHole), 0);     // x x  Light goes like so: |
+            dimension.SetBlockID(new GlobalVoxelCoordinates(xHole, yGround - 2, zHole), 0);     // x x                      |
+            dimension.SetBlockID(new GlobalVoxelCoordinates(xHole - 1, yGround - 2, zHole), 0); //   x                     -/
 
-            lighter.EnqueueOperation(new BoundingBox(new Vector3(5, 2, 5),
-                new Vector3(6, 4, 6)), true);
+            lighter.DoLightingOperation(new LightingOperation(GlobalVoxelCoordinates.Zero, LightingOperationMode.Add, LightingOperationKind.Initial, 15));
+            lighter.DoLightingOperation(new LightingOperation(new GlobalVoxelCoordinates(xHole, yGround - 2, zHole), LightingOperationMode.Add, LightingOperationKind.Sky, 15));
 
-            while (lighter.TryLightNext()) // Test lighting
-            {
-            }
-
-            Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(5, 3, 5));
-            Assert.AreEqual(15, dimension.GetSkyLight(new GlobalVoxelCoordinates(5, 3, 5)));
-            Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(5, 2, 5));
-            Assert.AreEqual(15, dimension.GetSkyLight(new GlobalVoxelCoordinates(5, 2, 5)));
-            Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(5, 1, 5));
-            Assert.AreEqual(15, dimension.GetSkyLight(new GlobalVoxelCoordinates(5, 1, 5)));
-            Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(4, 1, 5));
-            Assert.AreEqual(14, dimension.GetSkyLight(new GlobalVoxelCoordinates(4, 1, 5)));
+            Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(xHole, yGround, zHole));
+            Assert.AreEqual(15, dimension.GetSkyLight(new GlobalVoxelCoordinates(xHole, yGround, zHole)));
+            Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(xHole, yGround - 1, zHole));
+            Assert.AreEqual(15, dimension.GetSkyLight(new GlobalVoxelCoordinates(xHole, yGround - 1, zHole)));
+            Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(xHole, yGround - 2, zHole));
+            Assert.AreEqual(15, dimension.GetSkyLight(new GlobalVoxelCoordinates(5, yGround - 2, zHole)));
+            Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(xHole - 1, yGround - 2, zHole));
+            Assert.AreEqual(14, dimension.GetSkyLight(new GlobalVoxelCoordinates(xHole - 1, yGround - 2, zHole)));
         }
 
         [Test]
         public void TestFarPropegation()
         {
             var repository = GetBlockRepository();
-            IDimension dimension = new TrueCraft.Core.World.Dimension(string.Empty, "TEST", new FlatlandGenerator(_testSeed), _blockRepository);
-            var lighter = new Core.Lighting.Lighting(dimension, repository);
-            dimension.GetBlockID(GlobalVoxelCoordinates.Zero); // Generate a chunk
-            lighter.InitialLighting(dimension.GetChunk(GlobalChunkCoordinates.Zero));
+            IDimension dimension = new FakeDimension(GetBlockRepository());
+            IChunk chunk = dimension.GetChunk(GlobalChunkCoordinates.Zero)!;
+            int xHole = 5;
+            int zHole = 5;
+            int yGround = chunk.GetHeight(xHole, zHole);
+            ILighter lighter = new OverWorldLighter(dimension, null!);
 
-            dimension.SetBlockID(new GlobalVoxelCoordinates(5, 3, 5), 0); // Create area that looks like so:
-            dimension.SetBlockID(new GlobalVoxelCoordinates(5, 2, 5), 0); // x x  Light goes like so: |
-            dimension.SetBlockID(new GlobalVoxelCoordinates(5, 1, 5), 0); // x x                      |
-            dimension.SetBlockID(new GlobalVoxelCoordinates(4, 1, 5), 0); //   x                     -/
+            //lighter.InitialLighting(dimension.GetChunk(GlobalChunkCoordinates.Zero));
+
+            dimension.SetBlockID(new GlobalVoxelCoordinates(xHole, yGround, zHole), 0);         // Create area that looks like so:
+            dimension.SetBlockID(new GlobalVoxelCoordinates(xHole, yGround - 1, zHole), 0);     // x x  Light goes like so: |
+            dimension.SetBlockID(new GlobalVoxelCoordinates(xHole, yGround - 2, zHole), 0);     // x x                      |
+            dimension.SetBlockID(new GlobalVoxelCoordinates(xHole - 1, yGround - 2, zHole), 0); //   x                     -/
 
             for (int x = 0; x < 4; x++)
             {
-                dimension.SetBlockID(new GlobalVoxelCoordinates(x, 1, 5), 0); // Dig a tunnel
+                dimension.SetBlockID(new GlobalVoxelCoordinates(x, yGround - 2, zHole), 0); // Dig a tunnel
                 // xxxxx x ish
                 // x     x
                 // xxxxxxx
             }
 
-            lighter.EnqueueOperation(new BoundingBox(new Vector3(5, 2, 5),
-                    new Vector3(6, 4, 6)), true);
+            lighter.DoLightingOperation(new LightingOperation(GlobalVoxelCoordinates.Zero, LightingOperationMode.Add, LightingOperationKind.Initial, 15));
+            lighter.DoLightingOperation(new LightingOperation(new GlobalVoxelCoordinates(xHole, yGround - 2, zHole),
+                LightingOperationMode.Add, LightingOperationKind.Sky, 15));
 
-            while (lighter.TryLightNext()) // Test lighting
-            {
-            }
-
-            Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(5, 3, 5));
-            Assert.AreEqual(15, dimension.GetSkyLight(new GlobalVoxelCoordinates(5, 3, 5)));
-            Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(5, 2, 5));
-            Assert.AreEqual(15, dimension.GetSkyLight(new GlobalVoxelCoordinates(5, 2, 5)));
-            Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(5, 1, 5));
-            Assert.AreEqual(15, dimension.GetSkyLight(new GlobalVoxelCoordinates(5, 1, 5)));
+            Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(xHole, yGround, zHole));
+            Assert.AreEqual(15, dimension.GetSkyLight(new GlobalVoxelCoordinates(xHole, yGround, zHole)));
+            Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(xHole, yGround - 1, zHole));
+            Assert.AreEqual(15, dimension.GetSkyLight(new GlobalVoxelCoordinates(xHole, yGround - 1, zHole)));
+            Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(xHole, yGround - 2, zHole));
+            Assert.AreEqual(15, dimension.GetSkyLight(new GlobalVoxelCoordinates(xHole, yGround - 2, zHole)));
 
             byte expected = 15;
             for (int x = 5; x >= 0; x--)
             {
-                Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(x, 1, 5));
-                Assert.AreEqual(expected, dimension.GetSkyLight(new GlobalVoxelCoordinates(x, 1, 5)));
+                Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(x, yGround - 2, zHole));
+                Assert.AreEqual(expected, dimension.GetSkyLight(new GlobalVoxelCoordinates(x, yGround - 2, zHole)));
                 expected--;
             }
         }
@@ -146,11 +149,13 @@ namespace TrueCraft.Core.Test.Lighting
         [Test]
         public void TestFarPropegationx2()
         {
-            var repository = GetBlockRepository();
-            IDimension dimension = new TrueCraft.Core.World.Dimension(string.Empty, "TEST", new FlatlandGenerator(_testSeed), _blockRepository);
-            var lighter = new Core.Lighting.Lighting(dimension, repository);
-            dimension.GetBlockID(GlobalVoxelCoordinates.Zero); // Generate a chunk
-            lighter.InitialLighting(dimension.GetChunk(GlobalChunkCoordinates.Zero));
+            IBlockRepository repository = GetBlockRepository();
+            IDimension dimension = new FakeDimension(repository);
+            IChunk chunk = dimension.GetChunk(GlobalChunkCoordinates.Zero)!;
+            ILighter lighter = new OverWorldLighter(dimension, null!);
+            int xHole = 5;
+            int zHole = 5;
+            int groundY = chunk.GetHeight(xHole, zHole);
 
             // Test this layout:
             // xxx x    y=3
@@ -160,130 +165,122 @@ namespace TrueCraft.Core.Test.Lighting
             //
             //    ^ x,z = 5
 
-            for (int y = 1; y <= 3; y++) // Dig hole
-            {
-                dimension.SetBlockID(new GlobalVoxelCoordinates(5, y, 5), 0);
-            }
+            // Dig a hole 3 blocks deep at xHole,zHole.
+            for (int y = groundY - 3; y <= groundY; y++)
+                dimension.SetBlockID(new GlobalVoxelCoordinates(xHole, y, zHole), 0);
 
-            for (int x = 0; x <= 4; x++) // Dig outwards
+            // Dig a 1-wide, 2-high tunnel sideways for 4 blocks.
+            for (int x = 1; x <= 4; x++) // Dig outwards
             {
-                dimension.SetBlockID(new GlobalVoxelCoordinates(x, 2, 5), 0); // Dig a tunnel
-                dimension.SetBlockID(new GlobalVoxelCoordinates(x, 1, 5), 0); // Dig a tunnel
+                dimension.SetBlockID(new GlobalVoxelCoordinates(x + xHole, 2, zHole), 0);
+                dimension.SetBlockID(new GlobalVoxelCoordinates(x + xHole, 1, zHole), 0);
             }
 
             var watch = new Stopwatch();
             watch.Start();
 
-            lighter.EnqueueOperation(new BoundingBox(new Vector3(5, 2, 5),
-                    new Vector3(6, 4, 6)), true);
+            lighter.DoLightingOperation(new LightingOperation(GlobalVoxelCoordinates.Zero, LightingOperationMode.Add, LightingOperationKind.Initial, 15));
 
-            while (lighter.TryLightNext()) // Test lighting
-            {
-            }
+            lighter.DoLightingOperation(new LightingOperation(new GlobalVoxelCoordinates(xHole, groundY - 3, zHole), LightingOperationMode.Add, LightingOperationKind.Sky, 15));
 
             watch.Stop();
 
             // Output lighting
             Console.WriteLine("Block IDS:");
             Console.WriteLine("y");
-            for (int y = 3; y >= 0; y--)
+            for (int y = groundY; y >= groundY - 3; y--)
             {
                 Console.Write($"{y} ");
                 for (int x = 0; x <= 5; x++)
                 {
-                    Console.Write(dimension.GetBlockID(new GlobalVoxelCoordinates(x, y, 5)).ToString("D2") + " ");
+                    Console.Write(dimension.GetBlockID(new GlobalVoxelCoordinates(x + xHole, y, zHole)).ToString("D2") + " ");
                 }
                 Console.WriteLine();
             }
             Console.Write("x:");
             for (int x = 0; x <= 5; x++)
-                Console.Write($"{x:D2} ");
+                Console.Write($"{x + xHole:D2} ");
             Console.WriteLine();
 
             Console.WriteLine("Sky Light levels:");
             Console.WriteLine("y");
-            for (int y = 3; y >= 0; y--)
+            for (int y = groundY; y >= groundY - 3; y--)
             {
                 Console.Write($"{y} ");
                 for (int x = 0; x <= 5; x++)
                 {
-                    Console.Write(dimension.GetSkyLight(new GlobalVoxelCoordinates(x, y, 5)).ToString("D2") + " ");
+                    Console.Write(dimension.GetSkyLight(new GlobalVoxelCoordinates(x + xHole, y, zHole)).ToString("D2") + " ");
                 }
                 Console.WriteLine();
             }
 
-            Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(5, 3, 5));
-            Assert.AreEqual(15, dimension.GetSkyLight(new GlobalVoxelCoordinates(5, 3, 5)));
-            Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(5, 2, 5));
-            Assert.AreEqual(15, dimension.GetSkyLight(new GlobalVoxelCoordinates(5, 2, 5)));
-            Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(5, 1, 5));
-            Assert.AreEqual(15, dimension.GetSkyLight(new GlobalVoxelCoordinates(5, 1, 5)));
+            Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(xHole, groundY, zHole));
+            Assert.AreEqual(15, dimension.GetSkyLight(new GlobalVoxelCoordinates(zHole, groundY, zHole)));
+            Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(xHole, groundY- 1, zHole));
+            Assert.AreEqual(15, dimension.GetSkyLight(new GlobalVoxelCoordinates(xHole, groundY - 1, zHole)));
+            Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(xHole, groundY - 2, zHole));
+            Assert.AreEqual(15, dimension.GetSkyLight(new GlobalVoxelCoordinates(xHole, groundY - 2, zHole)));
 
             byte expected = 15;
             for (int x = 5; x >= 0; x--)
             {
-                Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(x, 2, 5));
-                Assert.AreEqual(expected, dimension.GetSkyLight(new GlobalVoxelCoordinates(x, 2, 5)));
+                Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(x + xHole, groundY - 1, zHole));
+                Assert.AreEqual(expected, dimension.GetSkyLight(new GlobalVoxelCoordinates(x + xHole, groundY - 1, zHole)));
                 expected--;
             }
             expected = 15;
             for (int x = 5; x >= 0; x--)
             {
-                Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(x, 1, 5));
-                Assert.AreEqual(expected, dimension.GetSkyLight(new GlobalVoxelCoordinates(x, 1, 5)));
+                Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(x + xHole, groundY - 2, zHole));
+                Assert.AreEqual(expected, dimension.GetSkyLight(new GlobalVoxelCoordinates(x + xHole, groundY - 2, zHole)));
                 expected--;
             }
 
             Console.WriteLine("{0}ms", watch.ElapsedMilliseconds);
         }
 
+        /// <summary>
+        /// Tests initial lighting with Sky Light 
+        /// </summary>
         [Test]
         public void TestLeavesAndEtc()
         {
-            var repository = GetBlockRepository();
-            IDimension dimension = new TrueCraft.Core.World.Dimension(string.Empty, "TEST", new FlatlandGenerator(_testSeed), _blockRepository);
-            var lighter = new Core.Lighting.Lighting(dimension, repository);
-            dimension.GetBlockID(GlobalVoxelCoordinates.Zero); // Generate a chunk
+            IBlockRepository repository = GetBlockRepository();
+            IDimension dimension = new FakeDimension(repository);
+            IChunk chunk = dimension.GetChunk(GlobalChunkCoordinates.Zero)!;
+            ILighter lighter = new OverWorldLighter(dimension, null!);
+            int x = 5;
+            int z = 5;
+            int ground = chunk.GetHeight(x, z);
 
-            for (int y = 1; y <= 16; y++)
+            for (int y = ground + 1; y <= ground + 16; y++)
             {
-                var coords = new GlobalVoxelCoordinates(5, y, 5);
+                GlobalVoxelCoordinates coords = new GlobalVoxelCoordinates(x, y, z);
                 dimension.SetBlockID(coords, 0);
                 dimension.SetBlockID(coords + Vector3i.East, DirtBlock.BlockID);
                 dimension.SetBlockID(coords + Vector3i.West, DirtBlock.BlockID);
                 dimension.SetBlockID(coords + Vector3i.North, DirtBlock.BlockID);
                 dimension.SetBlockID(coords + Vector3i.South, DirtBlock.BlockID);
             }
-            dimension.GetChunk(GlobalChunkCoordinates.Zero).UpdateHeightMap();
-
-            lighter.InitialLighting(dimension.GetChunk(GlobalChunkCoordinates.Zero));
 
             // Test this layout:
             // xox      o == leaves
-            // x x
+            // x x      x == dirt
             // xox
             // x x
             // xox ...
 
-            for (int y = 1; y <= 16; y++)
-            {
-                if (y % 2 == 1)
-                    dimension.SetBlockID(new GlobalVoxelCoordinates(5, y, 5), LeavesBlock.BlockID);
-            }
-            dimension.GetChunk(GlobalChunkCoordinates.Zero).UpdateHeightMap();
+            for (int y = ground + 1; y <= ground + 16; y++)
+                if (y % 2 == 0)
+                    dimension.SetBlockID(new GlobalVoxelCoordinates(x, y, z), LeavesBlock.BlockID);
 
-            lighter.EnqueueOperation(new BoundingBox(new Vector3(5, 0, 5),
-                    new Vector3(6, 16, 6)), true);
-
-            while (lighter.TryLightNext()) // Test lighting
-            {
-            }
+            lighter.DoLightingOperation(new LightingOperation(GlobalVoxelCoordinates.Zero, LightingOperationMode.Add, LightingOperationKind.Initial, 15));
 
             // Output lighting
-            for (int y = 16; y >= 0; y--)
+            for (int y = ground + 16; y >= ground; y--)
             {
-                Console.Write(dimension.GetBlockID(new GlobalVoxelCoordinates(5, y, 5)).ToString("D2"));
-                Console.Write(" " + dimension.GetSkyLight(new GlobalVoxelCoordinates(5, y, 5)).ToString("D2"));
+                Console.Write(dimension.GetBlockID(new GlobalVoxelCoordinates(x, y, z)).ToString("D2"));
+                Console.Write(" " + dimension.GetSkyLight(new GlobalVoxelCoordinates(x, y, z)).ToString("D2"));
                 Console.WriteLine("   Y={0}", y);
             }                
 
@@ -303,14 +300,14 @@ namespace TrueCraft.Core.Test.Lighting
                 0,  // leaves
             };
 
-            for (int y = 16, i = 0; y >= 0; y--, i++)
+            for (int y = ground + 16, i = 0; y >= ground; y--, i++)
             {
                 byte ex;
                 if (i < expected.Length)
                     ex = expected[i];
                 else
                     ex = 0;
-                Assert.AreEqual(ex, dimension.GetSkyLight(new GlobalVoxelCoordinates(5, y, 5)));
+                Assert.AreEqual(ex, dimension.GetSkyLight(new GlobalVoxelCoordinates(x, y, z)));
             }
         }
     }
