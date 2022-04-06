@@ -53,9 +53,6 @@ namespace TrueCraft
             try
             {
                 world = TrueCraft.World.World.LoadWorld("world");
-                // TODO: add the Nether
-                // TODO: delete method AddDimension
-                Server.AddDimension(world[DimensionID.Overworld]);
             }
             catch(DirectoryNotFoundException)
             {
@@ -65,10 +62,7 @@ namespace TrueCraft
                     new PanDimensionalVoxelCoordinates(DimensionID.Overworld, 0, 0, 0));
                 world.Save();
 
-                // TODO: add the Nether
-                // TODO: delete method AddDimension
                 IDimension overWorld = world[DimensionID.Overworld];
-                Server.AddDimension(overWorld);
 
                 int chunkRadius = 5;
                 Server.Log(LogCategory.Notice, "Generating world around spawn point...");
