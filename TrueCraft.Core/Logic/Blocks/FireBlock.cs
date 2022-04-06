@@ -92,7 +92,7 @@ namespace TrueCraft.Core.Logic.Blocks
             if (meta > 9)
             {
                 var pick = AdjacentBlocks[meta % AdjacentBlocks.Length];
-                var provider = BlockRepository
+                IBlockProvider provider = dimension.BlockRepository
                     .GetBlockProvider(dimension.GetBlockID(pick + descriptor.Coordinates));
                 if (provider.Flammable)
                     dimension.SetBlockID(pick + descriptor.Coordinates, AirBlock.BlockID);
@@ -115,7 +115,7 @@ namespace TrueCraft.Core.Logic.Blocks
                     // Check if this is adjacent to a flammable block
                     foreach (var adj in AdjacentBlocks)
                     {
-                        var provider = BlockRepository.GetBlockProvider(
+                        IBlockProvider provider = dimension.BlockRepository.GetBlockProvider(
                            dimension.GetBlockID(check + adj));
                         if (provider.Flammable)
                         {

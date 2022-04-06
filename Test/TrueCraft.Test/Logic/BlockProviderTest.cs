@@ -31,12 +31,12 @@ namespace TrueCraft.Test.Logic
             _entityManager = new Mock<IEntityManager>();
             _user = new Mock<IRemoteClient>();
             _blockRepository = new Mock<IBlockRepository>();
-            BlockProvider.BlockRepository = _blockRepository.Object;
 
             _user.SetupGet(u => u.Dimension).Returns(_dimension.Object);
             _user.SetupGet(u => u.Server).Returns(_server.Object);
 
             _dimension.Setup(w => w.SetBlockID(It.IsAny<GlobalVoxelCoordinates>(), It.IsAny<byte>()));
+            _dimension.Setup(d => d.BlockRepository).Returns(_blockRepository.Object);
 
             _server.Setup(s => s.GetEntityManagerForWorld(It.IsAny<IDimension>()))
                 .Returns<IDimension>(w => _entityManager.Object);

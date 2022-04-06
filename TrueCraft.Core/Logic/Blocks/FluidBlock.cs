@@ -171,7 +171,7 @@ namespace TrueCraft.Core.Logic.Blocks
                 s => AutomataUpdate(s, dimension, target.TargetBlock));
             if (FlowingID == LavaBlock.BlockID)
             {
-                (BlockRepository.GetBlockProvider(FireBlock.BlockID) as FireBlock).ScheduleUpdate(
+                (dimension.BlockRepository.GetBlockProvider(FireBlock.BlockID) as FireBlock)?.ScheduleUpdate(
                     server, dimension, dimension.GetBlockData(target.TargetBlock));
             }
         }

@@ -80,8 +80,6 @@ namespace TrueCraft
 
             ItemRepository = TrueCraft.Core.Logic.ItemRepository.Get();
 
-            BlockProvider.BlockRepository = BlockRepository;
-
             PendingBlockUpdates = new Queue<BlockUpdate>();
             EnableClientLogging = false;
             QueryProtocol = new TrueCraft.QueryProtocol(this);

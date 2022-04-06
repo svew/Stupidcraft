@@ -151,8 +151,6 @@ namespace TrueCraft.Client
             Client.PropertyChanged += HandleClientPropertyChanged;
             Client.Connect(EndPoint);
 
-            BlockProvider.BlockRepository = BlockRepository;
-
             ItemRepository = TrueCraft.Core.Logic.ItemRepository.Get();
 
             IconRenderer.CreateBlocks(this, BlockRepository);
