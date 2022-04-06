@@ -10,6 +10,7 @@ using TrueCraft.Core;
 using TrueCraft.Profiling;
 using TrueCraft.World;
 using System.Collections.Generic;
+using TrueCraft.Core.Logic;
 
 namespace TrueCraft
 {
@@ -80,16 +81,18 @@ namespace TrueCraft
                 {
                     for (int z = -chunkRadius; z < chunkRadius; z++)
                     {
-                        var chunk = overWorld.GetChunk(new GlobalChunkCoordinates(x, z));
+                        // TODO Update to a IDimensionServer method that will generate/load the Chunk, if needed.
+                        IChunk? chunk = overWorld.GetChunk(new GlobalChunkCoordinates(x, z));
                         for (byte _x = 0; _x < Chunk.Width; _x++)
                         {
                             for (byte _z = 0; _z < Chunk.Depth; _z++)
                             {
                                 for (int _y = 0; _y < chunk.GetHeight(_x, _z); _y++)
                                 {
-                                    GlobalVoxelCoordinates coords = new GlobalVoxelCoordinates(x + _x, _y, z + _z);
-                                    var data = overWorld.GetBlockData(coords);
-                                    var provider = overWorld.BlockRepository.GetBlockProvider(data.ID);
+                                    LocalVoxelCoordinates localCoords = new LocalVoxelCoordinates(_x, _y, _z);
+                                    GlobalVoxelCoordinates coords = GlobalVoxelCoordinates.GetGlobalVoxelCoordinates(chunk.Coordinates, localCoords);
+                                    BlockDescriptor data = overWorld.GetBlockData(coords);
+                                    IBlockProvider provider = overWorld.BlockRepository.GetBlockProvider(data.ID);
                                     provider.BlockUpdate(data, data, Server, overWorld);
                                 }
                             }
