@@ -95,6 +95,9 @@ namespace TrueCraft.Core.Server
         /// <remarks>If the Chunk is not available at the specified LoadEffort, zero will be returned.</remarks>
         byte GetSkyLight(GlobalVoxelCoordinates coordinates, LoadEffort loadEffort);
 
-
+        /// <summary>
+        /// Gets the full name of the type of Chunk Provider for this Dimension.
+        /// </summary>
+        string ChunkProvider { get; }
     }
 }

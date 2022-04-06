@@ -127,7 +127,7 @@ namespace TrueCraft.World
                 new NbtInt("Z", this.SpawnPoint.Z)
             }));
             file.RootTag.Add(new NbtInt("Seed", this.Seed));
-            file.RootTag.Add(new NbtString("ChunkProvider", this[DimensionID.Overworld].ChunkProvider.GetType().FullName));
+            file.RootTag.Add(new NbtString("ChunkProvider", ((IDimensionServer)this[DimensionID.Overworld]).ChunkProvider));
             file.RootTag.Add(new NbtString("Name", Name));
             file.SaveToFile(Path.Combine(this._baseDirectory, "manifest.nbt"), NbtCompression.ZLib);
 

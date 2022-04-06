@@ -520,6 +520,12 @@ namespace TrueCraft.World
             ChunkLoaded?.Invoke(this, e);
         }
 
+        /// <inheritdoc />
+        public string ChunkProvider
+        {
+            get => this.GetType().FullName!;
+        }
+
         #region IEnumerable<IChunk>
         public IEnumerator<IChunk> GetEnumerator()
         {
