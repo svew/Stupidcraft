@@ -21,6 +21,11 @@ namespace TrueCraft.World
         string Name { get; }
 
         /// <summary>
+        /// Gets the full path of the folder where the World is saved.
+        /// </summary>
+        string BaseDirectory { get; }
+
+        /// <summary>
         /// Gets the Spawn Point of this world.
         /// </summary>
         PanDimensionalVoxelCoordinates SpawnPoint { get; }

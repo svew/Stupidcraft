@@ -19,6 +19,7 @@ using TrueCraft.Core.World;
 using TrueCraft.Exceptions;
 using TrueCraft.Inventory;
 using TrueCraft.Profiling;
+using TrueCraft.World;
 
 namespace TrueCraft
 {
@@ -238,7 +239,7 @@ namespace TrueCraft
         {
             var path = Path.Combine(Directory.GetCurrentDirectory(), "players", Username + ".nbt");
             if (Program.ServerConfiguration.Singleplayer)
-                path = Path.Combine(((Dimension)Dimension).BaseDirectory, "player.nbt");
+                path = Path.Combine(((IWorld)Server.World).BaseDirectory, "player.nbt");
             if (!File.Exists(path))
                 return false;
             try
@@ -265,7 +266,7 @@ namespace TrueCraft
 
             var path = Path.Combine(Directory.GetCurrentDirectory(), "players", Username + ".nbt");
             if (Program.ServerConfiguration.Singleplayer)
-                path = Path.Combine(((Dimension)Dimension).BaseDirectory, "player.nbt");
+                path = Path.Combine(((IWorld)Server.World).BaseDirectory, "player.nbt");
             if (!Directory.Exists(Path.GetDirectoryName(path)))
                 Directory.CreateDirectory(Path.GetDirectoryName(path));
             if (Entity == null) // I didn't think this could happen but null reference exceptions have been repoted here

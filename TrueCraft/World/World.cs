@@ -111,6 +111,9 @@ namespace TrueCraft.World
         public string Name { get => _name; }
 
         /// <inheritdoc />
+        public string BaseDirectory { get => _baseDirectory; }
+
+        /// <inheritdoc />
         public PanDimensionalVoxelCoordinates SpawnPoint { get => _spawnPoint; }
 
         /// <inheritdoc />
