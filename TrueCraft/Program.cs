@@ -87,9 +87,10 @@ namespace TrueCraft
 
         static void SaveWorlds(IMultiplayerServer server)
         {
+            // TODO: Surely, this is too time consuming of an operation to be done from
+            //       a scheduled event.
             Server.Log(LogCategory.Notice, "Saving world...");
-            foreach (var w in Server.World)
-                ((IDimensionServer)w).Save();
+            ((IWorld)Server.World).Save();
             Server.Log(LogCategory.Notice, "Done.");
             server.Scheduler.ScheduleEvent("world.save", null,
                 TimeSpan.FromSeconds(ServerConfiguration.WorldSaveInterval), SaveWorlds);
