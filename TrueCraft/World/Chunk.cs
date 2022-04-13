@@ -34,9 +34,9 @@ namespace TrueCraft.World
             const int size = Width * Height * Depth;
             const int halfSize = size / 2;
             Data = new byte[size + halfSize * 3];
-            Metadata = new NibbleSlice(Data, size, halfSize);
-            BlockLight = new NibbleSlice(Data, size + halfSize, halfSize);
-            SkyLight = new NibbleSlice(Data, size + halfSize * 2, halfSize);
+            Metadata = new NybbleArray(Data, size, halfSize);
+            BlockLight = new NybbleArray(Data, size + halfSize, halfSize);
+            SkyLight = new NybbleArray(Data, size + halfSize * 2, halfSize);
         }
 
         public Chunk(GlobalChunkCoordinates coordinates) : this()
@@ -65,11 +65,11 @@ namespace TrueCraft.World
         [NbtIgnore]
         public byte[] Data { get; set; }
         [NbtIgnore]
-        public NibbleSlice Metadata { get; private set; }
+        public NybbleArray Metadata { get; private set; }
         [NbtIgnore]
-        public NibbleSlice BlockLight { get; private set; }
+        public NybbleArray BlockLight { get; private set; }
         [NbtIgnore]
-        public NibbleSlice SkyLight { get; private set; }
+        public NybbleArray SkyLight { get; private set; }
 
         #region Biome IDs
         private readonly Biome[] _biomes;
@@ -345,9 +345,9 @@ namespace TrueCraft.World
             const int halfSize = size / 2;
             Data = new byte[(int)(size * 2.5)];
             Buffer.BlockCopy(tag["Blocks"].ByteArrayValue, 0, Data, 0, size);
-            Metadata = new NibbleSlice(Data, size, halfSize);
-            BlockLight = new NibbleSlice(Data, size + halfSize, halfSize);
-            SkyLight = new NibbleSlice(Data, size + halfSize * 2, halfSize);
+            Metadata = new NybbleArray(Data, size, halfSize);
+            BlockLight = new NybbleArray(Data, size + halfSize, halfSize);
+            SkyLight = new NybbleArray(Data, size + halfSize * 2, halfSize);
             
             Metadata.Deserialize(tag["Data"]);
             BlockLight.Deserialize(tag["BlockLight"]);

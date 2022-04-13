@@ -55,9 +55,9 @@ namespace TrueCraft.Core.World
         byte[] Data { get; }
         bool TerrainPopulated { get; set; }
 
-        NibbleSlice Metadata { get; }
-        NibbleSlice BlockLight { get; }
-        NibbleSlice SkyLight { get; }
+        NybbleArray Metadata { get; }
+        NybbleArray BlockLight { get; }
+        NybbleArray SkyLight { get; }
         //IRegion ParentRegion { get; set; }
 
         byte GetBlockID(LocalVoxelCoordinates coordinates);

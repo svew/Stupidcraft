@@ -8,7 +8,7 @@ namespace TrueCraft.Core
     /// <summary>
     /// Represents a slice of an array of 4-bit values.
     /// </summary>
-    public class NibbleSlice : INbtSerializable
+    public class NybbleArray : INbtSerializable
     {
         /// <summary>
         /// The data in the nibble array. Each byte contains
@@ -18,7 +18,7 @@ namespace TrueCraft.Core
         public int Offset { get; private set; }
         public int Length { get; private set; }
 
-        public NibbleSlice(byte[] data, int offset, int length)
+        public NybbleArray(byte[] data, int offset, int length)
         {
             Data = data;
             Offset = offset;
@@ -62,9 +62,9 @@ namespace TrueCraft.Core
 
     public class ReadOnlyNibbleArray
     {
-        private NibbleSlice NibbleArray { get; set; }
+        private NybbleArray NibbleArray { get; set; }
 
-        public ReadOnlyNibbleArray(NibbleSlice array)
+        public ReadOnlyNibbleArray(NybbleArray array)
         {
             NibbleArray = array;
         }

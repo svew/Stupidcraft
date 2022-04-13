@@ -57,11 +57,11 @@ namespace TrueCraft.Core.Test.World
 
         public bool TerrainPopulated { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
-        public NibbleSlice Metadata => throw new NotImplementedException();
+        public NybbleArray Metadata => throw new NotImplementedException();
 
-        public NibbleSlice BlockLight => throw new NotImplementedException();
+        public NybbleArray BlockLight => throw new NotImplementedException();
 
-        public NibbleSlice SkyLight => throw new NotImplementedException();
+        public NybbleArray SkyLight => throw new NotImplementedException();
 
         public event EventHandler? Disposed;
 
