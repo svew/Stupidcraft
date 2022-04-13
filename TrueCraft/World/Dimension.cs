@@ -7,6 +7,7 @@ using System.Threading;
 using fNbt;
 using TrueCraft.Core;
 using TrueCraft.Core.Lighting;
+using TrueCraft.Core.Logging;
 using TrueCraft.Core.Logic;
 using TrueCraft.Core.Logic.Blocks;
 using TrueCraft.Core.Server;
@@ -94,6 +95,60 @@ namespace TrueCraft.World
                 return string.Empty;
 
             return "DIM" + (byte)id;
+        }
+
+        // TODO: Update IMultiplayerServer to a logger.
+        public void Initialize(GlobalChunkCoordinates spawnChunk, IMultiplayerServer server, IDimensionServer.ProgressNotification? progressNotification)
+        {
+            server.Log(LogCategory.Notice, "Generating world around spawn point...");
+            int chunkRadius = 5;
+            int lastLoggedProgress = -10;
+            for (int x = -chunkRadius; x < chunkRadius; x++)
+            {
+                for (int z = -chunkRadius; z < chunkRadius; z++)
+                    GetChunk(new GlobalChunkCoordinates(spawnChunk.X + x, spawnChunk.Z + z), LoadEffort.Generate);
+                int progress = (int)(((x + chunkRadius) / (2.0 * chunkRadius)) * 100);
+                progressNotification?.Invoke(progress / 100.0, "Generating world...");
+                if (progress / 10 > lastLoggedProgress / 10)
+                {
+                    server.Log(LogCategory.Notice, "{0}% complete", progress + 10);
+                    lastLoggedProgress = progress;
+                }
+            }
+            server.Log(LogCategory.Notice, "Simulating the world for a moment...");
+            lastLoggedProgress = -10;
+            for (int x = -chunkRadius; x < chunkRadius; x++)
+            {
+                for (int z = -chunkRadius; z < chunkRadius; z++)
+                {
+                    GlobalChunkCoordinates chunkCoordinates = new GlobalChunkCoordinates(spawnChunk.X + x, spawnChunk.Z + z);
+                    IChunk chunk = GetChunk(chunkCoordinates)!;
+                    for (byte _x = 0; _x < WorldConstants.ChunkWidth; _x++)
+                    {
+                        for (byte _z = 0; _z < WorldConstants.ChunkDepth; _z++)
+                        {
+                            for (int _y = 0; _y < chunk.GetHeight(_x, _z); _y++)
+                            {
+                                LocalVoxelCoordinates localCoordinates = new LocalVoxelCoordinates(_x, _y, _z);
+                                GlobalVoxelCoordinates coords = GlobalVoxelCoordinates.GetGlobalVoxelCoordinates(chunkCoordinates, localCoordinates);
+                                BlockDescriptor data = GetBlockData(coords);  // TODO: we ought to get this from the Chunk rather than the Dimension
+                                IBlockProvider provider = _blockRepository.GetBlockProvider(data.ID);
+                                // TODO: do we really want a block update? This will cause
+                                //    generated suspended sand to fall.  Maybe this should
+                                //    be an "on loaded"?
+                                provider.BlockUpdate(data, data, server, this);
+                            }
+                        }
+                    }
+                }
+                int progress = (int)(((x + chunkRadius) / (2.0 * chunkRadius)) * 100);
+                progressNotification?.Invoke(progress / 100.0, "Simulating world...");
+                if (progress / 10 > lastLoggedProgress / 10)
+                {
+                    server.Log(LogCategory.Notice, "{0}% complete", progress + 10);
+                    lastLoggedProgress = progress;
+                }
+            }
         }
 
         #region object overrides

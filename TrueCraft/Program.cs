@@ -22,6 +22,7 @@ namespace TrueCraft
 
         public static void Main(string[] args)
         {
+            // TODO: World path must be passed here.
             Server = MultiplayerServer.Get();
 
             Server.AddLogProvider(new ConsoleLogProvider(LogCategory.Notice | LogCategory.Warning | LogCategory.Error | LogCategory.Debug));
@@ -63,45 +64,8 @@ namespace TrueCraft
                     new PanDimensionalVoxelCoordinates(DimensionID.Overworld, 0, 0, 0));
                 world.Save();
 
-                IDimension overWorld = world[DimensionID.Overworld];
-
-                int chunkRadius = 5;
-                Server.Log(LogCategory.Notice, "Generating world around spawn point...");
-                for (int x = -chunkRadius; x < chunkRadius; x++)
-                {
-                    for (int z = -chunkRadius; z < chunkRadius; z++)
-                        overWorld.GetChunk(new GlobalChunkCoordinates(x, z));
-                    int progress = (int)(((x + chunkRadius) / (2.0 * chunkRadius)) * 100);
-                    if (progress % 10 == 0)  // TODO changing chunkRadius will break progress updates
-                        Server.Log(LogCategory.Notice, "{0}% complete", progress + 10);
-                }
-
-                Server.Log(LogCategory.Notice, "Simulating the world for a moment...");
-                for (int x = -chunkRadius; x < chunkRadius; x++)
-                {
-                    for (int z = -chunkRadius; z < chunkRadius; z++)
-                    {
-                        // TODO Update to a IDimensionServer method that will generate/load the Chunk, if needed.
-                        IChunk? chunk = overWorld.GetChunk(new GlobalChunkCoordinates(x, z));
-                        for (byte _x = 0; _x < Chunk.Width; _x++)
-                        {
-                            for (byte _z = 0; _z < Chunk.Depth; _z++)
-                            {
-                                for (int _y = 0; _y < chunk.GetHeight(_x, _z); _y++)
-                                {
-                                    LocalVoxelCoordinates localCoords = new LocalVoxelCoordinates(_x, _y, _z);
-                                    GlobalVoxelCoordinates coords = GlobalVoxelCoordinates.GetGlobalVoxelCoordinates(chunk.Coordinates, localCoords);
-                                    BlockDescriptor data = overWorld.GetBlockData(coords);
-                                    IBlockProvider provider = overWorld.BlockRepository.GetBlockProvider(data.ID);
-                                    provider.BlockUpdate(data, data, Server, overWorld);
-                                }
-                            }
-                        }
-                    }
-                    int progress = (int)(((x + chunkRadius) / (2.0 * chunkRadius)) * 100);
-                    if (progress % 10 == 0)  // TODO changing chunkRadius will break progress updates
-                        Server.Log(LogCategory.Notice, "{0}% complete", progress + 10);
-                }
+                IDimensionServer overWorld = (IDimensionServer)world[DimensionID.Overworld];
+                overWorld.Initialize(new GlobalChunkCoordinates(0, 0), Server, null);
 
                 Server.Log(LogCategory.Notice, "Lighting the world (this will take a moment)...");
                 foreach (var lighter in Server.WorldLighters)

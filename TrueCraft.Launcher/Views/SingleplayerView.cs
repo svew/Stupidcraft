@@ -2,10 +2,13 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Threading.Tasks;
 using Gtk;
 using TrueCraft.Core;
+using TrueCraft.Core.Server;
+using TrueCraft.Core.World;
 using TrueCraft.Launcher.Singleplayer;
 
 namespace TrueCraft.Launcher.Views
@@ -29,7 +32,6 @@ namespace TrueCraft.Launcher.Views
         public Button _newWorldCancel;
         public Label _progressLabel;
         public ProgressBar _progressBar;
-        public SingleplayerServer _server;
 
         public SingleplayerView(LauncherWindow window)
         {
@@ -146,21 +148,29 @@ namespace TrueCraft.Launcher.Views
             _worldListView.Selection.GetSelected(out iter);
             string worldName = (string)_worldListStore.GetValue(iter, 0);
             // TODO: Do world names have to be unique?
-            TrueCraft.Core.World.Dimension world = Worlds.Local.Saves.Where(s => s.Name == worldName).First<TrueCraft.Core.World.Dimension>();
-            _server = new SingleplayerServer(world);
+            MultiplayerServer _server = MultiplayerServer.Get(worldName);
+            TrueCraft.World.IWorld world = (World.IWorld)_server.World;
+            TrueCraft.Program.ServerConfiguration = new ServerConfiguration()
+            {
+                MOTD = null,
+                Singleplayer = true
+            };
 
             _playButton.Sensitive = _backButton.Sensitive = _createWorldButton.Sensitive =
                 _createWorldBox.Visible = _worldListView.Sensitive = false;
             _progressBar.Visible = _progressLabel.Visible = true;
             Task.Factory.StartNew(() =>
             {
-                _server.Initialize((value, stage) =>
+                // TODO: What if the player exitted the game from another dimension?
+                IDimensionServer overWorld = (IDimensionServer)world[Core.World.DimensionID.Overworld];
+                GlobalChunkCoordinates spawnChunk = new GlobalChunkCoordinates(0, 0);
+                overWorld.Initialize(spawnChunk, _server, (value, stage) =>
                     Application.Invoke((sender, e) =>
                     {
                         _progressLabel.Text = stage;
                         _progressBar.Fraction = value;
                     }));
-                _server.Start();
+                _server.Start(new IPEndPoint(IPAddress.Loopback, 0));
                 Application.Invoke((sender, e) =>
                 {
                     _playButton.Sensitive = _backButton.Sensitive = _createWorldButton.Sensitive = _worldListView.Sensitive = true;
@@ -170,7 +180,7 @@ namespace TrueCraft.Launcher.Views
                     clientLocation = System.IO.Path.GetDirectoryName(clientLocation);
                     clientLocation = System.IO.Path.Combine(clientLocation, "TrueCraft.Client.dll");
 
-                    string launchParams = string.Format("{0} {1} {2} {3}", clientLocation, _server.Server.EndPoint, _window.User.Username, _window.User.SessionId);
+                    string launchParams = string.Format("{0} {1} {2} {3}", clientLocation, _server.EndPoint, _window.User.Username, _window.User.SessionId);
 
                     process.StartInfo = new ProcessStartInfo($"dotnet",
                              launchParams);
@@ -181,7 +191,6 @@ namespace TrueCraft.Launcher.Views
                         _progressBar.Visible = _progressLabel.Visible = false;
                         _window.Show();
                         _server.Stop();
-                        _server.World.Save();
                     });
                     process.Start();
                     _window.Hide();

@@ -47,7 +47,7 @@ namespace TrueCraft
 
         private QueryProtocol QueryProtocol;
 
-        private MultiplayerServer()
+        private MultiplayerServer(string worldPath)
         {
             TrueCraft.Core.WhoAmI.Answer = Core.IAm.Server;
             TrueCraft.Core.Inventory.InventoryFactory<IServerSlot>.RegisterInventoryFactory(new TrueCraft.Inventory.InventoryFactory());
@@ -65,7 +65,7 @@ namespace TrueCraft
             _cde = new CountdownEvent(_lstAutoResetEvents.Count);
 
             PacketHandlers = new PacketHandler[0x100];
-            _world = TrueCraft.World.World.LoadWorld(Paths.Worlds);
+            _world = TrueCraft.World.World.LoadWorld(worldPath);
             foreach (IDimensionServer d in _world)
                 d.BlockChanged += HandleBlockChanged;
 
@@ -95,8 +95,18 @@ namespace TrueCraft
 
         public static MultiplayerServer Get()
         {
-            if (_singleton == null)
-                _singleton = new MultiplayerServer();
+            if (_singleton is null)
+                throw new InvalidOperationException("World is not yet loaded.");
+
+            return _singleton;
+        }
+
+        public static MultiplayerServer Get(string worldPath)
+        {
+            if (_singleton is not null)
+                throw new InvalidOperationException("World already loaded.");
+
+            _singleton = new MultiplayerServer(worldPath);
 
             return _singleton;
         }

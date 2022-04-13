@@ -40,6 +40,9 @@ namespace TrueCraft.Core.Server
         event EventHandler<ChunkLoadedEventArgs> ChunkGenerated;
         event EventHandler<ChunkLoadedEventArgs> ChunkLoaded;
 
+        public delegate void ProgressNotification(double progress, string stage);
+        void Initialize(GlobalChunkCoordinates spawnChunk, IMultiplayerServer server, ProgressNotification? progressNotification);
+
         /// <summary>
         /// Gets the Tile Entity at the given Coordinates.
         /// </summary>
