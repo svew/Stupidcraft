@@ -8,6 +8,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using TrueCraft.Core.Server;
+using TrueCraft.World;
 
 namespace TrueCraft
 {
@@ -218,7 +219,7 @@ namespace TrueCraft
                 {"game_id", "TRUECRAFT"},
                 {"version", "1.0"},
                 {"plugins", "TrueCraft"},
-                {"map", Server.World.First().Name},
+                {"map", ((IWorld)Server.World).Name},
                 {"numplayers", Server.Clients.Count.ToString()},
                 {"maxplayers", "64"},
                 {"hostport", Program.ServerConfiguration.ServerPort.ToString()},
