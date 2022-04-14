@@ -34,9 +34,9 @@ namespace TrueCraft.World
             const int size = Width * Height * Depth;
             const int halfSize = size / 2;
             Data = new byte[size + halfSize * 3];
-            Metadata = new NybbleArray(Data, size, halfSize);
-            BlockLight = new NybbleArray(Data, size + halfSize, halfSize);
-            SkyLight = new NybbleArray(Data, size + halfSize * 2, halfSize);
+            Metadata = new NybbleArray(Data, size, size);
+            BlockLight = new NybbleArray(Data, size + halfSize, size);
+            SkyLight = new NybbleArray(Data, size + halfSize * 2, size);
         }
 
         public Chunk(GlobalChunkCoordinates coordinates) : this()
@@ -345,9 +345,9 @@ namespace TrueCraft.World
             const int halfSize = size / 2;
             Data = new byte[(int)(size * 2.5)];
             Buffer.BlockCopy(tag["Blocks"].ByteArrayValue, 0, Data, 0, size);
-            Metadata = new NybbleArray(Data, size, halfSize);
-            BlockLight = new NybbleArray(Data, size + halfSize, halfSize);
-            SkyLight = new NybbleArray(Data, size + halfSize * 2, halfSize);
+            Metadata = new NybbleArray();
+            BlockLight = new NybbleArray();
+            SkyLight = new NybbleArray();
             
             Metadata.Deserialize(tag["Data"]);
             BlockLight.Deserialize(tag["BlockLight"]);

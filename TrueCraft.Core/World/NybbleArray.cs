@@ -12,17 +12,34 @@ namespace TrueCraft.Core
     {
         /// <summary>
         /// The data in the nibble array. Each byte contains
-        /// two nibbles, stored in big-endian.
+        /// two nybbles.  The low order nybble corresponds to the
+        /// lower numbered index.
         /// </summary>
-        public byte[] Data { get; private set; }
-        public int Offset { get; private set; }
-        public int Length { get; private set; }
+        private byte[] _data;
 
+        /// <summary>
+        /// Constructs a new NybbleArray
+        /// </summary>
+        /// <remarks>Objects constructed with this constructor are intended for
+        /// use in deserializing NBT data.</remarks>
+        public NybbleArray()
+        {
+            _data = new byte[0];
+        }
+
+        /// <summary>
+        ///  Constructs a new NybbleArray by copying data from the given array.
+        /// </summary>
+        /// <param name="data">The source array.</param>
+        /// <param name="offset">The offset (in bytes) within the source array of
+        /// the first element of the new NybbleArray.</param>
+        /// <param name="length">The length (in nybbles) of the data.  The number of
+        /// bytes required in the source array is half this value.</param>
         public NybbleArray(byte[] data, int offset, int length)
         {
-            Data = data;
-            Offset = offset;
-            Length = length;
+            length /= 2;
+            _data = new byte[length];
+            Buffer.BlockCopy(data, offset, _data, 0, length);
         }
 
         /// <summary>
@@ -31,19 +48,30 @@ namespace TrueCraft.Core
         [NbtIgnore]
         public byte this[int index]
         {
-            get { return (byte)(Data[Offset + index / 2] >> (index % 2 * 4) & 0xF); }
+            get
+            {
+                return (byte)(_data[index / 2] >> (index % 2 * 4) & 0xF);
+            }
             set
             {
-                value &= 0xF;
-                Data[Offset + index / 2] &= (byte)(~(0xF << (index % 2 * 4)));
-                Data[Offset + index / 2] |= (byte)(value << (index % 2 * 4));
+                value &= 0x0F;
+                int idx = index / 2;
+                if ((index & 0x01) != 0)
+                    _data[idx] = (byte)((_data[idx] & 0xF0) | (value << 4));
+                else
+                    _data[idx] = (byte)((_data[idx] & 0x0F) | value);
             }
         }
 
+        /// <summary>
+        /// Gets the Length (in Nybbles) of this Array.
+        /// </summary>
+        public int Length { get => 2 * _data.Length; }
+
         public byte[] ToArray()
         {
-            byte[] array = new byte[Length];
-            Buffer.BlockCopy(Data, Offset, array, 0, Length);
+            byte[] array = new byte[_data.Length];
+            Buffer.BlockCopy(_data, 0, array, 0, _data.Length);
             return array;
         }
 
@@ -54,29 +82,8 @@ namespace TrueCraft.Core
 
         public void Deserialize(NbtTag value)
         {
-            Length = value.ByteArrayValue.Length;
-            Buffer.BlockCopy(value.ByteArrayValue, 0,
-                Data, Offset, Length);
-        }
-    }
-
-    public class ReadOnlyNibbleArray
-    {
-        private NybbleArray NibbleArray { get; set; }
-
-        public ReadOnlyNibbleArray(NybbleArray array)
-        {
-            NibbleArray = array;
-        }
-
-        public byte this[int index]
-        {
-            get { return NibbleArray[index]; }
-        }
-
-        public ReadOnlyCollection<byte> Data
-        {
-            get { return Array.AsReadOnly(NibbleArray.Data); }
+            _data = new byte[value.ByteArrayValue.Length];
+            Buffer.BlockCopy(value.ByteArrayValue, 0, _data, 0, _data.Length);
         }
     }
 }

@@ -54,8 +54,8 @@ namespace TrueCraft.Client.Handlers
             {
                 // Chunk data offsets
                 int metadataOffset = chunk.Data.Length;
-                int lightOffset = metadataOffset + chunk.Metadata.Length;
-                int skylightOffset = lightOffset + chunk.BlockLight.Length;
+                int lightOffset = metadataOffset + chunk.Metadata.Length / 2;
+                int skylightOffset = lightOffset + chunk.BlockLight.Length / 2;
 
                 // Block IDs
                 Buffer.BlockCopy(data, 0, chunk.Data, 0, chunk.Data.Length);
