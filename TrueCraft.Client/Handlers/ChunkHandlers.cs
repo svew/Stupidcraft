@@ -1,6 +1,7 @@
 ﻿using System;
 using MonoGame.Framework.Utilities.Deflate;
 using TrueCraft.Client.Events;
+using TrueCraft.Client.World;
 using TrueCraft.Core.Networking;
 using TrueCraft.Core.Networking.Packets;
 using TrueCraft.Core.World;
@@ -42,44 +43,21 @@ namespace TrueCraft.Client.Handlers
 
         public static void HandleChunkData(IPacket _packet, MultiplayerClient client)
         {
-            var packet = (ChunkDataPacket)_packet;
-            GlobalVoxelCoordinates coords = new GlobalVoxelCoordinates(packet.X, packet.Y, packet.Z);
-            var data = ZlibStream.UncompressBuffer(packet.CompressedData);
+            ChunkDataPacket packet = (ChunkDataPacket)_packet;
             IChunk chunk;
-            var adjustedCoords = client.World.World.FindBlockPosition(coords, out chunk);
 
-            if (packet.Width == Chunk.Width
-                && packet.Height == Chunk.Height
-                && packet.Depth == Chunk.Depth) // Fast path
+            if (packet.Width == WorldConstants.ChunkWidth
+                && packet.Height == WorldConstants.Height
+                && packet.Depth == WorldConstants.ChunkDepth) // Fast path
             {
-                // Chunk data offsets
-                int metadataOffset = chunk.Data.Length;
-                int lightOffset = metadataOffset + chunk.Metadata.Length / 2;
-                int skylightOffset = lightOffset + chunk.BlockLight.Length / 2;
-
-                // Block IDs
-                Buffer.BlockCopy(data, 0, chunk.Data, 0, chunk.Data.Length);
-                // Block metadata
-                if (metadataOffset < data.Length)
-                {
-                    Buffer.BlockCopy(data, metadataOffset,
-                        chunk.Metadata.Data, 0, chunk.Metadata.Data.Length);
-                }
-                // Block light
-                if (lightOffset < data.Length)
-                {
-                    Buffer.BlockCopy(data, lightOffset,
-                        chunk.BlockLight.Data, 0, chunk.BlockLight.Data.Length);
-                }
-                // Sky light
-                if (skylightOffset < data.Length)
-                {
-                    Buffer.BlockCopy(data, skylightOffset,
-                        chunk.SkyLight.Data, 0, chunk.SkyLight.Data.Length);
-                }
+                chunk = new Chunk(packet);
+                client.World.SetChunk(chunk.Coordinates, chunk);
             }
             else // Slow path
             {
+                GlobalVoxelCoordinates coords = new GlobalVoxelCoordinates(packet.X, packet.Y, packet.Z);
+                var data = ZlibStream.UncompressBuffer(packet.CompressedData);
+                var adjustedCoords = client.World.World.FindBlockPosition(coords, out chunk);
                 int x = adjustedCoords.X, y = adjustedCoords.Y, z = adjustedCoords.Z;
                 int fullLength = packet.Width * packet.Height * packet.Depth; // Length of full sized byte section
                 int nibbleLength = fullLength / 2; // Length of nibble sections

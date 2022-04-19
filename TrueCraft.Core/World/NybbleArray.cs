@@ -2,6 +2,7 @@ using fNbt;
 using fNbt.Serialization;
 using System;
 using System.Collections.ObjectModel;
+using System.IO;
 
 namespace TrueCraft.Core
 {
@@ -40,6 +41,18 @@ namespace TrueCraft.Core
             length /= 2;
             _data = new byte[length];
             Buffer.BlockCopy(data, offset, _data, 0, length);
+        }
+
+        /// <summary>
+        ///  Constructs a new NybbleArray by copying data from the given Stream.
+        /// </summary>
+        /// <param name="stream">The Stream from which to read the data.</param>
+        /// <param name="length">The length in Nybbles of the data to read.</param>
+        public NybbleArray(Stream stream, int length)
+        {
+            length /= 2;
+            _data = new byte[length];
+            stream.Read(_data, 0, length);
         }
 
         /// <summary>
