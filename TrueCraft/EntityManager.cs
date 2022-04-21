@@ -37,7 +37,7 @@ namespace TrueCraft
         {
             _server = server;
             Dimension = dimension;
-            _physicsEngine = new PhysicsEngine(dimension, (BlockRepository)server.BlockRepository);
+            _physicsEngine = new PhysicsEngine(dimension, (IBlockPhysicsProvider)dimension.BlockRepository);
             _pendingDespawns = new ConcurrentBag<IEntity>();
             _entities = new List<IEntity>();
             // TODO: Handle loading worlds that already have entities
