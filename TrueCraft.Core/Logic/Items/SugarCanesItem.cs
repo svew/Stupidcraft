@@ -32,7 +32,7 @@ namespace TrueCraft.Core.Logic.Items
                 dimension.SetBlockID(coordinates, SugarcaneBlock.BlockID);
                 item.Count--;
                 user.Hotbar[user.SelectedSlot].Item = item;
-                user.Server.BlockRepository.GetBlockProvider(SugarcaneBlock.BlockID).BlockPlaced(
+                dimension.BlockRepository.GetBlockProvider(SugarcaneBlock.BlockID).BlockPlaced(
                     new BlockDescriptor { Coordinates = coordinates }, face, dimension, user);
             }
         }

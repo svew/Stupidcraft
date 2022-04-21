@@ -21,7 +21,7 @@ namespace TrueCraft.Core.Logic.Items
             if (id == DirtBlock.BlockID || id == GrassBlock.BlockID)
             {
                 dimension.SetBlockID(coordinates, FarmlandBlock.BlockID);
-                user.Server.BlockRepository.GetBlockProvider(FarmlandBlock.BlockID).BlockPlaced(
+                dimension.BlockRepository.GetBlockProvider(FarmlandBlock.BlockID).BlockPlaced(
                     new BlockDescriptor { Coordinates = coordinates }, face, dimension, user);
             }
         }

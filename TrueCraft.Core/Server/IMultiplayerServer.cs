@@ -35,6 +35,8 @@ namespace TrueCraft.Core.Server
         object World { get; }
 
         IEventScheduler Scheduler { get; }
+
+        [Obsolete()]
         IBlockRepository BlockRepository { get; }
 
         IItemRepository ItemRepository { get; }

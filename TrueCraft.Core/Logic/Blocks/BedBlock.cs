@@ -94,7 +94,7 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IDimension dimension)
         {
-            if (!ValidBedPosition(descriptor, server.BlockRepository, dimension))
+            if (!ValidBedPosition(descriptor, dimension.BlockRepository, dimension))
                 dimension.SetBlockID(descriptor.Coordinates, 0);
             base.BlockUpdate(descriptor, source, server, dimension);
         }

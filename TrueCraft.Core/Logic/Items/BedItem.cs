@@ -51,11 +51,11 @@ namespace TrueCraft.Core.Logic.Items
                     direction = BedBlock.BedDirection.West;
                     break;
             }
-            var bedProvider = (BedBlock)user.Server.BlockRepository.GetBlockProvider(BedBlock.BlockID);
+            var bedProvider = (BedBlock)dimension.BlockRepository.GetBlockProvider(BedBlock.BlockID);
             if (!bedProvider.ValidBedPosition(new BlockDescriptor { Coordinates = head },
-                user.Server.BlockRepository, user.Dimension, false, true) ||
+                dimension.BlockRepository, user.Dimension, false, true) ||
                 !bedProvider.ValidBedPosition(new BlockDescriptor { Coordinates = foot },
-                user.Server.BlockRepository, user.Dimension, false, true))
+                dimension.BlockRepository, user.Dimension, false, true))
             {
                 return;
             }

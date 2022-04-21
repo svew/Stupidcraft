@@ -53,7 +53,7 @@ namespace TrueCraft.Core.Logic.Items
             }
             else
             {
-                var provider = user.Server.BlockRepository.GetBlockProvider(dimension.GetBlockID(coordinates));
+                var provider = dimension.BlockRepository.GetBlockProvider(dimension.GetBlockID(coordinates));
                 if (!provider.Opaque)
                 {
                     if (RelevantBlockType != null)

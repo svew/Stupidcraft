@@ -132,7 +132,7 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
-            if (ValidCactusPosition(descriptor, user.Server.BlockRepository, dimension))
+            if (ValidCactusPosition(descriptor, dimension.BlockRepository, dimension))
                 base.BlockPlaced(descriptor, face, dimension, user);
             else
             {
@@ -153,7 +153,7 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IDimension dimension)
         {
-            if (!ValidCactusPosition(descriptor, server.BlockRepository, dimension))
+            if (!ValidCactusPosition(descriptor, dimension.BlockRepository, dimension))
                 DestroyCactus(descriptor, server, dimension);
             base.BlockUpdate(descriptor, source, server, dimension);
         }
