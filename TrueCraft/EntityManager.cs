@@ -18,26 +18,32 @@ namespace TrueCraft
     {
         public TimeSpan TimeSinceLastUpdate { get; private set; }
         public IDimension Dimension { get; }
-        public IMultiplayerServer Server { get; set; }
-        public PhysicsEngine PhysicsEngine { get; set; }
 
-        private int NextEntityID { get; set; }
-        private List<IEntity> Entities { get; set; } // TODO: Persist to disk
-        private object EntityLock = new object();
-        private ConcurrentBag<IEntity> PendingDespawns { get; set; }
-        private DateTime LastUpdate { get; set; }
+        private readonly IMultiplayerServer _server;
+
+        private readonly PhysicsEngine _physicsEngine;
+
+        private int _nextEntityID;
+
+        private readonly List<IEntity> _entities; // TODO: Persist to disk
+
+        private object _entityLock = new object();
+
+        private readonly ConcurrentBag<IEntity> _pendingDespawns;
+
+        private DateTime _lastUpdate;
 
         public EntityManager(IMultiplayerServer server, IDimension dimension)
         {
-            Server = server;
+            _server = server;
             Dimension = dimension;
-            PhysicsEngine = new PhysicsEngine(dimension, (BlockRepository)server.BlockRepository);
-            PendingDespawns = new ConcurrentBag<IEntity>();
-            Entities = new List<IEntity>();
+            _physicsEngine = new PhysicsEngine(dimension, (BlockRepository)server.BlockRepository);
+            _pendingDespawns = new ConcurrentBag<IEntity>();
+            _entities = new List<IEntity>();
             // TODO: Handle loading worlds that already have entities
             // Note: probably not the concern of EntityManager. The server could manually set this?
-            NextEntityID = 1;
-            LastUpdate = DateTime.UtcNow;
+            _nextEntityID = 1;
+            _lastUpdate = DateTime.UtcNow;
             TimeSinceLastUpdate = TimeSpan.Zero;
         }
 
@@ -73,7 +79,7 @@ namespace TrueCraft
                         (int)(entity.Position.Z) >> 4 != (int)(entity.OldPosition.Z) >> 4)
                     {
                         client.Log("Passed chunk boundary at {0}, {1}", (int)(entity.Position.X) >> 4, (int)(entity.Position.Z) >> 4);
-                        Server.Scheduler.ScheduleEvent("client.update-chunks", client,
+                        _server.Scheduler.ScheduleEvent("client.update-chunks", client,
                             TimeSpan.Zero, s => client.UpdateChunks());
                         UpdateClientEntities(client);
                     }
@@ -127,9 +133,9 @@ namespace TrueCraft
 
         private void PropegateEntityPositionUpdates(IEntity entity)
         {
-            for (int i = 0, ServerClientsCount = Server.Clients.Count; i < ServerClientsCount; i++)
+            for (int i = 0, ServerClientsCount = _server.Clients.Count; i < ServerClientsCount; i++)
             {
-                var client = Server.Clients[i] as RemoteClient;
+                var client = _server.Clients[i] as RemoteClient;
                 if (client.Entity == entity)
                     continue; // Do not send movement updates back to the client that triggered them
                 if (client.KnownEntities.Contains(entity))
@@ -150,9 +156,9 @@ namespace TrueCraft
         {
             if (!entity.SendMetadataToClients)
                 return;
-            for (int i = 0, ServerClientsCount = Server.Clients.Count; i < ServerClientsCount; i++)
+            for (int i = 0, ServerClientsCount = _server.Clients.Count; i < ServerClientsCount; i++)
             {
-                var client = Server.Clients[i] as RemoteClient;
+                var client = _server.Clients[i] as RemoteClient;
                 if (client.Entity == entity)
                     continue; // Do not send movement updates back to the client that triggered them
                 if (client.KnownEntities.Contains(entity))
@@ -168,7 +174,7 @@ namespace TrueCraft
 
         private IEntity[] GetEntitiesInRange(IEntity entity, int maxChunks)
         {
-            return Entities.Where(e => e.EntityID != entity.EntityID && !e.Despawned && IsInRange(e.Position, entity.Position, maxChunks)).ToArray();
+            return _entities.Where(e => e.EntityID != entity.EntityID && !e.Despawned && IsInRange(e.Position, entity.Position, maxChunks)).ToArray();
         }
 
         private void SendEntityToClient(RemoteClient client, IEntity entity)
@@ -212,17 +218,17 @@ namespace TrueCraft
 
         private IRemoteClient GetClientForEntity(PlayerEntity entity)
         {
-            return Server.Clients.SingleOrDefault(c => c.Entity != null && c.Entity.EntityID == entity.EntityID);
+            return _server.Clients.SingleOrDefault(c => c.Entity != null && c.Entity.EntityID == entity.EntityID);
         }
 
         public IList<IEntity> EntitiesInRange(Vector3 center, float radius)
         {
-            return Entities.Where(e => !e.Despawned && e.Position.DistanceTo(center) < radius).ToList();
+            return _entities.Where(e => !e.Despawned && e.Position.DistanceTo(center) < radius).ToList();
         }
 
         public IList<IRemoteClient> ClientsForEntity(IEntity entity)
         {
-            return Server.Clients.Where(c => (c as RemoteClient).KnownEntities.Contains(entity)).ToList();
+            return _server.Clients.Where(c => (c as RemoteClient).KnownEntities.Contains(entity)).ToList();
         }
 
         public void SpawnEntity(IEntity entity)
@@ -232,12 +238,12 @@ namespace TrueCraft
             entity.SpawnTime = DateTime.UtcNow;
             entity.EntityManager = this;
             entity.Dimension = Dimension;
-            entity.EntityID = NextEntityID++;
+            entity.EntityID = _nextEntityID++;
             entity.PropertyChanged -= HandlePropertyChanged;
             entity.PropertyChanged += HandlePropertyChanged;
-            lock (EntityLock)
+            lock (_entityLock)
             {
-                Entities.Add(entity);
+                _entities.Add(entity);
             }
             foreach (var clientEntity in GetEntitiesInRange(entity, 8)) // Note: 8 is pretty arbitrary here
             {
@@ -248,29 +254,29 @@ namespace TrueCraft
                 }
             }
             if (entity is IPhysicsEntity)
-                PhysicsEngine.AddEntity(entity as IPhysicsEntity);
+                _physicsEngine.AddEntity(entity as IPhysicsEntity);
         }
 
         public void DespawnEntity(IEntity entity)
         {
             entity.Despawned = true;
-            PendingDespawns.Add(entity);
+            _pendingDespawns.Add(entity);
         }
 
         public void FlushDespawns()
         {
             IEntity entity;
-            while (PendingDespawns.Count != 0)
+            while (_pendingDespawns.Count != 0)
             {
-                while (!PendingDespawns.TryTake(out entity))
+                while (!_pendingDespawns.TryTake(out entity))
                     ;
                 if (entity is IPhysicsEntity)
-                    PhysicsEngine.RemoveEntity((IPhysicsEntity)entity);
-                lock ((Server as MultiplayerServer).ClientLock) // TODO: Thread safe way to iterate over client collection
+                    _physicsEngine.RemoveEntity((IPhysicsEntity)entity);
+                lock ((_server as MultiplayerServer).ClientLock) // TODO: Thread safe way to iterate over client collection
                 {
-                    for (int i = 0, ServerClientsCount = Server.Clients.Count; i < ServerClientsCount; i++)
+                    for (int i = 0, ServerClientsCount = _server.Clients.Count; i < ServerClientsCount; i++)
                     {
-                        var client = (RemoteClient)Server.Clients[i];
+                        var client = (RemoteClient)_server.Clients[i];
                         if (client.KnownEntities.Contains(entity) && !client.Disconnected)
                         {
                             client.QueuePacket(new DestroyEntityPacket(entity.EntityID));
@@ -279,26 +285,26 @@ namespace TrueCraft
                         }
                     }
                 }
-                lock (EntityLock)
-                    Entities.Remove(entity);
+                lock (_entityLock)
+                    _entities.Remove(entity);
             }
         }
 
         public IEntity GetEntityByID(int id)
         {
-            return Entities.SingleOrDefault(e => e.EntityID == id);
+            return _entities.SingleOrDefault(e => e.EntityID == id);
         }
 
         public void Update()
         {
-            TimeSinceLastUpdate = DateTime.UtcNow - LastUpdate;
-            LastUpdate = DateTime.UtcNow;
-            PhysicsEngine.Update(TimeSinceLastUpdate);
+            TimeSinceLastUpdate = DateTime.UtcNow - _lastUpdate;
+            _lastUpdate = DateTime.UtcNow;
+            _physicsEngine.Update(TimeSinceLastUpdate);
             try
             {
-                lock (Entities)
+                lock (_entities)
                 {
-                    foreach (var e in Entities)
+                    foreach (var e in _entities)
                     {
                         if (!e.Despawned)
                             e.Update(this);
