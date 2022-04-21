@@ -13,16 +13,16 @@ namespace TrueCraft.Client.Rendering
         /// <summary>
         /// 
         /// </summary>
-        public ReadOnlyChunk Chunk { get; set; }
+        public IChunk Chunk { get; }
 
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="game"></param>
         /// <param name="chunk"></param>
-        /// <param name="device"></param>
         /// <param name="vertices"></param>
         /// <param name="indices"></param>
-        public ChunkMesh(ReadOnlyChunk chunk, TrueCraftGame game, VertexPositionNormalColorTexture[] vertices, int[] indices)
+        public ChunkMesh(TrueCraftGame game, IChunk chunk, VertexPositionNormalColorTexture[] vertices, int[] indices)
             : base(game, 1, true)
         {
             Chunk = chunk;
@@ -33,12 +33,12 @@ namespace TrueCraft.Client.Rendering
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="game"></param>
         /// <param name="chunk"></param>
-        /// <param name="device"></param>
         /// <param name="vertices"></param>
         /// <param name="opaqueIndices"></param>
         /// <param name="transparentIndices"></param>
-        public ChunkMesh(ReadOnlyChunk chunk, TrueCraftGame game, VertexPositionNormalColorTexture[] vertices, int[] opaqueIndices, int[] transparentIndices)
+        public ChunkMesh(TrueCraftGame game, IChunk chunk, VertexPositionNormalColorTexture[] vertices, int[] opaqueIndices, int[] transparentIndices)
             : base(game, 2, true)
         {
             Chunk = chunk;
@@ -54,11 +54,12 @@ namespace TrueCraft.Client.Rendering
         /// <returns></returns>
         protected override BoundingBox RecalculateBounds(VertexPositionNormalColorTexture[] vertices)
         {
+            // TODO fix adhoc inline coordinate conversion.
             return new BoundingBox(
-                new Vector3(Chunk.X * TrueCraft.Core.World.Chunk.Width, 0, Chunk.Z * TrueCraft.Core.World.Chunk.Depth),
-                new Vector3(Chunk.X * TrueCraft.Core.World.Chunk.Width
-                    + TrueCraft.Core.World.Chunk.Width, TrueCraft.Core.World.Chunk.Height,
-                    Chunk.Z * TrueCraft.Core.World.Chunk.Depth + TrueCraft.Core.World.Chunk.Depth));
+                new Vector3(Chunk.X * WorldConstants.ChunkWidth, 0, Chunk.Z * WorldConstants.ChunkDepth),
+                new Vector3(Chunk.X * WorldConstants.ChunkWidth
+                    + WorldConstants.ChunkWidth, WorldConstants.Height,
+                    Chunk.Z * WorldConstants.ChunkDepth + WorldConstants.ChunkDepth));
         }
     }
 }

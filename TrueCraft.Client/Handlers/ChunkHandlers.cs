@@ -18,7 +18,7 @@ namespace TrueCraft.Client.Handlers
             IChunk chunk;
             try
             {
-                adjusted = client.World.World.FindBlockPosition(coordinates, out chunk);
+                adjusted = client.Dimension.FindBlockPosition(coordinates, out chunk);
             }
             catch (ArgumentException)
             {
@@ -31,14 +31,11 @@ namespace TrueCraft.Client.Handlers
             chunk.SetMetadata(adjusted, (byte)packet.Metadata);
             client.OnBlockChanged(new BlockChangeEventArgs(coordinates, new TrueCraft.Core.Logic.BlockDescriptor(),
                 new TrueCraft.Core.Logic.BlockDescriptor()));
-            client.OnChunkModified(new ChunkEventArgs(new ReadOnlyChunk(chunk)));
+            client.OnChunkModified(new ChunkEventArgs(chunk));
         }
 
         public static void HandleChunkPreamble(IPacket _packet, MultiplayerClient client)
         {
-            var packet = (ChunkPreamblePacket)_packet;
-            GlobalChunkCoordinates coords = new GlobalChunkCoordinates(packet.X, packet.Z);
-            client.World.SetChunk(coords, new Chunk(coords));
         }
 
         public static void HandleChunkData(IPacket _packet, MultiplayerClient client)
@@ -51,13 +48,13 @@ namespace TrueCraft.Client.Handlers
                 && packet.Depth == WorldConstants.ChunkDepth) // Fast path
             {
                 chunk = new Chunk(packet);
-                client.World.SetChunk(chunk.Coordinates, chunk);
+                ((IDimensionClient)client.Dimension).AddChunk(chunk);
             }
             else // Slow path
             {
                 GlobalVoxelCoordinates coords = new GlobalVoxelCoordinates(packet.X, packet.Y, packet.Z);
                 var data = ZlibStream.UncompressBuffer(packet.CompressedData);
-                var adjustedCoords = client.World.World.FindBlockPosition(coords, out chunk);
+                var adjustedCoords = client.Dimension.FindBlockPosition(coords, out chunk);
                 int x = adjustedCoords.X, y = adjustedCoords.Y, z = adjustedCoords.Z;
                 int fullLength = packet.Width * packet.Height * packet.Depth; // Length of full sized byte section
                 int nibbleLength = fullLength / 2; // Length of nibble sections
@@ -106,7 +103,7 @@ namespace TrueCraft.Client.Handlers
             }
             chunk.UpdateHeightMap();
             chunk.TerrainPopulated = true;
-            client.OnChunkLoaded(new ChunkEventArgs(new ReadOnlyChunk(chunk)));
+            client.OnChunkLoaded(new ChunkEventArgs(chunk));
         }
     }
 }

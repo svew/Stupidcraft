@@ -1,12 +1,13 @@
 ﻿using System;
+using TrueCraft.Core.World;
 
 namespace TrueCraft.Client.Events
 {
     public class ChunkEventArgs : EventArgs
     {
-        public ReadOnlyChunk Chunk { get; set; }
+        public IChunk Chunk { get; }
 
-        public ChunkEventArgs(ReadOnlyChunk chunk)
+        public ChunkEventArgs(IChunk chunk)
         {
             Chunk = chunk;
         }

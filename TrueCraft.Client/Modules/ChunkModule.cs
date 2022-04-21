@@ -30,14 +30,14 @@ namespace TrueCraft.Client.Modules
         {
             Game = game;
 
-            ChunkRenderer = new ChunkRenderer(Game.Client.World, Game, Game.BlockRepository);
+            ChunkRenderer = new ChunkRenderer(Game, Game.Client.Dimension);
             Game.Client.ChunkLoaded += Game_Client_ChunkLoaded;
             Game.Client.ChunkUnloaded += (sender, e) => UnloadChunk(e.Chunk);
             Game.Client.ChunkModified += Game_Client_ChunkModified;
             Game.Client.BlockChanged += Game_Client_BlockChanged;
             ChunkRenderer.MeshCompleted += MeshCompleted;
             ChunkRenderer.Start();
-            WorldLighting = new Lighting(Game.Client.World.World, Game.BlockRepository);
+            WorldLighting = new Lighting(Game.Client.Dimension, Game.BlockRepository);
 
             OpaqueEffect = new BasicEffect(Game.GraphicsDevice);
             OpaqueEffect.TextureEnabled = true;
@@ -71,7 +71,7 @@ namespace TrueCraft.Client.Modules
             //      Could it be related to the lighting height map adding 2 to the height?
             //      That would result in incorrect heights when placing blocks high above other blocks.
             Core.Vector3 posA = new Core.Vector3(e.Position.X, 0, e.Position.Z);
-            Core.Vector3 posB = new Core.Vector3(e.Position.X + 1, Dimension.Height, e.Position.Z + 1);
+            Core.Vector3 posB = new Core.Vector3(e.Position.X + 1, WorldConstants.Height, e.Position.Z + 1);
             WorldLighting.EnqueueOperation(new TrueCraft.Core.BoundingBox(posA, posB), true);
             WorldLighting.EnqueueOperation(new TrueCraft.Core.BoundingBox(posA, posB), false);
             for (int i = 0; i < 100; i++)
@@ -110,12 +110,12 @@ namespace TrueCraft.Client.Modules
             //    }
         }
 
-        void MeshCompleted(object sender, RendererEventArgs<ReadOnlyChunk> e)
+        void MeshCompleted(object sender, RendererEventArgs<IChunk> e)
         {
             IncomingChunks.Add(e.Result);
         }
 
-        void UnloadChunk(ReadOnlyChunk chunk)
+        void UnloadChunk(IChunk chunk)
         {
             Game.Invoke(() =>
             {

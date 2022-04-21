@@ -215,14 +215,14 @@ namespace TrueCraft.Client.Rendering
             // Handle top (and bottom) of the world.
             if (y < 0)
                 return 0;
-            if (y >= Chunk.Height)
+            if (y >= WorldConstants.Height)
                 return 15;
 
             // TODO: Have to return a proper value for light outside the local chunk.
             //      This will require the Renderer to have access to the World object.
             // Handle coordinates outside the chunk.
-            if ((x < 0) || (x >= Chunk.Width) ||
-                (z < 0) || (z >= Chunk.Depth))
+            if ((x < 0) || (x >= WorldConstants.ChunkWidth) ||
+                (z < 0) || (z >= WorldConstants.ChunkDepth))
             {
                 return 15;
             }

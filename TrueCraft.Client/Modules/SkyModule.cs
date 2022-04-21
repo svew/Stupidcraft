@@ -60,7 +60,7 @@ namespace TrueCraft.Client.Modules
         {
             get
             {
-                float x = (Game.Client.World.Time % 24000f) / 24000f - 0.25f;
+                float x = Game.Client.Dimension.TimeOfDay / 24000f - 0.25f;
                 if (x < 0) x = 0;
                 if (x > 1) x = 1;
                 return x + ((1 - ((float)Math.Cos(x * MathHelper.Pi) + 1) / 2) - x) / 3;

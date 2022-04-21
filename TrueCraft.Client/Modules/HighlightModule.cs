@@ -92,7 +92,7 @@ namespace TrueCraft.Client.Modules
             Matrix.CreateRotationX(MathHelper.ToRadians(Game.Client.Pitch)) *
             Matrix.CreateRotationY(MathHelper.ToRadians(-(Game.Client.Yaw - 180) + 180)));
 
-            var cast = VoxelCast.Cast(Game.Client.World,
+            var cast = VoxelCast.Cast(Game.Client.Dimension,
                 new TRay(Game.Camera.Position, new TVector3(direction.X, direction.Y, direction.Z)),
                 Game.BlockRepository, TrueCraftGame.Reach, TrueCraftGame.Reach + 2);
 
@@ -100,7 +100,7 @@ namespace TrueCraft.Client.Modules
                 Game.HighlightedBlock = null;
             else
             {
-                var provider = Game.BlockRepository.GetBlockProvider(Game.Client.World.GetBlockID(cast.Item1));
+                var provider = Game.BlockRepository.GetBlockProvider(Game.Client.Dimension.GetBlockID(cast.Item1));
                 if (provider.InteractiveBoundingBox != null)
                 {
                     var box = provider.InteractiveBoundingBox.Value;

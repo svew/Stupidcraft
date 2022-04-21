@@ -265,12 +265,12 @@ namespace TrueCraft.Client.Modules
         private void BeginDigging(GlobalVoxelCoordinates target)
         {
             // TODO: Adjust digging time to compensate for latency
-            var block = Game.Client.World.GetBlockID(target);
+            var block = Game.Client.Dimension.GetBlockID(target);
             Game.TargetBlock = target;
             Game.StartDigging = DateTime.UtcNow;
             short damage;
             Game.EndDigging = Game.StartDigging.AddMilliseconds(
-                BlockProvider.GetHarvestTime(block,
+                BlockProvider.GetHarvestTime(Game.Client.Dimension, block,
                     Game.Client.Hotbar[Game.Client.HotbarSelection].Item.ID, out damage));
             Game.Client.QueuePacket(new PlayerDiggingPacket(
                 PlayerDiggingPacket.Action.StartDigging,
@@ -293,9 +293,9 @@ namespace TrueCraft.Client.Modules
         private void PlayFootstep()
         {
             GlobalVoxelCoordinates coords = (GlobalVoxelCoordinates)Game.Client.BoundingBox.Min.Floor();
-            var target = Game.Client.World.GetBlockID(coords);
+            var target = Game.Client.Dimension.GetBlockID(coords);
             if (target == AirBlock.BlockID)
-                target = Game.Client.World.GetBlockID(coords + Vector3i.Down);
+                target = Game.Client.Dimension.GetBlockID(coords + Vector3i.Down);
             var provider = Game.BlockRepository.GetBlockProvider(target);
             if (provider.SoundEffect == SoundEffectClass.None)
                 return;

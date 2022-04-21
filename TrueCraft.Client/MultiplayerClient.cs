@@ -31,7 +31,9 @@ namespace TrueCraft.Client
         private int hotbarSelection;
 
         public TrueCraftUser User { get; set; }
-        public ReadOnlyWorld World { get; private set; }
+
+        public IDimension Dimension { get; set; }
+
         public PhysicsEngine Physics { get; set; }
         public bool LoggedIn { get; internal set; }
         public int EntityID { get; internal set; }
@@ -80,13 +82,10 @@ namespace TrueCraft.Client
             PacketReader.RegisterCorePackets();
             PacketHandlers = new PacketHandler[0x100];
             Handlers.PacketHandlers.RegisterHandlers(this);
-            World = new ReadOnlyWorld();
 
             Discover.DoDiscovery(new Discover());
 
-            World.World.BlockRepository = BlockRepository.Get();
-            World.World.ChunkProvider = new EmptyGenerator();
-            Physics = new PhysicsEngine(World.World, BlockRepository.Get());
+            Physics = new PhysicsEngine(Dimension, BlockRepository.Get());
             _socketPool = new SocketAsyncEventArgsPool(100, 200, 65536);
             connected = 0;
             Health = 20;

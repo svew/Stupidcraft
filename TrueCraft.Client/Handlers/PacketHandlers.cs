@@ -72,9 +72,8 @@ namespace TrueCraft.Client.Handlers
 
         public static void HandleTimeUpdate(IPacket _packet, MultiplayerClient client)
         {
-            var packet = (TimeUpdatePacket)_packet;
-            var time = packet.Time / 20.0;
-            client.World.World.BaseTime = DateTime.UtcNow - TimeSpan.FromSeconds(time);
+            TimeUpdatePacket packet = (TimeUpdatePacket)_packet;
+            client.Dimension.TimeOfDay = packet.Time % 24000;
         }
     }
 }

@@ -63,7 +63,7 @@ namespace TrueCraft.Client
         {
             get
             {
-                return Client.World.World.BlockRepository;
+                return Client.Dimension.BlockRepository;
             }
         }
 
@@ -346,7 +346,7 @@ namespace TrueCraft.Client
                 action();
 
             IChunk chunk;
-            LocalVoxelCoordinates adjusted = Client.World.World.FindBlockPosition(
+            LocalVoxelCoordinates adjusted = Client.Dimension.FindBlockPosition(
                 new GlobalVoxelCoordinates((int)Client.Position.X, 0, (int)Client.Position.Z), out chunk);
             if (chunk != null && Client.LoggedIn)
             {
