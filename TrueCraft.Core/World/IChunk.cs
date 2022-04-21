@@ -40,7 +40,10 @@ namespace TrueCraft.Core.World
         [Obsolete("Should be server-side only and only needed during construction.")]
         void UpdateHeightMap();
 
+        // TODO: move to server-side
+        [Obsolete("Should be server-side only")]
         bool IsModified { get; }
+
         bool LightPopulated { get; set; }
 
         /// <summary>
@@ -52,13 +55,22 @@ namespace TrueCraft.Core.World
         Biome GetBiome(int x, int z);
 
         DateTime LastAccessed { get; set; }
+
+        // TODO: remove this method
+        [Obsolete("Violation of encapsulation")]
         byte[] Data { get; }
+
         bool TerrainPopulated { get; set; }
 
+        // TODO: remove this method
+        [Obsolete("Violation of encapsulation")]
         NybbleArray Metadata { get; }
+        // TODO: remove this method
+        [Obsolete("Violation of encapsulation")]
         NybbleArray BlockLight { get; }
+        // TODO: remove this method
+        [Obsolete("Violation of encapsulation")]
         NybbleArray SkyLight { get; }
-        //IRegion ParentRegion { get; set; }
 
         byte GetBlockID(LocalVoxelCoordinates coordinates);
         byte GetMetadata(LocalVoxelCoordinates coordinates);
@@ -69,7 +81,12 @@ namespace TrueCraft.Core.World
         void SetSkyLight(LocalVoxelCoordinates coordinates, byte value);
         void SetBlockLight(LocalVoxelCoordinates coordinates, byte value);
 
+        // TODO: move to server-side
+        [Obsolete("Should be server-side only")]
         NbtCompound GetTileEntity(LocalVoxelCoordinates coordinates);
+
+        // TODO: move to server-side
+        [Obsolete("Should be server-side only")]
         void SetTileEntity(LocalVoxelCoordinates coordinates, NbtCompound value);
     }
 }
