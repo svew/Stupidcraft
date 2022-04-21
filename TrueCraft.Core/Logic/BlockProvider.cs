@@ -97,14 +97,14 @@ namespace TrueCraft.Core.Logic
             }
         }
 
-        public virtual bool IsSupported(BlockDescriptor descriptor, IMultiplayerServer server, IDimension dimension)
+        public virtual bool IsSupported(IDimension dimension, BlockDescriptor descriptor)
         {
             ServerOnly.Assert();
 
             var support = GetSupportDirection(descriptor);
             if (support != Vector3i.Zero)
             {
-                var supportingBlock = server.BlockRepository.GetBlockProvider(dimension.GetBlockID(descriptor.Coordinates + support));
+                var supportingBlock = dimension.BlockRepository.GetBlockProvider(dimension.GetBlockID(descriptor.Coordinates + support));
                 if (!supportingBlock.Opaque)
                     return false;
             }
@@ -115,7 +115,7 @@ namespace TrueCraft.Core.Logic
         {
             ServerOnly.Assert();
 
-            if (!IsSupported(descriptor, server, dimension))
+            if (!IsSupported(dimension, descriptor))
             {
                 GenerateDropEntity(descriptor, dimension, server, ItemStack.EmptyStack);
                 dimension.SetBlockID(descriptor.Coordinates, 0);
@@ -195,7 +195,7 @@ namespace TrueCraft.Core.Logic
 
             BlockPlaced(dimension.GetBlockData(coordinates), face, dimension, user);
 
-            if (!IsSupported(dimension.GetBlockData(coordinates), user.Server, dimension))
+            if (!IsSupported(dimension, dimension.GetBlockData(coordinates)))
                 dimension.SetBlockData(coordinates, old);
             else
             {

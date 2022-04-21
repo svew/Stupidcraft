@@ -83,7 +83,7 @@ namespace TrueCraft.Core.Logic.Blocks
             }
             int i = 0;
             descriptor.Metadata = (byte)direction;
-            while (!IsSupported(descriptor, user.Server, dimension) && i < preferredDirections.Length)
+            while (!IsSupported(dimension, descriptor) && i < preferredDirections.Length)
             {
                 direction = preferredDirections[i++];
                 descriptor.Metadata = (byte)direction;
@@ -113,7 +113,7 @@ namespace TrueCraft.Core.Logic.Blocks
 
                 BlockPlaced(data, face, dimension, user);
 
-                if (!IsSupported(dimension.GetBlockData(coordinates), user.Server, dimension))
+                if (!IsSupported(dimension, dimension.GetBlockData(coordinates)))
                     dimension.SetBlockData(coordinates, old);
                 else
                 {

@@ -98,7 +98,7 @@ namespace TrueCraft.Core.Logic.Blocks
                     break;
             }
             descriptor.Metadata = (byte)direction;
-            if (IsSupported(descriptor, user.Server, dimension))
+            if (IsSupported(dimension, descriptor))
             {
                 dimension.SetBlockID(descriptor.Coordinates, BlockID);
                 dimension.SetMetadata(descriptor.Coordinates, (byte)direction);
