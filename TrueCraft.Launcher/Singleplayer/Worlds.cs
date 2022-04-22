@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using fNbt;
 using TrueCraft.Core;
 using TrueCraft.Core.Logic;
 using TrueCraft.Core.World;
@@ -8,35 +10,44 @@ using TrueCraft.World;
 
 namespace TrueCraft.Launcher.Singleplayer
 {
-    public class Worlds
+    public class Worlds : IEnumerable<WorldInfo>
     {
-        private List<IWorld> _savedWorlds;
+        private readonly string _baseDirectory;
 
-        public static Worlds Local { get; set; }
+        private readonly List<WorldInfo> _savedWorlds;
 
-        public IEnumerable<IWorld> Saves { get; }
+        //public static Worlds Local { get; set; }
 
-        public void Load()
+        // public IEnumerable<IWorld> Saves { get; }
+
+        /// <summary>
+        /// Constructs a new collection of WorldInfo objects.
+        /// </summary>
+        /// <param name="baseDirectory">The directory in which the World save folders are kept.</param>
+        public Worlds(string baseDirectory)
         {
-            if (!Directory.Exists(Paths.Worlds))
-                Directory.CreateDirectory(Paths.Worlds);
+            if (!Directory.Exists(baseDirectory))
+                throw new DirectoryNotFoundException(baseDirectory);
 
-            string[] directories = Directory.GetDirectories(Paths.Worlds);
-            _savedWorlds = new List<IWorld>(directories.Length);
+            _baseDirectory = baseDirectory;
+
+            string[] directories = Directory.GetDirectories(baseDirectory);
+            _savedWorlds = new List<WorldInfo>(directories.Length);
             foreach (string d in directories)
             {
-                try
+                string manifestFile = Path.Combine(baseDirectory, "manifest.nbt");
+                if (File.Exists(manifestFile))
                 {
-                    // TODO: Instead of "loading" every world, have a method to check for validity.
-                    IWorld w = TrueCraft.World.World.LoadWorld(d);
-                    _savedWorlds.Add(w);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
+                    NbtFile file = new NbtFile(manifestFile);
+                    _savedWorlds.Add(new WorldInfo(Path.GetFileName(d), file));
                 }
             }
         }
+
+        /// <summary>
+        /// Gets the Base Directory where the Worlds in this list are stored.
+        /// </summary>
+        public string BaseDirectory { get => _baseDirectory; }
 
         /// <summary>
         /// Creates a new World.
@@ -44,7 +55,7 @@ namespace TrueCraft.Launcher.Singleplayer
         /// <param name="name">The World name, as entered by the Player</param>
         /// <param name="seed">The seed for generating the new World.</param>
         /// <returns></returns>
-        public IWorld CreateNewWorld(string name, string seed)
+        public WorldInfo CreateNewWorld(string name, string seed)
         {
             int s;
             if (!int.TryParse(seed, out s))
@@ -53,15 +64,36 @@ namespace TrueCraft.Launcher.Singleplayer
                 s = MathHelper.Random.Next();
             }
 
-            Discover.DoDiscovery(new Discover());
+            string newWorldFolder = TrueCraft.World.World.CreateWorld(s, Paths.Worlds , name);
+            string manifestFile = Path.Combine(newWorldFolder, "manifest.nbt");
 
-            PanDimensionalVoxelCoordinates spawnPoint = new PanDimensionalVoxelCoordinates(DimensionID.Overworld, 0, 0, 0);
-            IDimensionFactory factory = new DimensionFactory();
-            IWorld world = new TrueCraft.World.World(s, Paths.Worlds, name, factory, spawnPoint);
-            world.Save();
-            _savedWorlds.Add(world);
+            WorldInfo worldInfo = new WorldInfo(newWorldFolder, new NbtFile(manifestFile));
+            _savedWorlds.Add(worldInfo);
 
-            return world;
+            return worldInfo;
+        }
+
+        /// <summary>
+        /// Removes the world in the specified directory from this collection
+        /// </summary>
+        /// <param name="directory"></param>
+        public void Remove(string directory)
+        {
+            int j = 0;
+            while (j < _savedWorlds.Count && _savedWorlds[j].Directory != directory)
+                j++;
+            if (j < _savedWorlds.Count)
+                _savedWorlds.RemoveAt(j);
+        }
+
+        public IEnumerator<WorldInfo> GetEnumerator()
+        {
+            return _savedWorlds.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return _savedWorlds.GetEnumerator();
         }
     }
 }

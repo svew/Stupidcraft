@@ -5,11 +5,13 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Threading.Tasks;
+using Gdk;
 using Gtk;
 using TrueCraft.Core;
 using TrueCraft.Core.Server;
 using TrueCraft.Core.World;
 using TrueCraft.Launcher.Singleplayer;
+using TrueCraft.World;
 
 namespace TrueCraft.Launcher.Views
 {
@@ -33,10 +35,11 @@ namespace TrueCraft.Launcher.Views
         public Label _progressLabel;
         public ProgressBar _progressBar;
 
+        private readonly Worlds _worlds;
+
         public SingleplayerView(LauncherWindow window)
         {
-            Worlds.Local = new Worlds();
-            Worlds.Local.Load();
+            _worlds = new Worlds(Paths.Worlds);
 
             _window = window;
             this.SetSizeRequest(250, -1);
@@ -90,27 +93,13 @@ namespace TrueCraft.Launcher.Views
             _newWorldCommit.Clicked += NewWorldCommit_Clicked;
 
             _playButton.Clicked += PlayButton_Clicked;
-            _deleteWorldButton.Clicked += (sender, e) => 
-            {
-                TreeIter iter;
-                ITreeModel model;
-                _worldListView.Selection.GetSelected(out model, out iter);
+            _deleteWorldButton.Clicked += DeleteButton_Clicked;
 
-                string worldName = (string)model.GetValue(iter, 0);
-                _worldListStore.Remove(ref iter);
-
-                // TODO: display busy cursor; surround with try/catch/finally
-                // TODO: Do world names have to be unique???
-                Worlds.Local.Saves = Worlds.Local.Saves.Where(s => s.Name != worldName).ToArray();
-
-                // TODO: actually delete the World
-                // Directory.Delete(world.BaseDirectory, true);
-            };
-
-            foreach (var world in Worlds.Local.Saves)
+            foreach (WorldInfo worldInfo in _worlds)
             {
                 TreeIter row = _worldListStore.Append();
-                _worldListStore.SetValue(row, 0, world.Name);
+                _worldListStore.SetValue(row, 0, worldInfo.Name);
+                _worldListStore.SetValue(row, 1, worldInfo);
             }
 
             var createDeleteHbox = new HBox();
@@ -140,6 +129,35 @@ namespace TrueCraft.Launcher.Views
             TreeViewColumn column = new TreeViewColumn("Name", rendererText, "text", 0);
             column.SortColumnId = 0;
             worldView.AppendColumn(column);
+        }
+
+        private void DeleteButton_Clicked(object? sender, EventArgs e)
+        {
+            Cursor origCursor = _window.Window.Cursor;
+            try
+            {
+                _window.Window.Cursor = new Cursor(CursorType.Watch);
+
+                TreeIter iter;
+                ITreeModel model;
+                _worldListView.Selection.GetSelected(out model, out iter);
+
+                string worldName = (string)model.GetValue(iter, 0);
+                WorldInfo worldInfo = (WorldInfo)model.GetValue(iter, 1);
+
+                // Remove the World from the UI
+                _worldListStore.Remove(ref iter);
+
+                // Remove the world from the list of Worlds
+                _worlds.Remove(worldInfo.Directory);
+
+                // Remove the World from disk
+                Directory.Delete(System.IO.Path.Combine(_worlds.BaseDirectory, worldInfo.Directory), true);
+            }
+            finally
+            {
+                _window.Window.Cursor = origCursor;
+            }
         }
 
         public void PlayButton_Clicked(object sender, EventArgs e)
@@ -222,10 +240,12 @@ namespace TrueCraft.Launcher.Views
 
         void NewWorldCommit_Clicked(object sender, EventArgs e)
         {
-            var world = Worlds.Local.CreateNewWorld(_newWorldName.Text, _newWorldSeed.Text);
+            WorldInfo world = _worlds.CreateNewWorld(_newWorldName.Text, _newWorldSeed.Text);
             _createWorldBox.Visible = false;
+
             TreeIter row = _worldListStore.Append();
             _worldListStore.SetValue(row, 0, world.Name);
+            _worldListStore.SetValue(row, 1, world);
         }
     }
 }
