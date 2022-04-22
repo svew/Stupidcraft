@@ -15,6 +15,11 @@ namespace TrueCraft.World
 
         private readonly int _seed;
 
+        /// <summary>
+        /// The full path to the folder where the world is saved.
+        /// </summary>
+        /// <remarks>The last element of this path is a sanitized (for filesystem)
+        /// version of _name.</remarks>
         private readonly string _baseDirectory;
 
         /// <summary>
@@ -22,24 +27,17 @@ namespace TrueCraft.World
         /// </summary>
         private readonly string _name;
 
-        /// <summary>
-        /// The full path to the folder where the world is saved.
-        /// </summary>
-        /// <remarks>The last element of this path is a sanitized (for filesystem)
-        /// version of _name.</remarks>
-        private readonly string _folderName;
-
         private PanDimensionalVoxelCoordinates _spawnPoint;
 
         /// <summary>
-        /// Creates a new World
+        /// Constructs a new World instance
         /// </summary>
         /// <param name="seed">The seed to be used to generate the World.</param>
-        /// <param name="baseDirectory">The folder where worlds are saved.</param>
+        /// <param name="baseDirectory">The folder this world is saved.</param>
         /// <param name="name">The name of the World, as seen by the Player.</param>
         /// <param name="dimensionFactory">A Factory for building the set of Dimensions.</param>
         /// <param name="spawnPoint">The default Spawn Point for all Players.</param>
-        public World(int seed, string baseDirectory, string name, IDimensionFactory dimensionFactory, PanDimensionalVoxelCoordinates spawnPoint)
+        private World(int seed, string baseDirectory, string name, IDimensionFactory dimensionFactory, PanDimensionalVoxelCoordinates spawnPoint)
         {
             _seed = seed;
             _name = name;
@@ -50,11 +48,52 @@ namespace TrueCraft.World
             _dimensions.AddRange(dimensions);
 
             _spawnPoint = spawnPoint;
+        }
 
+        /// <summary>
+        /// Creates a new World
+        /// </summary>
+        /// <param name="seed">The seed to be used to generate the World.</param>
+        /// <param name="baseDirectory">The folder where worlds are saved.
+        /// This will be the parent folder of the folder where the new world is created.</param>
+        /// <param name="name">The name of the World, as seen by the Player.</param>
+        /// <returns>The full path to the folder containing the manifest.nbt file.  The last
+        /// element of this path is a sanitized (for illegal file system characters and uniqueness)
+        /// version of name.</returns>
+        public static string CreateWorld(int seed, string baseDirectory, string name)
+        {
+            // Ensure that the folder name does not contain any illegal characters.
             string safeName = name;
             foreach (char c in Path.GetInvalidFileNameChars())
                 safeName = safeName.Replace(c.ToString(), string.Empty);
-            _folderName = Path.Combine(baseDirectory, safeName);
+
+            // Ensure that the folder name does not duplicate an existing folder name
+            if (File.Exists(Path.Combine(baseDirectory, safeName)))
+            {
+                int serial = 1;
+                while (File.Exists(Path.Combine(baseDirectory, $"{safeName}{serial}")))
+                    serial++;
+                safeName = $"{safeName}{serial}";
+            }
+
+            // Create the folder
+            string worldFolder = Path.Combine(baseDirectory, safeName);
+            Directory.CreateDirectory(worldFolder);
+
+            NbtFile file = new NbtFile();
+            file.RootTag.Add(new NbtCompound("SpawnPoint", new[]
+            {
+                new NbtInt("X", 0),
+                new NbtInt("Y", 0),
+                new NbtInt("Z", 0)
+            }));
+            file.RootTag.Add(new NbtInt("Seed", seed));
+            // TODO fix hard-coded OverWorld chunk provider
+            file.RootTag.Add(new NbtString("ChunkProvider", "TrueCraft.TerrainGen.StandardGenerator"));
+            file.RootTag.Add(new NbtString("Name", name));
+            file.SaveToFile(Path.Combine(worldFolder, "manifest.nbt"), NbtCompression.ZLib);
+
+            return worldFolder;
         }
 
         public static IWorld LoadWorld(string baseDirectory)
