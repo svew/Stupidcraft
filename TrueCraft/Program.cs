@@ -11,6 +11,7 @@ using TrueCraft.Profiling;
 using TrueCraft.World;
 using System.Collections.Generic;
 using TrueCraft.Core.Logic;
+using TrueCraft.Core.Lighting;
 
 namespace TrueCraft
 {
@@ -51,29 +52,25 @@ namespace TrueCraft
                 if (Directory.Exists("players"))
                     Directory.Delete("players", true);
             }
+
             IWorld world;
-            try
-            {
-                world = TrueCraft.World.World.LoadWorld("world");
-            }
-            catch(DirectoryNotFoundException)
+            if (!Directory.Exists("world"))
             {
                 int seed = MathHelper.Random.Next();
-                IDimensionFactory factory = new DimensionFactory();
-                world = new TrueCraft.World.World(seed, Paths.Worlds, "world", factory,
-                    new PanDimensionalVoxelCoordinates(DimensionID.Overworld, 0, 0, 0));
-                world.Save();
-
-                IDimensionServer overWorld = (IDimensionServer)world[DimensionID.Overworld];
-                overWorld.Initialize(new GlobalChunkCoordinates(0, 0), Server, null);
-
-                Server.Log(LogCategory.Notice, "Lighting the world (this will take a moment)...");
-                foreach (var lighter in Server.WorldLighters)
-                {
-                    while (lighter.TryLightNext()) ;
-                }
+                TrueCraft.World.World.CreateWorld(seed, Paths.Worlds, "world");
             }
-            world.Save();
+
+            world = TrueCraft.World.World.LoadWorld("world");
+
+            IDimensionServer overWorld = (IDimensionServer)world[DimensionID.Overworld];
+            overWorld.Initialize(new GlobalChunkCoordinates(0, 0), Server, null);
+
+            // TODO: Is this needed when loading (and not creating)?
+            Server.Log(LogCategory.Notice, "Lighting the world (this will take a moment)...");
+            foreach (Lighting lighter in Server.WorldLighters)
+            {
+                while (lighter.TryLightNext()) ;
+            }
 
             Server.Start(new IPEndPoint(IPAddress.Parse(ServerConfiguration.ServerAddress), ServerConfiguration.ServerPort));
             Console.CancelKeyPress += HandleCancelKeyPress;
