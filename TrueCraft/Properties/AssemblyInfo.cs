@@ -25,4 +25,4 @@ using System.Runtime.CompilerServices;
 //[assembly: AssemblyDelaySign(false)]
 //[assembly: AssemblyKeyFile("")]
 
-[assembly:InternalsVisibleTo("TrueCraft.Core.Test")]
+[assembly:InternalsVisibleTo("TrueCraft.Test")]
