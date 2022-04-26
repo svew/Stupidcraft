@@ -22,6 +22,8 @@ namespace TrueCraft.World
 
         private readonly DimensionID _dimensionID;
 
+        private readonly IMultiplayerServer _server;
+
         private readonly IEntityManager _entityManager;
 
         /// <inheritdoc />
@@ -75,15 +77,18 @@ namespace TrueCraft.World
         /// </summary>
         /// <param name="baseDirectory"></param>
         /// <param name="dimensionID"></param>
+        /// <param name="server"></param>
         /// <param name="chunkProvider"></param>
         /// <param name="lightingQueue">The Lighting Queue for lighting this Dimension</param>
         /// <param name="blockRepository"></param>
         /// <param name="entityManager"></param>
         public Dimension(string baseDirectory, DimensionID dimensionID,
+            IMultiplayerServer server,
             IChunkProvider chunkProvider, ILightingQueue lightingQueue, IBlockRepository blockRepository,
             IEntityManager entityManager)
         {
             _dimensionID = dimensionID;
+            _server = server;
             _entityManager = entityManager;
             _baseDirectory = baseDirectory;
             Name = DimensionInfo.GetName(dimensionID);
@@ -545,7 +550,7 @@ namespace TrueCraft.World
                 {
                     BlockDescriptor descriptor = GetBlockData(update + offset);
                     IBlockProvider provider = BlockRepository.GetBlockProvider(descriptor.ID);
-                    provider?.BlockUpdate(descriptor, source, XXXMultiplayerServer, this);
+                    provider?.BlockUpdate(descriptor, source, _server, this);
                 }
             }
         }

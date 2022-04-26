@@ -26,6 +26,7 @@ namespace TrueCraft.World
             ILightingQueue lightingQueue = new LightingQueue();
             EntityManager entityManager = new EntityManager(server);
             IDimensionServer overWorld = new Dimension(baseDirectory, DimensionID.Overworld,
+                server,
                 chunkProvider, lightingQueue, BlockRepository.Get(), entityManager);
             entityManager.SetDimension(overWorld);
             dimensions.Add(overWorld);
