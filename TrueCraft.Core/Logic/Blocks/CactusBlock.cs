@@ -100,6 +100,8 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public void DestroyCactus(BlockDescriptor descriptor, IMultiplayerServer server, IDimension dimension)
         {
+            ServerOnly.Assert();
+
             var toDrop = 0;
 
             // Search upwards
@@ -124,7 +126,7 @@ namespace TrueCraft.Core.Logic.Blocks
                 }
             }
 
-            var manager = server.GetEntityManagerForWorld(dimension);
+            IEntityManager manager = ((IDimensionServer)dimension).EntityManager;
             manager.SpawnEntity(
                 new ItemEntity((Vector3)(descriptor.Coordinates + Vector3i.Up),
                     new ItemStack(CactusBlock.BlockID, (sbyte)toDrop)));
@@ -132,13 +134,15 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
+            ServerOnly.Assert();
+
             if (ValidCactusPosition(descriptor, dimension.BlockRepository, dimension))
                 base.BlockPlaced(descriptor, face, dimension, user);
             else
             {
                 dimension.SetBlockID(descriptor.Coordinates, AirBlock.BlockID);
 
-                var manager = user.Server.GetEntityManagerForWorld(dimension);
+                IEntityManager manager = ((IDimensionServer)dimension).EntityManager;
                 manager.SpawnEntity(
                     new ItemEntity((Vector3)(descriptor.Coordinates + Vector3i.Up),
                         new ItemStack(CactusBlock.BlockID, (sbyte)1)));

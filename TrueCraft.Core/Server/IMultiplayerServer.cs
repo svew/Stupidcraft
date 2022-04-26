@@ -51,10 +51,6 @@ namespace TrueCraft.Core.Server
         void AddLogProvider(ILogProvider provider);
         void Log(LogCategory category, string text, params object[] parameters);
 
-        // TODO Move calls to IDimensionServer
-        [Obsolete()]
-        IEntityManager GetEntityManagerForWorld(IDimension dimension);
-
         void SendMessage(string message, params object[] parameters);
 
         void DisconnectClient(IRemoteClient client);

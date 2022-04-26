@@ -38,8 +38,6 @@ namespace TrueCraft.Test.Logic
             _dimension.Setup(w => w.SetBlockID(It.IsAny<GlobalVoxelCoordinates>(), It.IsAny<byte>()));
             _dimension.Setup(d => d.BlockRepository).Returns(_blockRepository.Object);
 
-            _server.Setup(s => s.GetEntityManagerForWorld(It.IsAny<IDimension>()))
-                .Returns<IDimension>(w => _entityManager.Object);
             _server.SetupGet(s => s.BlockRepository).Returns(_blockRepository.Object);
 
             _entityManager.Setup(m => m.SpawnEntity(It.IsAny<IEntity>()));

@@ -284,11 +284,6 @@ namespace TrueCraft
             }
         }
 
-        public IEntityManager GetEntityManagerForWorld(IDimension dimension)
-        {
-            return ((IDimensionServer)dimension).EntityManager;
-        }
-
         public void SendMessage(string message, params object[] parameters)
         {
             var compiled = string.Format(message, parameters);
@@ -378,8 +373,9 @@ namespace TrueCraft
             if (client.LoggedIn)
             {
                 SendMessage(ChatColor.Yellow + "{0} has left the server.", client.Username);
-                GetEntityManagerForWorld(client.Dimension).DespawnEntity(client.Entity);
-                GetEntityManagerForWorld(client.Dimension).FlushDespawns();
+                IEntityManager manager = ((IDimensionServer)_client.Dimension).EntityManager;
+                manager.DespawnEntity(client.Entity);
+                manager.FlushDespawns();
             }
             client.Save();
             client.Disconnect();

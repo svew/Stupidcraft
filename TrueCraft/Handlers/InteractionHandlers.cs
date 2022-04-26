@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using fNbt;
 using TrueCraft.Core;
@@ -40,8 +41,9 @@ namespace TrueCraft.Handlers
                     var item = new ItemEntity(client.Entity.Position + new Vector3(0, PlayerEntity.Height, 0), spawned);
                     item.Velocity = MathHelper.RotateY(Vector3.Forwards, MathHelper.DegreesToRadians(client.Entity.Yaw)) * 0.5;
                     client.Hotbar[client.SelectedSlot].Item = inventory;
-                    server.GetEntityManagerForWorld(client.Dimension).SpawnEntity(item);
+                    ((IDimensionServer)_client.Dimension).EntityManager.SpawnEntity(item);
                     break;
+
                 case PlayerDiggingPacket.Action.StartDigging:
                     foreach (var nearbyClient in server.Clients) // TODO: Send this repeatedly during the course of the digging
                     {
@@ -208,7 +210,7 @@ namespace TrueCraft.Handlers
                     client.ItemStaging = ItemStack.EmptyStack;
                 }
                 item.Velocity = MathHelper.FowardVector(client.Entity.Yaw) * 0.3;
-                server.GetEntityManagerForWorld(client.Dimension).SpawnEntity(item);
+                ((IDimensionServer)client.Dimension).EntityManager.SpawnEntity(item);
                 return;
             }
 
@@ -237,8 +239,8 @@ namespace TrueCraft.Handlers
             var packet = (ChangeHeldItemPacket)_packet;
             var client = (RemoteClient)_client;
             client.SelectedSlot = packet.Slot;
-            var notified = server.GetEntityManagerForWorld(client.Dimension).ClientsForEntity(client.Entity);
-            foreach (var c in notified)
+            IList<IRemoteClient> notified = ((IDimensionServer)client.Dimension).EntityManager.ClientsForEntity(client.Entity);
+            foreach (IRemoteClient c in notified)
                 c.QueuePacket(new EntityEquipmentPacket(client.Entity.EntityID, 0, client.SelectedItem.ID, client.SelectedItem.Metadata));
         }
 
@@ -264,9 +266,9 @@ namespace TrueCraft.Handlers
             var client = (RemoteClient)_client;
             if (packet.EntityID == client.Entity.EntityID)
             {
-                var nearby = server.GetEntityManagerForWorld(client.Dimension)
+                IList<IRemoteClient> nearby = ((IDimensionServer)client.Dimension).EntityManager
                     .ClientsForEntity(client.Entity);
-                foreach (var player in nearby)
+                foreach (IRemoteClient player in nearby)
                     player.QueuePacket(packet);
             }
         }

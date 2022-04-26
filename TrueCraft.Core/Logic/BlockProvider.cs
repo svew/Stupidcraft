@@ -70,7 +70,7 @@ namespace TrueCraft.Core.Logic
         {
             ServerOnly.Assert();
 
-            var entityManager = server.GetEntityManagerForWorld(dimension);
+            IEntityManager entityManager = ((IDimensionServer)dimension).EntityManager;
             var items = new ItemStack[0];
             var type = ToolType.None;
             var material = ToolMaterial.None;
@@ -167,7 +167,7 @@ namespace TrueCraft.Core.Logic
             // Test for entities
             if (BoundingBox.HasValue)
             {
-                var em = user.Server.GetEntityManagerForWorld(dimension);
+                IEntityManager em = ((IDimensionServer)dimension).EntityManager;
                 var entities = em.EntitiesInRange((Vector3)coordinates, 3);
                 var box = new BoundingBox(BoundingBox.Value.Min + (Vector3)coordinates,
                     BoundingBox.Value.Max + (Vector3)coordinates);

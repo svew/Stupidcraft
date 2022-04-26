@@ -56,7 +56,7 @@ namespace TrueCraft.Handlers
                 while (collision())
                     client.Entity.Position += Vector3.Up;
 
-                IEntityManager entityManager = server.GetEntityManagerForWorld(remoteClient.Dimension);
+                IEntityManager entityManager = ((IDimensionServer)remoteClient.Dimension).EntityManager;
                 entityManager.SpawnEntity(remoteClient.Entity);
 
                 // Send setup packets

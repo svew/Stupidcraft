@@ -137,10 +137,12 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override void BlockMined(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
+            ServerOnly.Assert();
+
             IDimensionServer dimensionServer = (IDimensionServer)dimension;
             GlobalVoxelCoordinates self = descriptor.Coordinates;
             NbtCompound? entity = dimensionServer.GetTileEntity(self);
-            IEntityManager manager = user.Server.GetEntityManagerForWorld(dimension);
+            IEntityManager manager = ((IDimensionServer)dimension).EntityManager;
             if (entity is not null)
             {
                 foreach (var item in (NbtList)entity["Items"])

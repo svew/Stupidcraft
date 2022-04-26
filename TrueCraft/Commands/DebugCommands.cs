@@ -153,7 +153,7 @@ namespace TrueCraft.Commands
                 return;
             }
             IEntity entity = (IEntity)Activator.CreateInstance(type);
-            IEntityManager em = client.Server.GetEntityManagerForWorld(client.Dimension);
+            IEntityManager em = ((IDimensionServer)client.Dimension).EntityManager;
             entity.Position = client.Entity.Position + MathHelper.FowardVector(client.Entity.Yaw) * 3;
             em.SpawnEntity(entity);
         }
@@ -196,7 +196,7 @@ namespace TrueCraft.Commands
                 return;
             }
 
-            IEntityManager manager = client.Server.GetEntityManagerForWorld(client.Dimension);
+            IEntityManager manager = ((IDimensionServer)client.Dimension).EntityManager;
             var entity = manager.GetEntityByID(id) as MobEntity;
             if (entity == null)
             {
@@ -259,7 +259,7 @@ namespace TrueCraft.Commands
                 return;
             }
 
-            IEntityManager manager = client.Server.GetEntityManagerForWorld(client.Dimension);
+            IEntityManager manager = ((IDimensionServer)client.Dimension).EntityManager;
             var entity = manager.GetEntityByID(id);
             if (entity == null)
             {
@@ -317,7 +317,7 @@ namespace TrueCraft.Commands
                 return;
             }
 
-            IEntityManager manager = client.Server.GetEntityManagerForWorld(client.Dimension);
+            IEntityManager manager = ((IDimensionServer)client.Dimension).EntityManager;
             var entity = manager.GetEntityByID(id) as MobEntity;
             if (entity == null)
             {

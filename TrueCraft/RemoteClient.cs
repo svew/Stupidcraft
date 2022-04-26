@@ -175,7 +175,7 @@ namespace TrueCraft
             // TODO: Should this packet even be sent to the originating client?
             //       It's used to provide the pickup animation.
             QueuePacket(packet);
-            IEntityManager manager = Server.GetEntityManagerForWorld(Dimension);
+            IEntityManager manager = ((IDimensionServer)Dimension).EntityManager;
             foreach (IRemoteClient client in manager.ClientsForEntity(Entity))
                 client.QueuePacket(packet);
 
@@ -556,7 +556,8 @@ namespace TrueCraft
             Profiler.Done();
 
             Profiler.Start("client.update-entities");
-            ((EntityManager)Server.GetEntityManagerForWorld(Dimension)).UpdateClientEntities(this);
+            IEntityManager manager = ((IDimensionServer)Dimension).EntityManager;
+            ((EntityManager)manager).UpdateClientEntities(this);    // TODO remove cast
             Profiler.Done();
         }
 

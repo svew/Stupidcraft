@@ -53,10 +53,12 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IDimension dimension)
         {
+            ServerOnly.Assert();
+
             if (dimension.GetBlockID(descriptor.Coordinates + Vector3i.Down) == AirBlock.BlockID)
             {
                 dimension.SetBlockID(descriptor.Coordinates, AirBlock.BlockID);
-                server.GetEntityManagerForWorld(dimension).SpawnEntity(new FallingGravelEntity((Vector3)descriptor.Coordinates));
+                ((IDimensionServer)dimension).EntityManager.SpawnEntity(new FallingGravelEntity((Vector3)descriptor.Coordinates));
             }
         }
     }
