@@ -16,7 +16,7 @@ namespace TrueCraft.World
         }
 
         /// <inheritdoc />
-        public IList<IDimensionServer> BuildDimensions(string baseDirectory, int seed)
+        public IList<IDimensionServer> BuildDimensions(IMultiplayerServer server, string baseDirectory, int seed)
         {
             List<IDimensionServer> dimensions = new List<IDimensionServer>(2);
 
@@ -24,7 +24,10 @@ namespace TrueCraft.World
 
             IChunkProvider chunkProvider = new StandardGenerator(seed);
             ILightingQueue lightingQueue = new LightingQueue();
-            IDimensionServer overWorld = new Dimension(baseDirectory, DimensionID.Overworld, chunkProvider, lightingQueue, BlockRepository.Get());
+            EntityManager entityManager = new EntityManager(server);
+            IDimensionServer overWorld = new Dimension(baseDirectory, DimensionID.Overworld,
+                chunkProvider, lightingQueue, BlockRepository.Get(), entityManager);
+            entityManager.SetDimension(overWorld);
             dimensions.Add(overWorld);
 
             // TODO Lighting Queue needs to be hooked up to its consumer.

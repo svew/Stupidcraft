@@ -60,7 +60,7 @@ namespace TrueCraft
                 TrueCraft.World.World.CreateWorld(seed, Paths.Worlds, "world");
             }
 
-            world = TrueCraft.World.World.LoadWorld("world");
+            world = TrueCraft.World.World.LoadWorld(Server, "world");
 
             IDimensionServer overWorld = (IDimensionServer)world[DimensionID.Overworld];
             overWorld.Initialize(new GlobalChunkCoordinates(0, 0), Server, null);

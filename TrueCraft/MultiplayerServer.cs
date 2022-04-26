@@ -65,12 +65,10 @@ namespace TrueCraft
             _cde = new CountdownEvent(_lstAutoResetEvents.Count);
 
             PacketHandlers = new PacketHandler[0x100];
-            _world = TrueCraft.World.World.LoadWorld(worldPath);
+            _world = TrueCraft.World.World.LoadWorld(this, worldPath);
             foreach (IDimensionServer d in _world)
                 d.BlockChanged += HandleBlockChanged;
 
-
-            EntityManagers = new List<IEntityManager>();
             LogProviders = new List<ILogProvider>();
             Scheduler = new EventScheduler(this);
 
@@ -119,7 +117,6 @@ namespace TrueCraft
         // <inheritdoc />
         public object World { get => _world; }
 
-        public IList<IEntityManager> EntityManagers { get; private set; }
         public IList<Lighting> WorldLighters { get; set; }
         public IEventScheduler Scheduler { get; private set; }
         public IBlockRepository BlockRepository { get; private set; }
@@ -289,13 +286,7 @@ namespace TrueCraft
 
         public IEntityManager GetEntityManagerForWorld(IDimension dimension)
         {
-            for (int i = 0; i < EntityManagers.Count; i++)
-            {
-                var manager = EntityManagers[i] as EntityManager;
-                if (manager.Dimension == dimension)
-                    return manager;
-            }
-            return null;
+            return ((IDimensionServer)dimension).EntityManager;
         }
 
         public void SendMessage(string message, params object[] parameters)
@@ -446,10 +437,8 @@ namespace TrueCraft
             Scheduler.Update();
 
             Profiler.Start("environment.entities");
-            foreach (var manager in EntityManagers)
-            {
-                manager.Update();
-            }
+            foreach (IDimensionServer server in _world)
+                server.EntityManager.Update();
             Profiler.Done();
 
             if (Program.ServerConfiguration.EnableLighting)

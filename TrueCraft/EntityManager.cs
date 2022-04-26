@@ -17,11 +17,12 @@ namespace TrueCraft
     public class EntityManager : IEntityManager
     {
         public TimeSpan TimeSinceLastUpdate { get; private set; }
-        public IDimension Dimension { get; }
 
         private readonly IMultiplayerServer _server;
 
-        private readonly PhysicsEngine _physicsEngine;
+        private IDimension? _dimension;
+
+        private PhysicsEngine? _physicsEngine;
 
         private int _nextEntityID;
 
@@ -33,11 +34,11 @@ namespace TrueCraft
 
         private DateTime _lastUpdate;
 
-        public EntityManager(IMultiplayerServer server, IDimension dimension)
+        public EntityManager(IMultiplayerServer server)
         {
             _server = server;
-            Dimension = dimension;
-            _physicsEngine = new PhysicsEngine(dimension, (IBlockPhysicsProvider)dimension.BlockRepository);
+            _dimension = null;
+            _physicsEngine = null;
             _pendingDespawns = new ConcurrentBag<IEntity>();
             _entities = new List<IEntity>();
             // TODO: Handle loading worlds that already have entities
@@ -45,6 +46,14 @@ namespace TrueCraft
             _nextEntityID = 1;
             _lastUpdate = DateTime.UtcNow;
             TimeSinceLastUpdate = TimeSpan.Zero;
+        }
+
+        public void SetDimension(IDimension dimension)
+        {
+            if (_dimension is not null)
+                throw new InvalidOperationException("Dimension is already set.");
+            _dimension = dimension;
+            _physicsEngine = new PhysicsEngine(dimension, (IBlockPhysicsProvider)dimension.BlockRepository);
         }
 
         private void HandlePropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -237,7 +246,7 @@ namespace TrueCraft
                 return;
             entity.SpawnTime = DateTime.UtcNow;
             entity.EntityManager = this;
-            entity.Dimension = Dimension;
+            entity.Dimension = _dimension!;
             entity.EntityID = _nextEntityID++;
             entity.PropertyChanged -= HandlePropertyChanged;
             entity.PropertyChanged += HandlePropertyChanged;
@@ -254,7 +263,7 @@ namespace TrueCraft
                 }
             }
             if (entity is IPhysicsEntity)
-                _physicsEngine.AddEntity(entity as IPhysicsEntity);
+                _physicsEngine!.AddEntity(entity as IPhysicsEntity);
         }
 
         public void DespawnEntity(IEntity entity)
@@ -271,7 +280,7 @@ namespace TrueCraft
                 while (!_pendingDespawns.TryTake(out entity))
                     ;
                 if (entity is IPhysicsEntity)
-                    _physicsEngine.RemoveEntity((IPhysicsEntity)entity);
+                    _physicsEngine!.RemoveEntity((IPhysicsEntity)entity);
                 lock ((_server as MultiplayerServer).ClientLock) // TODO: Thread safe way to iterate over client collection
                 {
                     for (int i = 0, ServerClientsCount = _server.Clients.Count; i < ServerClientsCount; i++)
@@ -299,7 +308,7 @@ namespace TrueCraft
         {
             TimeSinceLastUpdate = DateTime.UtcNow - _lastUpdate;
             _lastUpdate = DateTime.UtcNow;
-            _physicsEngine.Update(TimeSinceLastUpdate);
+            _physicsEngine!.Update(TimeSinceLastUpdate);
             try
             {
                 lock (_entities)

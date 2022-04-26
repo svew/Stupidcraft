@@ -22,6 +22,8 @@ namespace TrueCraft.World
 
         private readonly DimensionID _dimensionID;
 
+        private readonly IEntityManager _entityManager;
+
         /// <inheritdoc />
         public string Name { get; }
 
@@ -76,10 +78,13 @@ namespace TrueCraft.World
         /// <param name="chunkProvider"></param>
         /// <param name="lightingQueue">The Lighting Queue for lighting this Dimension</param>
         /// <param name="blockRepository"></param>
+        /// <param name="entityManager"></param>
         public Dimension(string baseDirectory, DimensionID dimensionID,
-            IChunkProvider chunkProvider, ILightingQueue lightingQueue, IBlockRepository blockRepository)
+            IChunkProvider chunkProvider, ILightingQueue lightingQueue, IBlockRepository blockRepository,
+            IEntityManager entityManager)
         {
-            _dimensionID = dimensionID; ;
+            _dimensionID = dimensionID;
+            _entityManager = entityManager;
             _baseDirectory = baseDirectory;
             Name = DimensionInfo.GetName(dimensionID);
             _chunkProvider = chunkProvider;
@@ -150,6 +155,9 @@ namespace TrueCraft.World
                 }
             }
         }
+
+        /// <inheritdoc />
+        public IEntityManager EntityManager { get => _entityManager; }
 
         #region object overrides
         public override int GetHashCode()

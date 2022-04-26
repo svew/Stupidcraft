@@ -37,13 +37,13 @@ namespace TrueCraft.World
         /// <param name="name">The name of the World, as seen by the Player.</param>
         /// <param name="dimensionFactory">A Factory for building the set of Dimensions.</param>
         /// <param name="spawnPoint">The default Spawn Point for all Players.</param>
-        private World(int seed, string baseDirectory, string name, IDimensionFactory dimensionFactory, PanDimensionalVoxelCoordinates spawnPoint)
+        private World(IMultiplayerServer server, int seed, string baseDirectory, string name, IDimensionFactory dimensionFactory, PanDimensionalVoxelCoordinates spawnPoint)
         {
             _seed = seed;
             _name = name;
             _baseDirectory = baseDirectory;
 
-            IList<IDimensionServer> dimensions = dimensionFactory.BuildDimensions(baseDirectory, seed);
+            IList<IDimensionServer> dimensions = dimensionFactory.BuildDimensions(server, baseDirectory, seed);
             _dimensions = new List<IDimensionServer>(dimensions.Count);
             _dimensions.AddRange(dimensions);
 
@@ -96,7 +96,7 @@ namespace TrueCraft.World
             return worldFolder;
         }
 
-        public static IWorld LoadWorld(string baseDirectory)
+        public static IWorld LoadWorld(IMultiplayerServer server, string baseDirectory)
         {
             if (!Directory.Exists(baseDirectory))
                 throw new DirectoryNotFoundException();
@@ -130,7 +130,7 @@ namespace TrueCraft.World
             }
 
             IDimensionFactory factory = new DimensionFactory();
-            return new World(seed, baseDirectory, name, factory, spawnPoint);
+            return new World(server, seed, baseDirectory, name, factory, spawnPoint);
         }
 
         #region IWorld

@@ -44,6 +44,11 @@ namespace TrueCraft.Core.Server
         void Initialize(GlobalChunkCoordinates spawnChunk, IMultiplayerServer server, ProgressNotification? progressNotification);
 
         /// <summary>
+        /// Gets the Entity Manager for this Dimension.
+        /// </summary>
+        IEntityManager EntityManager { get; }
+
+        /// <summary>
         /// Gets the Tile Entity at the given Coordinates.
         /// </summary>
         /// <param name="coordinates">The location of the Tile Entity.</param>
