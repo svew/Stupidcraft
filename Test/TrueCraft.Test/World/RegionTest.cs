@@ -11,40 +11,29 @@ namespace TrueCraft.Test.World
     [TestFixture]
     public class RegionTest
     {
-        public Region Region { get; set; }
+        private Region? _region;
 
         [OneTimeSetUp]
         public void SetUp()
         {
-            IDimension dimension = new TrueCraft.World.Dimension();
-            var assemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            Region = new Region(RegionCoordinates.Zero, dimension,
-                Path.Combine(assemblyDir, "Files", "r.0.0.mca"));
+            string assemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
+            _region = new Region(RegionCoordinates.Zero, 
+                Path.Combine(assemblyDir, "Files"));
         }
 
         [Test]
         public void TestGetChunk()
         {
-            var chunk = Region.GetChunk(LocalChunkCoordinates.Zero);
-            Assert.AreEqual(GlobalChunkCoordinates.Zero, chunk.Coordinates);
-            Assert.Throws(typeof(ArgumentException), () =>
-                Region.GetChunk(new LocalChunkCoordinates(31, 31)));
-        }
+            IChunk? chunk = _region!.GetChunk(LocalChunkCoordinates.Zero);
 
-        [Test]
-        public void TestUnloadChunk()
-        {
-            var chunk = Region.GetChunk(LocalChunkCoordinates.Zero);
-            Assert.AreEqual(GlobalChunkCoordinates.Zero, chunk.Coordinates);
-            Assert.IsTrue(Region.Chunks.Any(c => c.Coordinates == GlobalChunkCoordinates.Zero));
-            Region.UnloadChunk(LocalChunkCoordinates.Zero);
-            Assert.IsFalse(Region.Chunks.Any(c => c.Coordinates == GlobalChunkCoordinates.Zero));
+            // No chunk was added, and Region must not generate chunks.
+            Assert.IsNull(chunk);
         }
 
         [Test]
         public void TestGetRegionFileName()
         {
-            Assert.AreEqual("r.0.0.mca", Region.GetRegionFileName(Region.Position));
+            Assert.AreEqual("r.0.0.mca", Region.GetRegionFileName(_region!.Position));
         }
     }
 }
