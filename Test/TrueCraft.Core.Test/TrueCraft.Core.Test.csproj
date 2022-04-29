@@ -22,9 +22,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Windows\" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Files\r.0.0.mca">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -56,9 +53,5 @@
   <ItemGroup>
     <ProjectReference Include="..\..\TrueCraft.Core\TrueCraft.Core.csproj" />
     <ProjectReference Include="..\..\externals\fNbt\fNbt\fNbt.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Windows\" />
   </ItemGroup>
 </Project>
