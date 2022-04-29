@@ -9,6 +9,7 @@ using TrueCraft.Core.Server;
 using TrueCraft.Core.World;
 using TrueCraft.Core;
 using TrueCraft.TerrainGen;
+using TrueCraft.Core.Lighting;
 
 namespace TrueCraft.Test.Logic
 {
@@ -76,8 +77,16 @@ namespace TrueCraft.Test.Logic
         [Test]
         public void TestSupport()
         {
+            ResetMocks();
+
             // We need an actual world for this
-            IDimension dimension = new TrueCraft.World.Dimension(string.Empty, DimensionID.Overworld, new FlatlandGenerator(_testSeed), _blockRepository.Object);
+            Mock<IMultiplayerServer> mockServer = new Mock<IMultiplayerServer>(MockBehavior.Strict);
+            Mock<ILightingQueue> mockLightingQueue = new Mock<ILightingQueue>(MockBehavior.Strict);
+            IDimension dimension = new TrueCraft.World.Dimension(string.Empty,
+                      DimensionID.Overworld, mockServer.Object, new FlatlandGenerator(_testSeed),
+                      mockLightingQueue.Object,
+                      _blockRepository.Object, _entityManager.Object);
+
             dimension.SetBlockID(GlobalVoxelCoordinates.Zero, 1);
             GlobalVoxelCoordinates oneY = new GlobalVoxelCoordinates(0, 1, 0);
             dimension.SetBlockID(oneY, 2);

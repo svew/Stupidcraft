@@ -3,7 +3,9 @@ using System.IO;
 using System.Reflection;
 using Moq;
 using NUnit.Framework;
+using TrueCraft.Core.Lighting;
 using TrueCraft.Core.Logic;
+using TrueCraft.Core.Server;
 using TrueCraft.Core.World;
 using TrueCraft.TerrainGen;
 using TrueCraft.World;
@@ -24,8 +26,16 @@ namespace TrueCraft.Test.World
             Mock<IBlockRepository> mockRepository = new Mock<IBlockRepository>(MockBehavior.Strict);
             mockRepository.Setup(x => x.GetBlockProvider(It.Is<byte>(b => b == 3))).Returns(mockProvider.Object);
 
+            Mock<IMultiplayerServer> mockServer = new Mock<IMultiplayerServer>(MockBehavior.Strict);
+
+            Mock<ILightingQueue> mockLightingQueue = new Mock<ILightingQueue>(MockBehavior.Strict);
+
+            Mock<IEntityManager> mockEntityManager = new Mock<IEntityManager>(MockBehavior.Strict);
+
             string assemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            _dimension = new Dimension(assemblyDir, DimensionID.Overworld, new FlatlandGenerator(1234), mockRepository.Object);
+            _dimension = new Dimension(assemblyDir, DimensionID.Overworld, mockServer.Object,
+                new FlatlandGenerator(1234), mockLightingQueue.Object,
+                mockRepository.Object, mockEntityManager.Object);
         }
 
         [Test]

@@ -2,9 +2,11 @@
 using Moq;
 using NUnit.Framework;
 using TrueCraft.Core.Entities;
+using TrueCraft.Core.Lighting;
 using TrueCraft.Core.Logic;
 using TrueCraft.Core.Logic.Blocks;
 using TrueCraft.Core.Physics;
+using TrueCraft.Core.Server;
 using TrueCraft.Core.World;
 using TrueCraft.TerrainGen;
 
@@ -20,6 +22,12 @@ namespace TrueCraft.Core.Test.Physics
 
         private IBlockPhysicsProvider _blockPhysicsProvider;
 
+        private IMultiplayerServer _server;
+
+        private ILightingQueue _lightingQueue;
+
+        private IEntityManager _entityManager;
+
         public PhysicsEngineTest()
         {
             Mock<IBlockProvider> mockProvider = new Mock<IBlockProvider>(MockBehavior.Strict);
@@ -33,6 +41,15 @@ namespace TrueCraft.Core.Test.Physics
             Mock<IBlockPhysicsProvider> mockPhysicsProvider = new Mock<IBlockPhysicsProvider>(MockBehavior.Strict);
             mockPhysicsProvider.Setup(x => x.GetBoundingBox(It.IsAny<IDimension>(), It.IsAny<GlobalVoxelCoordinates>())).Returns(new BoundingBox(Vector3.Zero, Vector3.One));
             _blockPhysicsProvider = mockPhysicsProvider.Object;
+
+            Mock<IMultiplayerServer> mockServer = new Mock<IMultiplayerServer>(MockBehavior.Strict);
+            _server = mockServer.Object;
+
+            Mock<ILightingQueue> mockLightingQueue = new Mock<ILightingQueue>(MockBehavior.Strict);
+            _lightingQueue = mockLightingQueue.Object;
+
+            Mock<IEntityManager> mockEntityManager = new Mock<IEntityManager>(MockBehavior.Strict);
+            _entityManager = mockEntityManager.Object;
         }
 
         private class TestEntity : IAABBEntity
@@ -82,7 +99,10 @@ namespace TrueCraft.Core.Test.Physics
         [Test]
         public void TestGravity()
         {
-            IDimension dimension = new TrueCraft.World.Dimension(string.Empty, DimensionID.Overworld, new FlatlandGenerator(_testSeed), _blockRepository);
+            IDimension dimension = new TrueCraft.World.Dimension(string.Empty,
+                      DimensionID.Overworld, _server,
+                      new FlatlandGenerator(_testSeed), _lightingQueue,
+                      _blockRepository, _entityManager);
             IPhysicsEngine physics = new PhysicsEngine(dimension, _blockPhysicsProvider);
             var entity = new TestEntity();
             entity.Position = new Vector3(0, 100, 0);
@@ -103,7 +123,10 @@ namespace TrueCraft.Core.Test.Physics
         [Test]
         public void TestDrag()
         {
-            IDimension dimension = new TrueCraft.World.Dimension(string.Empty, DimensionID.Overworld, new FlatlandGenerator(_testSeed), _blockRepository);
+            IDimension dimension = new TrueCraft.World.Dimension(string.Empty,
+                      DimensionID.Overworld, _server,
+                      new FlatlandGenerator(_testSeed), _lightingQueue,
+                      _blockRepository, _entityManager);
             IPhysicsEngine physics = new PhysicsEngine(dimension, _blockPhysicsProvider);
             var entity = new TestEntity();
             entity.Position = new Vector3(0, 100, 0);
@@ -121,7 +144,10 @@ namespace TrueCraft.Core.Test.Physics
         [Test]
         public void TestTerrainCollision()
         {
-            IDimension dimension = new TrueCraft.World.Dimension(string.Empty, DimensionID.Overworld, new FlatlandGenerator(_testSeed), _blockRepository);
+            IDimension dimension = new TrueCraft.World.Dimension(string.Empty,
+                      DimensionID.Overworld, _server,
+                      new FlatlandGenerator(_testSeed), _lightingQueue,
+                      _blockRepository, _entityManager);
             IPhysicsEngine physics = new PhysicsEngine(dimension, _blockPhysicsProvider);
             var entity = new TestEntity();
             entity.Size = new Size(0.6, 1.8, 0.6);
@@ -142,7 +168,10 @@ namespace TrueCraft.Core.Test.Physics
         [Test]
         public void TestExtremeTerrainCollision()
         {
-            IDimension dimension = new TrueCraft.World.Dimension(string.Empty, DimensionID.Overworld, new FlatlandGenerator(_testSeed), _blockRepository);
+            IDimension dimension = new TrueCraft.World.Dimension(string.Empty,
+                      DimensionID.Overworld, _server,
+                      new FlatlandGenerator(_testSeed), _lightingQueue,
+                      _blockRepository, _entityManager);
             IPhysicsEngine physics = new PhysicsEngine(dimension, _blockPhysicsProvider);
             var entity = new TestEntity();
             entity.Position = new Vector3(0, 4, 0);
@@ -160,7 +189,10 @@ namespace TrueCraft.Core.Test.Physics
         {
             // Tests an entity that falls alongside a wall
 
-            IDimension dimension = new TrueCraft.World.Dimension(string.Empty, DimensionID.Overworld, new FlatlandGenerator(_testSeed), _blockRepository);
+            IDimension dimension = new TrueCraft.World.Dimension(string.Empty,
+                      DimensionID.Overworld, _server,
+                      new FlatlandGenerator(_testSeed), _lightingQueue,
+                      _blockRepository, _entityManager);
             IPhysicsEngine physics = new PhysicsEngine(dimension, _blockPhysicsProvider);
             var entity = new TestEntity();
             entity.Position = new Vector3(0, 10, 0);
@@ -181,7 +213,10 @@ namespace TrueCraft.Core.Test.Physics
         [Test]
         public void TestCollisionPoint()
         {
-            IDimension dimension = new TrueCraft.World.Dimension(string.Empty, DimensionID.Overworld, new FlatlandGenerator(_testSeed), _blockRepository);
+            IDimension dimension = new TrueCraft.World.Dimension(string.Empty,
+                      DimensionID.Overworld, _server,
+                      new FlatlandGenerator(_testSeed), _lightingQueue,
+                      _blockRepository, _entityManager);
             IPhysicsEngine physics = new PhysicsEngine(dimension, _blockPhysicsProvider);
             var entity = new TestEntity();
             entity.Position = new Vector3(0, 5, 0);
@@ -200,7 +235,10 @@ namespace TrueCraft.Core.Test.Physics
         [Test]
         public void TestHorizontalCollision()
         {
-            IDimension dimension = new TrueCraft.World.Dimension(string.Empty, DimensionID.Overworld, new FlatlandGenerator(_testSeed), _blockRepository);
+            IDimension dimension = new TrueCraft.World.Dimension(string.Empty,
+                      DimensionID.Overworld, _server,
+                      new FlatlandGenerator(_testSeed), _lightingQueue,
+                      _blockRepository, _entityManager);
             IPhysicsEngine physics = new PhysicsEngine(dimension, _blockPhysicsProvider);
             var entity = new TestEntity();
             entity.Position = new Vector3(0, 5, 0);
@@ -220,7 +258,10 @@ namespace TrueCraft.Core.Test.Physics
         [Test]
         public void TestCornerCollision()
         {
-            IDimension dimension = new TrueCraft.World.Dimension(string.Empty, DimensionID.Overworld, new FlatlandGenerator(_testSeed), _blockRepository);
+            IDimension dimension = new TrueCraft.World.Dimension(string.Empty,
+                      DimensionID.Overworld, _server,
+                      new FlatlandGenerator(_testSeed), _lightingQueue,
+                      _blockRepository, _entityManager);
             IPhysicsEngine physics = new PhysicsEngine(dimension, _blockPhysicsProvider);
             var entity = new TestEntity();
             entity.Position = new Vector3(-1, 10, -1);

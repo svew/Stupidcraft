@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Moq;
 using NUnit.Framework;
 using TrueCraft.Core.Server;
 using TrueCraft.Core.World;
@@ -17,9 +18,11 @@ namespace TrueCraft.Test.World
         public void TestBuildDimensions()
         {
             string baseDirectory = "FakeBaseDirectory";
+            Mock<IMultiplayerServer> mockServer = new Mock<IMultiplayerServer>(MockBehavior.Strict);
+
             IDimensionFactory factory = new DimensionFactory();
 
-            IList<IDimensionServer> actual = factory.BuildDimensions(baseDirectory, 314159);
+            IList<IDimensionServer> actual = factory.BuildDimensions(mockServer.Object, baseDirectory, 314159);
 
             Assert.AreEqual(2, actual.Count);
 
