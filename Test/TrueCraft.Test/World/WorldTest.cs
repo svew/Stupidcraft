@@ -12,23 +12,17 @@ namespace TrueCraft.Test.World
     [TestFixture]
     public class WorldTest
     {
-        private IWorld _world;
-
-        [OneTimeSetUp]
-        public void SetUp()
-        {
-            Mock<IMultiplayerServer> mockWorld = new Mock<IMultiplayerServer>(MockBehavior.Strict);
-
-            string assemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            _world = TrueCraft.World.World.LoadWorld(mockWorld.Object, Path.Combine(assemblyDir, "Files"));
-        }
-
         [Test]
         public void TestManifestLoaded()
         {
+            Mock<IMultiplayerServer> mockWorld = new Mock<IMultiplayerServer>(MockBehavior.Strict);
+
+            string assemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
+            IWorld world = TrueCraft.World.World.LoadWorld(mockWorld.Object, Path.Combine(assemblyDir, "Files"));
+
             // Constants from manifest.nbt
-            Assert.AreEqual(new GlobalVoxelCoordinates(0, 60, 0), _world.SpawnPoint);
-            Assert.AreEqual(1168393583, _world.Seed);
+            Assert.AreEqual(new GlobalVoxelCoordinates(0, 60, 0), world.SpawnPoint);
+            Assert.AreEqual(1168393583, world.Seed);
         }
     }
 }
