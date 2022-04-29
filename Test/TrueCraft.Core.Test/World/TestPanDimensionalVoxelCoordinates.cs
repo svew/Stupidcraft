@@ -17,10 +17,10 @@ namespace TrueCraft.Core.Test.World
         {
             PanDimensionalVoxelCoordinates actual = new PanDimensionalVoxelCoordinates(dimensionID, x, y, z);
 
-            Assert.Equals(actual.DimensionID, dimensionID);
-            Assert.Equals(actual.X, x);
-            Assert.Equals(actual.Y, y);
-            Assert.Equals(actual.Z, z);
+            Assert.AreEqual(actual.DimensionID, dimensionID);
+            Assert.AreEqual(actual.X, x);
+            Assert.AreEqual(actual.Y, y);
+            Assert.AreEqual(actual.Z, z);
         }
 
         [TestCase(true, DimensionID.Overworld, 2, 3, 5, DimensionID.Overworld, 2, 3, 5)]
