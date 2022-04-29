@@ -118,7 +118,8 @@ namespace TrueCraft.World
                 seed = file.RootTag["Seed"].IntValue;
 
                 string providerName = file.RootTag["ChunkProvider"].StringValue;
-                IChunkProvider provider = (IChunkProvider)Activator.CreateInstance(Type.GetType(providerName));
+                IChunkProvider provider = (IChunkProvider)Activator.CreateInstance(Type.GetType(providerName)!,
+                          new object[] { seed })!;
                 // TODO
                 // provider.Initialize(dimension);
 
