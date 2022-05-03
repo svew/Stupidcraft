@@ -32,18 +32,20 @@ namespace TrueCraft.World
         /// <summary>
         /// Constructs a new World instance
         /// </summary>
+        /// <param name="serviceLocator"></param>
         /// <param name="seed">The seed to be used to generate the World.</param>
         /// <param name="baseDirectory">The folder this world is saved.</param>
         /// <param name="name">The name of the World, as seen by the Player.</param>
         /// <param name="dimensionFactory">A Factory for building the set of Dimensions.</param>
         /// <param name="spawnPoint">The default Spawn Point for all Players.</param>
-        private World(IMultiplayerServer server, int seed, string baseDirectory, string name, IDimensionFactory dimensionFactory, PanDimensionalVoxelCoordinates spawnPoint)
+        private World(IServiceLocator serviceLocator, int seed, string baseDirectory,
+            string name, IDimensionFactory dimensionFactory, PanDimensionalVoxelCoordinates spawnPoint)
         {
             _seed = seed;
             _name = name;
             _baseDirectory = baseDirectory;
 
-            IList<IDimensionServer> dimensions = dimensionFactory.BuildDimensions(server, baseDirectory, seed);
+            IList<IDimensionServer> dimensions = dimensionFactory.BuildDimensions(serviceLocator, baseDirectory, seed);
             _dimensions = new List<IDimensionServer>(dimensions.Count);
             _dimensions.AddRange(dimensions);
 
@@ -96,7 +98,7 @@ namespace TrueCraft.World
             return worldFolder;
         }
 
-        public static IWorld LoadWorld(IMultiplayerServer server, string baseDirectory)
+        public static IWorld LoadWorld(IServiceLocator serviceLocator, string baseDirectory)
         {
             if (!Directory.Exists(baseDirectory))
                 throw new DirectoryNotFoundException();
@@ -131,7 +133,7 @@ namespace TrueCraft.World
             }
 
             IDimensionFactory factory = new DimensionFactory();
-            return new World(server, seed, baseDirectory, name, factory, spawnPoint);
+            return new World(serviceLocator, seed, baseDirectory, name, factory, spawnPoint);
         }
 
         #region IWorld

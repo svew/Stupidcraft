@@ -20,9 +20,12 @@ namespace TrueCraft.Test.World
             string baseDirectory = "FakeBaseDirectory";
             Mock<IMultiplayerServer> mockServer = new Mock<IMultiplayerServer>(MockBehavior.Strict);
 
+            Mock<IServiceLocator> mockServiceLocator = new Mock<IServiceLocator>(MockBehavior.Strict);
+            mockServiceLocator.Setup(x => x.Server).Returns(mockServer.Object);
+
             IDimensionFactory factory = new DimensionFactory();
 
-            IList<IDimensionServer> actual = factory.BuildDimensions(mockServer.Object, baseDirectory, 314159);
+            IList<IDimensionServer> actual = factory.BuildDimensions(mockServiceLocator.Object, baseDirectory, 314159);
 
             Assert.AreEqual(2, actual.Count);
 

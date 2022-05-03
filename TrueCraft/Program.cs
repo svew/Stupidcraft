@@ -21,6 +21,8 @@ namespace TrueCraft
 
         public static MultiplayerServer Server;
 
+        public static IServiceLocator ServiceLocator;
+
         public static void Main(string[] args)
         {
             // TODO: World path must be passed here.
@@ -60,7 +62,12 @@ namespace TrueCraft
                 TrueCraft.World.World.CreateWorld(seed, Paths.Worlds, "world");
             }
 
-            world = TrueCraft.World.World.LoadWorld(Server, "world");
+            Discover.DoDiscovery(new Discover());
+            ServiceLocator = new ServiceLocater(Server, BlockRepository.Get(), ItemRepository.Get());
+
+            world = TrueCraft.World.World.LoadWorld(ServiceLocator, "world");
+            ServiceLocator.World = world;
+            Server.World = world;
 
             IDimensionServer overWorld = (IDimensionServer)world[DimensionID.Overworld];
             overWorld.Initialize(new GlobalChunkCoordinates(0, 0), Server, null);

@@ -22,6 +22,8 @@ namespace TrueCraft.Core.Test.AI
 
         private IMultiplayerServer _server;
 
+        private IServiceLocator _serviceLocator;
+
         private IEntityManager _entityManager;
 
         public PathFindingTest()
@@ -39,6 +41,10 @@ namespace TrueCraft.Core.Test.AI
 
             Mock<IMultiplayerServer> mockServer = new Mock<IMultiplayerServer>(MockBehavior.Strict);
             _server = mockServer.Object;
+
+            Mock<IServiceLocator> mockServiceLocator = new Mock<IServiceLocator>(MockBehavior.Strict);
+            mockServiceLocator.Setup(x => x.Server).Returns(mockServer.Object);
+            _serviceLocator = mockServiceLocator.Object;
 
             Mock<IEntityManager> mockEntityManager = new Mock<IEntityManager>(MockBehavior.Strict);
             _entityManager = mockEntityManager.Object;
@@ -68,9 +74,9 @@ namespace TrueCraft.Core.Test.AI
 
         private IDimension BuildDimension()
         {
-            return new TrueCraft.World.Dimension(string.Empty, DimensionID.Overworld,
-                _server, new FlatlandGenerator(_testSeed), _lightingQueue,
-                _blockRepository, _entityManager);
+            return new TrueCraft.World.Dimension(_serviceLocator, string.Empty, DimensionID.Overworld,
+                new FlatlandGenerator(_testSeed), _lightingQueue,
+                _entityManager);
         }
 
         [Test]

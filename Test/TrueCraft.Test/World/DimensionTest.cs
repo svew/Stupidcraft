@@ -28,14 +28,19 @@ namespace TrueCraft.Test.World
 
             Mock<IMultiplayerServer> mockServer = new Mock<IMultiplayerServer>(MockBehavior.Strict);
 
+            Mock<IServiceLocator> mockServiceLocator = new Mock<IServiceLocator>(MockBehavior.Strict);
+            mockServiceLocator.Setup(x => x.BlockRepository).Returns(mockRepository.Object);
+            mockServiceLocator.Setup(x => x.Server).Returns(mockServer.Object);
+
             Mock<ILightingQueue> mockLightingQueue = new Mock<ILightingQueue>(MockBehavior.Strict);
 
             Mock<IEntityManager> mockEntityManager = new Mock<IEntityManager>(MockBehavior.Strict);
 
             string assemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            _dimension = new Dimension(assemblyDir, DimensionID.Overworld, mockServer.Object,
+            _dimension = new Dimension(mockServiceLocator.Object,
+                assemblyDir, DimensionID.Overworld, 
                 new FlatlandGenerator(1234), mockLightingQueue.Object,
-                mockRepository.Object, mockEntityManager.Object);
+                mockEntityManager.Object);
         }
 
         [Test]

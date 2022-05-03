@@ -75,26 +75,25 @@ namespace TrueCraft.World
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="serviceLocator"></param>
         /// <param name="baseDirectory"></param>
         /// <param name="dimensionID"></param>
-        /// <param name="server"></param>
         /// <param name="chunkProvider"></param>
         /// <param name="lightingQueue">The Lighting Queue for lighting this Dimension</param>
-        /// <param name="blockRepository"></param>
         /// <param name="entityManager"></param>
-        public Dimension(string baseDirectory, DimensionID dimensionID,
-            IMultiplayerServer server,
-            IChunkProvider chunkProvider, ILightingQueue lightingQueue, IBlockRepository blockRepository,
+        public Dimension(IServiceLocator serviceLocator,
+            string baseDirectory, DimensionID dimensionID,
+            IChunkProvider chunkProvider, ILightingQueue lightingQueue, 
             IEntityManager entityManager)
         {
             _dimensionID = dimensionID;
-            _server = server;
+            _server = serviceLocator.Server;
             _entityManager = entityManager;
             _baseDirectory = baseDirectory;
             Name = DimensionInfo.GetName(dimensionID);
             _chunkProvider = chunkProvider;
             _lightingQueue = lightingQueue;
-            _blockRepository = blockRepository;
+            _blockRepository = serviceLocator.BlockRepository;
             _regions = new Dictionary<RegionCoordinates, IRegion>();
             _baseTime = DateTime.UtcNow;
         }

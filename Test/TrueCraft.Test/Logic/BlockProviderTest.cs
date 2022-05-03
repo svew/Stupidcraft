@@ -80,12 +80,16 @@ namespace TrueCraft.Test.Logic
             ResetMocks();
 
             // We need an actual world for this
+            // TODO: Check if this could be switched to FakeDimension so that this unit test won't have
+            //       a dependency on the Dimension class.
             Mock<IMultiplayerServer> mockServer = new Mock<IMultiplayerServer>(MockBehavior.Strict);
+            Mock<IServiceLocator> mockServiceLocator = new Mock<IServiceLocator>(MockBehavior.Strict);
+            mockServiceLocator.Setup(x => x.Server).Returns(mockServer.Object);
             Mock<ILightingQueue> mockLightingQueue = new Mock<ILightingQueue>(MockBehavior.Strict);
-            IDimension dimension = new TrueCraft.World.Dimension(string.Empty,
-                      DimensionID.Overworld, mockServer.Object, new FlatlandGenerator(_testSeed),
+            IDimension dimension = new TrueCraft.World.Dimension(mockServiceLocator.Object, string.Empty,
+                      DimensionID.Overworld, new FlatlandGenerator(_testSeed),
                       mockLightingQueue.Object,
-                      _blockRepository.Object, _entityManager.Object);
+                      _entityManager.Object);
 
             dimension.SetBlockID(GlobalVoxelCoordinates.Zero, 1);
             GlobalVoxelCoordinates oneY = new GlobalVoxelCoordinates(0, 1, 0);

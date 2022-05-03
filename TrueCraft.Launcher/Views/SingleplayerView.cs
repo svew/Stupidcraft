@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Gdk;
 using Gtk;
 using TrueCraft.Core;
+using TrueCraft.Core.Logic;
 using TrueCraft.Core.Server;
 using TrueCraft.Core.World;
 using TrueCraft.Launcher.Singleplayer;
@@ -166,8 +167,10 @@ namespace TrueCraft.Launcher.Views
             _worldListView.Selection.GetSelected(out iter);
             string worldName = (string)_worldListStore.GetValue(iter, 0);
             // TODO: Do world names have to be unique?
-            MultiplayerServer _server = MultiplayerServer.Get(worldName);
-            TrueCraft.World.IWorld world = (World.IWorld)_server.World;
+            MultiplayerServer _server = MultiplayerServer.Get();
+            Discover.DoDiscovery(new Discover());
+            TrueCraft.Program.ServiceLocator = new ServiceLocater(_server, BlockRepository.Get(), ItemRepository.Get());
+            TrueCraft.World.IWorld world = TrueCraft.World.World.LoadWorld(TrueCraft.Program.ServiceLocator, worldName);
             TrueCraft.Program.ServerConfiguration = new ServerConfiguration()
             {
                 MOTD = null,

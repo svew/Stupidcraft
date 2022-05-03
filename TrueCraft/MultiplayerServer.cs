@@ -47,7 +47,7 @@ namespace TrueCraft
 
         private QueryProtocol QueryProtocol;
 
-        private MultiplayerServer(string worldPath)
+        private MultiplayerServer()
         {
             TrueCraft.Core.WhoAmI.Answer = Core.IAm.Server;
             TrueCraft.Core.Inventory.InventoryFactory<IServerSlot>.RegisterInventoryFactory(new TrueCraft.Inventory.InventoryFactory());
@@ -65,14 +65,9 @@ namespace TrueCraft
             _cde = new CountdownEvent(_lstAutoResetEvents.Count);
 
             PacketHandlers = new PacketHandler[0x100];
-            _world = TrueCraft.World.World.LoadWorld(this, worldPath);
-            foreach (IDimensionServer d in _world)
-                d.BlockChanged += HandleBlockChanged;
 
             LogProviders = new List<ILogProvider>();
             Scheduler = new EventScheduler(this);
-
-            Discover.DoDiscovery(new Discover());
 
             BlockRepository = TrueCraft.Core.Logic.BlockRepository.Get();
 
@@ -94,17 +89,7 @@ namespace TrueCraft
         public static MultiplayerServer Get()
         {
             if (_singleton is null)
-                throw new InvalidOperationException("World is not yet loaded.");
-
-            return _singleton;
-        }
-
-        public static MultiplayerServer Get(string worldPath)
-        {
-            if (_singleton is not null)
-                throw new InvalidOperationException("World already loaded.");
-
-            _singleton = new MultiplayerServer(worldPath);
+                _singleton = new MultiplayerServer();
 
             return _singleton;
         }
@@ -115,7 +100,19 @@ namespace TrueCraft
         public IList<IRemoteClient> Clients { get; private set; }
 
         // <inheritdoc />
-        public object World { get => _world; }
+        public object World
+        {
+            get => _world;
+            set
+            {
+                if (_world is not null)
+                    throw new InvalidOperationException($"{nameof(World)} is already set.");
+
+                _world = (IWorld)value;
+                foreach (IDimensionServer d in _world)
+                    d.BlockChanged += HandleBlockChanged;
+            }
+        }
 
         public IList<Lighting> WorldLighters { get; set; }
         public IEventScheduler Scheduler { get; private set; }
