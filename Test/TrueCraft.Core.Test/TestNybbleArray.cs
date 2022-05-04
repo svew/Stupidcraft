@@ -123,10 +123,13 @@ namespace TrueCraft.Core.Test
             actual.Deserialize(byteArray);
 
             Assert.AreEqual(2 * length, actual.Length);
+            // Each j must be divided by two before calculating the
+            // expected values because we are now indexing nybbles instead
+            // of the bytes when we set this up.
             for (int j = 0; j < actual.Length; j += 2)
-                Assert.AreEqual(j & 0x0f, actual[j]);
+                Assert.AreEqual((j >> 1) & 0x0f, actual[j]);
             for (int j = 1; j < actual.Length; j += 2)
-                Assert.AreEqual(j >> 4, actual[j]);
+                Assert.AreEqual(j >> 5, actual[j]);
         }
     }
 }
