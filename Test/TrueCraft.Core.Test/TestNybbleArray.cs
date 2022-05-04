@@ -48,15 +48,15 @@ namespace TrueCraft.Core.Test
             NybbleArray actual = new NybbleArray(data, offset, length);
 
             // Getter
-            Assert.Throws<ArgumentOutOfRangeException>(() => { byte b = actual[-1]; });
+            Assert.Throws<IndexOutOfRangeException>(() => { byte b = actual[-1]; });
             Assert.DoesNotThrow(() => { byte b = actual[0]; });
-            Assert.Throws<ArgumentOutOfRangeException>(() => { byte b = actual[actual.Length]; });
+            Assert.Throws<IndexOutOfRangeException>(() => { byte b = actual[actual.Length]; });
             Assert.DoesNotThrow(() => { byte b = actual[actual.Length - 1]; });
 
             // Setter
-            Assert.Throws<ArgumentOutOfRangeException>(() => { actual[-1] = 0x0f; });
+            Assert.Throws<IndexOutOfRangeException>(() => { actual[-1] = 0x0f; });
             Assert.DoesNotThrow(() => { actual[0] = 0x0e; });
-            Assert.Throws<ArgumentOutOfRangeException>(() => { actual[actual.Length] = 0x0d; });
+            Assert.Throws<IndexOutOfRangeException>(() => { actual[actual.Length] = 0x0d; });
             Assert.DoesNotThrow(() => { actual[actual.Length - 1] = 0x0c; });
         }
 

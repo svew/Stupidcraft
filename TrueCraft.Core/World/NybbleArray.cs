@@ -63,10 +63,14 @@ namespace TrueCraft.Core
         {
             get
             {
+                if (index < 0)
+                    throw new IndexOutOfRangeException();
                 return (byte)(_data[index / 2] >> (index % 2 * 4) & 0xF);
             }
             set
             {
+                if (index < 0)
+                    throw new IndexOutOfRangeException();
                 value &= 0x0F;
                 int idx = index / 2;
                 if ((index & 0x01) != 0)
