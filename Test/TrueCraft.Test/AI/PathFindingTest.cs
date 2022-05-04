@@ -30,8 +30,14 @@ namespace TrueCraft.Core.Test.AI
         {
             Mock<IBlockProvider> mockProvider = new Mock<IBlockProvider>(MockBehavior.Strict);
             mockProvider.Setup(x => x.ID).Returns(3);
+            mockProvider.Setup(x => x.BoundingBox).Returns(new BoundingBox(Vector3.Zero, Vector3.One));
+
+            Mock<IBlockProvider> mockAirBlock = new Mock<IBlockProvider>(MockBehavior.Strict);
+            mockAirBlock.Setup(x => x.ID).Returns(0);
+            mockAirBlock.Setup(x => x.BoundingBox).Returns((BoundingBox?)null);
 
             Mock<IBlockRepository> mockRepository = new Mock<IBlockRepository>(MockBehavior.Strict);
+            mockRepository.Setup(x => x.GetBlockProvider(It.Is<byte>(b => b == 0))).Returns(mockAirBlock.Object);
             mockRepository.Setup(x => x.GetBlockProvider(It.Is<byte>(b => b == 3))).Returns(mockProvider.Object);
             _blockRepository = mockRepository.Object;
 
@@ -44,6 +50,7 @@ namespace TrueCraft.Core.Test.AI
 
             Mock<IServiceLocator> mockServiceLocator = new Mock<IServiceLocator>(MockBehavior.Strict);
             mockServiceLocator.Setup(x => x.Server).Returns(mockServer.Object);
+            mockServiceLocator.Setup(x => x.BlockRepository).Returns(_blockRepository);
             _serviceLocator = mockServiceLocator.Object;
 
             Mock<IEntityManager> mockEntityManager = new Mock<IEntityManager>(MockBehavior.Strict);
