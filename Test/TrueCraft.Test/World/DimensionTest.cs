@@ -15,10 +15,15 @@ namespace TrueCraft.Test.World
     [TestFixture]
     public class DimensionTest
     {
-        private IDimension _dimension;
+        private readonly string _assemblyDir;
 
-        [OneTimeSetUp]
-        public void SetUp()
+        private readonly IServiceLocator _serviceLocator;
+
+        private readonly ILightingQueue _lightingQueue;
+
+        private readonly IEntityManager _entityManager;
+
+        public DimensionTest()
         {
             Mock<IBlockProvider> mockProvider = new Mock<IBlockProvider>(MockBehavior.Strict);
             mockProvider.Setup(x => x.ID).Returns(3);
@@ -31,40 +36,61 @@ namespace TrueCraft.Test.World
             Mock<IServiceLocator> mockServiceLocator = new Mock<IServiceLocator>(MockBehavior.Strict);
             mockServiceLocator.Setup(x => x.BlockRepository).Returns(mockRepository.Object);
             mockServiceLocator.Setup(x => x.Server).Returns(mockServer.Object);
+            _serviceLocator = mockServiceLocator.Object;
 
             Mock<ILightingQueue> mockLightingQueue = new Mock<ILightingQueue>(MockBehavior.Strict);
+            _lightingQueue = mockLightingQueue.Object;
 
             Mock<IEntityManager> mockEntityManager = new Mock<IEntityManager>(MockBehavior.Strict);
+            _entityManager = mockEntityManager.Object;
 
-            string assemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            _dimension = new Dimension(mockServiceLocator.Object,
-                assemblyDir, DimensionID.Overworld, 
-                new FlatlandGenerator(1234), mockLightingQueue.Object,
-                mockEntityManager.Object);
+            _assemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
         }
 
-        [Test]
-        public void TestFindChunk()
+        private IDimensionServer BuildDimension()
         {
-            var a = _dimension.GetChunk(new GlobalVoxelCoordinates(0, 0, 0));
-            var b = _dimension.GetChunk(new GlobalVoxelCoordinates(-1, 0, 0));
-            var c = _dimension.GetChunk(new GlobalVoxelCoordinates(-1, 0, -1));
-            var d = _dimension.GetChunk(new GlobalVoxelCoordinates(16, 0, 0));
-            Assert.AreEqual(new GlobalChunkCoordinates(0, 0), a.Coordinates);
-            Assert.AreEqual(new GlobalChunkCoordinates(-1, 0), b.Coordinates);
-            Assert.AreEqual(new GlobalChunkCoordinates(-1, -1), c.Coordinates);
-            Assert.AreEqual(new GlobalChunkCoordinates(1, 0), d.Coordinates);
+            return new Dimension(_serviceLocator, _assemblyDir, DimensionID.Overworld,
+                new FlatlandGenerator(1234), _lightingQueue, _entityManager);
         }
 
+        /// <summary>
+        /// Tests that the GetChunk(GlobalVoxelCoordinates) method does not
+        /// generate a Chunk that is not already loaded.
+        /// </summary>
         [Test]
-        public void TestGetChunk()
+        public void TestGetChunk_Global_NoGenerate()
         {
-            var a = _dimension.GetChunk(new GlobalChunkCoordinates(0, 0));
-            var b = _dimension.GetChunk(new GlobalChunkCoordinates(1, 0));
-            var c = _dimension.GetChunk(new GlobalChunkCoordinates(-1, 0));
-            Assert.AreEqual(new GlobalChunkCoordinates(0, 0), a.Coordinates);
-            Assert.AreEqual(new GlobalChunkCoordinates(1, 0), b.Coordinates);
-            Assert.AreEqual(new GlobalChunkCoordinates(-1, 0), c.Coordinates);
+            IDimension dimension = BuildDimension();
+
+            IChunk? a = dimension.GetChunk(new GlobalVoxelCoordinates(0, 0, 0));
+            IChunk? b = dimension.GetChunk(new GlobalVoxelCoordinates(-1, 0, 0));
+            IChunk? c = dimension.GetChunk(new GlobalVoxelCoordinates(-1, 0, -1));
+            IChunk? d = dimension.GetChunk(new GlobalVoxelCoordinates(0, 0, -1));
+
+            Assert.IsNull(a);
+            Assert.IsNull(b);
+            Assert.IsNull(c);
+            Assert.IsNull(d);
+        }
+
+        /// <summary>
+        /// Tests that the GetChunk(GlobalChunkCoordinates) method does not
+        /// generate a Chunk that is not already loaded.
+        /// </summary>
+        [Test]
+        public void TestGetChunk_Chunk_NoGenerate()
+        {
+            IDimension dimension = BuildDimension();
+
+            IChunk? a = dimension.GetChunk(new GlobalChunkCoordinates(0, 0));
+            IChunk? b = dimension.GetChunk(new GlobalChunkCoordinates(-1, 0));
+            IChunk? c = dimension.GetChunk(new GlobalChunkCoordinates(-1, -1));
+            IChunk? d = dimension.GetChunk(new GlobalChunkCoordinates(0, -1));
+
+            Assert.IsNull(a);
+            Assert.IsNull(b);
+            Assert.IsNull(c);
+            Assert.IsNull(d);
         }
     }
 }
