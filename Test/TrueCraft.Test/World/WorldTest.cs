@@ -28,7 +28,7 @@ namespace TrueCraft.Test.World
             IWorld world = TrueCraft.World.World.LoadWorld(mockServiceLocator.Object, Path.Combine(assemblyDir, "Files"));
 
             // Constants from manifest.nbt
-            Assert.AreEqual(new GlobalVoxelCoordinates(0, 60, 0), world.SpawnPoint);
+            Assert.AreEqual(new PanDimensionalVoxelCoordinates(DimensionID.Overworld, 0, 60, 0), world.SpawnPoint);
             Assert.AreEqual(1168393583, world.Seed);
         }
     }
