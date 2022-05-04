@@ -8,6 +8,7 @@ using TrueCraft.Core.Logic;
 using TrueCraft.Core.Server;
 using TrueCraft.Core.World;
 using TrueCraft.TerrainGen;
+using TrueCraft.World;
 
 namespace TrueCraft.Core.Test.AI
 {
@@ -81,9 +82,17 @@ namespace TrueCraft.Core.Test.AI
 
         private IDimension BuildDimension()
         {
-            return new TrueCraft.World.Dimension(_serviceLocator, string.Empty, DimensionID.Overworld,
+            IDimensionServer rv =  new Dimension(_serviceLocator, string.Empty, DimensionID.Overworld,
                 new FlatlandGenerator(_testSeed), _lightingQueue,
                 _entityManager);
+
+            // Generate 4 chunks around the origin.
+            rv.GetBlockID(new GlobalVoxelCoordinates(0, 1, 0), LoadEffort.Generate);
+            rv.GetBlockID(new GlobalVoxelCoordinates(-1, 1, 0), LoadEffort.Generate);
+            rv.GetBlockID(new GlobalVoxelCoordinates(-1, 1, -1), LoadEffort.Generate);
+            rv.GetBlockID(new GlobalVoxelCoordinates(0, 1, -1), LoadEffort.Generate);
+
+            return rv;
         }
 
         [Test]
