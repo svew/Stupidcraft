@@ -85,7 +85,7 @@ namespace TrueCraft.Client
 
             Discover.DoDiscovery(new Discover());
 
-            Physics = new PhysicsEngine(Dimension, BlockRepository.Get());
+            Physics = new PhysicsEngine(Dimension);
             _socketPool = new SocketAsyncEventArgsPool(100, 200, 65536);
             connected = 0;
             Health = 20;

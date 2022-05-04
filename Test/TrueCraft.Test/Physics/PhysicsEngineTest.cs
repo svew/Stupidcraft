@@ -20,8 +20,6 @@ namespace TrueCraft.Core.Test.Physics
 
         private IBlockRepository _blockRepository;
 
-        private IBlockPhysicsProvider _blockPhysicsProvider;
-
         private IMultiplayerServer _server;
 
         private IServiceLocator _serviceLocator;
@@ -39,17 +37,13 @@ namespace TrueCraft.Core.Test.Physics
             mockRepository.Setup(x => x.GetBlockProvider(It.Is<byte>(b => b == 3))).Returns(mockProvider.Object);
             _blockRepository = mockRepository.Object;
 
-            // Note: dependency upon BoundingBox class
-            Mock<IBlockPhysicsProvider> mockPhysicsProvider = new Mock<IBlockPhysicsProvider>(MockBehavior.Strict);
-            mockPhysicsProvider.Setup(x => x.GetBoundingBox(It.IsAny<IDimension>(), It.IsAny<GlobalVoxelCoordinates>())).Returns(new BoundingBox(Vector3.Zero, Vector3.One));
-            _blockPhysicsProvider = mockPhysicsProvider.Object;
-
             Mock<IMultiplayerServer> mockServer = new Mock<IMultiplayerServer>(MockBehavior.Strict);
             _server = mockServer.Object;
 
             Mock<IServiceLocator> mockServiceLocator = new Mock<IServiceLocator>(MockBehavior.Strict);
             mockServiceLocator.Setup(x => x.BlockRepository).Returns(_blockRepository);
             mockServiceLocator.Setup(x => x.Server).Returns(_server);
+            _serviceLocator = mockServiceLocator.Object;
 
             Mock<ILightingQueue> mockLightingQueue = new Mock<ILightingQueue>(MockBehavior.Strict);
             _lightingQueue = mockLightingQueue.Object;
@@ -109,7 +103,7 @@ namespace TrueCraft.Core.Test.Physics
                       string.Empty, DimensionID.Overworld, 
                       new FlatlandGenerator(_testSeed), _lightingQueue,
                       _entityManager);
-            IPhysicsEngine physics = new PhysicsEngine(dimension, _blockPhysicsProvider);
+            IPhysicsEngine physics = new PhysicsEngine(dimension);
             var entity = new TestEntity();
             entity.Position = new Vector3(0, 100, 0);
             entity.AccelerationDueToGravity = 1;
@@ -133,7 +127,7 @@ namespace TrueCraft.Core.Test.Physics
                       string.Empty, DimensionID.Overworld,
                       new FlatlandGenerator(_testSeed), _lightingQueue,
                       _entityManager);
-            IPhysicsEngine physics = new PhysicsEngine(dimension, _blockPhysicsProvider);
+            IPhysicsEngine physics = new PhysicsEngine(dimension);
             var entity = new TestEntity();
             entity.Position = new Vector3(0, 100, 0);
             entity.AccelerationDueToGravity = 0;
@@ -154,7 +148,7 @@ namespace TrueCraft.Core.Test.Physics
                       string.Empty, DimensionID.Overworld,
                       new FlatlandGenerator(_testSeed), _lightingQueue,
                       _entityManager);
-            IPhysicsEngine physics = new PhysicsEngine(dimension, _blockPhysicsProvider);
+            IPhysicsEngine physics = new PhysicsEngine(dimension);
             var entity = new TestEntity();
             entity.Size = new Size(0.6, 1.8, 0.6);
             entity.Position = new Vector3(-10.9, 4, -10.9);
@@ -178,7 +172,7 @@ namespace TrueCraft.Core.Test.Physics
                       string.Empty, DimensionID.Overworld,
                       new FlatlandGenerator(_testSeed), _lightingQueue,
                       _entityManager);
-            IPhysicsEngine physics = new PhysicsEngine(dimension, _blockPhysicsProvider);
+            IPhysicsEngine physics = new PhysicsEngine(dimension);
             var entity = new TestEntity();
             entity.Position = new Vector3(0, 4, 0);
             entity.AccelerationDueToGravity = 10;
@@ -198,7 +192,7 @@ namespace TrueCraft.Core.Test.Physics
                       string.Empty, DimensionID.Overworld,
                       new FlatlandGenerator(_testSeed), _lightingQueue,
                       _entityManager);
-            IPhysicsEngine physics = new PhysicsEngine(dimension, _blockPhysicsProvider);
+            IPhysicsEngine physics = new PhysicsEngine(dimension);
             var entity = new TestEntity();
             entity.Position = new Vector3(0, 10, 0);
             entity.AccelerationDueToGravity = 1;
@@ -222,7 +216,7 @@ namespace TrueCraft.Core.Test.Physics
                       string.Empty, DimensionID.Overworld,
                       new FlatlandGenerator(_testSeed), _lightingQueue,
                       _entityManager);
-            IPhysicsEngine physics = new PhysicsEngine(dimension, _blockPhysicsProvider);
+            IPhysicsEngine physics = new PhysicsEngine(dimension);
             var entity = new TestEntity();
             entity.Position = new Vector3(0, 5, 0);
             entity.AccelerationDueToGravity = 1;
@@ -244,7 +238,7 @@ namespace TrueCraft.Core.Test.Physics
                       string.Empty, DimensionID.Overworld,
                       new FlatlandGenerator(_testSeed), _lightingQueue,
                       _entityManager);
-            IPhysicsEngine physics = new PhysicsEngine(dimension, _blockPhysicsProvider);
+            IPhysicsEngine physics = new PhysicsEngine(dimension);
             var entity = new TestEntity();
             entity.Position = new Vector3(0, 5, 0);
             entity.AccelerationDueToGravity = 0;
@@ -267,7 +261,7 @@ namespace TrueCraft.Core.Test.Physics
                       string.Empty, DimensionID.Overworld,
                       new FlatlandGenerator(_testSeed), _lightingQueue,
                       _entityManager);
-            IPhysicsEngine physics = new PhysicsEngine(dimension, _blockPhysicsProvider);
+            IPhysicsEngine physics = new PhysicsEngine(dimension);
             var entity = new TestEntity();
             entity.Position = new Vector3(-1, 10, -1);
             entity.AccelerationDueToGravity = 0;

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using TrueCraft.Core.World;
 using TrueCraft.Core.Entities;
+using TrueCraft.Core.Logic;
+using TrueCraft.Core.Logic.Blocks;
 
 namespace TrueCraft.Core.Physics
 {
@@ -9,15 +11,13 @@ namespace TrueCraft.Core.Physics
     {
         private IDimension _dimension;
 
-        public PhysicsEngine(IDimension dimension, IBlockPhysicsProvider physicsProvider)
+        public PhysicsEngine(IDimension dimension)
         {
             _dimension = dimension;
             Entities = new List<IPhysicsEntity>();
             EntityLock = new object();
-            BlockPhysicsProvider = physicsProvider;
         }
 
-        public IBlockPhysicsProvider BlockPhysicsProvider { get; set; }
         public List<IPhysicsEntity> Entities { get; set; }
         private object EntityLock { get; set; }
 
@@ -119,6 +119,15 @@ namespace TrueCraft.Core.Physics
             entity.Velocity = velocity;
         }
 
+        private BoundingBox? GetBoundingBox(IDimension dimension, GlobalVoxelCoordinates coordinates)
+        {
+            byte id = dimension.GetBlockID(coordinates);
+            if (id == AirBlock.BlockID) return null;
+
+            IBlockProvider? provider = dimension.BlockRepository.GetBlockProvider(id);
+            return provider?.BoundingBox;
+        }
+
         public bool TestTerrainCollisionCylinder(IAABBEntity entity, out Vector3 collisionPoint)
         {
             collisionPoint = Vector3.Zero;
@@ -137,8 +146,8 @@ namespace TrueCraft.Core.Physics
                         if (!_dimension.IsValidPosition(coords))
                             continue;
 
-                        var _box = BlockPhysicsProvider.GetBoundingBox(_dimension, coords);
-                        if (_box == null)
+                        BoundingBox? _box = GetBoundingBox(_dimension, coords);
+                        if (_box is null)
                             continue;
 
                         var box = _box.Value.OffsetBy((Vector3)coords);
@@ -205,8 +214,8 @@ namespace TrueCraft.Core.Physics
                         if (!_dimension.IsValidPosition(coords))
                             continue;
 
-                        var _box = BlockPhysicsProvider.GetBoundingBox(_dimension, coords);
-                        if (_box == null)
+                        BoundingBox? _box = GetBoundingBox(_dimension, coords);
+                        if (_box is null)
                             continue;
 
                         var box = _box.Value.OffsetBy((Vector3)coords);
@@ -294,8 +303,8 @@ namespace TrueCraft.Core.Physics
                         if (!_dimension.IsValidPosition(coords))
                             continue;
 
-                        var _box = BlockPhysicsProvider.GetBoundingBox(_dimension, coords);
-                        if (_box == null)
+                        BoundingBox? _box = GetBoundingBox(_dimension, coords);
+                        if (_box is null)
                             continue;
 
                         var box = _box.Value.OffsetBy((Vector3)coords);
@@ -383,8 +392,8 @@ namespace TrueCraft.Core.Physics
                         if (!_dimension.IsValidPosition(coords))
                             continue;
 
-                        var _box = BlockPhysicsProvider.GetBoundingBox(_dimension, coords);
-                        if (_box == null)
+                        BoundingBox? _box = GetBoundingBox(_dimension, coords);
+                        if (_box is null)
                             continue;
 
                         var box = _box.Value.OffsetBy((Vector3)coords);

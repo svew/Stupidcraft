@@ -4,7 +4,7 @@ using TrueCraft.Core.World;
 
 namespace TrueCraft.Core.Logic
 {
-    public class BlockRepository : IBlockRepository, IBlockPhysicsProvider, IRegisterBlockProvider
+    public class BlockRepository : IBlockRepository, IRegisterBlockProvider
     {
         private readonly IBlockProvider[] BlockProviders = new IBlockProvider[0x100];
 
@@ -51,15 +51,6 @@ namespace TrueCraft.Core.Logic
         public void RegisterBlockProvider(IBlockProvider provider)
         {
             BlockProviders[provider.ID] = provider;
-        }
-
-        public BoundingBox? GetBoundingBox(IDimension dimension, GlobalVoxelCoordinates coordinates)
-        {
-            // TODO: Block-specific bounding boxes
-            var id = dimension.GetBlockID(coordinates);
-            if (id == 0) return null;
-            var provider = BlockProviders[id];
-            return provider.BoundingBox;
         }
     }
 }

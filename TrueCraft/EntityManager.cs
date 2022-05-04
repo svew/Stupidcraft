@@ -53,7 +53,7 @@ namespace TrueCraft
             if (_dimension is not null)
                 throw new InvalidOperationException("Dimension is already set.");
             _dimension = dimension;
-            _physicsEngine = new PhysicsEngine(dimension, (IBlockPhysicsProvider)dimension.BlockRepository);
+            _physicsEngine = new PhysicsEngine(dimension);
         }
 
         private void HandlePropertyChanged(object sender, PropertyChangedEventArgs e)
