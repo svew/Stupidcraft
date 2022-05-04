@@ -74,9 +74,9 @@ namespace TrueCraft.Core
                 value &= 0x0F;
                 int idx = index / 2;
                 if ((index & 0x01) != 0)
-                    _data[idx] = (byte)((_data[idx] & 0xF0) | (value << 4));
+                    _data[idx] = (byte)((_data[idx] & 0x0F) | (value << 4));
                 else
-                    _data[idx] = (byte)((_data[idx] & 0x0F) | value);
+                    _data[idx] = (byte)((_data[idx] & 0xF0) | value);
             }
         }
 
