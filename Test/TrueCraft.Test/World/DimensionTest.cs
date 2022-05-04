@@ -49,13 +49,14 @@ namespace TrueCraft.Test.World
 
         private IDimensionServer BuildDimension()
         {
-            return new Dimension(_serviceLocator, _assemblyDir, DimensionID.Overworld,
+            string filePath = Path.Combine(_assemblyDir, "Files");
+            return new Dimension(_serviceLocator, filePath, DimensionID.Overworld,
                 new FlatlandGenerator(1234), _lightingQueue, _entityManager);
         }
 
         /// <summary>
         /// Tests that the GetChunk(GlobalVoxelCoordinates) method does not
-        /// generate a Chunk that is not already loaded.
+        /// generate/load a Chunk that is not already loaded.
         /// </summary>
         [Test]
         public void TestGetChunk_Global_NoGenerate()
@@ -75,7 +76,7 @@ namespace TrueCraft.Test.World
 
         /// <summary>
         /// Tests that the GetChunk(GlobalChunkCoordinates) method does not
-        /// generate a Chunk that is not already loaded.
+        /// generate/load a Chunk that is not already loaded.
         /// </summary>
         [Test]
         public void TestGetChunk_Chunk_NoGenerate()
@@ -91,6 +92,73 @@ namespace TrueCraft.Test.World
             Assert.IsNull(b);
             Assert.IsNull(c);
             Assert.IsNull(d);
+        }
+
+        /// <summary>
+        /// Tests that the GetChunk(GlobalChunkCoordinates) method will not
+        /// return a Chunk unless it is already in memory.
+        /// </summary>
+        [Test]
+        public void TestGetChunk_Chunk_InMemory()
+        {
+            IDimensionServer dimension = BuildDimension();
+            // The Chunk at 16,6 is not present in the region file in the Files
+            // folder, so it cannot be loaded from disk.
+            GlobalChunkCoordinates chunkCoordinates = new GlobalChunkCoordinates(16, 6);
+
+            // Try to get the Chunk from memory
+            IChunk? chunk = dimension.GetChunk(chunkCoordinates, LoadEffort.InMemory);
+            Assert.IsNull(chunk);
+
+            // Generate the Chunk
+            dimension.GetChunk(chunkCoordinates, LoadEffort.Generate);
+
+            // Try again to get the Chunk from memory.
+            chunk = dimension.GetChunk(chunkCoordinates, LoadEffort.InMemory);
+            Assert.IsNotNull(chunk);
+            Assert.AreEqual(chunkCoordinates, chunk?.Coordinates);
+        }
+
+        /// <summary>
+        /// Tests that the GetChunk(GlobalChunkCoordinates) method will load
+        /// an existing Chunk from disk with LoadEffort.Load.
+        /// </summary>
+        [Test]
+        public void TestGetChunk_Chunk_Load()
+        {
+            IDimensionServer dimension = BuildDimension();
+            GlobalChunkCoordinates chunkCoordinates = new GlobalChunkCoordinates(0, 0);
+
+            // The chunk is known to be not in memory as we just created the
+            // Dimension.
+            IChunk? chunk = dimension.GetChunk(chunkCoordinates, LoadEffort.Load);
+            Assert.IsNotNull(chunk);
+            Assert.AreEqual(chunkCoordinates, chunk?.Coordinates);
+        }
+
+        /// <summary>
+        /// Tests that the GetChunk(GlobalChunkCoordinates) method will generate
+        /// a new Chunk.
+        /// </summary>
+        [Test]
+        public void TestGetChunk_Chunk_Generate()
+        {
+            IDimensionServer dimension = BuildDimension();
+            // The Chunk at 16,6 is not present in the region file in the Files
+            // folder, so it cannot be loaded from disk.
+            GlobalChunkCoordinates chunkCoordinates = new GlobalChunkCoordinates(16, 6);
+
+            // The Chunk is known not to be in memory because we just created
+            // a brand-new dimension.
+
+            // Assert that the Chunk can not be loaded from disk.
+            IChunk? chunk = dimension.GetChunk(chunkCoordinates, LoadEffort.Load);
+            Assert.IsNull(chunk);
+
+            // Generate the Chunk
+            chunk = dimension.GetChunk(chunkCoordinates, LoadEffort.Generate);
+            Assert.IsNotNull(chunk);
+            Assert.AreEqual(chunkCoordinates, chunk?.Coordinates);
         }
     }
 }
