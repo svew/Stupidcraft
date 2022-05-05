@@ -241,10 +241,23 @@ namespace TrueCraft.World
             lock (_regions)
             {
                 IRegion region;
-                if (!_regions.ContainsKey(regionCoordinates) && loadEffort == LoadEffort.InMemory)
-                    return null;
+                if (!_regions.ContainsKey(regionCoordinates))
+                {
+                    if (loadEffort == LoadEffort.InMemory)
+                       return null;
 
-                region = _regions[regionCoordinates];
+                    if (!Region.DoesRegionExistOnDisk(regionCoordinates, _baseDirectory) &&
+                        loadEffort == LoadEffort.Load)
+                        return null;
+
+                    region = new Region(regionCoordinates, _baseDirectory);
+                    _regions[regionCoordinates] = region;
+                }
+                else
+                {
+                    region = _regions[regionCoordinates];
+                }
+
                 LocalChunkCoordinates chunkCoordinates = (LocalChunkCoordinates)coordinates;
                 if (!region.IsChunkLoaded(chunkCoordinates) && loadEffort == LoadEffort.InMemory)
                     return null;
@@ -556,10 +569,9 @@ namespace TrueCraft.World
 
         protected internal void OnChunkGenerated(ChunkLoadedEventArgs e)
         {
-            if (Program.ServerConfiguration.EnableLighting)
+            if (Program.ServerConfiguration?.EnableLighting ?? true)
             {
-                var lighter = new Lighting(this, BlockRepository);
-                lighter.InitialLighting(e.Chunk, false);
+                _lightingQueue.Enqueue((GlobalVoxelCoordinates)e.Chunk.Coordinates, LightingOperationMode.Add, LightingOperationKind.Initial, 15);
             }
             else
             {

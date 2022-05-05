@@ -294,6 +294,20 @@ namespace TrueCraft.World
             return string.Format("r.{0}.{1}.mcr", position.X, position.Z);
         }
 
+        /// <summary>
+        /// Determines whether or not a Region File already exists for the given
+        /// Region.
+        /// </summary>
+        /// <param name="position">The Region Coordinates to check.</param>
+        /// <param name="baseDirectory">The path to the containing Dimension's
+        /// files.</param>
+        /// <returns>True if the file exists; false otherwise.</returns>
+        public static bool DoesRegionExistOnDisk(RegionCoordinates position, string baseDirectory)
+        {
+            string filename = Path.Combine(baseDirectory, "region", GetRegionFileName(position));
+            return File.Exists(filename);
+        }
+
         public void Dispose()
         {
             if (_regionFile == null)

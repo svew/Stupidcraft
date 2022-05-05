@@ -17,7 +17,7 @@ namespace TrueCraft
 {
     public class Program
     {
-        public static ServerConfiguration ServerConfiguration;
+        public static ServerConfiguration? ServerConfiguration;
 
         public static MultiplayerServer Server;
 

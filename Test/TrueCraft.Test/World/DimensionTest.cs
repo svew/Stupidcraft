@@ -3,6 +3,7 @@ using System.IO;
 using System.Reflection;
 using Moq;
 using NUnit.Framework;
+using TrueCraft.Core;
 using TrueCraft.Core.Lighting;
 using TrueCraft.Core.Logic;
 using TrueCraft.Core.Server;
@@ -39,12 +40,28 @@ namespace TrueCraft.Test.World
             _serviceLocator = mockServiceLocator.Object;
 
             Mock<ILightingQueue> mockLightingQueue = new Mock<ILightingQueue>(MockBehavior.Strict);
+            mockLightingQueue.Setup(x => x.Enqueue(It.IsAny<GlobalVoxelCoordinates>(), It.IsAny<LightingOperationMode>(), It.IsAny<LightingOperationKind>(), It.IsAny<byte>()));
             _lightingQueue = mockLightingQueue.Object;
 
             Mock<IEntityManager> mockEntityManager = new Mock<IEntityManager>(MockBehavior.Strict);
             _entityManager = mockEntityManager.Object;
 
             _assemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
+        }
+
+        [OneTimeSetUp]
+        public void Setup()
+        {
+            try
+            {
+                WhoAmI.Answer = IAm.Server;
+            }
+            catch (InvalidOperationException)
+            {
+                // Disregard the error of setting this more than once.
+                // Other tests may have set it, and we can't check, but
+                // we need to be sure it is set.
+            }
         }
 
         private IDimensionServer BuildDimension()
