@@ -10,7 +10,7 @@ namespace TrueCraft.Core.Test.Inventory
     public class SlotTest
     {
         [Test]
-        public void ctor(int index)
+        public void ctor()
         {
             Mock<IItemRepository> mock = new Mock<IItemRepository>(MockBehavior.Strict);
             ISlot slot = new Slot(mock.Object);
@@ -21,7 +21,7 @@ namespace TrueCraft.Core.Test.Inventory
         [Test]
         public void ctor_Throws()
         {
-            Assert.Throws<ArgumentNullException>(() => new Slot(null));
+            Assert.Throws<ArgumentNullException>(() => new Slot(null!));
         }
 
         [TestCase(280, 14, 0)]
