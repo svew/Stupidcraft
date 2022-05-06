@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Moq;
 using NUnit.Framework;
+using TrueCraft.Core.Logic;
 using TrueCraft.Core.Server;
 using TrueCraft.Core.World;
 using TrueCraft.World;
@@ -20,8 +21,11 @@ namespace TrueCraft.Test.World
             string baseDirectory = "FakeBaseDirectory";
             Mock<IMultiplayerServer> mockServer = new Mock<IMultiplayerServer>(MockBehavior.Strict);
 
+            Mock<IBlockRepository> mockBlockRepository = new Mock<IBlockRepository>(MockBehavior.Strict);
+
             Mock<IServiceLocator> mockServiceLocator = new Mock<IServiceLocator>(MockBehavior.Strict);
             mockServiceLocator.Setup(x => x.Server).Returns(mockServer.Object);
+            mockServiceLocator.Setup(x => x.BlockRepository).Returns(mockBlockRepository.Object);
 
             IDimensionFactory factory = new DimensionFactory();
 

@@ -25,7 +25,7 @@ namespace TrueCraft.Core.World
             switch(id)
             {
                 case DimensionID.Overworld:
-                    return "OverWord";
+                    return "OverWorld";
 
                 case DimensionID.Nether:
                     return "Nether";
