@@ -19,7 +19,7 @@ namespace TrueCraft.Test.Logic
     {
         private const int _testSeed = 314159;
 
-        private readonly Mock<IDimension> _dimension;
+        private readonly Mock<IDimensionServer> _dimension;
         private readonly Mock<IMultiplayerServer> _server;
         private readonly Mock<IEntityManager> _entityManager;
         private readonly Mock<IRemoteClient> _user;
@@ -27,7 +27,7 @@ namespace TrueCraft.Test.Logic
 
         public BlockProviderTest()
         {
-            _dimension = new Mock<IDimension>();
+            _dimension = new Mock<IDimensionServer>();
             _server = new Mock<IMultiplayerServer>();
             _entityManager = new Mock<IEntityManager>();
             _user = new Mock<IRemoteClient>();
