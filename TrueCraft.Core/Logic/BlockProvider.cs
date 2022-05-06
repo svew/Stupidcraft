@@ -74,7 +74,7 @@ namespace TrueCraft.Core.Logic
             var items = new ItemStack[0];
             var type = ToolType.None;
             var material = ToolMaterial.None;
-            var held = ItemRepository.Get().GetItemProvider(item.ID);
+            var held = dimension.ItemRepository.GetItemProvider(item.ID);
 
             if (held is ToolItem)
             {

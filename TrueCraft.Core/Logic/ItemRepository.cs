@@ -25,6 +25,7 @@ namespace TrueCraft.Core.Logic
             return _singleton;
         }
 
+        [Obsolete("Inject IItemRepository instead")]
         public static IItemRepository Get()
         {
 #if DEBUG
