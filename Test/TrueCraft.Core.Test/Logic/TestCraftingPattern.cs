@@ -22,7 +22,7 @@ namespace TrueCraft.Core.Test.Logic
             area.Setup(a => a.Width).Returns(sz);
             area.Setup(a => a.Height).Returns(sz);
             area.Setup(a => a.GetItemStack(It.IsAny<int>(), It.IsAny<int>()))
-                .Returns<int, int>((x, y) => grid[y * sz + x] != 0 ? new ItemStack(grid[y * sz + x]) : ItemStack.EmptyStack);
+                .Returns<int, int>((x, y) => grid[y * sz + x] != -1 ? new ItemStack(grid[y * sz + x]) : ItemStack.EmptyStack);
 
             return area;
         }
@@ -129,9 +129,9 @@ namespace TrueCraft.Core.Test.Logic
 
         [TestCase(3, new short[] { 1, 1, 1, 1, 1, 1, 1, 1, 1 })]
         [TestCase(2, new short[] { 5, 5, 5, 5 })]
-        [TestCase(2, new short[] { 0, 0, 0, 0, 1, 1, 0, 1, 2 })]
-        [TestCase(1, new short[] { 0, 2, 0, 0, 1, 0, 0, 1, 0 })]
-        [TestCase(1, new short[] { 0, 0, 0, 0, 3, 0, 0, 0, 0 })]
+        [TestCase(2, new short[] { -1, -1, -1, -1, 1, 1, -1, 1, 2 })]
+        [TestCase(1, new short[] { -1, 2, -1, -1, 1, -1, -1, 1, -1 })]
+        [TestCase(1, new short[] { -1, -1, -1, -1, 3, -1, -1, -1, -1 })]
         public void Width(int expectedWidth, short[] grid)
         {
             XmlNode xml = GetCraftingAreaXml(grid);
@@ -143,9 +143,9 @@ namespace TrueCraft.Core.Test.Logic
 
         [TestCase(3, new short[] { 1, 1, 1, 1, 1, 1, 1, 1, 1 })]
         [TestCase(2, new short[] { 5, 5, 5, 5 })]
-        [TestCase(2, new short[] { 0, 0, 0, 0, 1, 1, 0, 1, 2 })]
-        [TestCase(1, new short[] { 0, 0, 0, 2, 1, 1, 0, 0, 0 })]
-        [TestCase(1, new short[] { 0, 0, 0, 0, 3, 0, 0, 0, 0 })]
+        [TestCase(2, new short[] { -1, -1, -1, -1, 1, 1, -1, 1, 2 })]
+        [TestCase(1, new short[] { -1, -1, -1, 2, 1, 1, -1, -1, -1 })]
+        [TestCase(1, new short[] { -1, -1, -1, -1, 3, -1, -1, -1, -1 })]
         public void Height(int expectedHeight, short[] grid)
         {
             XmlNode xml = GetCraftingAreaXml(grid);
@@ -155,12 +155,12 @@ namespace TrueCraft.Core.Test.Logic
             Assert.AreEqual(expectedHeight, actual.Height);
         }
 
-        [TestCase(true, new short[] { 1, 1, 1, 0, 2, 0, 0, 2, 0 }, new short[] { 1, 1, 1, 0, 2, 0, 0, 2, 0 })]
-        [TestCase(true, new short[] { 1, 0, 0, 0, 0, 0, 0, 0, 0 }, new short[] { 0, 1, 0, 0 })]
-        [TestCase(true, new short[] { 0, 0, 0, 0, 1, 1, 0, 1, 2 }, new short[] { 1, 1, 1, 2 })]
-        [TestCase(false, new short[] { 1, 1, 1, 0, 2, 0, 0, 2, 0 }, new short[] { 1, 2, 1, 0, 2, 0, 0, 2, 0 })]
-        [TestCase(false, new short[] { 1, 0, 0, 0, 0, 0, 0, 0, 0}, new short[] { 0, 0, 1, 1 })]
-        [TestCase(false, new short[] { 1, 0, 0, 0, 0, 0, 0, 0, 0 }, new short[] { 2, 0, 0, 0, 0, 0, 0, 0, 0 })]
+        [TestCase(true, new short[] { 1, 1, 1, -1, 2, -1, -1, 2, -1 }, new short[] { 1, 1, 1, -1, 2, -1, -1, 2, -1 })]
+        [TestCase(true, new short[] { 1, -1, -1, -1, -1, -1, -1, -1, -1 }, new short[] { -1, 1, -1, -1 })]
+        [TestCase(true, new short[] { -1, -1, -1, -1, 1, 1, -1, 1, 2 }, new short[] { 1, 1, 1, 2 })]
+        [TestCase(false, new short[] { 1, 1, 1, -1, 2, -1, -1, 2, -1 }, new short[] { 1, 2, 1, -1, 2, -1, -1, 2, -1 })]
+        [TestCase(false, new short[] { 1, -1, -1, -1, -1, -1, -1, -1, -1}, new short[] { -1, -1, 1, 1 })]
+        [TestCase(false, new short[] { 1, -1, -1, -1, -1, -1, -1, -1, -1 }, new short[] { 2, -1, -1, -1, -1, -1, -1, -1, -1 })]
         public void Test_Equality(bool expected, short[] grid1, short[] grid2)
         {
             XmlNode xml1 = GetCraftingAreaXml(grid1);
