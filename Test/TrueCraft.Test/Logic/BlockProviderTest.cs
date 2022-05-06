@@ -70,7 +70,10 @@ namespace TrueCraft.Test.Logic
         public void TestBlockMined()
         {
             ResetMocks();
-            var blockProvider = new Mock<BlockProvider> { CallBase = true };
+            Mock<BlockProvider> blockProvider = new Mock<BlockProvider>(MockBehavior.Strict);
+            blockProvider.Setup(x => x.BlockMined(It.IsAny<BlockDescriptor>(),
+                It.IsAny<BlockFace>(), It.IsAny<IDimension>(), It.IsAny<IRemoteClient>())).CallBase();
+
             var descriptor = new BlockDescriptor
             {
                 ID = 10,
