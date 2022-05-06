@@ -52,8 +52,8 @@ namespace TrueCraft.Core.Test.Inventory
             ItemStack area1Stack = new ItemStack(20);
             area[1].Item = area1Stack; ;
 
-            Assert.AreEqual(area0Stack, area[0]);
-            Assert.AreEqual(area1Stack, area[1]);
+            Assert.AreEqual(area0Stack, area[0].Item);
+            Assert.AreEqual(area1Stack, area[1].Item);
 
             for (int j = 2; j < slotCount; j++)
                 Assert.AreEqual(ItemStack.EmptyStack, area[j].Item);
