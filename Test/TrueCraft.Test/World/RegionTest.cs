@@ -33,7 +33,7 @@ namespace TrueCraft.Test.World
         [Test]
         public void TestGetRegionFileName()
         {
-            Assert.AreEqual("r.0.0.mca", Region.GetRegionFileName(_region!.Position));
+            Assert.AreEqual("r.0.0.mcr", Region.GetRegionFileName(_region!.Position));
         }
     }
 }
