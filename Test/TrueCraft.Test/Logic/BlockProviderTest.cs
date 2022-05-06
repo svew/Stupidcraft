@@ -52,6 +52,20 @@ namespace TrueCraft.Test.Logic
             _user.Invocations.Clear();
         }
 
+        [OneTimeSetUp]
+        public void SetUp()
+        {
+            try
+            {
+                WhoAmI.Answer = IAm.Server;
+            }
+            catch (InvalidOperationException)
+            {
+                // Ignore this - it just means we've tried to set WhoAmI
+                // multiple times.
+            }
+        }
+
         [Test]
         public void TestBlockMined()
         {
