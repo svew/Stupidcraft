@@ -10,11 +10,14 @@ namespace TrueCraft.Client.World
     {
         private readonly IBlockRepository _blockRepository;
 
+        private readonly IItemRepository _itemRepository;
+
         private Dictionary<GlobalChunkCoordinates, IChunk> _chunks;
 
-        public Dimension(IBlockRepository blockRepository)
+        public Dimension(IBlockRepository blockRepository, IItemRepository itemRepository)
         {
             _blockRepository = blockRepository;
+            _itemRepository = itemRepository;
             _chunks = new Dictionary<GlobalChunkCoordinates, IChunk>(434);
         }
 
@@ -32,6 +35,9 @@ namespace TrueCraft.Client.World
 
         /// <inheritdoc />
         public IBlockRepository BlockRepository { get => _blockRepository; }
+
+        /// <inheritdoc />
+        public IItemRepository ItemRepository { get => _itemRepository; }
 
         /// <inheritdoc />
         public long TimeOfDay { get; set; }

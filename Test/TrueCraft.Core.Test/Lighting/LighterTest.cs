@@ -17,6 +17,8 @@ namespace TrueCraft.Core.Test.Lighting
 
         private IBlockRepository _blockRepository;
 
+        private readonly IItemRepository _itemRepository;
+
         public LighterTest()
         {
             Mock<IBlockProvider> mockProvider = new Mock<IBlockProvider>(MockBehavior.Strict);
@@ -25,6 +27,9 @@ namespace TrueCraft.Core.Test.Lighting
             Mock<IBlockRepository> mockRepository = new Mock<IBlockRepository>(MockBehavior.Strict);
             mockRepository.Setup(x => x.GetBlockProvider(It.Is<byte>(b => b == 3))).Returns(mockProvider.Object);
             _blockRepository = mockRepository.Object;
+
+            Mock<IItemRepository> mockItemRepository = new Mock<IItemRepository>(MockBehavior.Strict);
+            _itemRepository = mockItemRepository.Object;
         }
 
         private IBlockRepository GetBlockRepository()
@@ -37,7 +42,7 @@ namespace TrueCraft.Core.Test.Lighting
         public void TestBasicLighting()
         {
             var repository = GetBlockRepository();
-            IDimension dimension = new FakeDimension(GetBlockRepository());
+            IDimension dimension = new FakeDimension(GetBlockRepository(), _itemRepository);
             ILighter lighter = new OverWorldLighter(dimension, null!);
             IChunk chunk = dimension.GetChunk(GlobalChunkCoordinates.Zero)!;
             int ground = chunk.GetHeight(0, 0);
@@ -74,7 +79,7 @@ namespace TrueCraft.Core.Test.Lighting
         public void TestShortPropegation()
         {
             var repository = GetBlockRepository();
-            IDimension dimension = new FakeDimension(GetBlockRepository());
+            IDimension dimension = new FakeDimension(GetBlockRepository(), _itemRepository);
             IChunk chunk = dimension.GetChunk(GlobalChunkCoordinates.Zero)!;
             //var lighter = new Core.Lighting.Lighting(dimension, repository);
             ILighter lighter = new OverWorldLighter(dimension, null!);
@@ -104,7 +109,7 @@ namespace TrueCraft.Core.Test.Lighting
         public void TestFarPropegation()
         {
             var repository = GetBlockRepository();
-            IDimension dimension = new FakeDimension(GetBlockRepository());
+            IDimension dimension = new FakeDimension(GetBlockRepository(), _itemRepository);
             IChunk chunk = dimension.GetChunk(GlobalChunkCoordinates.Zero)!;
             int xHole = 5;
             int zHole = 5;
@@ -150,7 +155,7 @@ namespace TrueCraft.Core.Test.Lighting
         public void TestFarPropegationx2()
         {
             IBlockRepository repository = GetBlockRepository();
-            IDimension dimension = new FakeDimension(repository);
+            IDimension dimension = new FakeDimension(repository, _itemRepository);
             IChunk chunk = dimension.GetChunk(GlobalChunkCoordinates.Zero)!;
             ILighter lighter = new OverWorldLighter(dimension, null!);
             int xHole = 5;
@@ -246,7 +251,7 @@ namespace TrueCraft.Core.Test.Lighting
         public void TestLeavesAndEtc()
         {
             IBlockRepository repository = GetBlockRepository();
-            IDimension dimension = new FakeDimension(repository);
+            IDimension dimension = new FakeDimension(repository, _itemRepository);
             IChunk chunk = dimension.GetChunk(GlobalChunkCoordinates.Zero)!;
             ILighter lighter = new OverWorldLighter(dimension, null!);
             int x = 5;

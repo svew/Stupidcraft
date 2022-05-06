@@ -81,6 +81,7 @@ namespace TrueCraft.Test.Logic
             };
 
             blockProvider.Object.BlockMined(descriptor, BlockFace.PositiveY, _dimension.Object, _user.Object);
+
             _entityManager.Verify(m => m.SpawnEntity(It.Is<ItemEntity>(e => e.Item.ID == 10)));
             _dimension.Verify(w => w.SetBlockID(GlobalVoxelCoordinates.Zero, 0));
 

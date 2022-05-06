@@ -33,7 +33,20 @@ namespace TrueCraft.Core.World
         /// <summary>
         /// Gets the BlockRepository in use for this Dimension.
         /// </summary>
+        /// <remarks>
+        /// The same Block Repository is used in all Dimensions of a World.  It
+        /// is provided here as a convenience.
+        /// </remarks>
         IBlockRepository BlockRepository { get; }
+
+        /// <summary>
+        /// Gets the ItemRepository.
+        /// </summary>
+        /// <remarks>
+        /// The same Item Repository is used in all Dimensions of a World.  It
+        /// is provided here as a convenience.
+        /// </remarks>
+        IItemRepository ItemRepository { get; }
 
         /// <summary>
         /// Gets or sets the Time of Day (in ticks).

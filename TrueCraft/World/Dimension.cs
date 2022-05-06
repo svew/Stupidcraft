@@ -37,6 +37,8 @@ namespace TrueCraft.World
 
         private readonly IBlockRepository _blockRepository;
 
+        private readonly IItemRepository _itemRepository;
+
         /// <summary>
         /// Chunks in this Queue are waiting to have their BlockLoaded methods called for each block.
         /// </summary>
@@ -53,6 +55,9 @@ namespace TrueCraft.World
 
         /// <inheritdoc/>
         public IBlockRepository BlockRepository { get => _blockRepository; }
+
+        /// <inheritdoc/>
+        public IItemRepository ItemRepository { get => _itemRepository; }
 
         private DateTime _baseTime;
 
@@ -94,6 +99,7 @@ namespace TrueCraft.World
             _chunkProvider = chunkProvider;
             _lightingQueue = lightingQueue;
             _blockRepository = serviceLocator.BlockRepository;
+            _itemRepository = serviceLocator.ItemRepository;
             _regions = new Dictionary<RegionCoordinates, IRegion>();
             _baseTime = DateTime.UtcNow;
         }

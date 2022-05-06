@@ -11,11 +11,14 @@ namespace TrueCraft.Core.Test.World
     {
         private readonly IBlockRepository _blockRepository;
 
+        private readonly IItemRepository _itemRepository;
+
         private Dictionary<GlobalChunkCoordinates, IChunk> _chunks;
 
-        public FakeDimension(IBlockRepository blockRepository)
+        public FakeDimension(IBlockRepository blockRepository, IItemRepository itemRepository)
         {
             _blockRepository = blockRepository;
+            _itemRepository = itemRepository;
             _chunks = new Dictionary<GlobalChunkCoordinates, IChunk>(434);
 
             GlobalChunkCoordinates chunkCoordinates = new GlobalChunkCoordinates(0, 0);
@@ -27,6 +30,9 @@ namespace TrueCraft.Core.Test.World
         public string Name { get => "Fake"; }
 
         public IBlockRepository BlockRepository { get => _blockRepository; }
+
+        /// <inheritdoc/>
+        public IItemRepository ItemRepository { get => _itemRepository; }
 
         public long TimeOfDay { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
