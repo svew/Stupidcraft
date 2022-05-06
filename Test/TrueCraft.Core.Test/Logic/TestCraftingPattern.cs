@@ -54,7 +54,8 @@ namespace TrueCraft.Core.Test.Logic
             XmlDocument doc = new XmlDocument();
             doc.LoadXml(rv.ToString());
 
-            return doc.FirstChild;
+            // doc was constructed to ensure FirstChild is not null
+            return doc.FirstChild!;
         }
 
         [Test]
@@ -115,7 +116,8 @@ namespace TrueCraft.Core.Test.Logic
         {
             XmlDocument doc = new XmlDocument();
             doc.LoadXml(xml);
-            CraftingPattern actual = CraftingPattern.GetCraftingPattern(doc.FirstChild);
+            // Test cases were constructed to ensure FirstChild is not null.
+            CraftingPattern actual = CraftingPattern.GetCraftingPattern(doc.FirstChild!);
 
             Assert.AreEqual(expectedWidth, actual.Width);
             Assert.AreEqual(expectedHeight, actual.Height);
@@ -173,8 +175,8 @@ namespace TrueCraft.Core.Test.Logic
             Assert.AreEqual(expected, a.Equals(b));
             Assert.AreEqual(expected, b.Equals(a));
 
-            Assert.False(a.Equals(null));
-            Assert.False(a.Equals("wrong type of object"));
+            Assert.False(a.Equals(null!));
+            Assert.False(a!.Equals("wrong type of object"));
 
             Assert.AreEqual(expected, a == b);
             Assert.AreEqual(expected, b == a);
@@ -182,8 +184,8 @@ namespace TrueCraft.Core.Test.Logic
             Assert.AreNotEqual(expected, a != b);
             Assert.AreNotEqual(expected, b != a);
 
-            Assert.False(a == null);
-            Assert.False(null == a);
+            Assert.False(a == null!);
+            Assert.False(null! == a!);
         }
 
     }
