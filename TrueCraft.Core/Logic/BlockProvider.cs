@@ -66,7 +66,7 @@ namespace TrueCraft.Core.Logic
             dimension.SetBlockID(descriptor.Coordinates, 0);
         }
 
-        public void GenerateDropEntity(BlockDescriptor descriptor, IDimension dimension, IMultiplayerServer server, ItemStack item)
+        public virtual void GenerateDropEntity(BlockDescriptor descriptor, IDimension dimension, IMultiplayerServer server, ItemStack item)
         {
             ServerOnly.Assert();
 

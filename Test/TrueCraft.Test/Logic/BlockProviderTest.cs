@@ -69,27 +69,73 @@ namespace TrueCraft.Test.Logic
         [Test]
         public void TestBlockMined()
         {
-            ResetMocks();
+            //
+            // Set up
+            //
+            bool generateDropEntityCalled = false;
+            BlockDescriptor? generateDescriptor = null;
+            IDimension? generateDimension = null;
+            IMultiplayerServer? generateServer = null;
+            ItemStack? generateHeldItem = null;
             Mock<BlockProvider> blockProvider = new Mock<BlockProvider>(MockBehavior.Strict);
             blockProvider.Setup(x => x.BlockMined(It.IsAny<BlockDescriptor>(),
                 It.IsAny<BlockFace>(), It.IsAny<IDimension>(), It.IsAny<IRemoteClient>())).CallBase();
+            blockProvider.Setup(x => x.GenerateDropEntity(It.IsAny<BlockDescriptor>(),
+                It.IsAny<IDimension>(), It.IsAny<IMultiplayerServer>(), It.IsAny<ItemStack>()))
+                .Callback<BlockDescriptor, IDimension, IMultiplayerServer, ItemStack>(
+                (block, dimension, server, heldItem) =>
+                {
+                    generateDropEntityCalled = true;
+                    generateDescriptor = block;
+                    generateDimension = dimension;
+                    generateServer = server;
+                    generateHeldItem = heldItem;
+                });
 
+            // NOTE: dependency upon BlockDescriptor and GlobalVoxelCoordinates.
+            GlobalVoxelCoordinates blockCoordinates = new GlobalVoxelCoordinates(5, 15, 10);
             var descriptor = new BlockDescriptor
             {
                 ID = 10,
-                Coordinates = GlobalVoxelCoordinates.Zero
+                Coordinates = blockCoordinates
             };
 
-            blockProvider.Object.BlockMined(descriptor, BlockFace.PositiveY, _dimension.Object, _user.Object);
+            Mock<IEntityManager> mockEntityManager = new Mock<IEntityManager>(MockBehavior.Strict);
 
-            _entityManager.Verify(m => m.SpawnEntity(It.Is<ItemEntity>(e => e.Item.ID == 10)));
-            _dimension.Verify(w => w.SetBlockID(GlobalVoxelCoordinates.Zero, 0));
+            Mock<IItemRepository> mockItemRepository = new Mock<IItemRepository>(MockBehavior.Strict);
 
-            blockProvider.Protected().Setup<ItemStack[]>("GetDrop", ItExpr.IsAny<BlockDescriptor>(), ItExpr.IsAny<ItemStack>())
-                .Returns(() => new[] { new ItemStack(12) });
-            blockProvider.Object.BlockMined(descriptor, BlockFace.PositiveY, _dimension.Object, _user.Object);
-            _entityManager.Verify(m => m.SpawnEntity(It.Is<ItemEntity>(e => e.Item.ID == 12)));
-            _dimension.Verify(w => w.SetBlockID(GlobalVoxelCoordinates.Zero, 0));
+            GlobalVoxelCoordinates blockSetAt = GlobalVoxelCoordinates.Zero;
+            byte newBlockID = 1;
+            Mock<IDimensionServer> mockDimension = new Mock<IDimensionServer>(MockBehavior.Strict);
+            mockDimension.Setup(x => x.EntityManager).Returns(mockEntityManager.Object);
+            mockDimension.Setup(x => x.ItemRepository).Returns(mockItemRepository.Object);
+            mockDimension.Setup(x => x.SetBlockID(It.IsAny<GlobalVoxelCoordinates>(), It.IsAny<byte>()))
+                .Callback<GlobalVoxelCoordinates, byte>((coord, id) => { blockSetAt = coord; newBlockID = id; });
+
+            Mock<IMultiplayerServer> mockServer = new Mock<IMultiplayerServer>(MockBehavior.Strict);
+
+            Mock<IRemoteClient> mockRemoteClient = new Mock<IRemoteClient>(MockBehavior.Strict);
+            mockRemoteClient.Setup(x => x.Server).Returns(mockServer.Object);
+            // NOTE: dependent upon ItemStack class.
+            mockRemoteClient.Setup(x => x.SelectedItem).Returns(ItemStack.EmptyStack);
+
+            //
+            // Act
+            //
+            blockProvider.Object.BlockMined(descriptor, BlockFace.PositiveY, mockDimension.Object, mockRemoteClient.Object);
+
+            //
+            // Assert
+            //
+            Assert.AreEqual(blockCoordinates, blockSetAt);
+            Assert.AreEqual(0, newBlockID);
+            Assert.True(generateDropEntityCalled);
+            Assert.IsNotNull(generateDescriptor);
+            Assert.AreEqual(10, generateDescriptor?.ID);
+            Assert.AreEqual(blockCoordinates, generateDescriptor?.Coordinates);
+            Assert.True(object.ReferenceEquals(mockDimension.Object, generateDimension));
+            Assert.AreEqual(ItemStack.EmptyStack, generateHeldItem);
+            Assert.True(object.ReferenceEquals(mockServer.Object, generateServer));
         }
 
         [Test]
