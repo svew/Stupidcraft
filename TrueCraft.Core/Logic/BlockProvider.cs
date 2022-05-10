@@ -71,14 +71,14 @@ namespace TrueCraft.Core.Logic
             ServerOnly.Assert();
 
             IEntityManager entityManager = ((IDimensionServer)dimension).EntityManager;
-            var items = new ItemStack[0];
-            var type = ToolType.None;
-            var material = ToolMaterial.None;
-            var held = dimension.ItemRepository.GetItemProvider(item.ID);
+            ItemStack[] items = new ItemStack[0];
+            ToolType type = ToolType.None;
+            ToolMaterial material = ToolMaterial.None;
+            IItemProvider? held = dimension.ItemRepository.GetItemProvider(item.ID);
 
             if (held is ToolItem)
             {
-                var tool = held as ToolItem;
+                ToolItem tool = (ToolItem)held;
                 material = tool.Material;
                 type = tool.ToolType;
             }
