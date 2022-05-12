@@ -122,6 +122,11 @@ namespace TrueCraft.Core.Logic
             }
         }
 
+        // TODO: Fix this method signature.  passing in a BlockDescriptor opens the
+        //   possibility it may have a different ID than this BlockProvider.  What is
+        //   the meaning of, say, passing in a Torch BlockDescriptor, if this is a StoneBlock?
+        //   The only part of the BlockDescriptor to be used appears to be the metadata.
+        //   Also: item means the item held by the player breaking the block.
         protected virtual ItemStack[] GetDrop(BlockDescriptor descriptor, ItemStack item)
         {
             return new[] { new ItemStack(descriptor.ID, 1, descriptor.Metadata) };

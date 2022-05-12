@@ -10,6 +10,7 @@ using TrueCraft.Core.World;
 using TrueCraft.Core;
 using TrueCraft.TerrainGen;
 using TrueCraft.Core.Lighting;
+using TrueCraft.Test.World;
 
 namespace TrueCraft.Test.Logic
 {
@@ -17,41 +18,6 @@ namespace TrueCraft.Test.Logic
     [TestFixture]
     public class BlockProviderTest
     {
-        private const int _testSeed = 314159;
-
-        private readonly Mock<IDimensionServer> _dimension;
-        private readonly Mock<IMultiplayerServer> _server;
-        private readonly Mock<IEntityManager> _entityManager;
-        private readonly Mock<IRemoteClient> _user;
-        private readonly Mock<IBlockRepository> _blockRepository;
-
-        public BlockProviderTest()
-        {
-            _dimension = new Mock<IDimensionServer>();
-            _server = new Mock<IMultiplayerServer>();
-            _entityManager = new Mock<IEntityManager>();
-            _user = new Mock<IRemoteClient>();
-            _blockRepository = new Mock<IBlockRepository>();
-
-            _user.SetupGet(u => u.Dimension).Returns(_dimension.Object);
-            _user.SetupGet(u => u.Server).Returns(_server.Object);
-
-            _dimension.Setup(w => w.SetBlockID(It.IsAny<GlobalVoxelCoordinates>(), It.IsAny<byte>()));
-            _dimension.Setup(d => d.BlockRepository).Returns(_blockRepository.Object);
-
-            _server.SetupGet(s => s.BlockRepository).Returns(_blockRepository.Object);
-
-            _entityManager.Setup(m => m.SpawnEntity(It.IsAny<IEntity>()));
-        }
-
-        protected void ResetMocks()
-        {
-            _dimension.Invocations.Clear();
-            _server.Invocations.Clear();
-            _entityManager.Invocations.Clear();
-            _user.Invocations.Clear();
-        }
-
         [OneTimeSetUp]
         public void SetUp()
         {
@@ -141,45 +107,96 @@ namespace TrueCraft.Test.Logic
         [Test]
         public void TestSupport()
         {
-            ResetMocks();
+            //
+            // Setup
+            //
+            Mock<IBlockProvider> supportive = new Mock<IBlockProvider>(MockBehavior.Strict);
+            supportive.SetupGet(p => p.Opaque).Returns(true);
+            supportive.SetupGet<byte>(p => p.ID).Returns(1);
+            Mock<IBlockProvider> needsSupport = new Mock<IBlockProvider>(MockBehavior.Strict);
+            needsSupport.SetupGet<byte>(p => p.ID).Returns(2);
+            Mock<IBlockProvider> unsupportive = new Mock<IBlockProvider>(MockBehavior.Strict);
+            unsupportive.SetupGet(p => p.Opaque).Returns(false);
+            unsupportive.SetupGet<byte>(p => p.ID).Returns(3);
 
-            // We need an actual world for this
-            // TODO: Check if this could be switched to FakeDimension so that this unit test won't have
-            //       a dependency on the Dimension class.
+            Mock<IBlockRepository> mockBlockRepository = new Mock<IBlockRepository>(MockBehavior.Strict);
+            mockBlockRepository.Setup(r => r.GetBlockProvider(It.Is<byte>(b => b == supportive.Object.ID))).Returns(supportive.Object);
+            mockBlockRepository.Setup(r => r.GetBlockProvider(It.Is<byte>(b => b == unsupportive.Object.ID))).Returns(unsupportive.Object);
+
+            Mock<IItemRepository> mockItemRepository = new Mock<IItemRepository>(MockBehavior.Strict);
+            mockItemRepository.Setup(x => x.GetItemProvider(It.Is<short>(x => x == -1))).Returns<IItemProvider>(null);
+
             Mock<IMultiplayerServer> mockServer = new Mock<IMultiplayerServer>(MockBehavior.Strict);
+
             Mock<IServiceLocator> mockServiceLocator = new Mock<IServiceLocator>(MockBehavior.Strict);
             mockServiceLocator.Setup(x => x.Server).Returns(mockServer.Object);
-            Mock<ILightingQueue> mockLightingQueue = new Mock<ILightingQueue>(MockBehavior.Strict);
-            IDimension dimension = new TrueCraft.World.Dimension(mockServiceLocator.Object, string.Empty,
-                      DimensionID.Overworld, new FlatlandGenerator(_testSeed),
-                      mockLightingQueue.Object,
-                      _entityManager.Object);
+            mockServiceLocator.Setup(x => x.BlockRepository).Returns(mockBlockRepository.Object);
+            mockServiceLocator.Setup(x => x.ItemRepository).Returns(mockItemRepository.Object);
 
-            dimension.SetBlockID(GlobalVoxelCoordinates.Zero, 1);
+            Mock<IEntityManager> mockEntityManager = new Mock<IEntityManager>(MockBehavior.Strict);
+            IEntity? spawnedEntity = null;
+            mockEntityManager.Setup(x => x.SpawnEntity(It.IsAny<IEntity>())).Callback<IEntity>(
+                (entity) =>
+                {
+                    spawnedEntity = entity;
+                });
+
+            IDimension fakeDimension = new FakeDimension(mockBlockRepository.Object,
+                mockItemRepository.Object, mockEntityManager.Object);
+
+            fakeDimension.SetBlockID(GlobalVoxelCoordinates.Zero, supportive.Object.ID);
             GlobalVoxelCoordinates oneY = new GlobalVoxelCoordinates(0, 1, 0);
-            dimension.SetBlockID(oneY, 2);
+            fakeDimension.SetBlockID(oneY, needsSupport.Object.ID);
 
-            var blockProvider = new Mock<BlockProvider> { CallBase = true };
-            var updated = new BlockDescriptor { ID = 2, Coordinates = oneY };
-            var source = new BlockDescriptor { ID = 2, Coordinates = new GlobalVoxelCoordinates(1, 0, 0) };
-            blockProvider.Setup(b => b.GetSupportDirection(It.IsAny<BlockDescriptor>())).Returns(Vector3i.Down);
+            // Note: It would be preferable to have this be a Strict Mock rather
+            //  than a loose one, but the setup of GetDrop is not working.
+            Mock<BlockProvider> testBlockProvider = new Mock<BlockProvider>(MockBehavior.Loose);
+            testBlockProvider.CallBase = true;
+            testBlockProvider.SetupGet<byte>(x => x.ID).Returns(2);
+            testBlockProvider.SetupGet<ToolType>(x => x.EffectiveTools).Returns(ToolType.All);
+            testBlockProvider.SetupGet<ToolMaterial>(x => x.EffectiveToolMaterials).Returns(ToolMaterial.All);
+            testBlockProvider.Setup(b => b.GetSupportDirection(It.IsAny<BlockDescriptor>())).Returns(Vector3i.Down);
+            testBlockProvider.Setup(x => x.BlockUpdate(It.IsAny<BlockDescriptor>(),
+                It.IsAny<BlockDescriptor>(), It.IsAny<IMultiplayerServer>(),
+                It.IsAny<IDimension>())).CallBase();
+            testBlockProvider.Setup(x => x.IsSupported(It.IsAny<IDimension>(),
+                It.IsAny<BlockDescriptor>())).CallBase();
+            testBlockProvider.Setup(x => x.GenerateDropEntity(It.IsAny<BlockDescriptor>(),
+                It.IsAny<IDimension>(), It.IsAny<IMultiplayerServer>(), It.IsAny<ItemStack>()))
+                .CallBase();
+            // Note: This could not be made to work.  It was throwing an exception
+            // stating that
+            // "all invocations on the Mock must have a corresponding setup"
+            // Changing the passed in signature produced an error as expected so
+            // the setup was able to find the method, but execution of the Mock
+            // was not.
+            //testBlockProvider.Protected().Setup<ItemStack[]>("GetDrop", It.IsAny<BlockDescriptor>(), It.IsAny<ItemStack>()).CallBase();
 
-            var supportive = new Mock<IBlockProvider>();
-            supportive.SetupGet(p => p.Opaque).Returns(true);
-            var unsupportive = new Mock<IBlockProvider>();
-            unsupportive.SetupGet(p => p.Opaque).Returns(false);
+            BlockDescriptor updated = new BlockDescriptor { ID = needsSupport.Object.ID, Coordinates = oneY };
+            BlockDescriptor source = new BlockDescriptor { ID = needsSupport.Object.ID, Coordinates = new GlobalVoxelCoordinates(1, 0, 0) };
 
-            _blockRepository.Setup(r => r.GetBlockProvider(It.Is<byte>(b => b == 1))).Returns(supportive.Object);
-            _blockRepository.Setup(r => r.GetBlockProvider(It.Is<byte>(b => b == 3))).Returns(unsupportive.Object);
 
-            blockProvider.Object.BlockUpdate(updated, source, _server.Object, dimension);
-            _dimension.Verify(w => w.SetBlockID(oneY, 0), Times.Never);
+            //
+            // Act / Assert
+            //
 
-            dimension.SetBlockID(GlobalVoxelCoordinates.Zero, 3);
+            // Send the block an update from the side
+            testBlockProvider.Object.BlockUpdate(updated, source, mockServer.Object, fakeDimension);
+            // Assert that the block needing support is still there.
+            Assert.AreEqual(needsSupport.Object.ID, fakeDimension.GetBlockID(oneY));
 
-            blockProvider.Object.BlockUpdate(updated, source, _server.Object, dimension);
-            Assert.AreEqual(0, dimension.GetBlockID(oneY));
-            _entityManager.Verify(m => m.SpawnEntity(It.Is<ItemEntity>(e => e.Item.ID == 2)));
+            // Switch the block underneath to one that does not provide support.
+            fakeDimension.SetBlockID(GlobalVoxelCoordinates.Zero, unsupportive.Object.ID);
+            // Send the supported block an update from below
+            source = new BlockDescriptor { ID = unsupportive.Object.ID, Coordinates = GlobalVoxelCoordinates.Zero };
+            testBlockProvider.Object.BlockUpdate(updated, source, mockServer.Object, fakeDimension);
+            // Assert that the block requiring support has been replace with an Air Block
+            Assert.AreEqual(0, fakeDimension.GetBlockID(oneY));
+            // Assert that an Item Entity with ID == 2 was spawned.
+            Assert.IsNotNull(spawnedEntity);
+            ItemEntity? itemEntity = spawnedEntity as ItemEntity;
+            Assert.IsNotNull(itemEntity);
+            Assert.AreEqual(needsSupport.Object.ID, itemEntity?.Item.ID);
         }
     }
 }
