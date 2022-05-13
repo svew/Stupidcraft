@@ -11,6 +11,7 @@ using TrueCraft.Core;
 using TrueCraft.TerrainGen;
 using TrueCraft.Core.Lighting;
 using TrueCraft.Test.World;
+using TrueCraft.Core.Logic.Items;
 
 namespace TrueCraft.Test.Logic
 {
@@ -197,6 +198,201 @@ namespace TrueCraft.Test.Logic
             ItemEntity? itemEntity = spawnedEntity as ItemEntity;
             Assert.IsNotNull(itemEntity);
             Assert.AreEqual(needsSupport.Object.ID, itemEntity?.Item.ID);
+        }
+
+        /// <summary>
+        /// Test GenerateDropEntity using a tool which is effective and of the correct material
+        /// </summary>
+        [Test]
+        public void GenerateDropEntity_Effective()
+        {
+            //
+            // Setup
+            //
+            GlobalVoxelCoordinates coordinates = new GlobalVoxelCoordinates(5, 7, 13);
+            byte blockID = 47;
+            BlockDescriptor block = new BlockDescriptor()
+            {
+                ID = blockID,
+                Coordinates = coordinates
+            };
+
+            Mock<BlockProvider> testBlockProvider = new Mock<BlockProvider>(MockBehavior.Loose);
+            testBlockProvider.CallBase = true;
+            testBlockProvider.Setup(x => x.EffectiveToolMaterials).CallBase();
+            testBlockProvider.Setup(x => x.EffectiveTools).CallBase();
+            testBlockProvider.Setup(x => x.GenerateDropEntity(It.IsAny<BlockDescriptor>(),
+                It.IsAny<IDimension>(), It.IsAny<IMultiplayerServer>(), It.IsAny<ItemStack>()))
+                .CallBase();
+
+            Mock<IMultiplayerServer> mockServer = new Mock<IMultiplayerServer>(MockBehavior.Strict);
+
+            short toolItemID = 12;
+            ItemStack heldItem = new ItemStack(toolItemID);
+
+            Mock<ToolItem> mockTool = new Mock<ToolItem>(MockBehavior.Strict);
+            mockTool.Setup(x => x.Material).Returns(ToolMaterial.Stone);
+            mockTool.Setup(x => x.ToolType).Returns(ToolType.Hoe);
+
+            Mock<IItemRepository> mockItemRepository = new Mock<IItemRepository>(MockBehavior.Strict);
+            mockItemRepository.Setup(x => x.GetItemProvider(It.Is<short>(y => y == toolItemID))).Returns(mockTool.Object);
+
+            Mock<IEntityManager> mockEntityManager = new Mock<IEntityManager>(MockBehavior.Strict);
+            int spawnCount = 0;
+            IEntity? spawnedEntity = null;
+            mockEntityManager.Setup(x => x.SpawnEntity(It.IsAny<IEntity>())).Callback<IEntity>((entity) =>
+            {
+                spawnCount++;
+                spawnedEntity = entity;
+            });
+
+            Mock<IDimensionServer> mockDimension = new Mock<IDimensionServer>(MockBehavior.Strict);
+            mockDimension.Setup(x => x.ItemRepository).Returns(mockItemRepository.Object);
+            mockDimension.Setup(x => x.EntityManager).Returns(mockEntityManager.Object);
+
+            //
+            // Act
+            //
+            testBlockProvider.Object.GenerateDropEntity(block, mockDimension.Object,
+                mockServer.Object, heldItem);
+
+            //
+            // Assert
+            //
+            Assert.AreEqual(1, spawnCount);
+            ItemEntity? spawnedItem = spawnedEntity as ItemEntity;
+            Assert.IsNotNull(spawnedItem);
+            Assert.AreEqual(blockID, spawnedItem?.Item.ID);
+            Assert.AreEqual(1, spawnedItem?.Item.Count);
+            Assert.AreEqual(coordinates.X, Math.Floor(spawnedEntity?.Position.X ?? double.MinValue));
+            Assert.AreEqual(coordinates.Y, Math.Floor(spawnedEntity?.Position.Y ?? double.MinValue));
+            Assert.AreEqual(coordinates.Z, Math.Floor(spawnedEntity?.Position.Z ?? double.MinValue));
+        }
+
+        /// <summary>
+        /// Test GenerateDropEntity using a tool which is ineffective but of the correct material
+        /// </summary>
+        [Test]
+        public void GenerateDropEntity_IneffectiveTool()
+        {
+            //
+            // Setup
+            //
+            GlobalVoxelCoordinates coordinates = new GlobalVoxelCoordinates(5, 7, 13);
+            byte blockID = 47;
+            BlockDescriptor block = new BlockDescriptor()
+            {
+                ID = blockID,
+                Coordinates = coordinates
+            };
+
+            Mock<BlockProvider> testBlockProvider = new Mock<BlockProvider>(MockBehavior.Loose);
+            testBlockProvider.CallBase = true;
+            testBlockProvider.Setup(x => x.EffectiveToolMaterials).Returns(ToolMaterial.Diamond);
+            testBlockProvider.Setup(x => x.EffectiveTools).Returns(ToolType.Pickaxe);
+            testBlockProvider.Setup(x => x.GenerateDropEntity(It.IsAny<BlockDescriptor>(),
+                It.IsAny<IDimension>(), It.IsAny<IMultiplayerServer>(), It.IsAny<ItemStack>()))
+                .CallBase();
+
+            Mock<IMultiplayerServer> mockServer = new Mock<IMultiplayerServer>(MockBehavior.Strict);
+
+            short toolItemID = 12;
+            ItemStack heldItem = new ItemStack(toolItemID);
+
+            Mock<ToolItem> mockTool = new Mock<ToolItem>(MockBehavior.Strict);
+            mockTool.Setup(x => x.Material).Returns(ToolMaterial.Diamond);
+            mockTool.Setup(x => x.ToolType).Returns(ToolType.Hoe);
+
+            Mock<IItemRepository> mockItemRepository = new Mock<IItemRepository>(MockBehavior.Strict);
+            mockItemRepository.Setup(x => x.GetItemProvider(It.Is<short>(y => y == toolItemID))).Returns(mockTool.Object);
+
+            Mock<IEntityManager> mockEntityManager = new Mock<IEntityManager>(MockBehavior.Strict);
+            int spawnCount = 0;
+            IEntity? spawnedEntity = null;
+            mockEntityManager.Setup(x => x.SpawnEntity(It.IsAny<IEntity>())).Callback<IEntity>((entity) =>
+            {
+                spawnCount++;
+                spawnedEntity = entity;
+            });
+
+            Mock<IDimensionServer> mockDimension = new Mock<IDimensionServer>(MockBehavior.Strict);
+            mockDimension.Setup(x => x.ItemRepository).Returns(mockItemRepository.Object);
+            mockDimension.Setup(x => x.EntityManager).Returns(mockEntityManager.Object);
+
+            //
+            // Act
+            //
+            testBlockProvider.Object.GenerateDropEntity(block, mockDimension.Object,
+                mockServer.Object, heldItem);
+
+            //
+            // Assert
+            //
+            Assert.AreEqual(0, spawnCount);
+            Assert.IsNull(spawnedEntity);
+        }
+
+        /// <summary>
+        /// Test GenerateDropEntity using a tool which is effective but of the incorrect material
+        /// </summary>
+        [Test]
+        public void GenerateDropEntity_IneffectiveMaterial()
+        {
+            //
+            // Setup
+            //
+            GlobalVoxelCoordinates coordinates = new GlobalVoxelCoordinates(5, 7, 13);
+            byte blockID = 47;
+            BlockDescriptor block = new BlockDescriptor()
+            {
+                ID = blockID,
+                Coordinates = coordinates
+            };
+
+            Mock<BlockProvider> testBlockProvider = new Mock<BlockProvider>(MockBehavior.Loose);
+            testBlockProvider.CallBase = true;
+            testBlockProvider.Setup(x => x.EffectiveToolMaterials).Returns(ToolMaterial.Diamond);
+            testBlockProvider.Setup(x => x.EffectiveTools).Returns(ToolType.Pickaxe);
+            testBlockProvider.Setup(x => x.GenerateDropEntity(It.IsAny<BlockDescriptor>(),
+                It.IsAny<IDimension>(), It.IsAny<IMultiplayerServer>(), It.IsAny<ItemStack>()))
+                .CallBase();
+
+            Mock<IMultiplayerServer> mockServer = new Mock<IMultiplayerServer>(MockBehavior.Strict);
+
+            short toolItemID = 12;
+            ItemStack heldItem = new ItemStack(toolItemID);
+
+            Mock<ToolItem> mockTool = new Mock<ToolItem>(MockBehavior.Strict);
+            mockTool.Setup(x => x.Material).Returns(ToolMaterial.Stone);
+            mockTool.Setup(x => x.ToolType).Returns(ToolType.Pickaxe);
+
+            Mock<IItemRepository> mockItemRepository = new Mock<IItemRepository>(MockBehavior.Strict);
+            mockItemRepository.Setup(x => x.GetItemProvider(It.Is<short>(y => y == toolItemID))).Returns(mockTool.Object);
+
+            Mock<IEntityManager> mockEntityManager = new Mock<IEntityManager>(MockBehavior.Strict);
+            int spawnCount = 0;
+            IEntity? spawnedEntity = null;
+            mockEntityManager.Setup(x => x.SpawnEntity(It.IsAny<IEntity>())).Callback<IEntity>((entity) =>
+            {
+                spawnCount++;
+                spawnedEntity = entity;
+            });
+
+            Mock<IDimensionServer> mockDimension = new Mock<IDimensionServer>(MockBehavior.Strict);
+            mockDimension.Setup(x => x.ItemRepository).Returns(mockItemRepository.Object);
+            mockDimension.Setup(x => x.EntityManager).Returns(mockEntityManager.Object);
+
+            //
+            // Act
+            //
+            testBlockProvider.Object.GenerateDropEntity(block, mockDimension.Object,
+                mockServer.Object, heldItem);
+
+            //
+            // Assert
+            //
+            Assert.AreEqual(0, spawnCount);
+            Assert.IsNull(spawnedEntity);
         }
     }
 }
