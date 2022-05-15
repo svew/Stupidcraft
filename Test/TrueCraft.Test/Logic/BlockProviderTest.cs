@@ -12,6 +12,10 @@ using TrueCraft.TerrainGen;
 using TrueCraft.Core.Lighting;
 using TrueCraft.Test.World;
 using TrueCraft.Core.Logic.Items;
+using TrueCraft.Core.Logic.Blocks;
+using System.Collections.Generic;
+using TrueCraft.Core.Inventory;
+using TrueCraft.Core.Physics;
 
 namespace TrueCraft.Test.Logic
 {
@@ -393,6 +397,308 @@ namespace TrueCraft.Test.Logic
             //
             Assert.AreEqual(0, spawnCount);
             Assert.IsNull(spawnedEntity);
+        }
+
+        /// <summary>
+        /// Tests that a Block will not be placed in a voxel occupied by an Air Block.
+        /// </summary>
+        [Test]
+        public void ItemUsedOnBlock_Space()
+        {
+            //
+            // Setup
+            //
+            Mock<IBlockRepository> mockBlockRepository = new Mock<IBlockRepository>(MockBehavior.Strict);
+            mockBlockRepository.Setup(x => x.GetBlockProvider(CobblestoneBlock.BlockID)).Returns(new CobblestoneBlock());
+
+            Mock<IItemRepository> mockItemRepository = new Mock<IItemRepository>(MockBehavior.Strict);
+
+            Mock<IEntityManager> mockEntityManager = new Mock<IEntityManager>(MockBehavior.Strict);
+            mockEntityManager.Setup(x => x.EntitiesInRange(It.IsAny<Vector3>(), It.IsAny<float>())).Returns(new List<IEntity>(1));
+
+            GlobalVoxelCoordinates coordinates = new GlobalVoxelCoordinates(3, 5, 7);
+            FakeDimension dimension = new FakeDimension(mockBlockRepository.Object,
+                mockItemRepository.Object, mockEntityManager.Object);
+            dimension.SetBlockID(coordinates, CobblestoneBlock.BlockID);
+            dimension.ResetCounts();
+
+            int blockPlacedCallCount = 0;
+            Mock<BlockProvider> testBlockProvider = new Mock<BlockProvider>(MockBehavior.Strict);
+            testBlockProvider.Setup(x => x.ItemUsedOnBlock(It.IsAny<GlobalVoxelCoordinates>(),
+                It.IsAny<ItemStack>(), It.IsAny<BlockFace>(), It.IsAny<IDimension>(), It.IsAny<IRemoteClient>()))
+                .CallBase();
+            testBlockProvider.Setup(x => x.BoundingBox).CallBase();
+            testBlockProvider.Setup(x => x.ID).Returns(CobblestoneBlock.BlockID);
+            testBlockProvider.Setup(x => x.BlockPlaced(It.IsAny<BlockDescriptor>(),
+                It.IsAny<BlockFace>(), It.IsAny<IDimension>(), It.IsAny<IRemoteClient>()))
+                .Callback(() => blockPlacedCallCount++)
+                .CallBase();
+            testBlockProvider.Setup(x => x.IsSupported(It.IsAny<IDimension>(), It.IsAny<BlockDescriptor>()))
+                .CallBase();
+            testBlockProvider.Setup(x => x.GetSupportDirection(It.IsAny<BlockDescriptor>()))
+                .CallBase();
+
+            BlockFace face = BlockFace.PositiveY;
+            sbyte heldItemCount = 32;
+            short selectedSlot = 6;   // index into Hotbar.
+            ItemStack heldItem = new ItemStack(CobblestoneBlock.BlockID, heldItemCount);
+            ItemStack updatedHeldItem = heldItem;
+
+            Mock<IServerSlot> mockSlot = new Mock<IServerSlot>(MockBehavior.Strict);
+            mockSlot.SetupGet(x => x.Item).Returns(updatedHeldItem);
+            mockSlot.SetupSet(x => x.Item = heldItem.GetReducedStack(1)).Verifiable();
+
+            Mock<ISlots<IServerSlot>> mockInventory = new Mock<ISlots<IServerSlot>>(MockBehavior.Strict);
+            mockInventory.SetupGet(x => x[It.Is<int>(i => i == selectedSlot)]).Returns(mockSlot.Object);
+
+            Mock<IRemoteClient> mockUser = new Mock<IRemoteClient>(MockBehavior.Strict);
+            mockUser.Setup(x => x.Inventory).Returns(mockInventory.Object);
+            mockUser.Setup(x => x.SelectedSlot).Returns(selectedSlot);
+
+            //
+            // Act
+            //
+            testBlockProvider.Object.ItemUsedOnBlock(coordinates, heldItem, face, dimension, mockUser.Object);
+
+            //
+            // Assertions
+            //
+            Assert.AreEqual(1, dimension.SetBlockIDCount);
+            Assert.AreEqual(1, blockPlacedCallCount);
+            Assert.AreEqual(CobblestoneBlock.BlockID, dimension.GetBlockID(coordinates));
+            Assert.AreEqual(CobblestoneBlock.BlockID, dimension.GetBlockID(coordinates + Vector3i.Up));
+            mockSlot.Verify();    // Asserts that the held item count has been reduced by one.
+        }
+
+        /// <summary>
+        /// Tests that a Block will not be placed in a voxel occupied by a non-overwritable block.
+        /// </summary>
+        [Test]
+        public void ItemUsedOnBlock_NoSpace()
+        {
+            //
+            // Setup
+            //
+            Mock<IBlockRepository> mockBlockRepository = new Mock<IBlockRepository>(MockBehavior.Strict);
+            mockBlockRepository.Setup(x => x.GetBlockProvider(CobblestoneBlock.BlockID)).Returns(new CobblestoneBlock());
+
+            Mock<IItemRepository> mockItemRepository = new Mock<IItemRepository>(MockBehavior.Strict);
+
+            Mock<IEntityManager> mockEntityManager = new Mock<IEntityManager>(MockBehavior.Strict);
+
+            GlobalVoxelCoordinates coordinates = new GlobalVoxelCoordinates(3, 5, 7);
+            FakeDimension dimension = new FakeDimension(mockBlockRepository.Object,
+                mockItemRepository.Object, mockEntityManager.Object);
+            dimension.SetBlockID(coordinates, CobblestoneBlock.BlockID);
+            dimension.SetBlockID(coordinates + Vector3i.Up, CobblestoneBlock.BlockID);
+            dimension.ResetCounts();
+
+            Mock<BlockProvider> testBlockProvider = new Mock<BlockProvider>(MockBehavior.Strict);
+            testBlockProvider.Setup(x => x.ItemUsedOnBlock(It.IsAny<GlobalVoxelCoordinates>(),
+                It.IsAny<ItemStack>(), It.IsAny<BlockFace>(), It.IsAny<IDimension>(), It.IsAny<IRemoteClient>()))
+                .CallBase();
+
+            BlockFace face = BlockFace.PositiveY;
+            sbyte heldItemCount = 32;
+            ItemStack heldItem = new ItemStack(CobblestoneBlock.BlockID, heldItemCount);
+
+            Mock<IRemoteClient> mockUser = new Mock<IRemoteClient>(MockBehavior.Strict);
+
+            //
+            // Act
+            //
+            testBlockProvider.Object.ItemUsedOnBlock(coordinates, heldItem, face, dimension, mockUser.Object);
+
+            //
+            // Assertions
+            //
+            Assert.AreEqual(0, dimension.SetBlockIDCount);
+            Assert.AreEqual(CobblestoneBlock.BlockID, dimension.GetBlockID(coordinates));
+            Assert.AreEqual(CobblestoneBlock.BlockID, dimension.GetBlockID(coordinates + Vector3i.Up));
+        }
+
+        /// <summary>
+        /// Tests that a Block will not be placed in a voxel occupied by a mob.
+        /// </summary>
+        [Test]
+        public void ItemUsedOnBlock_MobOccupied()
+        {
+            //
+            // Setup
+            //
+            Mock<IBlockRepository> mockBlockRepository = new Mock<IBlockRepository>(MockBehavior.Strict);
+            mockBlockRepository.Setup(x => x.GetBlockProvider(CobblestoneBlock.BlockID)).Returns(new CobblestoneBlock());
+
+            Mock<IItemRepository> mockItemRepository = new Mock<IItemRepository>(MockBehavior.Strict);
+
+            Mock<IMobEntity> mockMob = new Mock<IMobEntity>(MockBehavior.Strict);
+            mockMob.Setup(x => x.BoundingBox).Returns(new BoundingBox(new Vector3(3, 6, 7), new Vector3(4, 8, 8)));
+
+            Mock<IEntityManager> mockEntityManager = new Mock<IEntityManager>(MockBehavior.Strict);
+            mockEntityManager.Setup(x => x.EntitiesInRange(It.IsAny<Vector3>(), It.IsAny<float>()))
+                .Returns(new List<IEntity>() { mockMob.Object });
+
+            GlobalVoxelCoordinates coordinates = new GlobalVoxelCoordinates(3, 5, 7);
+            FakeDimension dimension = new FakeDimension(mockBlockRepository.Object,
+                mockItemRepository.Object, mockEntityManager.Object);
+            dimension.SetBlockID(coordinates, CobblestoneBlock.BlockID);
+            dimension.ResetCounts();
+
+            Mock<BlockProvider> testBlockProvider = new Mock<BlockProvider>(MockBehavior.Strict);
+            testBlockProvider.Setup(x => x.ItemUsedOnBlock(It.IsAny<GlobalVoxelCoordinates>(),
+                It.IsAny<ItemStack>(), It.IsAny<BlockFace>(), It.IsAny<IDimension>(), It.IsAny<IRemoteClient>()))
+                .CallBase();
+            testBlockProvider.Setup(x => x.BoundingBox).CallBase();
+
+            BlockFace face = BlockFace.PositiveY;
+            sbyte heldItemCount = 32;
+            ItemStack heldItem = new ItemStack(CobblestoneBlock.BlockID, heldItemCount);
+
+            Mock<IRemoteClient> mockUser = new Mock<IRemoteClient>(MockBehavior.Strict);
+
+            //
+            // Act
+            //
+            testBlockProvider.Object.ItemUsedOnBlock(coordinates, heldItem, face, dimension, mockUser.Object);
+
+            //
+            // Assertions
+            //
+            Assert.AreEqual(0, dimension.SetBlockIDCount);
+            Assert.AreEqual(CobblestoneBlock.BlockID, dimension.GetBlockID(coordinates));
+            Assert.AreEqual(AirBlock.BlockID, dimension.GetBlockID(coordinates + Vector3i.Up));
+        }
+
+        /// <summary>
+        /// Tests that a Block can be placed in a voxel occupied by an Item.
+        /// </summary>
+        /// <remarks>
+        /// NOTE: this test depends upon the ItemEntity implementation.
+        /// </remarks>
+        [Test]
+        public void ItemUsedOnBlock_ItemOccupied()
+        {
+            //
+            // Setup
+            //
+            Mock<IBlockRepository> mockBlockRepository = new Mock<IBlockRepository>(MockBehavior.Strict);
+            mockBlockRepository.Setup(x => x.GetBlockProvider(CobblestoneBlock.BlockID)).Returns(new CobblestoneBlock());
+
+            Mock<IItemRepository> mockItemRepository = new Mock<IItemRepository>(MockBehavior.Strict);
+
+            ItemEntity itemEntity = new ItemEntity(new Vector3(3.375, 6, 7.375), new ItemStack(CobblestoneBlock.BlockID, 2));
+
+            Mock<IEntityManager> mockEntityManager = new Mock<IEntityManager>(MockBehavior.Strict);
+            mockEntityManager.Setup(x => x.EntitiesInRange(It.IsAny<Vector3>(), It.IsAny<float>()))
+                .Returns(new List<IEntity>() { itemEntity });
+
+            GlobalVoxelCoordinates coordinates = new GlobalVoxelCoordinates(3, 5, 7);
+            FakeDimension dimension = new FakeDimension(mockBlockRepository.Object,
+                mockItemRepository.Object, mockEntityManager.Object);
+            dimension.SetBlockID(coordinates, CobblestoneBlock.BlockID);
+            dimension.ResetCounts();
+
+            int blockPlacedCallCount = 0;
+            Mock<BlockProvider> testBlockProvider = new Mock<BlockProvider>(MockBehavior.Strict);
+            testBlockProvider.Setup(x => x.ItemUsedOnBlock(It.IsAny<GlobalVoxelCoordinates>(),
+                It.IsAny<ItemStack>(), It.IsAny<BlockFace>(), It.IsAny<IDimension>(), It.IsAny<IRemoteClient>()))
+                .CallBase();
+            testBlockProvider.Setup(x => x.BoundingBox).CallBase();
+            testBlockProvider.SetupGet(x => x.ID).Returns(CobblestoneBlock.BlockID);
+            testBlockProvider.Setup(x => x.BlockPlaced(It.IsAny<BlockDescriptor>(),
+                It.IsAny<BlockFace>(), It.IsAny<IDimension>(), It.IsAny<IRemoteClient>()))
+                .Callback(() => blockPlacedCallCount++)
+                .CallBase();
+            testBlockProvider.Setup(x => x.IsSupported(It.IsAny<IDimension>(), It.IsAny<BlockDescriptor>()))
+                .CallBase();
+            testBlockProvider.Setup(x => x.GetSupportDirection(It.IsAny<BlockDescriptor>()))
+                .CallBase();
+
+            BlockFace face = BlockFace.PositiveY;
+            sbyte heldItemCount = 32;
+            short selectedSlot = 6;   // index into Hotbar.
+            ItemStack heldItem = new ItemStack(CobblestoneBlock.BlockID, heldItemCount);
+            ItemStack updatedHeldItem = heldItem;
+
+            Mock<IServerSlot> mockSlot = new Mock<IServerSlot>(MockBehavior.Strict);
+            mockSlot.SetupGet(x => x.Item).Returns(updatedHeldItem);
+            mockSlot.SetupSet(x => x.Item = heldItem.GetReducedStack(1)).Verifiable();
+
+            Mock<ISlots<IServerSlot>> mockInventory = new Mock<ISlots<IServerSlot>>(MockBehavior.Strict);
+            mockInventory.SetupGet(x => x[It.Is<int>(i => i == selectedSlot)]).Returns(mockSlot.Object);
+
+            Mock<IRemoteClient> mockUser = new Mock<IRemoteClient>(MockBehavior.Strict);
+            mockUser.Setup(x => x.Inventory).Returns(mockInventory.Object);
+            mockUser.Setup(x => x.SelectedSlot).Returns(selectedSlot);
+
+            //
+            // Act
+            //
+            testBlockProvider.Object.ItemUsedOnBlock(coordinates, heldItem, face, dimension, mockUser.Object);
+
+            //
+            // Assertions
+            //
+            Assert.AreEqual(1, dimension.SetBlockIDCount);
+            Assert.AreEqual(1, blockPlacedCallCount);
+            Assert.AreEqual(CobblestoneBlock.BlockID, dimension.GetBlockID(coordinates));
+            Assert.AreEqual(CobblestoneBlock.BlockID, dimension.GetBlockID(coordinates + Vector3i.Up));
+            mockSlot.Verify();    // Asserts that the held item count has been reduced by one.
+        }
+
+        /// <summary>
+        /// Tests that a Block will not be placed in a voxel occupied by a Player.
+        /// </summary>
+        /// <remarks>
+        /// NOTE: this test depends upon the implementation of the Player class.
+        /// </remarks>
+        [Test]
+        public void ItemUsedOnBlock_PlayerOccupied()
+        {
+            //
+            // Setup
+            //
+            Mock<IBlockRepository> mockBlockRepository = new Mock<IBlockRepository>(MockBehavior.Strict);
+            mockBlockRepository.Setup(x => x.GetBlockProvider(CobblestoneBlock.BlockID)).Returns(new CobblestoneBlock());
+
+            Mock<IItemRepository> mockItemRepository = new Mock<IItemRepository>(MockBehavior.Strict);
+
+            PlayerEntity player = new PlayerEntity("Fred");
+            player.Position = new Vector3(3, 6, 7);
+
+            Mock<IEntityManager> mockEntityManager = new Mock<IEntityManager>(MockBehavior.Strict);
+            mockEntityManager.Setup(x => x.EntitiesInRange(It.IsAny<Vector3>(), It.IsAny<float>()))
+                .Returns(new List<IEntity>() { player });
+
+            GlobalVoxelCoordinates coordinates = new GlobalVoxelCoordinates(3, 5, 7);
+            FakeDimension dimension = new FakeDimension(mockBlockRepository.Object,
+                mockItemRepository.Object, mockEntityManager.Object);
+            dimension.SetBlockID(coordinates, CobblestoneBlock.BlockID);
+            dimension.ResetCounts();
+
+            Mock<BlockProvider> testBlockProvider = new Mock<BlockProvider>(MockBehavior.Strict);
+            testBlockProvider.Setup(x => x.ItemUsedOnBlock(It.IsAny<GlobalVoxelCoordinates>(),
+                It.IsAny<ItemStack>(), It.IsAny<BlockFace>(), It.IsAny<IDimension>(), It.IsAny<IRemoteClient>()))
+                .CallBase();
+            testBlockProvider.Setup(x => x.BoundingBox).CallBase();
+
+            BlockFace face = BlockFace.PositiveY;
+            sbyte heldItemCount = 32;
+            ItemStack heldItem = new ItemStack(CobblestoneBlock.BlockID, heldItemCount);
+
+            Mock<IRemoteClient> mockUser = new Mock<IRemoteClient>(MockBehavior.Strict);
+
+            //
+            // Act
+            //
+            testBlockProvider.Object.ItemUsedOnBlock(coordinates, heldItem, face, dimension, mockUser.Object);
+
+            //
+            // Assertions
+            //
+            Assert.AreEqual(0, dimension.SetBlockIDCount);
+            Assert.AreEqual(CobblestoneBlock.BlockID, dimension.GetBlockID(coordinates));
+            Assert.AreEqual(AirBlock.BlockID, dimension.GetBlockID(coordinates + Vector3i.Up));
         }
     }
 }

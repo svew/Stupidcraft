@@ -200,6 +200,7 @@ namespace TrueCraft.Core.Logic
 
             BlockPlaced(dimension.GetBlockData(coordinates), face, dimension, user);
 
+            // TODO: How could the block we just placed be unsupported?
             if (!IsSupported(dimension, dimension.GetBlockData(coordinates)))
                 dimension.SetBlockData(coordinates, old);
             else

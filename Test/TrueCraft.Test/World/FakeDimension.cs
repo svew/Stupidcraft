@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using fNbt;
 using TrueCraft.Core.Logic;
+using TrueCraft.Core.Logic.Blocks;
 using TrueCraft.Core.Server;
 using TrueCraft.Core.World;
 
@@ -25,6 +26,8 @@ namespace TrueCraft.Test.World
             _itemRepository = itemRepository;
             _entityManager = entityManager;
             _chunks = new Dictionary<GlobalChunkCoordinates, IChunk>(434);
+
+            _setBlockIDCount = 0;
 
             GlobalChunkCoordinates chunkCoordinates = new GlobalChunkCoordinates(0, 0);
             _chunks[chunkCoordinates] = new FakeChunk(chunkCoordinates);
@@ -62,7 +65,20 @@ namespace TrueCraft.Test.World
 
         public BlockDescriptor GetBlockData(GlobalVoxelCoordinates coordinates)
         {
-            throw new NotImplementedException();
+            IChunk? chunk = GetChunk(coordinates);
+            if (chunk is null)
+                return new BlockDescriptor() { ID = AirBlock.BlockID };
+
+            LocalVoxelCoordinates local = (LocalVoxelCoordinates)coordinates;
+            return new BlockDescriptor()
+            {
+                ID = chunk.GetBlockID(local),
+                Metadata = chunk.GetMetadata(local),
+                BlockLight = chunk.GetBlockLight(local),
+                SkyLight = chunk.GetSkyLight(local),
+                Coordinates = coordinates,
+                Chunk = chunk
+            };
         }
 
         public byte GetBlockID(GlobalVoxelCoordinates coordinates)
@@ -108,6 +124,7 @@ namespace TrueCraft.Test.World
         {
             IChunk? chunk = GetChunk(coordinates);
             chunk?.SetBlockID((LocalVoxelCoordinates)coordinates, value);
+            _setBlockIDCount++;
         }
 
         public void SetBlockLight(GlobalVoxelCoordinates coordinates, byte value)
@@ -212,6 +229,23 @@ namespace TrueCraft.Test.World
 
         /// <inheritdoc />
         public string ChunkProvider { get => throw new NotImplementedException(); }
+        #endregion
+
+        #region Stats
+        private int _setBlockIDCount;
+
+        /// <summary>
+        /// Resets the counts of all calls.
+        /// </summary>
+        public void ResetCounts()
+        {
+            _setBlockIDCount = 0;
+        }
+
+        /// <summary>
+        /// Gets the number of times SetBlockID was called since the last call to ResetCounts.
+        /// </summary>
+        public int SetBlockIDCount { get => _setBlockIDCount; }
         #endregion
     }
 }

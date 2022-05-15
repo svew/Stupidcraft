@@ -39,7 +39,7 @@ namespace TrueCraft.Core.Entities
             get { return new Size(0.25, 0.25, 0.25); }
         }
 
-        public BoundingBox BoundingBox
+        public virtual BoundingBox BoundingBox
         {
             get
             {
