@@ -32,10 +32,13 @@ namespace TrueCraft.Test.World
             Mock<IBlockRepository> mockRepository = new Mock<IBlockRepository>(MockBehavior.Strict);
             mockRepository.Setup(x => x.GetBlockProvider(It.Is<byte>(b => b == 3))).Returns(mockProvider.Object);
 
+            Mock<IItemRepository> mockItemRepository = new Mock<IItemRepository>(MockBehavior.Strict);
+
             Mock<IMultiplayerServer> mockServer = new Mock<IMultiplayerServer>(MockBehavior.Strict);
 
             Mock<IServiceLocator> mockServiceLocator = new Mock<IServiceLocator>(MockBehavior.Strict);
             mockServiceLocator.Setup(x => x.BlockRepository).Returns(mockRepository.Object);
+            mockServiceLocator.Setup(x => x.ItemRepository).Returns(mockItemRepository.Object);
             mockServiceLocator.Setup(x => x.Server).Returns(mockServer.Object);
             _serviceLocator = mockServiceLocator.Object;
 
