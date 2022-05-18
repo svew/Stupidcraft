@@ -23,9 +23,12 @@ namespace TrueCraft.Test.World
 
             Mock<IBlockRepository> mockBlockRepository = new Mock<IBlockRepository>(MockBehavior.Strict);
 
+            Mock<IItemRepository> mockItemRepository = new Mock<IItemRepository>(MockBehavior.Strict);
+
             Mock<IServiceLocator> mockServiceLocator = new Mock<IServiceLocator>(MockBehavior.Strict);
             mockServiceLocator.Setup(x => x.Server).Returns(mockServer.Object);
             mockServiceLocator.Setup(x => x.BlockRepository).Returns(mockBlockRepository.Object);
+            mockServiceLocator.Setup(x => x.ItemRepository).Returns(mockItemRepository.Object);
 
             IDimensionFactory factory = new DimensionFactory();
 
