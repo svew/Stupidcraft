@@ -19,6 +19,8 @@ namespace TrueCraft.Core.Test.AI
 
         private IBlockRepository _blockRepository;
 
+        private IItemRepository _itemRepository;
+
         private ILightingQueue _lightingQueue;
 
         private IMultiplayerServer _server;
@@ -33,14 +35,22 @@ namespace TrueCraft.Core.Test.AI
             mockProvider.Setup(x => x.ID).Returns(3);
             mockProvider.Setup(x => x.BoundingBox).Returns(new BoundingBox(Vector3.Zero, Vector3.One));
 
+            Mock<IBlockProvider> mockStoneBlock = new Mock<IBlockProvider>(MockBehavior.Strict);
+            mockStoneBlock.Setup(x => x.ID).Returns(1);
+            mockStoneBlock.Setup(x => x.BoundingBox).Returns(new BoundingBox(Vector3.Zero, Vector3.One));
+
             Mock<IBlockProvider> mockAirBlock = new Mock<IBlockProvider>(MockBehavior.Strict);
             mockAirBlock.Setup(x => x.ID).Returns(0);
             mockAirBlock.Setup(x => x.BoundingBox).Returns((BoundingBox?)null);
 
             Mock<IBlockRepository> mockRepository = new Mock<IBlockRepository>(MockBehavior.Strict);
             mockRepository.Setup(x => x.GetBlockProvider(It.Is<byte>(b => b == 0))).Returns(mockAirBlock.Object);
+            mockRepository.Setup(x => x.GetBlockProvider(It.Is<byte>(b => b == 1))).Returns(mockStoneBlock.Object);
             mockRepository.Setup(x => x.GetBlockProvider(It.Is<byte>(b => b == 3))).Returns(mockProvider.Object);
             _blockRepository = mockRepository.Object;
+
+            Mock<IItemRepository> mockItemRepository = new Mock<IItemRepository>(MockBehavior.Strict);
+            _itemRepository = mockItemRepository.Object;
 
             // For path-finding, we can safely ignore calls to the Lighting Queue.
             Mock<ILightingQueue> mockQueue = new Mock<ILightingQueue>();
@@ -52,6 +62,7 @@ namespace TrueCraft.Core.Test.AI
             Mock<IServiceLocator> mockServiceLocator = new Mock<IServiceLocator>(MockBehavior.Strict);
             mockServiceLocator.Setup(x => x.Server).Returns(mockServer.Object);
             mockServiceLocator.Setup(x => x.BlockRepository).Returns(_blockRepository);
+            mockServiceLocator.Setup(x => x.ItemRepository).Returns(_itemRepository);
             _serviceLocator = mockServiceLocator.Object;
 
             Mock<IEntityManager> mockEntityManager = new Mock<IEntityManager>(MockBehavior.Strict);
@@ -82,7 +93,7 @@ namespace TrueCraft.Core.Test.AI
 
         private IDimension BuildDimension()
         {
-            IDimensionServer rv =  new Dimension(_serviceLocator, string.Empty, DimensionID.Overworld,
+            IDimensionServer rv =  new Dimension(_serviceLocator, "Files", DimensionID.Overworld,
                 new FlatlandGenerator(_testSeed), _lightingQueue,
                 _entityManager);
 
