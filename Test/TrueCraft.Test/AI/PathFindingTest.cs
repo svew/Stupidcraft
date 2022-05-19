@@ -8,6 +8,7 @@ using TrueCraft.Core.Logic;
 using TrueCraft.Core.Server;
 using TrueCraft.Core.World;
 using TrueCraft.TerrainGen;
+using TrueCraft.Test.World;
 using TrueCraft.World;
 
 namespace TrueCraft.Core.Test.AI
@@ -15,17 +16,13 @@ namespace TrueCraft.Core.Test.AI
     [TestFixture]
     public class PathFindingTest
     {
-        private const int _testSeed = 314159;
+        private const int StoneBlockId = 1;
+
+        private const int SurfaceHeight = 4;
 
         private IBlockRepository _blockRepository;
 
         private IItemRepository _itemRepository;
-
-        private ILightingQueue _lightingQueue;
-
-        private IMultiplayerServer _server;
-
-        private IServiceLocator _serviceLocator;
 
         private IEntityManager _entityManager;
 
@@ -52,35 +49,24 @@ namespace TrueCraft.Core.Test.AI
             Mock<IItemRepository> mockItemRepository = new Mock<IItemRepository>(MockBehavior.Strict);
             _itemRepository = mockItemRepository.Object;
 
-            // For path-finding, we can safely ignore calls to the Lighting Queue.
-            Mock<ILightingQueue> mockQueue = new Mock<ILightingQueue>();
-            _lightingQueue = mockQueue.Object;
-
-            Mock<IMultiplayerServer> mockServer = new Mock<IMultiplayerServer>(MockBehavior.Strict);
-            _server = mockServer.Object;
-
-            Mock<IServiceLocator> mockServiceLocator = new Mock<IServiceLocator>(MockBehavior.Strict);
-            mockServiceLocator.Setup(x => x.Server).Returns(mockServer.Object);
-            mockServiceLocator.Setup(x => x.BlockRepository).Returns(_blockRepository);
-            mockServiceLocator.Setup(x => x.ItemRepository).Returns(_itemRepository);
-            _serviceLocator = mockServiceLocator.Object;
-
             Mock<IEntityManager> mockEntityManager = new Mock<IEntityManager>(MockBehavior.Strict);
             _entityManager = mockEntityManager.Object;
         }
 
         private void DrawGrid(PathResult path, IDimension dimension)
         {
+            int h = SurfaceHeight;
+
             for (int z = -8; z < 8; z++)
             {
                 for (int x = -8; x < 8; x++)
                 {
-                    GlobalVoxelCoordinates coords = new GlobalVoxelCoordinates(x, 4, z);
+                    GlobalVoxelCoordinates coords = new GlobalVoxelCoordinates(x, h, z);
                     if (path.Waypoints.Contains(coords))
                         Console.Write("o");
                     else
                     {
-                        var id = dimension.GetBlockID(coords);
+                        byte id = dimension.GetBlockID(coords);
                         if (id != 0)
                             Console.Write("x");
                         else
@@ -93,104 +79,135 @@ namespace TrueCraft.Core.Test.AI
 
         private IDimension BuildDimension()
         {
-            IDimensionServer rv =  new Dimension(_serviceLocator, "Files", DimensionID.Overworld,
-                new FlatlandGenerator(_testSeed), _lightingQueue,
-                _entityManager);
+            IDimensionServer rv = new FakeDimension(_blockRepository, _itemRepository, _entityManager);
 
             // Generate 4 chunks around the origin.
-            rv.GetBlockID(new GlobalVoxelCoordinates(0, 1, 0), LoadEffort.Generate);
-            rv.GetBlockID(new GlobalVoxelCoordinates(-1, 1, 0), LoadEffort.Generate);
-            rv.GetBlockID(new GlobalVoxelCoordinates(-1, 1, -1), LoadEffort.Generate);
-            rv.GetBlockID(new GlobalVoxelCoordinates(0, 1, -1), LoadEffort.Generate);
+            IChunk? chunk = rv.GetChunk(new GlobalChunkCoordinates(0, 0), LoadEffort.Generate);
+            FillChunk(chunk!);
+            chunk = rv.GetChunk(new GlobalChunkCoordinates(0, -1), LoadEffort.Generate);
+            FillChunk(chunk!);
+            chunk = rv.GetChunk(new GlobalChunkCoordinates(-1, 0), LoadEffort.Generate);
+            FillChunk(chunk!);
+            chunk = rv.GetChunk(new GlobalChunkCoordinates(-1, -1), LoadEffort.Generate);
+            FillChunk(chunk!);
 
             return rv;
+        }
+
+        private void FillChunk(IChunk chunk)
+        {
+            for (int x = 0; x < Chunk.Width; x++)
+                for (int z = 0; z < Chunk.Depth; z++)
+                    for (int y = 0; y < SurfaceHeight; y++)
+                        chunk.SetBlockID(new LocalVoxelCoordinates(x, y, z), StoneBlockId);
         }
 
         [Test]
         public void TestAStarLinearPath()
         {
             IDimension dimension = BuildDimension();
-            var astar = new AStarPathFinder();
+            AStarPathFinder astar = new AStarPathFinder();
+            int h = SurfaceHeight;
 
-            var watch = new Stopwatch();
+            Stopwatch watch = new Stopwatch();
             watch.Start();
-            var path = astar.FindPath(dimension, new BoundingBox(),
-               new GlobalVoxelCoordinates(0, 4, 0), new GlobalVoxelCoordinates(5, 4, 0));
+            PathResult? path = astar.FindPath(dimension, new BoundingBox(),
+               new GlobalVoxelCoordinates(0, h, 0), new GlobalVoxelCoordinates(5, h, 0));
             watch.Stop();
-            DrawGrid(path, dimension);
+
+            Assert.IsNotNull(path);
+            DrawGrid(path!, dimension);
             Console.WriteLine(watch.ElapsedMilliseconds + "ms");
 
-            var expected = new[]
+            GlobalVoxelCoordinates[] expected = new[]
             {
-                new GlobalVoxelCoordinates(0, 4, 0),
-                new GlobalVoxelCoordinates(1, 4, 0),
-                new GlobalVoxelCoordinates(2, 4, 0),
-                new GlobalVoxelCoordinates(3, 4, 0),
-                new GlobalVoxelCoordinates(4, 4, 0),
-                new GlobalVoxelCoordinates(5, 4, 0)
+                new GlobalVoxelCoordinates(0, h, 0),
+                new GlobalVoxelCoordinates(1, h, 0),
+                new GlobalVoxelCoordinates(2, h, 0),
+                new GlobalVoxelCoordinates(3, h, 0),
+                new GlobalVoxelCoordinates(4, h, 0),
+                new GlobalVoxelCoordinates(5, h, 0)
             };
-            for (int i = 0; i < path.Waypoints.Count; i++)
-                Assert.AreEqual(expected[i], path.Waypoints[i]);
+            Assert.AreEqual(expected.Length, path!.Waypoints.Count);
+            for (int i = 0; i < path!.Waypoints.Count; i++)
+                Assert.AreEqual(expected[i], path!.Waypoints[i]);
         }
 
         [Test]
         public void TestAStarDiagonalPath()
         {
             IDimension dimension = BuildDimension();
-            var astar = new AStarPathFinder();
-            GlobalVoxelCoordinates start = new GlobalVoxelCoordinates(0, 4, 0);
-            GlobalVoxelCoordinates end = new GlobalVoxelCoordinates(5, 4, 5);
+            AStarPathFinder astar = new AStarPathFinder();
+            int h = SurfaceHeight;
 
-            var watch = new Stopwatch();
+            GlobalVoxelCoordinates start = new GlobalVoxelCoordinates(0, h, 0);
+            GlobalVoxelCoordinates end = new GlobalVoxelCoordinates(5, h, 5);
+
+            Stopwatch watch = new Stopwatch();
             watch.Start();
-            var path = astar.FindPath(dimension, new BoundingBox(), start, end);
+            PathResult? path = astar.FindPath(dimension, new BoundingBox(), start, end);
             watch.Stop();
-            DrawGrid(path, dimension);
+
+            Assert.IsNotNull(path);
+            DrawGrid(path!, dimension);
             Console.WriteLine(watch.ElapsedMilliseconds + "ms");
 
             // Just test the start and end, the exact results need to be eyeballed
-            Assert.AreEqual(start, path.Waypoints[0]);
-            Assert.AreEqual(end, path.Waypoints[path.Waypoints.Count - 1]);
+            Assert.AreEqual(start, path!.Waypoints[0]);
+            Assert.AreEqual(end, path!.Waypoints[path.Waypoints.Count - 1]);
         }
 
         [Test]
         public void TestAStarObstacle()
         {
             IDimension dimension = BuildDimension();
-            var astar = new AStarPathFinder();
-            GlobalVoxelCoordinates start = new GlobalVoxelCoordinates(0, 4, 0);
-            GlobalVoxelCoordinates end = new GlobalVoxelCoordinates(5, 4, 0);
-            dimension.SetBlockID(new GlobalVoxelCoordinates(3, 4, 0), 1); // Obstacle
+            AStarPathFinder astar = new AStarPathFinder();
+            int h = SurfaceHeight;
 
-            var watch = new Stopwatch();
+            GlobalVoxelCoordinates start = new GlobalVoxelCoordinates(0, h, 0);
+            GlobalVoxelCoordinates end = new GlobalVoxelCoordinates(5, h, 0);
+
+            // Obstacle
+            dimension.SetBlockID(new GlobalVoxelCoordinates(3, h, 0), StoneBlockId);
+            dimension.SetBlockID(new GlobalVoxelCoordinates(3, h + 1, 0), StoneBlockId);
+
+            Stopwatch watch = new Stopwatch();
             watch.Start();
-            var path = astar.FindPath(dimension, new BoundingBox(), start, end);
+            PathResult? path = astar.FindPath(dimension, new BoundingBox(), start, end);
             watch.Stop();
-            DrawGrid(path, dimension);
+
+            Assert.IsNotNull(path);
+            DrawGrid(path!, dimension);
             Console.WriteLine(watch.ElapsedMilliseconds + "ms");
 
             // Just test the start and end, the exact results need to be eyeballed
-            Assert.AreEqual(start, path.Waypoints[0]);
-            Assert.AreEqual(end, path.Waypoints[path.Waypoints.Count - 1]);
-            Assert.IsFalse(path.Waypoints.Contains(new GlobalVoxelCoordinates(3, 4, 0)));
+            Assert.AreEqual(start, path!.Waypoints[0]);
+            Assert.AreEqual(end, path!.Waypoints[path.Waypoints.Count - 1]);
+            Assert.IsFalse(path!.Waypoints.Contains(new GlobalVoxelCoordinates(3, 4, 0)));
         }
 
         [Test]
         public void TestAStarImpossible()
         {
             IDimension dimension = BuildDimension();
-            var astar = new AStarPathFinder();
-            GlobalVoxelCoordinates start = new GlobalVoxelCoordinates(0, 4, 0);
-            GlobalVoxelCoordinates end = new GlobalVoxelCoordinates(5, 4, 0);
+            AStarPathFinder astar = new AStarPathFinder();
+            int h = SurfaceHeight;
 
-            dimension.SetBlockID(start + Vector3i.East, 1);
-            dimension.SetBlockID(start + Vector3i.West, 1);
-            dimension.SetBlockID(start + Vector3i.North, 1);
-            dimension.SetBlockID(start + Vector3i.South, 1);
+            GlobalVoxelCoordinates start = new GlobalVoxelCoordinates(0, h, 0);
+            GlobalVoxelCoordinates end = new GlobalVoxelCoordinates(5, h, 0);
 
-            var watch = new Stopwatch();
+            dimension.SetBlockID(start + Vector3i.East, StoneBlockId);
+            dimension.SetBlockID(start + Vector3i.East + Vector3i.Up, StoneBlockId);
+            dimension.SetBlockID(start + Vector3i.West, StoneBlockId);
+            dimension.SetBlockID(start + Vector3i.West + Vector3i.Up, StoneBlockId);
+            dimension.SetBlockID(start + Vector3i.North, StoneBlockId);
+            dimension.SetBlockID(start + Vector3i.North + Vector3i.Up, StoneBlockId);
+            dimension.SetBlockID(start + Vector3i.South, StoneBlockId);
+            dimension.SetBlockID(start + Vector3i.South + Vector3i.Up, StoneBlockId);
+
+            Stopwatch watch = new Stopwatch();
             watch.Start();
-            var path = astar.FindPath(dimension, new BoundingBox(), start, end);
+            PathResult? path = astar.FindPath(dimension, new BoundingBox(), start, end);
             watch.Stop();
             Console.WriteLine(watch.ElapsedMilliseconds + "ms");
 
@@ -201,60 +218,90 @@ namespace TrueCraft.Core.Test.AI
         public void TestAStarExitRoom()
         {
             IDimension dimension = BuildDimension();
-            var astar = new AStarPathFinder();
-            GlobalVoxelCoordinates start = new GlobalVoxelCoordinates(0, 4, 0);
-            GlobalVoxelCoordinates end = new GlobalVoxelCoordinates(5, 4, 0);
+            AStarPathFinder astar = new AStarPathFinder();
+            int h = SurfaceHeight;
+
+            GlobalVoxelCoordinates start = new GlobalVoxelCoordinates(0, h, 0);
+            GlobalVoxelCoordinates end = new GlobalVoxelCoordinates(5, h, 0);
 
             // North wall
             for (int x = -4; x < 4; x++)
-                dimension.SetBlockID(new GlobalVoxelCoordinates(x, 4, -4), 1);
+            {
+                dimension.SetBlockID(new GlobalVoxelCoordinates(x, h, -4), StoneBlockId);
+                dimension.SetBlockID(new GlobalVoxelCoordinates(x, h + 1, -4), StoneBlockId);
+            }
+
             // East wall
             for (int z = -4; z < 4; z++)
-                dimension.SetBlockID(new GlobalVoxelCoordinates(3, 4, z), 1);
+            {
+                dimension.SetBlockID(new GlobalVoxelCoordinates(3, h, z), StoneBlockId);
+                dimension.SetBlockID(new GlobalVoxelCoordinates(3, h + 1, z), StoneBlockId);
+            }
+
             // South wall
             for (int x = -4; x < 4; x++)
-                dimension.SetBlockID(new GlobalVoxelCoordinates(x, 4, 4), 1);
+            {
+                dimension.SetBlockID(new GlobalVoxelCoordinates(x, h, 4), StoneBlockId);
+                dimension.SetBlockID(new GlobalVoxelCoordinates(x, h + 1, 4), StoneBlockId);
+            }
 
-            var watch = new Stopwatch();
+            Stopwatch watch = new Stopwatch();
             watch.Start();
-            var path = astar.FindPath(dimension, new BoundingBox(), start, end);
+            PathResult? path = astar.FindPath(dimension, new BoundingBox(), start, end);
             watch.Stop();
-            DrawGrid(path, dimension);
+
+            Assert.IsNotNull(path);
+            DrawGrid(path!, dimension);
             Console.WriteLine(watch.ElapsedMilliseconds + "ms");
 
             // Just test the start and end, the exact results need to be eyeballed
-            Assert.AreEqual(start, path.Waypoints[0]);
-            Assert.AreEqual(end, path.Waypoints[path.Waypoints.Count - 1]);
+            Assert.AreEqual(start, path!.Waypoints[0]);
+            Assert.AreEqual(end, path!.Waypoints[path.Waypoints.Count - 1]);
         }
 
         [Test]
         public void TestAStarAvoidRoom()
         {
             IDimension dimension = BuildDimension();
-            var astar = new AStarPathFinder();
-            GlobalVoxelCoordinates start = new GlobalVoxelCoordinates(-5, 4, 0);
-            GlobalVoxelCoordinates end = new GlobalVoxelCoordinates(5, 4, 0);
+            AStarPathFinder astar = new AStarPathFinder();
+            int h = SurfaceHeight;
+
+            GlobalVoxelCoordinates start = new GlobalVoxelCoordinates(-5, h, 0);
+            GlobalVoxelCoordinates end = new GlobalVoxelCoordinates(5, h, 0);
 
             // North wall
             for (int x = -4; x < 4; x++)
-                dimension.SetBlockID(new GlobalVoxelCoordinates(x, 4, -4), 1);
+            {
+                dimension.SetBlockID(new GlobalVoxelCoordinates(x, h, -4), StoneBlockId);
+                dimension.SetBlockID(new GlobalVoxelCoordinates(x, h + 1, -4), StoneBlockId);
+            }
+
             // East wall
             for (int z = -4; z < 4; z++)
-                dimension.SetBlockID(new GlobalVoxelCoordinates(3, 4, z), 1);
+            {
+                dimension.SetBlockID(new GlobalVoxelCoordinates(3, h, z), StoneBlockId);
+                dimension.SetBlockID(new GlobalVoxelCoordinates(3, h + 1, z), StoneBlockId);
+            }
+
             // South wall
             for (int x = -4; x < 4; x++)
-                dimension.SetBlockID(new GlobalVoxelCoordinates(x, 4, 4), 1);
+            {
+                dimension.SetBlockID(new GlobalVoxelCoordinates(x, h, 4), StoneBlockId);
+                dimension.SetBlockID(new GlobalVoxelCoordinates(x, h + 1, 4), StoneBlockId);
+            }
 
-            var watch = new Stopwatch();
+            Stopwatch watch = new Stopwatch();
             watch.Start();
-            var path = astar.FindPath(dimension, new BoundingBox(), start, end);
+            PathResult? path = astar.FindPath(dimension, new BoundingBox(), start, end);
             watch.Stop();
-            DrawGrid(path, dimension);
+
+            Assert.IsNotNull(path);
+            DrawGrid(path!, dimension);
             Console.WriteLine(watch.ElapsedMilliseconds + "ms");
 
             // Just test the start and end, the exact results need to be eyeballed
-            Assert.AreEqual(start, path.Waypoints[0]);
-            Assert.AreEqual(end, path.Waypoints[path.Waypoints.Count - 1]);
+            Assert.AreEqual(start, path!.Waypoints[0]);
+            Assert.AreEqual(end, path!.Waypoints[path!.Waypoints.Count - 1]);
         }
     }
 }

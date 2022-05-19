@@ -206,7 +206,8 @@ namespace TrueCraft.Test.World
         /// <inheritdoc />
         public byte GetBlockID(GlobalVoxelCoordinates coordinates, LoadEffort loadEffort)
         {
-            throw new NotImplementedException();
+            IChunk? chunk = GetChunk((GlobalChunkCoordinates)coordinates, LoadEffort.Load);
+            return chunk?.GetBlockID((LocalVoxelCoordinates)coordinates) ?? AirBlock.BlockID;
         }
 
         /// <inheritdoc />

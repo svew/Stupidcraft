@@ -70,7 +70,7 @@ namespace TrueCraft.Core.AI
             }
         }
 
-        public PathResult FindPath(IDimension dimension, BoundingBox subject, GlobalVoxelCoordinates start, GlobalVoxelCoordinates goal)
+        public PathResult? FindPath(IDimension dimension, BoundingBox subject, GlobalVoxelCoordinates start, GlobalVoxelCoordinates goal)
         {
             // Thanks to www.redblobgames.com/pathfinding/a-star/implementation.html
             var parents = new Dictionary<GlobalVoxelCoordinates, GlobalVoxelCoordinates>();
