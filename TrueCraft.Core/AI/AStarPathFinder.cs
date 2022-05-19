@@ -38,15 +38,16 @@ namespace TrueCraft.Core.AI
             return new PathResult { Waypoints = list };
         }
 
-        private bool CanOccupyVoxel(IDimension dimension, BoundingBox box, GlobalVoxelCoordinates voxel)
+        // TODO: entity Bounding Box is not taken into account: What if the entity is more than one block high?
+        private bool CanOccupyVoxel(IDimension dimension, BoundingBox entity, GlobalVoxelCoordinates voxel)
         {
-            var id = dimension.GetBlockID(voxel);
-            if (dimension.BlockRepository == null)
-                return id == 0;
-            var provider = dimension.BlockRepository.GetBlockProvider(id);
-            if (provider == null)
+            byte id = dimension.GetBlockID(voxel);
+
+            IBlockProvider provider = dimension.BlockRepository.GetBlockProvider(id);
+            if (provider is null)
                 return true;
-            return provider.BoundingBox == null;
+
+            return provider.BoundingBox is null;
         }
 
         private IEnumerable<GlobalVoxelCoordinates> GetNeighbors(IDimension dimension, BoundingBox subject, GlobalVoxelCoordinates current)
