@@ -23,9 +23,6 @@ namespace TrueCraft.Core.Test.World
             Assert.Throws<ArgumentOutOfRangeException>(() => new LocalVoxelCoordinates(-1, 0, 0));
             Assert.Throws<ArgumentOutOfRangeException>(() => new LocalVoxelCoordinates(WorldConstants.ChunkWidth, 0, 0));
 
-            Assert.Throws<ArgumentOutOfRangeException>(() => new LocalVoxelCoordinates(0, -1, 0));
-            Assert.Throws<ArgumentOutOfRangeException>(() => new LocalVoxelCoordinates(0, WorldConstants.Height, 0));
-
             Assert.Throws<ArgumentOutOfRangeException>(() => new LocalVoxelCoordinates(0, 0, -1));
             Assert.Throws<ArgumentOutOfRangeException>(() => new LocalVoxelCoordinates(0, 0, WorldConstants.ChunkDepth));
         }
@@ -154,14 +151,6 @@ namespace TrueCraft.Core.Test.World
             // East
             a = new LocalVoxelCoordinates(WorldConstants.ChunkWidth - 1, 64, 7);
             Assert.Throws<ArgumentOutOfRangeException>(() => a.Add(Vector3i.East));
-
-            // Down
-            a = new LocalVoxelCoordinates(8, 0, 8);
-            Assert.Throws<ArgumentOutOfRangeException>(() => a.Add(Vector3i.Down));
-
-            // Up
-            a = new LocalVoxelCoordinates(8, WorldConstants.Height - 1, 8);
-            Assert.Throws<ArgumentOutOfRangeException>(() => a.Add(Vector3i.Up));
         }
 
         [TestCase(0, 0, 0, 0, 0, 0)]

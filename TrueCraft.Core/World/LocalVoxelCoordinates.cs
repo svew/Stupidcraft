@@ -38,11 +38,9 @@ namespace TrueCraft.Core.World
         {
 #if DEBUG
             if (x < 0 || x >= WorldConstants.ChunkWidth)
-                throw new ArgumentOutOfRangeException($"{ nameof(x) } is outside the valid range of[0,{ WorldConstants.ChunkWidth - 1}]");
-            if (y < 0 || y >= WorldConstants.Height)
-                throw new ArgumentOutOfRangeException($"{ nameof(y) } is outside the valid range of[0,{ WorldConstants.Height - 1}]");
+                throw new ArgumentOutOfRangeException(nameof(x), x, $"{ nameof(x) } is outside the valid range of[0,{ WorldConstants.ChunkWidth - 1}]");
             if (z < 0 || z >= WorldConstants.ChunkDepth)
-                throw new ArgumentOutOfRangeException($"{ nameof(z) } is outside the valid range of[0,{ WorldConstants.ChunkDepth - 1}]");
+                throw new ArgumentOutOfRangeException(nameof(z), z, $"{ nameof(z) } is outside the valid range of[0,{ WorldConstants.ChunkDepth - 1}]");
 #endif
             X = x;
             Y = y;
