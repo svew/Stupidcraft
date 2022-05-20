@@ -146,18 +146,18 @@ namespace TrueCraft.Core.Test.Physics
             IPhysicsEngine physics = new PhysicsEngine(dimension);
             TestEntity entity = new TestEntity();
             entity.Size = new Size(0.6, 1.8, 0.6);
-            entity.Position = new Vector3(-10.9, 4, -10.9);
+            entity.Position = new Vector3(10.9, SurfaceHeight, 10.9);
             entity.AccelerationDueToGravity = 1;
             physics.AddEntity(entity);
 
             // Test
             physics.Update(TimeSpan.FromSeconds(1));
 
-            Assert.AreEqual(4, entity.Position.Y);
+            Assert.AreEqual(SurfaceHeight, entity.Position.Y);
 
             physics.Update(TimeSpan.FromSeconds(5));
 
-            Assert.AreEqual(4, entity.Position.Y);
+            Assert.AreEqual(SurfaceHeight, entity.Position.Y);
         }
 
         [Test]
