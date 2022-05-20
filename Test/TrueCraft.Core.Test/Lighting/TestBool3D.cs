@@ -35,7 +35,7 @@ namespace TrueCraft.Core.Test.Lighting
             for (int x = 0; x < xsize; x++)
                 for (int y = 0; y < ysize; y++)
                     for (int z = 0; z < zsize; z++)
-                        Assert.True(tst[x, y, z]);
+                        Assert.False(tst[x, y, z]);
         }
 
         [Test]
