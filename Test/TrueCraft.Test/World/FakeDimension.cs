@@ -11,6 +11,8 @@ namespace TrueCraft.Test.World
 {
     public class FakeDimension : IDimensionServer
     {
+        private const int BuildHeight = 128;
+
         private readonly IBlockRepository _blockRepository;
 
         private readonly IItemRepository _itemRepository;
@@ -112,7 +114,7 @@ namespace TrueCraft.Test.World
 
         public bool IsValidPosition(GlobalVoxelCoordinates position)
         {
-            throw new NotImplementedException();
+            return position.Y >= 0 && position.Y < BuildHeight;
         }
 
         public void SetBlockData(GlobalVoxelCoordinates coordinates, BlockDescriptor block)
