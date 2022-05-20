@@ -27,9 +27,9 @@ namespace TrueCraft.Core.Test.World
             for (int x = 0; x < WorldConstants.ChunkWidth; x ++)
                 for (int z = 0; z < WorldConstants.ChunkDepth; z ++)
                 {
-                    _blocks[(x * WorldConstants.ChunkWidth + z) * WorldConstants.ChunkDepth] = BedrockBlock.BlockID;
+                    _blocks[CoordinatesToIndex(x, 0, z)] = BedrockBlock.BlockID;
                     for (int y = 1; y < 5; y ++)
-                        _blocks[(x * WorldConstants.ChunkWidth + z) * WorldConstants.ChunkDepth + y] = DirtBlock.BlockID;
+                        _blocks[CoordinatesToIndex(x, y, z)] = DirtBlock.BlockID;
                     _heightMap[x, z] = 5;
                 }
         }
@@ -43,6 +43,11 @@ namespace TrueCraft.Core.Test.World
         private int CoordinatesToIndex(LocalVoxelCoordinates coordinates)
         {
             return (coordinates.X * WorldConstants.ChunkWidth + coordinates.Z) * WorldConstants.Height + coordinates.Y;
+        }
+
+        private int CoordinatesToIndex(int x, int y, int z)
+        {
+            return (x * WorldConstants.ChunkWidth + z) * WorldConstants.Height + y;
         }
 
         public int MaxHeight => throw new NotImplementedException();
