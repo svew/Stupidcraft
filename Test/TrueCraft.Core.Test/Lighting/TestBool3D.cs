@@ -93,7 +93,7 @@ namespace TrueCraft.Core.Test.Lighting
                 for (int x = 0; x < xsize; x++)
                     for (int y = 0; y < ysize; y++)
                         for (int z = 0; z < zsize; z++)
-                            Assert.AreEqual(x == x1 && y == y1 && z == z1, tst[x, y, z]);
+                            Assert.AreEqual(x != x1 || y != y1 || z != z1, tst[x, y, z]);
             }
         }
     }
