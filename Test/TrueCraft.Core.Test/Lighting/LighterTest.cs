@@ -295,7 +295,7 @@ namespace TrueCraft.Core.Test.Lighting
             // xox ...
 
             for (int y = ground + 1; y <= ground + 16; y++)
-                if (y % 2 == 0)
+                if (y % 2 == 1)
                     dimension.SetBlockID(new GlobalVoxelCoordinates(x, y, z), LeavesBlock.BlockID);
 
             lighter.DoLightingOperation(new LightingOperation(GlobalVoxelCoordinates.Zero, LightingOperationMode.Add, LightingOperationKind.Initial, 15));
@@ -312,16 +312,21 @@ namespace TrueCraft.Core.Test.Lighting
             {
                 15, // air
                 13, // leaves
-                12, // air
-                10, // leaves
-                9, // air
+                13, // air
+                11, // leaves
+                11, // air
+                9,  // leaves
+                9,  // air
                 7,  // leaves
-                6,  // air
-                4,  // leaves
+                7,  // air
+                5,  // leaves
+                5,  // air
+                3,  // leaves
                 3,  // air
                 1,  // leaves
-                0,  // air
+                1,  // air
                 0,  // leaves
+                0,  // dirt
             };
 
             for (int y = ground + 16, i = 0; y >= ground; y--, i++)
