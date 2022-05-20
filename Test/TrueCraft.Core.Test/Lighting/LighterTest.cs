@@ -18,7 +18,9 @@ namespace TrueCraft.Core.Test.Lighting
 
         private const int SurfaceHeight = 4;
 
+        private const byte MockAirBlockID = 0;
         private const int MockOpaqueBlockID = 3;
+        private const byte MockLeavesBlockID = 18;
 
         private readonly IBlockRepository _blockRepository;
 
@@ -26,11 +28,22 @@ namespace TrueCraft.Core.Test.Lighting
 
         public LighterTest()
         {
-            Mock<IBlockProvider> mockProvider = new Mock<IBlockProvider>(MockBehavior.Strict);
-            mockProvider.Setup(x => x.ID).Returns(MockOpaqueBlockID);
+            Mock<IBlockProvider> mockAirBlock = new Mock<IBlockProvider>(MockBehavior.Strict);
+            mockAirBlock.Setup(x => x.LightOpacity).Returns(0);
+            mockAirBlock.Setup(x => x.ID).Returns(MockAirBlockID);
+
+            Mock<IBlockProvider> mockOpaqueBlock = new Mock<IBlockProvider>(MockBehavior.Strict);
+            mockOpaqueBlock.Setup(x => x.LightOpacity).Returns(255);
+            mockOpaqueBlock.Setup(x => x.ID).Returns(MockOpaqueBlockID);
+
+            Mock<IBlockProvider> mockLeavesBlock = new Mock<IBlockProvider>(MockBehavior.Strict);
+            mockLeavesBlock.Setup(x => x.LightOpacity).Returns(2);
+            mockLeavesBlock.Setup(x => x.ID).Returns(MockLeavesBlockID);
 
             Mock<IBlockRepository> mockRepository = new Mock<IBlockRepository>(MockBehavior.Strict);
-            mockRepository.Setup(x => x.GetBlockProvider(It.Is<byte>(b => b == MockOpaqueBlockID))).Returns(mockProvider.Object);
+            mockRepository.Setup(x => x.GetBlockProvider(It.Is<byte>(b => b == MockAirBlockID))).Returns(mockAirBlock.Object);
+            mockRepository.Setup(x => x.GetBlockProvider(It.Is<byte>(b => b == MockOpaqueBlockID))).Returns(mockOpaqueBlock.Object);
+            mockRepository.Setup(x => x.GetBlockProvider(It.Is<byte>(b => b == MockLeavesBlockID))).Returns(mockLeavesBlock.Object);
             _blockRepository = mockRepository.Object;
 
             Mock<IItemRepository> mockItemRepository = new Mock<IItemRepository>(MockBehavior.Strict);
