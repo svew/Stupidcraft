@@ -87,7 +87,10 @@ namespace TrueCraft.Core.Test.World
 
         public int GetHeight(int x, int z)
         {
-            throw new NotImplementedException();
+            int y = WorldConstants.Height - 1;
+            while (y >= 0 && AirBlock.BlockID == GetBlockID(new LocalVoxelCoordinates(x, y, z)))
+                y--;
+            return y;
         }
 
         public byte GetMetadata(LocalVoxelCoordinates coordinates)
