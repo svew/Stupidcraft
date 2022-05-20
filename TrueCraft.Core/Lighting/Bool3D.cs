@@ -34,6 +34,21 @@ namespace TrueCraft.Core.Lighting
         }
 
         /// <summary>
+        /// Gets the size of the array in the x-dimension.
+        /// </summary>
+        public int XSize { get => _xsize; }
+
+        /// <summary>
+        /// Gets the size of the array in the y-dimension.
+        /// </summary>
+        public int YSize { get => _ysize; }
+
+        /// <summary>
+        /// Gets the size of the array in the z-direction.
+        /// </summary>
+        public int ZSize { get => _zsize; }
+
+        /// <summary>
         /// Gets or sets the boolean value at the given indices.
         /// </summary>
         /// <param name="x">The x-index of the boolean to retrieve.</param>

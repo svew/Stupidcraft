@@ -39,6 +39,19 @@ namespace TrueCraft.Core.Test.Lighting
         }
 
         [Test]
+        public void ctor_size()
+        {
+            int xsize = 30;
+            int ysize = 40;
+            int zsize = 50;
+            Bool3D tst = new Bool3D(xsize, ysize, zsize, true);
+
+            Assert.AreEqual(xsize, tst.XSize);
+            Assert.AreEqual(ysize, tst.YSize);
+            Assert.AreEqual(zsize, tst.ZSize);
+        }
+
+        [Test]
         public void Indexer_Throws()
         {
             int xsize = 15;
