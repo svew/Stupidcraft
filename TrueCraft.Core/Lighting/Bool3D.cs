@@ -88,7 +88,7 @@ namespace TrueCraft.Core.Lighting
         [Conditional("DEBUG")]
         private static void ValidateIndex(int idx, int max, string name)
         {
-            if (idx < 0 || idx > max)
+            if (idx < 0 || idx >= max)
                 throw new IndexOutOfRangeException($"{name} = {idx} is outside the range of [0, {max})");
         }
     }
