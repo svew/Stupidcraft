@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using TrueCraft.Core.Logic;
 using TrueCraft.Core.World;
 
@@ -176,112 +177,27 @@ namespace TrueCraft.Core.Lighting
                 ys -= yo + lightLevel - WorldConstants.Height;
             }
 
-            Vector3i boxOffset = new Vector3i(xo, yo, zo);
             Bool3D finished = new Bool3D(xs, ys, zs, false);
-
-            // Light the Seed
+            byte localLight = lightLevel;
+            Stack<GlobalVoxelCoordinates> stack = new Stack<GlobalVoxelCoordinates>();
+            GlobalVoxelCoordinates coords;
             setter(seed, lightLevel);
-
-            // Flood fill the horizontal plane containing the seed, plus the
-            // space above it.
-            for (int y = 0; y < lightLevel; y++)
+            stack.Push(seed);
+            while (stack.Count > 0)
             {
-                // Light around the voxel at/above the seed
-                GlobalVoxelCoordinates curVoxel = new GlobalVoxelCoordinates(seed.X, seed.Y + y, seed.Z);
-                LightAroundVoxel(curVoxel, getter, setter, finished, boxOffset);
-
-                // Light voxels around the seed's column
-                bool somethingGotLit = false;
-                int sz = 1;
-                if (sz < y - lightLevel)
+                coords = stack.Pop();
+                localLight = (byte)(getter(coords) - 1);
+                if ((localLight & 0xf0) == 0 && !finished[coords.X - xo, coords.Y - yo, coords.Z - zo])
                 {
-                    do
+                    foreach(Vector3i v in Vector3i.Neighbors6)
                     {
-                        for (int x = -sz; x <= sz; x++)
-                        {
-                            curVoxel = new GlobalVoxelCoordinates(seed.X + x, seed.Y + y, seed.Z);
-                            somethingGotLit |= LightAroundVoxel(curVoxel, getter, setter, finished, boxOffset);
-                        }
-
-                        for (int z = -sz + 1; z < sz; z++)
-                        {
-                            curVoxel = new GlobalVoxelCoordinates(seed.X, seed.Y + y, seed.Z + z);
-                            somethingGotLit |= LightAroundVoxel(curVoxel, getter, setter, finished, boxOffset);
-                        }
-
-                        sz++;
-                    } while (sz < y - lightLevel && somethingGotLit);
-                }
-            }
-
-            // Flood fill below the seed's y-level.
-            for (int y = -1; y > -lightLevel; y--)
-            {
-                // Light around the voxel below the seed
-                GlobalVoxelCoordinates curVoxel = new GlobalVoxelCoordinates(seed.X, seed.Y + y, seed.Z);
-                LightAroundVoxel(curVoxel, getter, setter, finished, boxOffset);
-
-                // Light voxels around the seed's column
-                bool somethingGotLit = false;
-                int sz = 1;
-                if (sz < y + lightLevel)
-                {
-                    do
-                    {
-                        for (int x = -sz; x <= sz; x++)
-                        {
-                            curVoxel = new GlobalVoxelCoordinates(seed.X + x, seed.Y + y, seed.Z);
-                            somethingGotLit |= LightAroundVoxel(curVoxel, getter, setter, finished, boxOffset);
-                        }
-
-                        for (int z = -sz + 1; z < sz; z++)
-                        {
-                            curVoxel = new GlobalVoxelCoordinates(seed.X, seed.Y + y, seed.Z + z);
-                            somethingGotLit |= LightAroundVoxel(curVoxel, getter, setter, finished, boxOffset);
-                        }
-
-                        sz++;
-                    } while (sz < y + lightLevel && somethingGotLit);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Spreads the light from a Voxel to the neighbouring Voxels.
-        /// </summary>
-        /// <param name="coordinates">The Coordinates of the Voxel around which we are to set the lighting.</param>
-        /// <param name="getter">A function delegate for retrieving the light level at specific coordinates.</param>
-        /// <param name="setter">A delegate for setting the light level at specific coordinates.</param>
-        /// <param name="finished"></param>
-        /// <param name="offset"></param>
-        /// <returns>true if at least one Voxel had its light level updated.</returns>
-        protected bool LightAroundVoxel(GlobalVoxelCoordinates coordinates, 
-            Func<GlobalVoxelCoordinates, byte> getter,
-            Action<GlobalVoxelCoordinates, byte> setter, Bool3D finished,
-            Vector3i offset)
-        {
-            bool rv = false;
-            byte lightLevel = getter(coordinates);
-            if (lightLevel > 1)
-                foreach (Vector3i j in Vector3i.Neighbors6)
-                {
-                    GlobalVoxelCoordinates neighbour = coordinates + j;
-                    if (!finished[neighbour.X - offset.X, neighbour.Y - offset.Y, neighbour.Z - offset.Z])
-                    {
-                        byte blockID = _dimension.GetBlockID(neighbour);
-                        IBlockProvider provider = _dimension.BlockRepository.GetBlockProvider(blockID);
-                        byte opacity = provider.LightOpacity;
-                        if (opacity > lightLevel)
-                            lightLevel = 0;
-                        else
-                            lightLevel -= Math.Max((byte)1, opacity);
-                        LightVoxel(coordinates + j, lightLevel, getter, setter);
-                        rv = true;
+                        GlobalVoxelCoordinates neighbor = coords + v;
+                        // TODO: light level must be reduced by opacity of neighbor.
+                        if (LightVoxel(neighbor, localLight, getter, setter))
+                            stack.Push(neighbor);
                     }
                 }
-
-            finished[coordinates.X + offset.X, coordinates.Y + offset.Y, coordinates.Z + offset.Z] = true;
-            return rv;
+            }
         }
 
         /// <summary>
@@ -291,21 +207,24 @@ namespace TrueCraft.Core.Lighting
         /// <param name="lightLevel">The lightLevel to set</param>
         /// <param name="getter">A function delegate for retrieving the light level at specific coordinates.</param>
         /// <param name="setter">A delegate for setting the light level at specific coordinates.</param>
+        /// <returns>true if the light level was updated; false otherwise.</returns>
         /// <remarks>
         /// If the coordinates are outside the bounds of this Lighter's Dimension, the call
         /// is silently ignored.
         /// If the given light level is less than the existing light level, it will not be altered.
         /// </remarks>
-        protected void LightVoxel(GlobalVoxelCoordinates coordinates, byte lightLevel,
+        protected bool LightVoxel(GlobalVoxelCoordinates coordinates, byte lightLevel,
             Func<GlobalVoxelCoordinates, byte> getter,
             Action<GlobalVoxelCoordinates, byte> setter)
         {
             // TODO better determination of "outside the dimension bounds"
             if (coordinates.Y < 0 || coordinates.Y >= WorldConstants.Height)
-                return;
-            if (getter(coordinates) > lightLevel)
-                return;
+                return false;
+            if (getter(coordinates) >= lightLevel)
+                return false;
+
             setter(coordinates, lightLevel);
+            return true;
         }
 
         /// <summary>

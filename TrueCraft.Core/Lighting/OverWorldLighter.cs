@@ -47,7 +47,14 @@ namespace TrueCraft.Core.Lighting
         /// <inheritdoc />
         protected override void DoAddSkyLightOperation(GlobalVoxelCoordinates seed, byte lightLevel)
         {
-            FloodFill(seed, lightLevel, GetSkyLight, SetSkyLight);
+            // TODO: can we find a situation involving caves and chunk boundaries where this
+            //       won't suffice?
+            IChunk? chunk = _dimension.GetChunk(seed);
+            do
+            {
+                FloodFill(seed, lightLevel, GetSkyLight, SetSkyLight);
+                seed = new GlobalVoxelCoordinates(seed.X, seed.Y + 1, seed.Z);
+            } while (seed.Y < chunk?.MaxHeight);
         }
 
         /// <inheritdoc />

@@ -16,7 +16,8 @@ namespace TrueCraft.Core.Test.Lighting
     {
         private const int _testSeed = 314159;
 
-        private const int SurfaceHeight = 4;
+        // NOTE: this is the height built by FakeChunk.
+        private const int SurfaceHeight = 5;
 
         private const byte MockAirBlockID = 0;
         private const int MockOpaqueBlockID = 3;
@@ -89,7 +90,7 @@ namespace TrueCraft.Core.Test.Lighting
                     {
                         GlobalVoxelCoordinates coords = new GlobalVoxelCoordinates(x, y, z);
                         int sky = dimension.GetSkyLight(coords);
-                        if (y < 4)
+                        if (y < SurfaceHeight)
                             Assert.AreEqual(0, sky, coords.ToString());
                         else
                             Assert.AreEqual(15, sky, coords.ToString());
@@ -156,18 +157,49 @@ namespace TrueCraft.Core.Test.Lighting
             lighter.DoLightingOperation(new LightingOperation(new GlobalVoxelCoordinates(xHole, yGround - 2, zHole),
                 LightingOperationMode.Add, LightingOperationKind.Sky, 15));
 
+            //
+            // output lighting for command-line testing
+            //
+            Console.WriteLine("Block IDS:");
+            Console.WriteLine("y");
+            for (int y = SurfaceHeight; y >= 1; y--)
+            {
+                Console.Write($"{y} ");
+                for (int x = 0; x <= xHole; x++)
+                    Console.Write(dimension.GetBlockID(new GlobalVoxelCoordinates(x, y, zHole)).ToString("D2") + " ");
+                Console.WriteLine();
+            }
+            Console.Write("x:");
+            for (int x = 0; x <= xHole; x++)
+                Console.Write($"{x:D2} ");
+            Console.WriteLine();
+
+            Console.WriteLine("Sky Light levels:");
+            Console.WriteLine("y");
+            for (int y = SurfaceHeight; y >= 1; y--)
+            {
+                Console.Write($"{y} ");
+                for (int x = 0; x <= xHole; x++)
+                    Console.Write(dimension.GetSkyLight(new GlobalVoxelCoordinates(x, y, zHole)).ToString("D2") + " ");
+                Console.WriteLine();
+            }
+
+            //
+            // Assertions:
+            //
             Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(xHole, yGround, zHole));
             Assert.AreEqual(15, dimension.GetSkyLight(new GlobalVoxelCoordinates(xHole, yGround, zHole)));
             Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(xHole, yGround - 1, zHole));
             Assert.AreEqual(15, dimension.GetSkyLight(new GlobalVoxelCoordinates(xHole, yGround - 1, zHole)));
-            Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(xHole, yGround - 2, zHole));
-            Assert.AreEqual(15, dimension.GetSkyLight(new GlobalVoxelCoordinates(xHole, yGround - 2, zHole)));
 
             byte expected = 15;
-            for (int x = 5; x >= 0; x--)
+            for (int x = xHole; x >= 0; x--)
             {
-                Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(x, yGround - 2, zHole));
-                Assert.AreEqual(expected, dimension.GetSkyLight(new GlobalVoxelCoordinates(x, yGround - 2, zHole)));
+                GlobalVoxelCoordinates coords = new GlobalVoxelCoordinates(x, yGround - 2, zHole);
+                Console.WriteLine("Testing {0}", coords);
+                Assert.AreEqual(expected, dimension.GetSkyLight(coords),
+                    "At {0}; expected {1}, but found {2}",
+                    coords, expected, dimension.GetSkyLight(coords));
                 expected--;
             }
         }
@@ -191,14 +223,14 @@ namespace TrueCraft.Core.Test.Lighting
             //    ^ x,z = 5
 
             // Dig a hole 3 blocks deep at xHole,zHole.
-            for (int y = groundY - 3; y <= groundY; y++)
-                dimension.SetBlockID(new GlobalVoxelCoordinates(xHole, y, zHole), 0);
+            for (int y = groundY - 2; y <= groundY; y++)
+                dimension.SetBlockID(new GlobalVoxelCoordinates(xHole, y, zHole), MockAirBlockID);
 
             // Dig a 1-wide, 2-high tunnel sideways for 4 blocks.
             for (int x = 1; x <= 4; x++) // Dig outwards
             {
-                dimension.SetBlockID(new GlobalVoxelCoordinates(x + xHole, 2, zHole), 0);
-                dimension.SetBlockID(new GlobalVoxelCoordinates(x + xHole, 1, zHole), 0);
+                dimension.SetBlockID(new GlobalVoxelCoordinates(x + xHole, groundY - 1, zHole), MockAirBlockID);
+                dimension.SetBlockID(new GlobalVoxelCoordinates(x + xHole, groundY - 2, zHole), MockAirBlockID);
             }
 
             var watch = new Stopwatch();
@@ -213,7 +245,7 @@ namespace TrueCraft.Core.Test.Lighting
             // Output lighting
             Console.WriteLine("Block IDS:");
             Console.WriteLine("y");
-            for (int y = groundY; y >= groundY - 3; y--)
+            for (int y = groundY; y >= 0; y--)
             {
                 Console.Write($"{y} ");
                 for (int x = 0; x <= 5; x++)
@@ -229,7 +261,7 @@ namespace TrueCraft.Core.Test.Lighting
 
             Console.WriteLine("Sky Light levels:");
             Console.WriteLine("y");
-            for (int y = groundY; y >= groundY - 3; y--)
+            for (int y = groundY; y >= 0; y--)
             {
                 Console.Write($"{y} ");
                 for (int x = 0; x <= 5; x++)
@@ -240,24 +272,25 @@ namespace TrueCraft.Core.Test.Lighting
             }
 
             Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(xHole, groundY, zHole));
-            Assert.AreEqual(15, dimension.GetSkyLight(new GlobalVoxelCoordinates(zHole, groundY, zHole)));
-            Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(xHole, groundY- 1, zHole));
+            Assert.AreEqual(15, dimension.GetSkyLight(new GlobalVoxelCoordinates(xHole, groundY, zHole)));
             Assert.AreEqual(15, dimension.GetSkyLight(new GlobalVoxelCoordinates(xHole, groundY - 1, zHole)));
-            Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(xHole, groundY - 2, zHole));
             Assert.AreEqual(15, dimension.GetSkyLight(new GlobalVoxelCoordinates(xHole, groundY - 2, zHole)));
 
-            byte expected = 15;
-            for (int x = 5; x >= 0; x--)
+            byte expected = 14;
+            for (int x = 1; x <= 5; x++)
             {
-                Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(x + xHole, groundY - 1, zHole));
-                Assert.AreEqual(expected, dimension.GetSkyLight(new GlobalVoxelCoordinates(x + xHole, groundY - 1, zHole)));
-                expected--;
-            }
-            expected = 15;
-            for (int x = 5; x >= 0; x--)
-            {
-                Console.WriteLine("Testing {0}", new GlobalVoxelCoordinates(x + xHole, groundY - 2, zHole));
-                Assert.AreEqual(expected, dimension.GetSkyLight(new GlobalVoxelCoordinates(x + xHole, groundY - 2, zHole)));
+                GlobalVoxelCoordinates coords = new GlobalVoxelCoordinates(x + xHole, groundY - 1, zHole);
+                Console.WriteLine("Testing {0}", coords);
+                Assert.AreEqual(expected, dimension.GetSkyLight(coords),
+                    "At {0}; expected {1}, but found {2}",
+                    coords, expected, dimension.GetSkyLight(coords));
+
+                coords = new GlobalVoxelCoordinates(x + xHole, groundY - 2, zHole);
+                Console.WriteLine("Testing {0}", coords);
+                Assert.AreEqual(expected, dimension.GetSkyLight(coords),
+                    "At {0}; expected {1}, but found {2}",
+                    coords, expected, dimension.GetSkyLight(coords));
+
                 expected--;
             }
 

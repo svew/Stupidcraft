@@ -8,11 +8,14 @@ namespace TrueCraft.Core.Test.World
     // TODO: This "unit" test depends upon various BlockProvider subclasses for Block ID values.
     public class FakeChunk : IChunk
     {
+        private const byte SurfaceHeight = 5;
+
         private byte[] _blocks;
         private byte[] _blockLight;
         private byte[] _skyLight;
         private byte[] _metadata;
         private byte[,] _heightMap;
+        private byte _maxHeight;
 
         public FakeChunk(GlobalChunkCoordinates coordinates)
         {
@@ -28,10 +31,11 @@ namespace TrueCraft.Core.Test.World
                 for (int z = 0; z < WorldConstants.ChunkDepth; z ++)
                 {
                     _blocks[CoordinatesToIndex(x, 0, z)] = BedrockBlock.BlockID;
-                    for (int y = 1; y < 5; y ++)
+                    for (int y = 1; y < SurfaceHeight; y ++)
                         _blocks[CoordinatesToIndex(x, y, z)] = DirtBlock.BlockID;
-                    _heightMap[x, z] = 5;
+                    _heightMap[x, z] = SurfaceHeight - 1;
                 }
+            _maxHeight = SurfaceHeight - 1;
         }
 
         public int X { get => Coordinates.X; }
@@ -50,7 +54,7 @@ namespace TrueCraft.Core.Test.World
             return (x * WorldConstants.ChunkWidth + z) * WorldConstants.Height + y;
         }
 
-        public int MaxHeight => throw new NotImplementedException();
+        public int MaxHeight { get => _maxHeight; }
 
         public bool IsModified => throw new NotImplementedException();
 
@@ -92,10 +96,7 @@ namespace TrueCraft.Core.Test.World
 
         public int GetHeight(int x, int z)
         {
-            int y = WorldConstants.Height - 1;
-            while (y >= 0 && AirBlock.BlockID == GetBlockID(new LocalVoxelCoordinates(x, y, z)))
-                y--;
-            return y;
+            return _heightMap[x, z];
         }
 
         public byte GetMetadata(LocalVoxelCoordinates coordinates)
@@ -131,6 +132,8 @@ namespace TrueCraft.Core.Test.World
 
         public void SetBlockLight(LocalVoxelCoordinates coordinates, byte value)
         {
+            if (value > 15)
+                throw new ArgumentException($"{value} is an invalid value for {nameof(value)}");
             _blockLight[CoordinatesToIndex(coordinates)] = value;
         }
 
@@ -141,6 +144,8 @@ namespace TrueCraft.Core.Test.World
 
         public void SetSkyLight(LocalVoxelCoordinates coordinates, byte value)
         {
+            if (value > 15)
+                throw new ArgumentException($"{value} is an invalid value for {nameof(value)}");
             _skyLight[CoordinatesToIndex(coordinates)] = value;
         }
 
