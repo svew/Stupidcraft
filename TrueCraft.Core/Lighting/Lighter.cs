@@ -186,14 +186,21 @@ namespace TrueCraft.Core.Lighting
             while (stack.Count > 0)
             {
                 coords = stack.Pop();
-                localLight = (byte)(getter(coords) - 1);
-                if ((localLight & 0xf0) == 0 && !finished[coords.X - xo, coords.Y - yo, coords.Z - zo])
+                localLight = getter(coords);
+                if (localLight > 1 && !finished[coords.X - xo, coords.Y - yo, coords.Z - zo])
                 {
                     foreach(Vector3i v in Vector3i.Neighbors6)
                     {
+                        byte neighborLight = localLight;
                         GlobalVoxelCoordinates neighbor = coords + v;
-                        // TODO: light level must be reduced by opacity of neighbor.
-                        if (LightVoxel(neighbor, localLight, getter, setter))
+                        IBlockProvider? block = _dimension.BlockRepository.GetBlockProvider(_dimension.GetBlockID(neighbor));
+                        byte opacity = block?.LightOpacity ?? 0;
+                        if (opacity > neighborLight)
+                            continue;
+
+                        neighborLight -= Math.Max((byte)1, opacity);
+
+                        if (LightVoxel(neighbor, neighborLight, getter, setter))
                             stack.Push(neighbor);
                     }
                 }

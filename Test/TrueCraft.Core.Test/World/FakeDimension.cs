@@ -9,6 +9,8 @@ namespace TrueCraft.Core.Test.World
 {
     public class FakeDimension : IDimension
     {
+        private readonly byte _surfaceHeight;
+
         private readonly IBlockRepository _blockRepository;
 
         private readonly IItemRepository _itemRepository;
@@ -17,12 +19,25 @@ namespace TrueCraft.Core.Test.World
 
         public FakeDimension(IBlockRepository blockRepository, IItemRepository itemRepository)
         {
+            _surfaceHeight = FakeChunk.DefaultSurfaceHeight;
             _blockRepository = blockRepository;
             _itemRepository = itemRepository;
             _chunks = new Dictionary<GlobalChunkCoordinates, IChunk>(434);
 
             GlobalChunkCoordinates chunkCoordinates = new GlobalChunkCoordinates(0, 0);
             _chunks[chunkCoordinates] = new FakeChunk(chunkCoordinates);
+        }
+
+        public FakeDimension(IBlockRepository blockRepository, IItemRepository itemRepository,
+            byte surfaceHeight)
+        {
+            _surfaceHeight = surfaceHeight;
+            _blockRepository = blockRepository;
+            _itemRepository = itemRepository;
+            _chunks = new Dictionary<GlobalChunkCoordinates, IChunk>(434);
+
+            GlobalChunkCoordinates chunkCoordinates = new GlobalChunkCoordinates(0, 0);
+            _chunks[chunkCoordinates] = new FakeChunk(chunkCoordinates, _surfaceHeight);
         }
 
         public DimensionID ID { get => DimensionID.Overworld; }

@@ -8,7 +8,8 @@ namespace TrueCraft.Core.Test.World
     // TODO: This "unit" test depends upon various BlockProvider subclasses for Block ID values.
     public class FakeChunk : IChunk
     {
-        private const byte SurfaceHeight = 5;
+        public const byte DefaultSurfaceHeight = 5;
+        private readonly byte _surfaceHeight;
 
         private byte[] _blocks;
         private byte[] _blockLight;
@@ -17,8 +18,13 @@ namespace TrueCraft.Core.Test.World
         private byte[,] _heightMap;
         private byte _maxHeight;
 
-        public FakeChunk(GlobalChunkCoordinates coordinates)
+        public FakeChunk(GlobalChunkCoordinates coordinates) : this(coordinates, DefaultSurfaceHeight)
         {
+        }
+
+        public FakeChunk(GlobalChunkCoordinates coordinates, byte surfaceHeight)
+        {
+            _surfaceHeight = surfaceHeight;
             Coordinates = coordinates;
 
             _blocks = new byte[WorldConstants.ChunkDepth * WorldConstants.ChunkWidth * WorldConstants.Height];
@@ -27,15 +33,15 @@ namespace TrueCraft.Core.Test.World
             _metadata = new byte[WorldConstants.ChunkDepth * WorldConstants.ChunkWidth * WorldConstants.Height];
             _heightMap = new byte[WorldConstants.ChunkWidth, WorldConstants.ChunkDepth];
 
-            for (int x = 0; x < WorldConstants.ChunkWidth; x ++)
-                for (int z = 0; z < WorldConstants.ChunkDepth; z ++)
+            for (int x = 0; x < WorldConstants.ChunkWidth; x++)
+                for (int z = 0; z < WorldConstants.ChunkDepth; z++)
                 {
                     _blocks[CoordinatesToIndex(x, 0, z)] = BedrockBlock.BlockID;
-                    for (int y = 1; y < SurfaceHeight; y ++)
+                    for (int y = 1; y < _surfaceHeight; y++)
                         _blocks[CoordinatesToIndex(x, y, z)] = DirtBlock.BlockID;
-                    _heightMap[x, z] = SurfaceHeight - 1;
+                    _heightMap[x, z] = (byte)(_surfaceHeight - 1);
                 }
-            _maxHeight = SurfaceHeight - 1;
+            _maxHeight = (byte)(_surfaceHeight - 1);
         }
 
         public int X { get => Coordinates.X; }

@@ -63,6 +63,18 @@ namespace TrueCraft.Core.Test.Lighting
             return rv;
         }
 
+        private IDimension BuildDimension(byte surfaceHeight)
+        {
+            IDimension rv = new FakeDimension(_blockRepository, _itemRepository, surfaceHeight);
+
+            for (int x = 0; x < WorldConstants.ChunkWidth; x++)
+                for (int z = 0; z < WorldConstants.ChunkDepth; z++)
+                    for (int y = 0; y < SurfaceHeight; y++)
+                        rv.SetBlockID(new GlobalVoxelCoordinates(x, y, z), MockOpaqueBlockID);
+
+            return rv;
+        }
+
         [Test]
         public void TestBasicLighting()
         {
@@ -370,6 +382,106 @@ namespace TrueCraft.Core.Test.Lighting
                 else
                     ex = 0;
                 Assert.AreEqual(ex, dimension.GetSkyLight(new GlobalVoxelCoordinates(x, y, z)));
+            }
+        }
+
+        /// <summary>
+        /// Testing propagation of reduced skylight into caves.
+        /// </summary>
+        [Test]
+        public void TestLeavesAndCaves()
+        {
+            IDimension dimension = BuildDimension(20);
+            IChunk chunk = dimension.GetChunk(GlobalChunkCoordinates.Zero)!;
+            ILighter lighter = new OverWorldLighter(dimension, null!);
+            int xHole = 5;
+            int zHole = 5;
+            int groundY = chunk.GetHeight(xHole, zHole);
+
+            // drill a hole into the ground with leaves on even levels
+            for (int y = 0; y < 16; y ++)
+            {
+                if ((y % 2) == 1)
+                    dimension.SetBlockID(new GlobalVoxelCoordinates(xHole, groundY - y, zHole), MockLeavesBlockID);
+                else
+                    for (int j = 0; j < 3; j ++)
+                        dimension.SetBlockID(new GlobalVoxelCoordinates(xHole + j, groundY - y, zHole), MockAirBlockID);
+            }
+
+            //
+            // Action
+            //
+
+            // Initial lighting.
+            lighter.DoLightingOperation(new LightingOperation(GlobalVoxelCoordinates.Zero, LightingOperationMode.Add, LightingOperationKind.Initial, 15));
+            // debugging
+            for (int y = groundY; y >= 0; y--)
+                Console.WriteLine($"{y,2}: {dimension.GetSkyLight(new GlobalVoxelCoordinates(xHole, y, zHole))}");
+            // end debugging
+
+            // Final lighting of vertical shaft
+            for (int y = 0; y < 1; y ++) // TODO upper bound should be 16
+            {
+                GlobalVoxelCoordinates coords = new GlobalVoxelCoordinates(xHole, groundY - y, zHole);
+                byte lightLevel = dimension.GetSkyLight(coords);
+                lighter.DoLightingOperation(new LightingOperation(coords,
+                    LightingOperationMode.Add, LightingOperationKind.Sky, lightLevel));
+            }
+
+            // Output lighting
+            Console.WriteLine("Block IDS:");
+            Console.WriteLine("y");
+            for (int y = groundY; y >= 0; y--)
+            {
+                Console.Write($"{y:D2} ");
+                for (int x = 0; x <= 5; x++)
+                    Console.Write(dimension.GetBlockID(new GlobalVoxelCoordinates(x + xHole, y, zHole)).ToString("D2") + " ");
+                Console.WriteLine();
+            }
+            Console.Write("x:");
+            for (int x = 0; x <= 5; x++)
+                Console.Write($" {x + xHole:D2}");
+            Console.WriteLine();
+
+            Console.WriteLine("Sky Light levels:");
+            Console.WriteLine("y");
+            for (int y = groundY; y >= 0; y--)
+            {
+                Console.Write($"{y:D2} ");
+                for (int x = 0; x <= 5; x++)
+                    Console.Write(dimension.GetSkyLight(new GlobalVoxelCoordinates(x + xHole, y, zHole)).ToString("D2") + " ");
+                Console.WriteLine();
+            }
+
+            byte[] expected = new byte[]
+            {
+                15, // air
+                13, // leaves
+                13, // air
+                11, // leaves
+                11, // air
+                9,  // leaves
+                9,  // air
+                7,  // leaves
+                7,  // air
+                5,  // leaves
+                5,  // air
+                3,  // leaves
+                3,  // air
+                1,  // leaves
+                1,  // air
+                0,  // leaves
+                0,  // dirt
+            };
+
+            for (int y = groundY, i = 0; y >= 0; y--, i++)
+            {
+                byte ex;
+                if (i < expected.Length)
+                    ex = expected[i];
+                else
+                    ex = 0;
+                Assert.AreEqual(ex, dimension.GetSkyLight(new GlobalVoxelCoordinates(xHole, y, zHole)));
             }
         }
     }
