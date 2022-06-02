@@ -19,22 +19,22 @@ namespace TrueCraft.Launcher.Views
     public class SingleplayerView : VBox
     {
         private LauncherWindow _window;
-        public Label _singleplayerLabel;
+        private Label _singleplayerLabel;
 
         private TreeView _worldListView;
         private ListStore _worldListStore;
 
-        public Button _createWorldButton;
-        public Button _deleteWorldButton;
-        public Button _playButton;
-        public Button _backButton;
-        public VBox _createWorldBox;
-        public Entry _newWorldName;
-        public Entry _newWorldSeed;
-        public Button _newWorldCommit;
-        public Button _newWorldCancel;
-        public Label _progressLabel;
-        public ProgressBar _progressBar;
+        private Button _createWorldButton;
+        private Button _deleteWorldButton;
+        private Button _playButton;
+        private Button _backButton;
+        private VBox _createWorldBox;
+        private Entry _newWorldName;
+        private Entry _newWorldSeed;
+        private Button _newWorldCommit;
+        private Button _newWorldCancel;
+        private Label _progressLabel;
+        private ProgressBar _progressBar;
 
         private readonly Worlds _worlds;
 
@@ -161,7 +161,7 @@ namespace TrueCraft.Launcher.Views
             }
         }
 
-        public void PlayButton_Clicked(object sender, EventArgs e)
+        private void PlayButton_Clicked(object sender, EventArgs e)
         {
             TreeIter iter;
             _worldListView.Selection.GetSelected(out iter);
@@ -241,7 +241,7 @@ namespace TrueCraft.Launcher.Views
             });
         }
 
-        void NewWorldCommit_Clicked(object sender, EventArgs e)
+        private void NewWorldCommit_Clicked(object sender, EventArgs e)
         {
             WorldInfo world = _worlds.CreateNewWorld(_newWorldName.Text, _newWorldSeed.Text);
             _createWorldBox.Visible = false;
