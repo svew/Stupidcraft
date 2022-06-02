@@ -225,6 +225,7 @@ namespace TrueCraft.Core.Test.Lighting
             int xHole = 5;
             int zHole = 5;
             int groundY = chunk.GetHeight(xHole, zHole);
+            int tunnelLength = 4;
 
             // Test this layout:
             // xxx x    y=3
@@ -239,7 +240,7 @@ namespace TrueCraft.Core.Test.Lighting
                 dimension.SetBlockID(new GlobalVoxelCoordinates(xHole, y, zHole), MockAirBlockID);
 
             // Dig a 1-wide, 2-high tunnel sideways for 4 blocks.
-            for (int x = 1; x <= 4; x++) // Dig outwards
+            for (int x = 1; x <= tunnelLength; x++) // Dig outwards
             {
                 dimension.SetBlockID(new GlobalVoxelCoordinates(x + xHole, groundY - 1, zHole), MockAirBlockID);
                 dimension.SetBlockID(new GlobalVoxelCoordinates(x + xHole, groundY - 2, zHole), MockAirBlockID);
@@ -267,7 +268,7 @@ namespace TrueCraft.Core.Test.Lighting
                 Console.WriteLine();
             }
             Console.Write("x:");
-            for (int x = 0; x <= 5; x++)
+            for (int x = 0; x <= tunnelLength + 1; x++)
                 Console.Write($"{x + xHole:D2} ");
             Console.WriteLine();
 
@@ -276,7 +277,7 @@ namespace TrueCraft.Core.Test.Lighting
             for (int y = groundY; y >= 0; y--)
             {
                 Console.Write($"{y} ");
-                for (int x = 0; x <= 5; x++)
+                for (int x = 0; x <= tunnelLength + 1; x++)
                 {
                     Console.Write(dimension.GetSkyLight(new GlobalVoxelCoordinates(x + xHole, y, zHole)).ToString("D2") + " ");
                 }
@@ -289,7 +290,7 @@ namespace TrueCraft.Core.Test.Lighting
             Assert.AreEqual(15, dimension.GetSkyLight(new GlobalVoxelCoordinates(xHole, groundY - 2, zHole)));
 
             byte expected = 14;
-            for (int x = 1; x <= 5; x++)
+            for (int x = 1; x <= tunnelLength; x++)
             {
                 GlobalVoxelCoordinates coords = new GlobalVoxelCoordinates(x + xHole, groundY - 1, zHole);
                 Console.WriteLine("Testing {0}", coords);
