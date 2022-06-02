@@ -35,7 +35,7 @@ namespace TrueCraft.Launcher.Singleplayer
             _savedWorlds = new List<WorldInfo>(directories.Length);
             foreach (string d in directories)
             {
-                string manifestFile = Path.Combine(baseDirectory, "manifest.nbt");
+                string manifestFile = Path.Combine(d, "manifest.nbt");
                 if (File.Exists(manifestFile))
                 {
                     NbtFile file = new NbtFile(manifestFile);
