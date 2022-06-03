@@ -39,7 +39,7 @@ namespace TrueCraft.Launcher.Singleplayer
                 if (File.Exists(manifestFile))
                 {
                     NbtFile file = new NbtFile(manifestFile);
-                    _savedWorlds.Add(new WorldInfo(Path.GetFileName(d), file));
+                    _savedWorlds.Add(new WorldInfo(d, file));
                 }
             }
         }
