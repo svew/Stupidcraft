@@ -167,8 +167,8 @@ namespace TrueCraft.Launcher.Views
             _worldListView.Selection.GetSelected(out iter);
             string worldName = (string)_worldListStore.GetValue(iter, 0);
             // TODO: Do world names have to be unique?
-            MultiplayerServer _server = MultiplayerServer.Get();
             Discover.DoDiscovery(new Discover());
+            MultiplayerServer _server = MultiplayerServer.Get();
             TrueCraft.Program.ServiceLocator = new ServiceLocater(_server, BlockRepository.Get(), ItemRepository.Get());
             TrueCraft.World.IWorld world = TrueCraft.World.World.LoadWorld(TrueCraft.Program.ServiceLocator, worldName);
             TrueCraft.Program.ServerConfiguration = new ServerConfiguration()
