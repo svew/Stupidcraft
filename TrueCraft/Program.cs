@@ -19,73 +19,84 @@ namespace TrueCraft
     {
         public static ServerConfiguration? ServerConfiguration;
 
-        public static MultiplayerServer Server;
+        public static MultiplayerServer? Server;
 
         public static IServiceLocator ServiceLocator;
 
         public static void Main(string[] args)
         {
-            // TODO: World path must be passed here.
-            Server = MultiplayerServer.Get();
+            try
+            {
+                // TODO: World path must be passed here.
+                Server = MultiplayerServer.Get();
 
-            Server.AddLogProvider(new ConsoleLogProvider(LogCategory.Notice | LogCategory.Warning | LogCategory.Error | LogCategory.Debug));
+                Server.AddLogProvider(new ConsoleLogProvider(LogCategory.Notice | LogCategory.Warning | LogCategory.Error | LogCategory.Debug));
 #if DEBUG
-            Server.AddLogProvider(new FileLogProvider(new StreamWriter("packets.log", false), LogCategory.Packets));
+                Server.AddLogProvider(new FileLogProvider(new StreamWriter("packets.log", false), LogCategory.Packets));
 #endif
 
-            ServerConfiguration = Configuration.LoadConfiguration<ServerConfiguration>("config.yaml");
+                ServerConfiguration = Configuration.LoadConfiguration<ServerConfiguration>("config.yaml");
 
-            var buckets = ServerConfiguration.Debug?.Profiler?.Buckets?.Split(',');
-            if (buckets != null)
-            {
-                foreach (var bucket in buckets)
+                var buckets = ServerConfiguration.Debug?.Profiler?.Buckets?.Split(',');
+                if (buckets != null)
                 {
-                    Profiler.EnableBucket(bucket.Trim());
+                    foreach (var bucket in buckets)
+                    {
+                        Profiler.EnableBucket(bucket.Trim());
+                    }
+                }
+
+                if (ServerConfiguration.Debug.DeleteWorldOnStartup)
+                {
+                    if (Directory.Exists("world"))
+                        Directory.Delete("world", true);
+                }
+                if (ServerConfiguration.Debug.DeletePlayersOnStartup)
+                {
+                    if (Directory.Exists("players"))
+                        Directory.Delete("players", true);
+                }
+
+                IWorld world;
+                if (!Directory.Exists("world"))
+                {
+                    int seed = MathHelper.Random.Next();
+                    TrueCraft.World.World.CreateWorld(seed, Paths.Worlds, "world");
+                }
+
+                Discover.DoDiscovery(new Discover());
+                ServiceLocator = new ServiceLocater(Server, BlockRepository.Get(), ItemRepository.Get());
+
+                world = TrueCraft.World.World.LoadWorld(ServiceLocator, "world");
+                ServiceLocator.World = world;
+                Server.World = world;
+
+                IDimensionServer overWorld = (IDimensionServer)world[DimensionID.Overworld];
+                overWorld.Initialize(new GlobalChunkCoordinates(0, 0), Server, null);
+
+                // TODO: Is this needed when loading (and not creating)?
+                Server.Log(LogCategory.Notice, "Lighting the world (this will take a moment)...");
+                foreach (Lighting lighter in Server.WorldLighters)
+                {
+                    while (lighter.TryLightNext()) ;
+                }
+
+                Server.Start(new IPEndPoint(IPAddress.Parse(ServerConfiguration.ServerAddress), ServerConfiguration.ServerPort));
+                Console.CancelKeyPress += HandleCancelKeyPress;
+                Server.Scheduler.ScheduleEvent("world.save", null,
+                    TimeSpan.FromSeconds(ServerConfiguration.WorldSaveInterval), SaveWorlds);
+                while (true)
+                {
+                    Thread.Yield();
                 }
             }
-
-            if (ServerConfiguration.Debug.DeleteWorldOnStartup)
+            catch (Exception ex)
             {
-                if (Directory.Exists("world"))
-                    Directory.Delete("world", true);
-            }
-            if (ServerConfiguration.Debug.DeletePlayersOnStartup)
-            {
-                if (Directory.Exists("players"))
-                    Directory.Delete("players", true);
-            }
-
-            IWorld world;
-            if (!Directory.Exists("world"))
-            {
-                int seed = MathHelper.Random.Next();
-                TrueCraft.World.World.CreateWorld(seed, Paths.Worlds, "world");
-            }
-
-            Discover.DoDiscovery(new Discover());
-            ServiceLocator = new ServiceLocater(Server, BlockRepository.Get(), ItemRepository.Get());
-
-            world = TrueCraft.World.World.LoadWorld(ServiceLocator, "world");
-            ServiceLocator.World = world;
-            Server.World = world;
-
-            IDimensionServer overWorld = (IDimensionServer)world[DimensionID.Overworld];
-            overWorld.Initialize(new GlobalChunkCoordinates(0, 0), Server, null);
-
-            // TODO: Is this needed when loading (and not creating)?
-            Server.Log(LogCategory.Notice, "Lighting the world (this will take a moment)...");
-            foreach (Lighting lighter in Server.WorldLighters)
-            {
-                while (lighter.TryLightNext()) ;
-            }
-
-            Server.Start(new IPEndPoint(IPAddress.Parse(ServerConfiguration.ServerAddress), ServerConfiguration.ServerPort));
-            Console.CancelKeyPress += HandleCancelKeyPress;
-            Server.Scheduler.ScheduleEvent("world.save", null,
-                TimeSpan.FromSeconds(ServerConfiguration.WorldSaveInterval), SaveWorlds);
-            while (true)
-            {
-                Thread.Yield();
+                if (Server is not null)
+                {
+                    Server.Log(LogCategory.Error, ex.Message);
+                    SaveWorlds(Server);
+                }
             }
         }
 

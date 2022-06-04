@@ -163,83 +163,93 @@ namespace TrueCraft.Launcher.Views
 
         private void PlayButton_Clicked(object sender, EventArgs e)
         {
-            TreeIter iter;
-            _worldListView.Selection.GetSelected(out iter);
-            //string worldName = (string)_worldListStore.GetValue(iter, 0);
-            WorldInfo worldInfo = (WorldInfo)_worldListStore.GetValue(iter, 1);
-
-            Discover.DoDiscovery(new Discover());
-            MultiplayerServer _server = MultiplayerServer.Get();
-            TrueCraft.Program.ServiceLocator = new ServiceLocater(_server, BlockRepository.Get(), ItemRepository.Get());
-            TrueCraft.World.IWorld world = TrueCraft.World.World.LoadWorld(TrueCraft.Program.ServiceLocator, worldInfo.Directory);
-            TrueCraft.Program.ServerConfiguration = new ServerConfiguration()
+            try
             {
-                MOTD = null,
-                Singleplayer = true
-            };
+                TreeIter iter;
+                _worldListView.Selection.GetSelected(out iter);
+                //string worldName = (string)_worldListStore.GetValue(iter, 0);
+                WorldInfo worldInfo = (WorldInfo)_worldListStore.GetValue(iter, 1);
 
-            _playButton.Sensitive = _backButton.Sensitive = _createWorldButton.Sensitive =
-                _createWorldBox.Visible = _worldListView.Sensitive = false;
-            _progressBar.Visible = _progressLabel.Visible = true;
-            Task.Factory.StartNew(() =>
-            {
+                Discover.DoDiscovery(new Discover());
+                MultiplayerServer _server = MultiplayerServer.Get();
+                TrueCraft.Program.ServiceLocator = new ServiceLocater(_server, BlockRepository.Get(), ItemRepository.Get());
+                TrueCraft.World.IWorld world = TrueCraft.World.World.LoadWorld(TrueCraft.Program.ServiceLocator, worldInfo.Directory);
+                TrueCraft.Program.ServerConfiguration = new ServerConfiguration()
+                {
+                    MOTD = null,
+                    Singleplayer = true
+                };
+
+                _playButton.Sensitive = _backButton.Sensitive = _createWorldButton.Sensitive =
+                    _createWorldBox.Visible = _worldListView.Sensitive = false;
+                _progressBar.Visible = _progressLabel.Visible = true;
+                Task.Factory.StartNew(() =>
+                {
                 // TODO: What if the player exitted the game from another dimension?
                 IDimensionServer overWorld = (IDimensionServer)world[Core.World.DimensionID.Overworld];
-                GlobalChunkCoordinates spawnChunk = new GlobalChunkCoordinates(0, 0);
-                overWorld.Initialize(spawnChunk, _server, (value, stage) =>
+                    GlobalChunkCoordinates spawnChunk = new GlobalChunkCoordinates(0, 0);
+                    overWorld.Initialize(spawnChunk, _server, (value, stage) =>
+                        Application.Invoke((sender, e) =>
+                        {
+                            _progressLabel.Text = stage;
+                            _progressBar.Fraction = value;
+                        }));
+                    _server.Start(new IPEndPoint(IPAddress.Loopback, 0));
                     Application.Invoke((sender, e) =>
                     {
-                        _progressLabel.Text = stage;
-                        _progressBar.Fraction = value;
-                    }));
-                _server.Start(new IPEndPoint(IPAddress.Loopback, 0));
-                Application.Invoke((sender, e) =>
-                {
-                    _playButton.Sensitive = _backButton.Sensitive = _createWorldButton.Sensitive = _worldListView.Sensitive = true;
-                    var process = new Process();
+                        _playButton.Sensitive = _backButton.Sensitive = _createWorldButton.Sensitive = _worldListView.Sensitive = true;
+                        var process = new Process();
 
-                    string clientLocation = Assembly.GetExecutingAssembly().Location;
-                    clientLocation = System.IO.Path.GetDirectoryName(clientLocation);
-                    clientLocation = System.IO.Path.Combine(clientLocation, "TrueCraft.Client.dll");
+                        string clientLocation = Assembly.GetExecutingAssembly().Location;
+                        clientLocation = System.IO.Path.GetDirectoryName(clientLocation);
+                        clientLocation = System.IO.Path.Combine(clientLocation, "TrueCraft.Client.dll");
 
-                    string launchParams = string.Format("{0} {1} {2} {3}", clientLocation, _server.EndPoint, _window.User.Username, _window.User.SessionId);
+                        string launchParams = string.Format("{0} {1} {2} {3}", clientLocation, _server.EndPoint, _window.User.Username, _window.User.SessionId);
 
-                    process.StartInfo = new ProcessStartInfo($"dotnet",
-                             launchParams);
-                    process.StartInfo.UseShellExecute = false;
-                    process.EnableRaisingEvents = true;
-                    process.Exited += (s, a) => Application.Invoke((s, a) =>
-                    {
-                        _progressBar.Visible = _progressLabel.Visible = false;
-                        _window.Show();
-                        _server.Stop();
+                        process.StartInfo = new ProcessStartInfo($"dotnet",
+                                 launchParams);
+                        process.StartInfo.UseShellExecute = false;
+                        process.EnableRaisingEvents = true;
+                        process.Exited += (s, a) => Application.Invoke((s, a) =>
+                        {
+                            _progressBar.Visible = _progressLabel.Visible = false;
+                            _window.Show();
+                            _server.Stop();
+                        });
+                        process.Start();
+                        _window.Hide();
                     });
-                    process.Start();
-                    _window.Hide();
+                }).ContinueWith(task =>
+                {
+                    if (task.IsFaulted)
+                    {
+                        Application.Invoke((sender, e) =>
+                        {
+                            using (MessageDialog msg = new MessageDialog(_window,
+                                 DialogFlags.DestroyWithParent | DialogFlags.Modal,
+                                 MessageType.Error,
+                                 ButtonsType.Close,
+                                 "Error loading world",
+                                 Array.Empty<object>()))
+                            {
+                                msg.SecondaryText = "It's possible that this world is corrupted.";
+                                msg.Run();
+                            }
+
+                            _progressBar.Visible = _progressLabel.Visible = false;
+                            _playButton.Sensitive = _backButton.Sensitive = _createWorldButton.Sensitive =
+                                _worldListView.Sensitive = true;
+                        });
+                    }
                 });
-            }).ContinueWith(task =>
+            }
+            catch (Exception ex)
             {
-                if (task.IsFaulted)
-                {
-                    Application.Invoke((sender, e) =>
-                    {
-                       using (MessageDialog msg = new MessageDialog(_window,
-                                DialogFlags.DestroyWithParent | DialogFlags.Modal,
-                                MessageType.Error,
-                                ButtonsType.Close,
-                                "Error loading world",
-                                Array.Empty<object>()))
-                       {
-                          msg.SecondaryText = "It's possible that this world is corrupted.";
-                          msg.Run();
-                       }
-
-                        _progressBar.Visible = _progressLabel.Visible = false;
-                        _playButton.Sensitive = _backButton.Sensitive = _createWorldButton.Sensitive =
-                            _worldListView.Sensitive = true;
-                    });
-                }
-            });
+                using (MessageDialog msg = new MessageDialog(_window, DialogFlags.DestroyWithParent | DialogFlags.DestroyWithParent,
+                        MessageType.Error, ButtonsType.Close,
+                        ex.Message, Array.Empty<object>()))
+                    msg.Run();
+            }
         }
 
         private void NewWorldCommit_Clicked(object sender, EventArgs e)
