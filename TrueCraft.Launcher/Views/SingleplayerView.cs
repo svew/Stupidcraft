@@ -50,7 +50,7 @@ namespace TrueCraft.Launcher.Views
                 Justify = Justification.Center
             };
 
-            _worldListStore = new ListStore(typeof(string));
+            _worldListStore = new ListStore(typeof(string), typeof(WorldInfo));
             _worldListView = new TreeView(_worldListStore);
             _worldListView.SetSizeRequest(-1, 200);
             _worldListView.HeadersVisible = false;
@@ -165,12 +165,13 @@ namespace TrueCraft.Launcher.Views
         {
             TreeIter iter;
             _worldListView.Selection.GetSelected(out iter);
-            string worldName = (string)_worldListStore.GetValue(iter, 0);
-            // TODO: Do world names have to be unique?
+            //string worldName = (string)_worldListStore.GetValue(iter, 0);
+            WorldInfo worldInfo = (WorldInfo)_worldListStore.GetValue(iter, 1);
+
             Discover.DoDiscovery(new Discover());
             MultiplayerServer _server = MultiplayerServer.Get();
             TrueCraft.Program.ServiceLocator = new ServiceLocater(_server, BlockRepository.Get(), ItemRepository.Get());
-            TrueCraft.World.IWorld world = TrueCraft.World.World.LoadWorld(TrueCraft.Program.ServiceLocator, worldName);
+            TrueCraft.World.IWorld world = TrueCraft.World.World.LoadWorld(TrueCraft.Program.ServiceLocator, worldInfo.Directory);
             TrueCraft.Program.ServerConfiguration = new ServerConfiguration()
             {
                 MOTD = null,
