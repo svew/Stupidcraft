@@ -145,7 +145,7 @@ namespace TrueCraft.World
         {
             get
             {
-                return _dimensions[(int)index];
+                return _dimensions[((int)index) + 1];
             }
         }
 
