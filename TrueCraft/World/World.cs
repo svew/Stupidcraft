@@ -179,8 +179,9 @@ namespace TrueCraft.World
             file.RootTag.Add(new NbtString("Name", Name));
             file.SaveToFile(Path.Combine(this._baseDirectory, "manifest.nbt"), NbtCompression.ZLib);
 
-            foreach (IDimensionServer dimension in _dimensions)
-                dimension.Save();
+            // TODO: once the Nether is created, make this "dimension" not nullable.
+            foreach (IDimensionServer? dimension in _dimensions)
+                dimension?.Save();
         }
 
         public IEnumerator<IDimensionServer> GetEnumerator()

@@ -112,7 +112,9 @@ namespace TrueCraft
 
                 _world = (IWorld)value;
                 foreach (IDimensionServer d in _world)
-                    d.BlockChanged += HandleBlockChanged;
+                    // TODO: Once the nether is created, there will no longer be a null dimension.
+                    if (d is not null)
+                        d.BlockChanged += HandleBlockChanged;
             }
         }
 
@@ -435,8 +437,9 @@ namespace TrueCraft
             Scheduler.Update();
 
             Profiler.Start("environment.entities");
-            foreach (IDimensionServer server in _world!)
-                server.EntityManager.Update();
+            // TODO: once the Nether is created, make this "server" not nullable.
+            foreach (IDimensionServer? server in _world!)
+                server?.EntityManager.Update();
             Profiler.Done();
 
             if (Program.ServerConfiguration.EnableLighting)

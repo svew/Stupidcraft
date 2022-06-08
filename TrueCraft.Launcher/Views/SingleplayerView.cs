@@ -248,7 +248,7 @@ namespace TrueCraft.Launcher.Views
             {
                 using (MessageDialog msg = new MessageDialog(_window, DialogFlags.DestroyWithParent | DialogFlags.DestroyWithParent,
                         MessageType.Error, ButtonsType.Close,
-                        ex.Message, Array.Empty<object>()))
+                        ex.Message + "\n" + ex.StackTrace, Array.Empty<object>()))
                     msg.Run();
             }
         }
