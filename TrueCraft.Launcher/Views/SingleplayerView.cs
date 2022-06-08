@@ -246,6 +246,8 @@ namespace TrueCraft.Launcher.Views
             }
             catch (Exception ex)
             {
+                Console.Error.WriteLine(ex.Message);
+                Console.Error.WriteLine(ex.StackTrace);
                 using (MessageDialog msg = new MessageDialog(_window, DialogFlags.DestroyWithParent | DialogFlags.DestroyWithParent,
                         MessageType.Error, ButtonsType.Close,
                         ex.Message + "\n" + ex.StackTrace, Array.Empty<object>()))
