@@ -608,7 +608,7 @@ namespace TrueCraft.World
         /// <inheritdoc />
         public string ChunkProvider
         {
-            get => this.GetType().FullName!;
+            get => _chunkProvider.GetType().FullName!;
         }
 
         #region IEnumerable<IChunk>
