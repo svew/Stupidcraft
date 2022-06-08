@@ -28,7 +28,7 @@ namespace TrueCraft
         public event EventHandler<PlayerJoinedQuitEventArgs> PlayerJoined;
         public event EventHandler<PlayerJoinedQuitEventArgs> PlayerQuit;
 
-        private IWorld _world;
+        private IWorld? _world = null;
 
         private Thread _masterTick;
         private List<AutoResetEvent> _lstAutoResetEvents;
@@ -100,11 +100,13 @@ namespace TrueCraft
         public IList<IRemoteClient> Clients { get; private set; }
 
         // <inheritdoc />
-        public object World
+        public object? World
         {
             get => _world;
             set
             {
+                if (value is null)
+                    throw new ArgumentException("World must not be set to null.");
                 if (_world is not null)
                     throw new InvalidOperationException($"{nameof(World)} is already set.");
 
@@ -181,6 +183,9 @@ namespace TrueCraft
 
         public void Start(IPEndPoint endPoint)
         {
+            if (_world is null)
+                throw new InvalidOperationException("Start called before World was set.");
+
             Scheduler.DisabledEvents.Clear();
             if (Program.ServerConfiguration.DisabledEvents != null)
                 Program.ServerConfiguration.DisabledEvents.ToList().ForEach(
@@ -430,7 +435,7 @@ namespace TrueCraft
             Scheduler.Update();
 
             Profiler.Start("environment.entities");
-            foreach (IDimensionServer server in _world)
+            foreach (IDimensionServer server in _world!)
                 server.EntityManager.Update();
             Profiler.Done();
 

@@ -32,7 +32,7 @@ namespace TrueCraft.Core.Server
         /// <summary>
         /// 
         /// </summary>
-        object World { get; }
+        object? World { get; }
 
         IEventScheduler Scheduler { get; }
 
