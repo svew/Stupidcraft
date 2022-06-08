@@ -319,20 +319,28 @@ namespace TrueCraft.Core.Logic.Blocks
         /// </summary>
         private bool LineOfSight(IDimension dimension, GlobalVoxelCoordinates candidate, GlobalVoxelCoordinates target)
         {
-            GlobalVoxelCoordinates sight = new GlobalVoxelCoordinates(candidate.X, candidate.Y + 1, candidate.Z);
+            // TODO: What does LineOfSight have to do with fluid flow?
+            //       You can have an uphill line of sight, but fluid won't flow there.
+            // TODO: why is the candidate elevated by one block?
+            candidate = new GlobalVoxelCoordinates(candidate.X, candidate.Y + 1, candidate.Z);
             Vector3i direction = (target - candidate).Clamp(1);
 
+            // TODO: In what sense is a non-zero hardness block ANYWHERE in the
+            //       rectangle with candidate and target at its opposite corners
+            //       blocking the line of sight?
             do
             {
                 int z = candidate.Z;
                 do
                 {
                     var p = dimension.BlockRepository.GetBlockProvider(dimension.GetBlockID(candidate));
+                    // TODO: what does Hardness have to do with Line of Sight?  Not opaque?
+                    //       Are these blocks that break when water flows in?
                     if (p.Hardness != 0)
                         return false;
-                    sight = new GlobalVoxelCoordinates(sight.X, sight.Y, sight.Z + direction.Z);
+                    candidate = new GlobalVoxelCoordinates(candidate.X, candidate.Y, candidate.Z + direction.Z);
                 } while (target.Z != candidate.Z);
-                sight = new GlobalVoxelCoordinates(sight.X + direction.X, sight.Y, z);
+                candidate = new GlobalVoxelCoordinates(candidate.X + direction.X, candidate.Y, z);
             } while (target.X != candidate.X);
             return true;
         }
