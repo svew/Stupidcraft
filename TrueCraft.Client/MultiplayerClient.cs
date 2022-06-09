@@ -13,6 +13,7 @@ using TrueCraft.Core.Physics;
 using TrueCraft.Core.World;
 using TrueCraft.Core.Inventory;
 using TrueCraft.Client.Inventory;
+using TrueCraft.Client.World;
 
 namespace TrueCraft.Client
 {
@@ -84,6 +85,8 @@ namespace TrueCraft.Client
             Handlers.PacketHandlers.RegisterHandlers(this);
 
             Discover.DoDiscovery(new Discover());
+
+            Dimension = new Dimension(BlockRepository.Get(), ItemRepository.Get());
 
             Physics = new PhysicsEngine(Dimension);
             _socketPool = new SocketAsyncEventArgsPool(100, 200, 65536);
