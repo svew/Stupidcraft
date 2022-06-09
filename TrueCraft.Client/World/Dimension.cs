@@ -113,7 +113,7 @@ namespace TrueCraft.Client.World
         /// <inheritdoc />
         public bool IsValidPosition(GlobalVoxelCoordinates position)
         {
-            throw new NotImplementedException();
+            return position.Y >= 0 && position.Y < WorldConstants.Height;
         }
 
         /// <inheritdoc />
