@@ -253,8 +253,11 @@ namespace TrueCraft.Client.Modules
                     Digging = true;
                     return true;
                 case MouseButton.Right:
+                    if (Game.HighlightedBlock is null)
+                        return true;
+
                     ItemStack item = Game.Client.Hotbar[Game.Client.HotbarSelection].Item;
-                        Game.Client.QueuePacket(new PlayerBlockPlacementPacket(
+                    Game.Client.QueuePacket(new PlayerBlockPlacementPacket(
                         Game.HighlightedBlock.X, (sbyte)Game.HighlightedBlock.Y, Game.HighlightedBlock.Z,
                         Game.HighlightedBlockFace, item.ID, item.Count, item.Metadata));
                     return true;
