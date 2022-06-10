@@ -25,6 +25,8 @@ namespace TrueCraft
 {
     public class RemoteClient : IRemoteClient, IEventSubject, IDisposable
     {
+        private IDimensionServer? _dimension = null;
+
         public RemoteClient(IMultiplayerServer server, IPacketReader packetReader, PacketHandler[] packetHandlers, Socket connection)
         {
             _loadedChunks = new HashSet<GlobalChunkCoordinates>();
@@ -72,7 +74,21 @@ namespace TrueCraft
         public string Username { get; internal set; }
         public bool LoggedIn { get; internal set; }
         public IMultiplayerServer Server { get; }
-        public IDimension Dimension { get; internal set; }
+
+        /// <inheritdoc />
+        public IDimension Dimension
+        {
+            get => _dimension;
+            internal set
+            {
+                // TODO: Once IRemoteClient is properly server-side only, fix this.
+                IDimensionServer? val = value as IDimensionServer;
+                if (val is null)
+                    throw new ArgumentNullException();
+                _dimension = val;
+            }
+        }
+
 
         /// <summary>
         /// Gets the Player's Inventory.
@@ -175,7 +191,7 @@ namespace TrueCraft
             // TODO: Should this packet even be sent to the originating client?
             //       It's used to provide the pickup animation.
             QueuePacket(packet);
-            IEntityManager manager = ((IDimensionServer)Dimension).EntityManager;
+            IEntityManager manager = _dimension!.EntityManager;
             foreach (IRemoteClient client in manager.ClientsForEntity(Entity))
                 client.QueuePacket(packet);
 
@@ -261,7 +277,7 @@ namespace TrueCraft
         public void Save()
         {
             // The remote client may be disconnected prior to setting the World property.
-            if (object.ReferenceEquals(Dimension, null))
+            if (_dimension is null)
                 return;
 
             var path = Path.Combine(Directory.GetCurrentDirectory(), "players", Username + ".nbt");
@@ -556,7 +572,7 @@ namespace TrueCraft
             Profiler.Done();
 
             Profiler.Start("client.update-entities");
-            IEntityManager manager = ((IDimensionServer)Dimension).EntityManager;
+            IEntityManager manager = _dimension!.EntityManager;
             ((EntityManager)manager).UpdateClientEntities(this);    // TODO remove cast
             Profiler.Done();
         }
