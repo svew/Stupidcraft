@@ -464,7 +464,7 @@ namespace TrueCraft.World
             lock (_regions)
             {
                 foreach (var region in _regions)
-                    region.Value.Save(Path.Combine(_baseDirectory, Region.GetRegionFileName(region.Key)));
+                    region.Value.Save();
             }
         }
 

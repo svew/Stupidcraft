@@ -157,21 +157,6 @@ namespace TrueCraft.World
         }
 
         /// <summary>
-        /// Saves this region to the specified file.
-        /// </summary>
-        public void Save(string file)
-        {
-            if(File.Exists(file))
-                _regionFile = _regionFile ?? File.Open(file, FileMode.OpenOrCreate);
-            else
-            {
-                _regionFile = _regionFile ?? File.Open(file, FileMode.OpenOrCreate);
-                CreateRegionHeader();
-            }
-            Save();
-        }
-
-        /// <summary>
         /// Saves this region to the open region file.
         /// </summary>
         public void Save()
