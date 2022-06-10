@@ -102,7 +102,6 @@ namespace TrueCraft.Client.Handlers
                 // TODO: Lighting
             }
             chunk.UpdateHeightMap();
-            chunk.TerrainPopulated = true;
             client.OnChunkLoaded(new ChunkEventArgs(chunk));
         }
     }
