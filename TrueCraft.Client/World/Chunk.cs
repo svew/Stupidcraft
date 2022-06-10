@@ -1,7 +1,7 @@
 using System;
 using System.IO;
-using System.IO.Compression;
 using fNbt;
+using MonoGame.Framework.Utilities.Deflate;
 using TrueCraft.Core;
 using TrueCraft.Core.Networking.Packets;
 using TrueCraft.Core.World;
@@ -26,7 +26,7 @@ namespace TrueCraft.Client.World
             _blockIDs = new byte[blockCount];
 
             using (MemoryStream memoryStream = new MemoryStream(packet.CompressedData))
-            using (GZipStream stream = new GZipStream(memoryStream, CompressionMode.Decompress))
+            using (ZlibStream stream = new ZlibStream(memoryStream, CompressionMode.Decompress))
             {
                 stream.Read(_blockIDs, 0, blockCount);
                 _metaData = new NybbleArray(stream, blockCount);
