@@ -527,7 +527,7 @@ namespace TrueCraft
 
         internal void UpdateChunks(bool block = false)
         {
-            var toLoad = new List<Tuple<GlobalChunkCoordinates, IChunk>>();
+            List<IChunk> toLoad = new List<IChunk>();
             int cr = ChunkRadius;
             GlobalChunkCoordinates entityChunk = (GlobalChunkCoordinates)Entity.Position;
 
@@ -539,8 +539,7 @@ namespace TrueCraft
                     {
                         GlobalChunkCoordinates coords = new GlobalChunkCoordinates(entityChunk.X + x, entityChunk.Z + z);
                         if (!_loadedChunks.Contains(coords))
-                            toLoad.Add(new Tuple<GlobalChunkCoordinates, IChunk>(
-                                coords, Dimension.GetChunk(coords)));
+                            toLoad.Add(_dimension!.GetChunk(coords, LoadEffort.Generate)!);
                     }
                 }
             Profiler.Done();
@@ -548,12 +547,8 @@ namespace TrueCraft
             var encode = new Action(() =>
             {
                 Profiler.Start("client.encode-chunks");
-                foreach (var tup in toLoad)
+                foreach (IChunk chunk in toLoad)
                 {
-                    var coords = tup.Item1;
-                    var chunk = tup.Item2;
-                    if (chunk == null)
-                        chunk = Dimension.GetChunk(coords);
                     chunk.LastAccessed = DateTime.UtcNow;
                     LoadChunk(chunk);
                 }
