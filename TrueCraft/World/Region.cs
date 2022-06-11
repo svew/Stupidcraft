@@ -240,25 +240,28 @@ namespace TrueCraft.World
 
         private Tuple<int, int> AllocateNewChunks(LocalChunkCoordinates position, int length)
         {
-            // Expand region file
-            _regionFile.Seek(0, SeekOrigin.End);
-            int dataOffset = (int)_regionFile.Position;
+            lock(_streamLock)
+            {
+                // Expand region file
+                _regionFile.Seek(0, SeekOrigin.End);
+                int dataOffset = (int)_regionFile.Position;
 
-            length /= ChunkSizeMultiplier;
-            length++;
-            _regionFile.Write(new byte[length * ChunkSizeMultiplier], 0, length * ChunkSizeMultiplier);
+                length /= ChunkSizeMultiplier;
+                length++;
+                _regionFile.Write(new byte[length * ChunkSizeMultiplier], 0, length * ChunkSizeMultiplier);
 
-            // Write table entry
-            int tableOffset = GetTableOffset(position);
-            _regionFile.Seek(tableOffset, SeekOrigin.Begin);
+                // Write table entry
+                int tableOffset = GetTableOffset(position);
+                _regionFile.Seek(tableOffset, SeekOrigin.Begin);
 
-            byte[] entry = BitConverter.GetBytes(dataOffset >> 4);
-            entry[0] = (byte)length;
-            Array.Reverse(entry);
-            _regionFile.Write(entry, 0, entry.Length);
-            Buffer.BlockCopy(entry, 0, HeaderCache, tableOffset, 4);
+                byte[] entry = BitConverter.GetBytes(dataOffset >> 4);
+                entry[0] = (byte)length;
+                Array.Reverse(entry);
+                _regionFile.Write(entry, 0, entry.Length);
+                Buffer.BlockCopy(entry, 0, HeaderCache, tableOffset, 4);
 
-            return new Tuple<int, int>(dataOffset, length * ChunkSizeMultiplier);
+                return new Tuple<int, int>(dataOffset, length * ChunkSizeMultiplier);
+            }
         }
 
         /// <summary>
@@ -295,13 +298,16 @@ namespace TrueCraft.World
 
         public void Dispose()
         {
-            if (_regionFile == null)
+            if (_regionFile is null)
                 return;
-            lock (_streamLock)
-            {
-                _regionFile.Flush();
-                _regionFile.Close();
-            }
+
+            _regionFile.Flush();
+            _regionFile.Close();
+
+            // It's illegal to use a disposed object, so we can set
+            // these to null safely.
+            _regionFile = null!;
+            _streamLock = null!;
         }
     }
 }
