@@ -13,27 +13,6 @@ namespace TrueCraft.Client.Rendering
     /// </summary>
     public class ChunkRenderer : Renderer<IChunk>
     {
-        public class ChunkSorter : Comparer<Mesh>
-        {
-            private GlobalVoxelCoordinates _camera;
-
-            public ChunkSorter(GlobalVoxelCoordinates camera)
-            {
-                _camera = camera;
-            }
-
-            public override int Compare(Mesh _x, Mesh _y)
-            {
-                IChunk x = ((ChunkMesh)_x).Chunk;
-                IChunk y = ((ChunkMesh)_y).Chunk;
-
-                double distX = ((GlobalVoxelCoordinates)x.Coordinates).DistanceTo(_camera);
-                double distY = ((GlobalVoxelCoordinates)y.Coordinates).DistanceTo(_camera);
-
-                return (int)(distY - distX);
-            }
-        }
-
         public int PendingChunks
         {
             get

@@ -111,10 +111,28 @@ namespace TrueCraft.Client.Modules
             switch (e.PropertyName)
             {
                 case "Position":
-                    var sorter = new ChunkRenderer.ChunkSorter(new GlobalVoxelCoordinates(
+                    ChunkSorter sorter = new ChunkSorter(new GlobalVoxelCoordinates(
                         (int)_game.Client.Position.X, 0, (int)_game.Client.Position.Z));
                     _game.Invoke(() => _chunkMeshes.Sort(sorter));
                     break;
+            }
+        }
+
+        private class ChunkSorter : Comparer<ChunkMesh>
+        {
+            private GlobalVoxelCoordinates _camera;
+
+            public ChunkSorter(GlobalVoxelCoordinates camera)
+            {
+                _camera = camera;
+            }
+
+            public override int Compare(ChunkMesh? x, ChunkMesh? y)
+            {
+                double distX = ((GlobalVoxelCoordinates)x!.Chunk.Coordinates).DistanceTo(_camera);
+                double distY = ((GlobalVoxelCoordinates)y!.Chunk.Coordinates).DistanceTo(_camera);
+
+                return (int)(distY - distX);
             }
         }
 
