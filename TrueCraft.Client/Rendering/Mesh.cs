@@ -10,8 +10,8 @@ namespace TrueCraft.Client.Rendering
     /// </summary>
     public class Mesh : IDisposable
     {
-        public static int VerticiesRendered { get; set; }
-        public static int IndiciesRendered { get; set; }
+        public static int VerticiesRendered { get; private set; }
+        public static int IndiciesRendered { get; private set; }
 
         public static void ResetStats()
         {
@@ -25,40 +25,14 @@ namespace TrueCraft.Client.Rendering
         public const int SubmeshLimit = 16;
 
         // Used for synchronous access to the graphics device.
-        private static readonly object _syncLock =
-            new object();
+        private static readonly object _syncLock = new object();
 
         private TrueCraftGame _game;
         private GraphicsDevice _graphicsDevice;
         private int _submeshes = 0;
         private bool _isReady = false;
-        protected VertexBuffer _vertices; // ChunkMesh uses these but external classes shouldn't, so I've made them protected.
-        protected IndexBuffer[] _indices;
-
-        private bool _recalculateBounds; // Whether this mesh should recalculate its bounding box when changed.
-
-        /// <summary>
-        /// Gets or sets the vertices in this mesh.
-        /// </summary>
-        protected VertexPositionNormalColorTexture[] Vertices
-        {
-            set
-            {
-                if (_vertices != null)
-                    _vertices.Dispose();
-
-                _game.Invoke(() =>
-                {
-                    _vertices = new VertexBuffer(_graphicsDevice, VertexPositionNormalColorTexture.VertexDeclaration,
-                        (value.Length + 1), BufferUsage.WriteOnly);
-                    _vertices.SetData(value);
-                    _isReady = true;
-                });
-
-                if (_recalculateBounds)
-                    BoundingBox = RecalculateBounds(value);
-            }
-        }
+        private VertexBuffer? _vertices;
+        private IndexBuffer[] _indices;
 
         public bool IsReady
         {
@@ -79,7 +53,7 @@ namespace TrueCraft.Client.Rendering
         /// <summary>
         /// Gets the bounding box for this mesh.
         /// </summary>
-        public BoundingBox BoundingBox { get; private set; }
+        public BoundingBox BoundingBox { get; }
 
         /// <summary>
         /// Gets whether this mesh is disposed of.
@@ -89,7 +63,8 @@ namespace TrueCraft.Client.Rendering
         /// <summary>
         /// Creates a new mesh.
         /// </summary>
-        public Mesh(TrueCraftGame game, int submeshes = 1, bool recalculateBounds = true)
+        protected Mesh(TrueCraftGame game, VertexPositionNormalColorTexture[] vertices,
+                int submeshes)
         {
             if ((submeshes < 0) || (submeshes >= Mesh.SubmeshLimit))
                 throw new ArgumentOutOfRangeException();
@@ -97,32 +72,45 @@ namespace TrueCraft.Client.Rendering
             _game = game;
             _graphicsDevice = game.GraphicsDevice;
             _indices = new IndexBuffer[submeshes];
-            _recalculateBounds = recalculateBounds;
+
+            _game.Invoke(() =>
+            {
+                _vertices = new VertexBuffer(_graphicsDevice, VertexPositionNormalColorTexture.VertexDeclaration,
+                    (vertices.Length + 1), BufferUsage.WriteOnly);
+                _vertices.SetData(vertices);
+                _isReady = true;
+            });
+
+            BoundingBox = RecalculateBounds(vertices);
         }
 
         /// <summary>
         /// Creates a new mesh.
         /// </summary>
         public Mesh(TrueCraftGame game, VertexPositionNormalColorTexture[] vertices,
-                int submeshes = 1, bool recalculateBounds = true) : this(game, submeshes, recalculateBounds)
+                int[] indices)
         {
-            Vertices = vertices;
-        }
+            _game = game;
+            _graphicsDevice = game.GraphicsDevice;
+            _indices = new IndexBuffer[1];
 
-        /// <summary>
-        /// Creates a new mesh.
-        /// </summary>
-        public Mesh(TrueCraftGame game, VertexPositionNormalColorTexture[] vertices,
-                int[] indices, bool recalculateBounds = true) : this(game, 1, recalculateBounds)
-        {
-            Vertices = vertices;
+            _game.Invoke(() =>
+            {
+                _vertices = new VertexBuffer(_graphicsDevice, VertexPositionNormalColorTexture.VertexDeclaration,
+                    (vertices.Length + 1), BufferUsage.WriteOnly);
+                _vertices.SetData(vertices);
+                _isReady = true;
+            });
+
+            BoundingBox = RecalculateBounds(vertices);
+
             SetSubmesh(0, indices);
         }
 
         /// <summary>
         /// Sets a submesh in this mesh.
         /// </summary>
-        public void SetSubmesh(int index, int[] indices)
+        protected void SetSubmesh(int index, int[] indices)
         {
             if ((index < 0) || (index > _indices.Length))
                 throw new ArgumentOutOfRangeException();
@@ -189,7 +177,7 @@ namespace TrueCraft.Client.Rendering
         /// </summary>
         public int GetTotalVertices()
         {
-            if (_vertices == null)
+            if (_vertices is null)
                 return 0;
 
             lock (_syncLock)
@@ -204,8 +192,8 @@ namespace TrueCraft.Client.Rendering
             lock (_syncLock)
             {
                 int sum = 0;
-                foreach (var element in _indices)
-                    sum += (element != null) ? element.IndexCount : 0;
+                foreach (IndexBuffer element in _indices)
+                    sum += (element != null) ? element.IndexCount : 0;  // TODO: can this ever contain a null?
                 return sum;
             }
         }
@@ -242,16 +230,18 @@ namespace TrueCraft.Client.Rendering
         {
             if (disposing)
             {
-                _graphicsDevice = null; // Lose the reference to our graphics device.
+                _graphicsDevice = null!; // Lose the reference to our graphics device.
 
-                if (_vertices != null)
-                    _vertices.Dispose();
-                foreach (var element in _indices)
-                {
-                    if (element != null)
-                        element.Dispose();
-                }
+                 _vertices?.Dispose();
+                _vertices = null;
+
+                if (_indices is not null)
+                    foreach (IndexBuffer element in _indices)
+                        element?.Dispose();
+                _indices = null!;
             }
+
+            IsDisposed = true;
         }
 
         /// <summary>

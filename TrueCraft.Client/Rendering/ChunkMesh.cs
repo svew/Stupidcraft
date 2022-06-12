@@ -23,10 +23,9 @@ namespace TrueCraft.Client.Rendering
         /// <param name="vertices"></param>
         /// <param name="indices"></param>
         public ChunkMesh(TrueCraftGame game, IChunk chunk, VertexPositionNormalColorTexture[] vertices, int[] indices)
-            : base(game, 1, true)
+            : base(game, vertices, 1)
         {
             Chunk = chunk;
-            Vertices = vertices;
             SetSubmesh(0, indices);
         }
 
@@ -39,10 +38,9 @@ namespace TrueCraft.Client.Rendering
         /// <param name="opaqueIndices"></param>
         /// <param name="transparentIndices"></param>
         public ChunkMesh(TrueCraftGame game, IChunk chunk, VertexPositionNormalColorTexture[] vertices, int[] opaqueIndices, int[] transparentIndices)
-            : base(game, 2, true)
+            : base(game, vertices, 2)
         {
             Chunk = chunk;
-            Vertices = vertices;
             SetSubmesh(0, opaqueIndices);
             SetSubmesh(1, transparentIndices);
         }
