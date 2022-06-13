@@ -11,12 +11,13 @@ namespace TrueCraft.Client.Modules
 {
     public class HighlightModule : IGraphicalModule
     {
-        public TrueCraftGame Game { get; set; }
+        private readonly TrueCraftGame _game;
 
-        private BasicEffect HighlightEffect { get; set; }
-        private AlphaTestEffect DestructionEffect { get; set; }
-        private Mesh ProgressMesh { get; set; }
+        private readonly BasicEffect _highlightEffect;
+        private readonly AlphaTestEffect _destructionEffect;
+        private Mesh _progressMesh;
         private int Progress { get; set; }
+
         private static readonly RasterizerState RasterizerState;
         private static readonly VertexPositionColor[] CubeVerticies;
         private static readonly short[] CubeIndicies;
@@ -58,17 +59,17 @@ namespace TrueCraft.Client.Modules
 
         public HighlightModule(TrueCraftGame game)
         {
-            Game = game;
-            HighlightEffect = new BasicEffect(Game.GraphicsDevice);
-            HighlightEffect.VertexColorEnabled = true;
-            DestructionEffect = new AlphaTestEffect(Game.GraphicsDevice);
-            DestructionEffect.Texture = game.TextureMapper.GetTexture("terrain.png");
-            DestructionEffect.ReferenceAlpha = 1;
+            _game = game;
+            _highlightEffect = new BasicEffect(_game.GraphicsDevice);
+            _highlightEffect.VertexColorEnabled = true;
+            _destructionEffect = new AlphaTestEffect(_game.GraphicsDevice);
+            _destructionEffect.Texture = game.TextureMapper.GetTexture("terrain.png");
+            _destructionEffect.ReferenceAlpha = 1;
 
-            GenerateProgressMesh();
+            _progressMesh = GenerateProgressMesh();
         }
 
-        private void GenerateProgressMesh()
+        private Mesh GenerateProgressMesh()
         {
             int[] indicies;
             var texCoords = new Vector2(Progress, 15);
@@ -81,34 +82,34 @@ namespace TrueCraft.Client.Modules
             };
             for (int i = 0; i < texture.Length; i++)
                 texture[i] *= new Vector2(16f / 256f);
-            var verticies = BlockRenderer.CreateUniformCube(XVector3.Zero,
+            VertexPositionNormalColorTexture[] vertices = BlockRenderer.CreateUniformCube(XVector3.Zero,
                 texture, VisibleFaces.All, 0, out indicies, Color.White);
-            ProgressMesh = new Mesh(Game, verticies, indicies);
+            return new Mesh(_game, vertices, indicies);
         }
 
         public void Update(GameTime gameTime)
         {
             var direction = XVector3.Transform(XVector3.UnitZ,
-            Matrix.CreateRotationX(MathHelper.ToRadians(Game.Client.Pitch)) *
-            Matrix.CreateRotationY(MathHelper.ToRadians(-(Game.Client.Yaw - 180) + 180)));
+            Matrix.CreateRotationX(MathHelper.ToRadians(_game.Client.Pitch)) *
+            Matrix.CreateRotationY(MathHelper.ToRadians(-(_game.Client.Yaw - 180) + 180)));
 
-            var cast = VoxelCast.Cast(Game.Client.Dimension,
-                new TRay(Game.Camera.Position, new TVector3(direction.X, direction.Y, direction.Z)),
-                Game.BlockRepository, TrueCraftGame.Reach, TrueCraftGame.Reach + 2);
+            var cast = VoxelCast.Cast(_game.Client.Dimension,
+                new TRay(_game.Camera.Position, new TVector3(direction.X, direction.Y, direction.Z)),
+                _game.BlockRepository, TrueCraftGame.Reach, TrueCraftGame.Reach + 2);
 
             if (cast == null)
-                Game.HighlightedBlock = null;
+                _game.HighlightedBlock = null;
             else
             {
-                var provider = Game.BlockRepository.GetBlockProvider(Game.Client.Dimension.GetBlockID(cast.Item1));
+                var provider = _game.BlockRepository.GetBlockProvider(_game.Client.Dimension.GetBlockID(cast.Item1));
                 if (provider.InteractiveBoundingBox != null)
                 {
                     var box = provider.InteractiveBoundingBox.Value;
 
-                    Game.HighlightedBlock = cast.Item1;
-                    Game.HighlightedBlockFace = cast.Item2;
+                    _game.HighlightedBlock = cast.Item1;
+                    _game.HighlightedBlockFace = cast.Item2;
 
-                    DestructionEffect.World = HighlightEffect.World = Matrix.Identity
+                    _destructionEffect.World = _highlightEffect.World = Matrix.Identity
                         * Matrix.CreateScale(new XVector3((float)box.Width, (float)box.Height, (float)box.Depth))
                         * Matrix.CreateTranslation(new XVector3((float)box.Min.X, (float)box.Min.Y, (float)box.Min.Z))
                         * Matrix.CreateTranslation(new XVector3(cast.Item1.X, cast.Item1.Y, cast.Item1.Z));
@@ -118,24 +119,24 @@ namespace TrueCraft.Client.Modules
 
         public void Draw(GameTime gameTime)
         {
-            Game.Camera.ApplyTo(HighlightEffect);
-            Game.Camera.ApplyTo(DestructionEffect);
+            _game.Camera.ApplyTo(_highlightEffect);
+            _game.Camera.ApplyTo(_destructionEffect);
 
-            if (!object.ReferenceEquals(Game.HighlightedBlock, null))
+            if (!object.ReferenceEquals(_game.HighlightedBlock, null))
             {
-                Game.GraphicsDevice.RasterizerState = RasterizerState;
-                foreach (var pass in HighlightEffect.CurrentTechnique.Passes)
+                _game.GraphicsDevice.RasterizerState = RasterizerState;
+                foreach (var pass in _highlightEffect.CurrentTechnique.Passes)
                 {
                     pass.Apply();
-                    HighlightEffect.GraphicsDevice.DrawUserIndexedPrimitives<VertexPositionColor>(
+                    _highlightEffect.GraphicsDevice.DrawUserIndexedPrimitives<VertexPositionColor>(
                         PrimitiveType.LineList, CubeVerticies, 0,
                         CubeVerticies.Length, CubeIndicies, 0, CubeIndicies.Length / 2);
                 }
             }
-            if (Game.EndDigging != DateTime.MaxValue)
+            if (_game.EndDigging != DateTime.MaxValue)
             {
-                var diff = Game.EndDigging - DateTime.UtcNow;
-                var total = Game.EndDigging - Game.StartDigging;
+                var diff = _game.EndDigging - DateTime.UtcNow;
+                var total = _game.EndDigging - _game.StartDigging;
                 var progress = (int)(diff.TotalMilliseconds / total.TotalMilliseconds * 10);
                 progress = -(progress - 5) + 5;
                 if (progress > 9)
@@ -144,13 +145,13 @@ namespace TrueCraft.Client.Modules
                 if (progress != Progress)
                 {
                     Progress = progress;
-                    GenerateProgressMesh();
+                    _progressMesh = GenerateProgressMesh();
                 }
 
-                Game.GraphicsDevice.BlendState = DestructionBlendState;
-                ProgressMesh.Draw(DestructionEffect);
-                Game.GraphicsDevice.BlendState = BlendState.AlphaBlend;
-                Game.GraphicsDevice.RasterizerState = RasterizerState.CullCounterClockwise;
+                _game.GraphicsDevice.BlendState = DestructionBlendState;
+                _progressMesh.Draw(_destructionEffect);
+                _game.GraphicsDevice.BlendState = BlendState.AlphaBlend;
+                _game.GraphicsDevice.RasterizerState = RasterizerState.CullCounterClockwise;
             }
         }
     }
