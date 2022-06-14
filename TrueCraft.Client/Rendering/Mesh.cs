@@ -81,7 +81,7 @@ namespace TrueCraft.Client.Rendering
                 _isReady = true;
             });
 
-            BoundingBox = RecalculateBounds(vertices);
+            BoundingBox = CalculateBoundingBox(vertices);
         }
 
         /// <summary>
@@ -102,9 +102,40 @@ namespace TrueCraft.Client.Rendering
                 _isReady = true;
             });
 
-            BoundingBox = RecalculateBounds(vertices);
+            BoundingBox = CalculateBoundingBox(vertices);
 
             SetSubmesh(0, indices);
+        }
+
+        /// <summary>
+        /// Calculates the Bounding Box of the Mesh.
+        /// </summary>
+        /// <param name="vertices"></param>
+        /// <returns></returns>
+        private static BoundingBox CalculateBoundingBox(VertexPositionNormalColorTexture[] vertices)
+        {
+            float minLength = float.MaxValue;
+            Vector3 minVector = Vector3.Zero;
+            float maxLength = float.MinValue;
+            Vector3 maxVector = Vector3.One;
+
+            for (int j = 0, jul = vertices.Length; j < jul; j ++)
+            {
+                Vector3 v = vertices[j].Position;
+                float len = v.Length();
+                if (len < minLength)
+                {
+                    minLength = len;
+                    minVector = v;
+                }
+                if (len > maxLength)
+                {
+                    maxLength = len;
+                    maxVector = v;
+                }
+            }
+
+            return new BoundingBox(minVector, maxVector);
         }
 
         /// <summary>
@@ -196,18 +227,6 @@ namespace TrueCraft.Client.Rendering
                     sum += (element != null) ? element.IndexCount : 0;  // TODO: can this ever contain a null?
                 return sum;
             }
-        }
-
-        /// <summary>
-        /// Recalculates the bounding box for this mesh.
-        /// </summary>
-        /// <param name="vertices">The vertices in this mesh.</param>
-        /// <returns></returns>
-        protected virtual BoundingBox RecalculateBounds(VertexPositionNormalColorTexture[] vertices)
-        {
-            return new BoundingBox(
-                vertices.Select(v => v.Position).OrderBy(v => v.Length()).First(),
-                vertices.Select(v => v.Position).OrderByDescending(v => v.Length()).First());
         }
 
         /// <summary>

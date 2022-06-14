@@ -44,20 +44,5 @@ namespace TrueCraft.Client.Rendering
             SetSubmesh(0, opaqueIndices);
             SetSubmesh(1, transparentIndices);
         }
-        
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="vertices"></param>
-        /// <returns></returns>
-        protected override BoundingBox RecalculateBounds(VertexPositionNormalColorTexture[] vertices)
-        {
-            // TODO fix adhoc inline coordinate conversion.
-            return new BoundingBox(
-                new Vector3(Chunk.X * WorldConstants.ChunkWidth, 0, Chunk.Z * WorldConstants.ChunkDepth),
-                new Vector3(Chunk.X * WorldConstants.ChunkWidth
-                    + WorldConstants.ChunkWidth, WorldConstants.Height,
-                    Chunk.Z * WorldConstants.ChunkDepth + WorldConstants.ChunkDepth));
-        }
     }
 }
