@@ -86,7 +86,7 @@ namespace TrueCraft.Client.World
         /// <returns>The index into the internal arrays.</returns>
         private int CoordinatesToIndex(LocalVoxelCoordinates coordinates)
         {
-            return (coordinates.X * WorldConstants.ChunkWidth + coordinates.Z) * WorldConstants.ChunkDepth + coordinates.Y;
+            return (coordinates.X * WorldConstants.ChunkWidth + coordinates.Z) * WorldConstants.Height + coordinates.Y;
         }
 
         /// <inheritdoc />
