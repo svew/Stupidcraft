@@ -8,26 +8,14 @@ namespace TrueCraft.Client.Rendering
     /// <summary>
     /// 
     /// </summary>
-    public class ChunkMesh : Mesh
+    public sealed class ChunkMesh : MeshBase
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        public IChunk Chunk { get; }
+        private readonly IChunk _chunk;
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="game"></param>
-        /// <param name="chunk"></param>
-        /// <param name="vertices"></param>
-        /// <param name="indices"></param>
-        public ChunkMesh(TrueCraftGame game, IChunk chunk, VertexPositionNormalColorTexture[] vertices, int[] indices)
-            : base(game, vertices, 1)
-        {
-            Chunk = chunk;
-            SetSubmesh(0, indices);
-        }
+        public IChunk Chunk { get => _chunk; }
 
         /// <summary>
         /// 
@@ -40,9 +28,22 @@ namespace TrueCraft.Client.Rendering
         public ChunkMesh(TrueCraftGame game, IChunk chunk, VertexPositionNormalColorTexture[] vertices, int[] opaqueIndices, int[] transparentIndices)
             : base(game, vertices, 2)
         {
-            Chunk = chunk;
+            _chunk = chunk;
             SetSubmesh(0, opaqueIndices);
             SetSubmesh(1, transparentIndices);
+
+            BoundingBox = CalculateBoundingBox(_chunk);
+        }
+
+        private static BoundingBox CalculateBoundingBox(IChunk chunk)
+        {
+            // NOTE adhoc inline coordinate conversion.
+            return new BoundingBox(
+                new Vector3(chunk.X * WorldConstants.ChunkWidth, 0, chunk.Z * WorldConstants.ChunkDepth),
+                new Vector3(chunk.X * WorldConstants.ChunkWidth
+                    + WorldConstants.ChunkWidth, WorldConstants.Height,
+                    chunk.Z * WorldConstants.ChunkDepth + WorldConstants.ChunkDepth));
         }
     }
 }
+

@@ -51,7 +51,7 @@ namespace TrueCraft.Client.Rendering
             VisibleFaces.East
         };
 
-        protected override bool TryRender(IChunk item, out Mesh result)
+        protected override bool TryRender(IChunk item, out MeshBase result)
         {
             var state = new RenderState();
             ProcessChunk(item, state);

@@ -5,10 +5,53 @@ using System.Linq;
 
 namespace TrueCraft.Client.Rendering
 {
+    public sealed class Mesh : MeshBase
+    {
+        public Mesh(TrueCraftGame game, VertexPositionNormalColorTexture[] vertices,
+                int[] indices) : base(game, vertices, indices)
+        {
+            BoundingBox = CalculateBoundingBox(vertices);
+        }
+
+        /// <summary>
+        /// Calculates the Bounding Box of the Mesh.
+        /// </summary>
+        /// <param name="vertices"></param>
+        /// <returns></returns>
+        private static BoundingBox CalculateBoundingBox(VertexPositionNormalColorTexture[] vertices)
+        {
+            float minLength = float.MaxValue;
+            Vector3 minVector = Vector3.Zero;
+            float maxLength = float.MinValue;
+            Vector3 maxVector = Vector3.One;
+
+            for (int j = 0, jul = vertices.Length; j < jul; j++)
+            {
+                Vector3 v = vertices[j].Position;
+                float len = v.Length();
+                if (len < minLength)
+                {
+                    minLength = len;
+                    minVector = v;
+                }
+                if (len > maxLength)
+                {
+                    maxLength = len;
+                    maxVector = v;
+                }
+            }
+
+            return new BoundingBox(minVector, maxVector);
+        }
+    }
+
     /// <summary>
     /// Represents an indexed collection of data that can be rendered.
     /// </summary>
-    public class Mesh : IDisposable
+    /// <remarks>
+    /// WARNING: sub-classes must calculate their own Bounding Boxes.
+    /// </remarks>
+    public abstract class MeshBase : IDisposable
     {
         public static int VerticiesRendered { get; private set; }
         public static int IndiciesRendered { get; private set; }
@@ -53,7 +96,7 @@ namespace TrueCraft.Client.Rendering
         /// <summary>
         /// Gets the bounding box for this mesh.
         /// </summary>
-        public BoundingBox BoundingBox { get; }
+        public BoundingBox BoundingBox { get; protected set; }
 
         /// <summary>
         /// Gets whether this mesh is disposed of.
@@ -63,10 +106,10 @@ namespace TrueCraft.Client.Rendering
         /// <summary>
         /// Creates a new mesh.
         /// </summary>
-        protected Mesh(TrueCraftGame game, VertexPositionNormalColorTexture[] vertices,
+        protected MeshBase(TrueCraftGame game, VertexPositionNormalColorTexture[] vertices,
                 int submeshes)
         {
-            if ((submeshes < 0) || (submeshes >= Mesh.SubmeshLimit))
+            if ((submeshes < 0) || (submeshes >= MeshBase.SubmeshLimit))
                 throw new ArgumentOutOfRangeException();
 
             _game = game;
@@ -80,14 +123,12 @@ namespace TrueCraft.Client.Rendering
                 _vertices.SetData(vertices);
                 _isReady = true;
             });
-
-            BoundingBox = CalculateBoundingBox(vertices);
         }
 
         /// <summary>
         /// Creates a new mesh.
         /// </summary>
-        public Mesh(TrueCraftGame game, VertexPositionNormalColorTexture[] vertices,
+        protected MeshBase(TrueCraftGame game, VertexPositionNormalColorTexture[] vertices,
                 int[] indices)
         {
             _game = game;
@@ -102,40 +143,7 @@ namespace TrueCraft.Client.Rendering
                 _isReady = true;
             });
 
-            BoundingBox = CalculateBoundingBox(vertices);
-
             SetSubmesh(0, indices);
-        }
-
-        /// <summary>
-        /// Calculates the Bounding Box of the Mesh.
-        /// </summary>
-        /// <param name="vertices"></param>
-        /// <returns></returns>
-        private static BoundingBox CalculateBoundingBox(VertexPositionNormalColorTexture[] vertices)
-        {
-            float minLength = float.MaxValue;
-            Vector3 minVector = Vector3.Zero;
-            float maxLength = float.MinValue;
-            Vector3 maxVector = Vector3.One;
-
-            for (int j = 0, jul = vertices.Length; j < jul; j ++)
-            {
-                Vector3 v = vertices[j].Position;
-                float len = v.Length();
-                if (len < minLength)
-                {
-                    minLength = len;
-                    minVector = v;
-                }
-                if (len > maxLength)
-                {
-                    maxLength = len;
-                    maxVector = v;
-                }
-            }
-
-            return new BoundingBox(minVector, maxVector);
         }
 
         /// <summary>
@@ -266,7 +274,7 @@ namespace TrueCraft.Client.Rendering
         /// <summary>
         /// Finalizes this mesh.
         /// </summary>
-        ~Mesh()
+        ~MeshBase()
         {
             Dispose(false);
         }

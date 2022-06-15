@@ -16,7 +16,7 @@ namespace TrueCraft.Client.Rendering
         /// <summary>
         /// 
         /// </summary>
-        public Mesh Result { get; private set; }
+        public MeshBase Result { get; private set; }
 
         /// <summary>
         /// 
@@ -29,7 +29,7 @@ namespace TrueCraft.Client.Rendering
         /// <param name="item"></param>
         /// <param name="result"></param>
         /// <param name="isPriority"></param>
-        public RendererEventArgs(T item, Mesh result, bool isPriority)
+        public RendererEventArgs(T item, MeshBase result, bool isPriority)
         {
             Item = item;
             Result = result;

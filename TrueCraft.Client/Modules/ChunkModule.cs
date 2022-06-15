@@ -20,7 +20,7 @@ namespace TrueCraft.Client.Modules
         private readonly HashSet<GlobalChunkCoordinates> _activeMeshes;
 
         private readonly List<ChunkMesh> _chunkMeshes;
-        private readonly ConcurrentBag<Mesh> _incomingChunks;
+        private readonly ConcurrentBag<ChunkMesh> _incomingChunks;
         private Lighting WorldLighting { get; set; }
 
         private readonly BasicEffect _opaqueEffect;
@@ -56,7 +56,7 @@ namespace TrueCraft.Client.Modules
             _opaqueEffect.LightingEnabled = true;
 
             _chunkMeshes = new List<ChunkMesh>();
-            _incomingChunks = new ConcurrentBag<Mesh>();
+            _incomingChunks = new ConcurrentBag<ChunkMesh>();
             _activeMeshes = new HashSet<GlobalChunkCoordinates>();
         }
 
@@ -94,7 +94,7 @@ namespace TrueCraft.Client.Modules
 
         private void MeshCompleted(object? sender, RendererEventArgs<IChunk> e)
         {
-            _incomingChunks.Add(e.Result);
+            _incomingChunks.Add((ChunkMesh)e.Result);
         }
 
         private void UnloadChunk(IChunk chunk)
@@ -139,11 +139,10 @@ namespace TrueCraft.Client.Modules
         public void Update(GameTime gameTime)
         {
             var any = false;
-            Mesh? _mesh;
-            while (_incomingChunks.TryTake(out _mesh))
+            ChunkMesh? mesh;
+            while (_incomingChunks.TryTake(out mesh))
             {
                 any = true;
-                ChunkMesh? mesh = _mesh as ChunkMesh;
                 if (mesh is not null)
                 {
                     if (_activeMeshes.Contains(mesh.Chunk.Coordinates))
