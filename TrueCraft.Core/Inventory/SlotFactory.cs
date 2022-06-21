@@ -6,7 +6,10 @@ namespace TrueCraft.Core.Inventory
 {
     public class SlotFactory<T> : ISlotFactory<T> where T : ISlot
     {
-        private static ISlotFactory<T> _impl = null;
+        // NOTE this must be initialized by a call to RegisterSlotFactory
+        // prior to using any methods in this class.  Otherwise,
+        // a NullReferenceException will occur.
+        private static ISlotFactory<T> _impl = null!;
 
         public static void RegisterSlotFactory(ISlotFactory<T> slotFactory)
         {

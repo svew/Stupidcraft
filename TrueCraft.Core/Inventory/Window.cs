@@ -45,7 +45,7 @@ namespace TrueCraft.Core.Inventory
 
         protected IItemRepository ItemRepository { get => _itemRepository; }
 
-        public event EventHandler<WindowClosedEventArgs> WindowClosed;
+        public event EventHandler<WindowClosedEventArgs>? WindowClosed;
 
         protected void OnWindowClosed()
         {

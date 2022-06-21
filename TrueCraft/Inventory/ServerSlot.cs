@@ -51,7 +51,7 @@ namespace TrueCraft.Inventory
             return new SetSlotPacket(windowID, (short)Index, item.ID, item.Count, item.Metadata);
         }
 
-        protected override void OnPropertyChanged([CallerMemberName] string property = null)
+        protected override void OnPropertyChanged([CallerMemberName] string property = "")
         {
             base.OnPropertyChanged(property);
             if (property != nameof(Dirty))

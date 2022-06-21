@@ -93,7 +93,7 @@ namespace TrueCraft.Client.Inventory
         }
 
         /// <inheritdoc />
-        public ActionConfirmation HandleClick(int slotIndex, bool rightClick, bool shiftClick, IHeldItem heldItem)
+        public ActionConfirmation? HandleClick(int slotIndex, bool rightClick, bool shiftClick, IHeldItem heldItem)
         {
             if (rightClick)
             {
@@ -111,7 +111,7 @@ namespace TrueCraft.Client.Inventory
             }
         }
 
-        protected ActionConfirmation HandleLeftClick(int slotIndex, IHeldItem heldItem)
+        protected ActionConfirmation? HandleLeftClick(int slotIndex, IHeldItem heldItem)
         {
             if (IsOutputSlot(slotIndex))
             {
@@ -165,7 +165,7 @@ namespace TrueCraft.Client.Inventory
             }
         }
 
-        protected ActionConfirmation HandleShiftLeftClick(int slotIndex, IHeldItem heldItem)
+        protected ActionConfirmation? HandleShiftLeftClick(int slotIndex, IHeldItem heldItem)
         {
             ItemStack srcSlotContent = this[slotIndex];
             int areaIndex = GetAreaIndex(slotIndex);
@@ -205,7 +205,7 @@ namespace TrueCraft.Client.Inventory
             }
         }
 
-        protected ActionConfirmation HandleRightClick(int slotIndex, IHeldItem heldItem)
+        protected ActionConfirmation? HandleRightClick(int slotIndex, IHeldItem heldItem)
         {
             int maxStack;
 
@@ -293,7 +293,7 @@ namespace TrueCraft.Client.Inventory
             });
         }
 
-        protected ActionConfirmation HandleShiftRightClick(int slotIndex, IHeldItem heldItem)
+        protected ActionConfirmation? HandleShiftRightClick(int slotIndex, IHeldItem heldItem)
         {
             return HandleShiftLeftClick(slotIndex, heldItem);
         }
