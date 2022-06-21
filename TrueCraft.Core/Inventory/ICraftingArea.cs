@@ -27,7 +27,7 @@ namespace TrueCraft.Core.Inventory
         /// <summary>
         /// Gets the current Recipe represented by the items in the Crafting Grid.
         /// </summary>
-        ICraftingRecipe Recipe { get; }
+        ICraftingRecipe? Recipe { get; }
 
         /// <summary>
         /// Takes one Recipe's worth of output from the output slot.

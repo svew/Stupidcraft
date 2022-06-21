@@ -40,7 +40,7 @@ namespace TrueCraft.Core.Inventory
         }
 
         /// <inheritdoc />
-        public ICraftingRecipe Recipe { get; private set; }
+        public ICraftingRecipe? Recipe { get; private set; }
 
         /// <inheritdoc />
         public ItemStack TakeOutput()
@@ -58,7 +58,9 @@ namespace TrueCraft.Core.Inventory
 
         private void RemoveItemsFromInput()
         {
-            ICraftingRecipe recipe = Recipe;
+            ICraftingRecipe? recipe = Recipe;
+            if (recipe is null)
+                return;
 
             // Locate area on crafting bench
             int x, y = 0;
