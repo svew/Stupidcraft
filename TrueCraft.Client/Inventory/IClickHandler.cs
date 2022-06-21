@@ -6,6 +6,6 @@ namespace TrueCraft.Client.Inventory
 {
     public interface IClickHandler
     {
-        ActionConfirmation HandleClick(int slotIndex, bool rightClick, bool shiftClick, IHeldItem heldItem);
+        ActionConfirmation? HandleClick(int slotIndex, bool rightClick, bool shiftClick, IHeldItem heldItem);
     }
 }

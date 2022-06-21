@@ -13,9 +13,9 @@ namespace TrueCraft.Client.Inventory
         public ChestWindow(IItemRepository itemRepository,
             ISlotFactory<ISlot> slotFactory, sbyte windowID,
             ISlots<ISlot> mainInventory, ISlots<ISlot> hotBar,
-            IDimension dimension, GlobalVoxelCoordinates location, GlobalVoxelCoordinates otherHalf) :
+            IDimension dimension, GlobalVoxelCoordinates location, GlobalVoxelCoordinates? otherHalf) :
             base(itemRepository, slotFactory, windowID, mainInventory, hotBar,
-                otherHalf != null)
+                otherHalf is not null)
         {
         }
 
@@ -35,7 +35,7 @@ namespace TrueCraft.Client.Inventory
         }
 
         /// <inheritdoc />
-        public virtual ActionConfirmation HandleClick(int slotIndex, bool rightClick, bool shiftClick, IHeldItem heldItem)
+        public virtual ActionConfirmation? HandleClick(int slotIndex, bool rightClick, bool shiftClick, IHeldItem heldItem)
         {
             if (rightClick)
             {
@@ -53,7 +53,7 @@ namespace TrueCraft.Client.Inventory
             }
         }
 
-        protected ActionConfirmation HandleLeftClick(int slotIndex, IHeldItem heldItem)
+        protected ActionConfirmation? HandleLeftClick(int slotIndex, IHeldItem heldItem)
         {
             if (heldItem.HeldItem.Empty)
             {
@@ -108,7 +108,7 @@ namespace TrueCraft.Client.Inventory
         }
 
         /// <inheritdoc />
-        protected ActionConfirmation HandleShiftLeftClick(int slotIndex, IHeldItem heldItem)
+        protected ActionConfirmation? HandleShiftLeftClick(int slotIndex, IHeldItem heldItem)
         {
             AreaIndices srcArea = (AreaIndices)GetAreaIndex(slotIndex);
 
@@ -134,7 +134,7 @@ namespace TrueCraft.Client.Inventory
         }
 
         /// <inheritdoc />
-        protected ActionConfirmation HandleRightClick(int slotIndex, IHeldItem heldItem)
+        protected ActionConfirmation? HandleRightClick(int slotIndex, IHeldItem heldItem)
         {
             ItemStack stack = this[slotIndex];
             if (!heldItem.HeldItem.Empty)
@@ -188,7 +188,7 @@ namespace TrueCraft.Client.Inventory
             }
         }
 
-        protected ActionConfirmation HandleShiftRightClick(int slotIndex, IHeldItem heldItem)
+        protected ActionConfirmation? HandleShiftRightClick(int slotIndex, IHeldItem heldItem)
         {
             return HandleShiftLeftClick(slotIndex, heldItem);
         }

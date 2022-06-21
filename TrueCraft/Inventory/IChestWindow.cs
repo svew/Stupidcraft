@@ -10,6 +10,6 @@ namespace TrueCraft.Inventory
 
         GlobalVoxelCoordinates Location { get; }
 
-        GlobalVoxelCoordinates OtherHalf { get; }
+        GlobalVoxelCoordinates? OtherHalf { get; }
     }
 }

@@ -53,9 +53,9 @@ namespace TrueCraft.Core.Inventory
             }
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
-        protected virtual void OnPropertyChanged([CallerMemberName]string property = null)
+        protected virtual void OnPropertyChanged([CallerMemberName]string property = "")
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
         }

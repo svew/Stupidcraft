@@ -14,25 +14,27 @@ namespace TrueCraft.Inventory
     public class ChestWindow : TrueCraft.Core.Inventory.ChestWindow<IServerSlot>,
         IChestWindow, IServerWindow
     {
+        private readonly GlobalVoxelCoordinates? _otherHalf;
+
         public ChestWindow(IItemRepository itemRepository,
             ISlotFactory<IServerSlot> slotFactory,
             sbyte windowID, ISlots<IServerSlot> mainInventory, ISlots<IServerSlot> hotBar,
             IDimension dimension,
             GlobalVoxelCoordinates location, GlobalVoxelCoordinates otherHalf) :
             base(itemRepository, slotFactory, windowID, mainInventory, hotBar,
-                otherHalf != null)
+                otherHalf is not null)
         {
             Dimension = dimension;
             Location = location;
-            OtherHalf = otherHalf;
+            _otherHalf = otherHalf;
             Load();
         }
 
         private void Load()
         {
-            NbtCompound entity = ((IDimensionServer)Dimension).GetTileEntity(Location);
+            NbtCompound? entity = ((IDimensionServer)Dimension).GetTileEntity(Location);
             ISlots<IServerSlot> chestInventory = this.ChestInventory;
-            if (entity != null)
+            if (entity is not null)
             {
                 foreach (var item in (NbtList)entity["Items"])
                 {
@@ -41,11 +43,12 @@ namespace TrueCraft.Inventory
                     chestInventory[slot.Index].SetClean();
                 }
             }
+
             // Add adjacent items
             if (!object.ReferenceEquals(OtherHalf, null))
             {
                 entity = ((IDimensionServer)Dimension).GetTileEntity(OtherHalf);
-                if (entity != null)
+                if (entity is not null)
                 {
                     foreach (var item in (NbtList)entity["Items"])
                     {
@@ -62,7 +65,7 @@ namespace TrueCraft.Inventory
 
         public GlobalVoxelCoordinates Location { get; }
 
-        public GlobalVoxelCoordinates OtherHalf { get; }
+        public GlobalVoxelCoordinates? OtherHalf { get => _otherHalf; }
 
         /// <inheritdoc />
         public CloseWindowPacket GetCloseWindowPacket()
@@ -292,14 +295,14 @@ namespace TrueCraft.Inventory
                 newEntity["Items"] = entitySelf;
             ((IDimensionServer)Dimension).SetTileEntity(Location, newEntity);
 
-            if (DoubleChest)
+            if (_otherHalf is not null)
             {
-                newEntity = ((IDimensionServer)Dimension).GetTileEntity(OtherHalf);
+                newEntity = ((IDimensionServer)Dimension).GetTileEntity(_otherHalf);
                 if (newEntity is null)
                     newEntity = new NbtCompound(new[] { entityAdjacent });
                 else
                     newEntity["Items"] = entityAdjacent;
-                ((IDimensionServer)Dimension).SetTileEntity(OtherHalf, newEntity);
+                ((IDimensionServer)Dimension).SetTileEntity(_otherHalf, newEntity);
             }
         }
     }
