@@ -12,22 +12,22 @@ namespace TrueCraft.Client.Input
         /// <summary>
         /// Raised when this mouse component is moved.
         /// </summary>
-        public event EventHandler<MouseMoveEventArgs> Move;
+        public event EventHandler<MouseMoveEventArgs>? Move;
 
         /// <summary>
         /// Raised when a button for this mouse component is pressed.
         /// </summary>
-        public event EventHandler<MouseButtonEventArgs> ButtonDown;
+        public event EventHandler<MouseButtonEventArgs>? ButtonDown;
 
         /// <summary>
         /// Raised when a button for this mouse component is released.
         /// </summary>
-        public event EventHandler<MouseButtonEventArgs> ButtonUp;
+        public event EventHandler<MouseButtonEventArgs>? ButtonUp;
 
         /// <summary>
         /// Raised when the scroll wheel for this mouse component is moved.
         /// </summary>
-        public event EventHandler<MouseScrollEventArgs> Scroll;
+        public event EventHandler<MouseScrollEventArgs>? Scroll;
 
         /// <summary>
         /// Gets the state for this mouse component.

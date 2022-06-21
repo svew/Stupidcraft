@@ -10,8 +10,8 @@ namespace TrueCraft.Client.Input
         public GamePadState State { get; set; }
         public PlayerIndex PlayerIndex { get; set; }
 
-        public event EventHandler<GamePadButtonEventArgs> ButtonDown;
-        public event EventHandler<GamePadButtonEventArgs> ButtonUp;
+        public event EventHandler<GamePadButtonEventArgs>? ButtonDown;
+        public event EventHandler<GamePadButtonEventArgs>? ButtonUp;
 
         public GamePadHandler(Game game) : base(game)
         {

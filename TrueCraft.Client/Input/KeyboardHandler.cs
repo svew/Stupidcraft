@@ -13,12 +13,12 @@ namespace TrueCraft.Client.Input
         /// <summary>
         /// Raised when a key for this keyboard component is pressed.
         /// </summary>
-        public event EventHandler<KeyboardKeyEventArgs> KeyDown;
+        public event EventHandler<KeyboardKeyEventArgs>? KeyDown;
 
         /// <summary>
         /// Raised when a key for this keyboard component is released.
         /// </summary>
-        public event EventHandler<KeyboardKeyEventArgs> KeyUp;
+        public event EventHandler<KeyboardKeyEventArgs>? KeyUp;
 
         /// <summary>
         /// Gets the state for this keyboard component.
