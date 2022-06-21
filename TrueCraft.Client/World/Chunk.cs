@@ -116,7 +116,9 @@ namespace TrueCraft.Client.World
         /// <inheritdoc />
         public byte GetBlockLight(LocalVoxelCoordinates coordinates)
         {
-            return _blockLight[CoordinatesToIndex(coordinates)];
+            // TODO: fix return of light values
+            //return _blockLight[CoordinatesToIndex(coordinates)];
+            return 15;
         }
 
         /// <inheritdoc />
@@ -128,7 +130,9 @@ namespace TrueCraft.Client.World
         /// <inheritdoc />
         public byte GetSkyLight(LocalVoxelCoordinates coordinates)
         {
-            return _skyLight[CoordinatesToIndex(coordinates)];
+            // TODO: fix return of light values
+            //return _skyLight[CoordinatesToIndex(coordinates)];
+            return 15;
         }
 
         /// <inheritdoc />
