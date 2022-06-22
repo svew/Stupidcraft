@@ -50,10 +50,10 @@ namespace TrueCraft.Core.Test.World
 
             // Not null is not equal to null
             Assert.False(a.Equals(null));
-            Assert.False(a.Equals((PanDimensionalVoxelCoordinates)null));
+            Assert.False(a!.Equals((PanDimensionalVoxelCoordinates?)null));
 
             // Cannot be equal to a different type
-            Assert.False(a.Equals(new LocalVoxelCoordinates(a.X, a.Y, a.Z)));
+            Assert.False(a!.Equals(new LocalVoxelCoordinates(a.X, a.Y, a.Z)));
         }
 
     }

@@ -128,16 +128,16 @@ namespace TrueCraft.Core.World
 
         public static bool operator ==(GlobalVoxelCoordinates? a, GlobalVoxelCoordinates? b)
         {
-            if (object.ReferenceEquals(a, null))
+            if (a is null)
             {
-                if (object.ReferenceEquals(b, null))
+                if (b is null)
                     return true;
                 else
                     return false;
             }
             else
             {
-                if (object.ReferenceEquals(b, null))
+                if (b is null)
                     return false;
                 else
                     return a.Equals(b);
@@ -218,7 +218,7 @@ namespace TrueCraft.Core.World
         /// <returns></returns>
         public bool Equals(GlobalVoxelCoordinates? other)
         {
-            if (object.ReferenceEquals(other, null))
+            if (other is null)
                 return false;
             else
                 return this.X == other.X && this.Y == other.Y && this.Z == other.Z;
@@ -229,7 +229,7 @@ namespace TrueCraft.Core.World
         /// </summary>
         /// <param name="obj">The other object.</param>
         /// <returns></returns>
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return Equals(obj as GlobalVoxelCoordinates);
         }

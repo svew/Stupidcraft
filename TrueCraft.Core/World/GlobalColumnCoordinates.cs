@@ -40,31 +40,31 @@ namespace TrueCraft.Core.World
         /// </summary>
         /// <param name="other">The other coordinates.</param>
         /// <returns></returns>
-        public bool Equals(GlobalColumnCoordinates other)
+        public bool Equals(GlobalColumnCoordinates? other)
         {
-            if (object.ReferenceEquals(other, null))
+            if (other is null)
                 return false;
             else
                 return this.X == other.X && this.Z == other.Z;
         }
 
-        public static bool operator !=(GlobalColumnCoordinates a, GlobalColumnCoordinates b)
+        public static bool operator !=(GlobalColumnCoordinates? a, GlobalColumnCoordinates? b)
         {
             return !(a == b);
         }
 
-        public static bool operator ==(GlobalColumnCoordinates a, GlobalColumnCoordinates b)
+        public static bool operator ==(GlobalColumnCoordinates? a, GlobalColumnCoordinates? b)
         {
-            if (object.ReferenceEquals(a, null))
+            if (a is null)
             {
-                if (object.ReferenceEquals(b, null))
+                if (b is null)
                     return true;
                 else
                     return false;
             }
             else
             {
-                if (object.ReferenceEquals(b, null))
+                if (b is null)
                     return false;
                 else
                     return a.Equals(b);
@@ -78,7 +78,7 @@ namespace TrueCraft.Core.World
         /// </summary>
         /// <param name="obj">The other object.</param>
         /// <returns></returns>
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return Equals(obj as GlobalColumnCoordinates);
         }

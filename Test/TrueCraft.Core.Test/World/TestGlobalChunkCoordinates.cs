@@ -25,7 +25,7 @@ namespace TrueCraft.Core.Test.World
             GlobalColumnCoordinates c = new GlobalColumnCoordinates(a.X, a.Z);
 
             Assert.False(a.Equals(null));
-            Assert.False(a.Equals(a.ToString()));
+            Assert.False(a!.Equals(a.ToString()));
             Assert.True(a.Equals((object)b));
             Assert.False(a.Equals(c));
         }

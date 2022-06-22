@@ -24,7 +24,7 @@ namespace TrueCraft.Core.Test.World
             GlobalColumnCoordinates c = new GlobalColumnCoordinates(a.X, a.Z);
 
             Assert.False(a.Equals(null));
-            Assert.False(a.Equals(b));
+            Assert.False(a!.Equals(b));
             Assert.False(a.Equals(a.ToString()));
             Assert.True(a.Equals((object)c));
         }
@@ -39,7 +39,7 @@ namespace TrueCraft.Core.Test.World
             Assert.True(a.Equals(c));
             Assert.True(c.Equals(a));
             Assert.False(a.Equals(b));
-            Assert.False(a.Equals((GlobalColumnCoordinates)null));
+            Assert.False(a.Equals((GlobalColumnCoordinates?)null));
         }
 
         [Test]

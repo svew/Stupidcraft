@@ -10,8 +10,7 @@ namespace TrueCraft.Test.World
     {
         private Random _random;
 
-        [OneTimeSetUp]
-        public void SetUp()
+        public TestRegionCoordinates()
         {
             _random = new Random(1234);
         }
@@ -33,7 +32,7 @@ namespace TrueCraft.Test.World
             RegionCoordinates c = new RegionCoordinates(a.X, a.Z);
 
             Assert.False(a.Equals(null));
-            Assert.False(a.Equals(a.ToString()));
+            Assert.False(a!.Equals(a.ToString()));
             Assert.False(a.Equals(b));
             Assert.True(a.Equals(c));
         }

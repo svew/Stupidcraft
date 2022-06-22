@@ -41,31 +41,31 @@ namespace TrueCraft.World
         /// </summary>
         /// <param name="other">The other coordinates.</param>
         /// <returns></returns>
-        public bool Equals(RegionCoordinates other)
+        public bool Equals(RegionCoordinates? other)
         {
-            if (object.ReferenceEquals(other, null))
+            if (other is null)
                 return false;
             else
                 return this.X == other.X && this.Z == other.Z;
         }
 
-        public static bool operator !=(RegionCoordinates a, RegionCoordinates b)
+        public static bool operator !=(RegionCoordinates? a, RegionCoordinates? b)
         {
             return !(a == b);
         }
 
-        public static bool operator ==(RegionCoordinates a, RegionCoordinates b)
+        public static bool operator ==(RegionCoordinates? a, RegionCoordinates? b)
         {
-            if (object.ReferenceEquals(a, null))
+            if (a is null)
             {
-                if (object.ReferenceEquals(b, null))
+                if (b is null)
                     return true;
                 else
                     return false;
             }
             else
             {
-                if (object.ReferenceEquals(b, null))
+                if (b is null)
                     return false;
                 else
                     return a.Equals(b);
@@ -79,7 +79,7 @@ namespace TrueCraft.World
         /// </summary>
         /// <param name="obj">The other object.</param>
         /// <returns></returns>
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return Equals(obj as RegionCoordinates);
         }

@@ -30,25 +30,25 @@ namespace TrueCraft.Core.World
         }
 
         #region IEquatable<> & related
-        public bool Equals(LocalColumnCoordinates other)
+        public bool Equals(LocalColumnCoordinates? other)
         {
-            if (object.ReferenceEquals(other, null))
+            if (other is null)
                 return false;
             return this.X == other.X && this.Z == other.Z;
         }
 
-        public static bool operator==(LocalColumnCoordinates l, LocalColumnCoordinates r)
+        public static bool operator==(LocalColumnCoordinates? l, LocalColumnCoordinates? r)
         {
-            if (!object.ReferenceEquals(l, null))
+            if (l is not null)
             {
-                if (!object.ReferenceEquals(r, null))
+                if (r is not null)
                     return l.Equals(r);
                 else
                     return false;
             }
             else
             {
-                if (!object.ReferenceEquals(r, null))
+                if (r is not null)
                     return false;
                 else
                     return true;
@@ -62,7 +62,7 @@ namespace TrueCraft.Core.World
         #endregion
 
         #region object overrides
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return Equals(obj as LocalColumnCoordinates);
         }

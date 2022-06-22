@@ -41,7 +41,7 @@ namespace TrueCraft.Core.World
         #endregion
 
         #region IEquatable<PanDimensionVoxelCoordinates> & related
-        public bool Equals(PanDimensionalVoxelCoordinates other)
+        public bool Equals(PanDimensionalVoxelCoordinates? other)
         {
             if (other is null)
                 return false;
@@ -50,7 +50,7 @@ namespace TrueCraft.Core.World
                 _x == other.X && _y == other.Y && _z == other.Z;
         }
 
-        public static bool operator==(PanDimensionalVoxelCoordinates l, PanDimensionalVoxelCoordinates r)
+        public static bool operator==(PanDimensionalVoxelCoordinates? l, PanDimensionalVoxelCoordinates? r)
         {
             if (l is null)
             {
@@ -65,7 +65,7 @@ namespace TrueCraft.Core.World
             }
         }
 
-        public static bool operator!=(PanDimensionalVoxelCoordinates l, PanDimensionalVoxelCoordinates r)
+        public static bool operator!=(PanDimensionalVoxelCoordinates? l, PanDimensionalVoxelCoordinates? r)
         {
             return !(l == r);
         }

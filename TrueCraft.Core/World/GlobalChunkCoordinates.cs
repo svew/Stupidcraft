@@ -41,31 +41,31 @@ namespace TrueCraft.Core.World
         /// </summary>
         /// <param name="other">The other coordinates.</param>
         /// <returns></returns>
-        public bool Equals(GlobalChunkCoordinates other)
+        public bool Equals(GlobalChunkCoordinates? other)
         {
-            if (object.ReferenceEquals(other, null))
+            if (other is null)
                 return false;
             else
                 return this.X == other.X && this.Z == other.Z;
         }
 
-        public static bool operator !=(GlobalChunkCoordinates a, GlobalChunkCoordinates b)
+        public static bool operator !=(GlobalChunkCoordinates? a, GlobalChunkCoordinates? b)
         {
             return !(a == b);
         }
 
-        public static bool operator ==(GlobalChunkCoordinates a, GlobalChunkCoordinates b)
+        public static bool operator ==(GlobalChunkCoordinates? a, GlobalChunkCoordinates? b)
         {
-            if (object.ReferenceEquals(a, null))
+            if (a is null)
             {
-                if (object.ReferenceEquals(b, null))
+                if (b is null)
                     return true;
                 else
                     return false;
             }
             else
             {
-                if (object.ReferenceEquals(b, null))
+                if (b is null)
                     return false;
                 else
                     return a.Equals(b);

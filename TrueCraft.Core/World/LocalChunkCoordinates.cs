@@ -48,19 +48,19 @@ namespace TrueCraft.Core.World
         /// </summary>
         /// <param name="other">The other coordinates.</param>
         /// <returns></returns>
-        public bool Equals(LocalChunkCoordinates other)
+        public bool Equals(LocalChunkCoordinates? other)
         {
-            if (object.ReferenceEquals(other, null))
+            if (other is null)
                 return false;
             return this.X == other.X && this.Z == other.Z;
         }
 
-        public static bool operator !=(LocalChunkCoordinates a, LocalChunkCoordinates b)
+        public static bool operator !=(LocalChunkCoordinates? a, LocalChunkCoordinates? b)
         {
             return !(a == b);
         }
 
-        public static bool operator ==(LocalChunkCoordinates a, LocalChunkCoordinates b)
+        public static bool operator ==(LocalChunkCoordinates? a, LocalChunkCoordinates? b)
         {
             if (object.ReferenceEquals(a, null))
             {

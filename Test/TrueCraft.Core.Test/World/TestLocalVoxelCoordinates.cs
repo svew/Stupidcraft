@@ -47,7 +47,7 @@ namespace TrueCraft.Core.Test.World
             Assert.True(e.Equals(a));
 
             Assert.False(a.Equals(null));
-            Assert.False(a.Equals(f));
+            Assert.False(a!.Equals(f));
         }
 
         [Test]
@@ -68,7 +68,7 @@ namespace TrueCraft.Core.Test.World
             Assert.True(a.Equals(e));
             Assert.True(e.Equals(a));
 
-            Assert.False(a.Equals((LocalVoxelCoordinates)null));
+            Assert.False(a.Equals((LocalVoxelCoordinates?)null));
         }
 
         [Test]

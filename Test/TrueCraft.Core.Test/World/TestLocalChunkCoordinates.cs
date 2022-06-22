@@ -9,8 +9,7 @@ namespace TrueCraft.Core.Test.World
     {
         private Random _random;
 
-        [OneTimeSetUp]
-        public void SetUp()
+        public TestLocalChunkCoordinates()
         {
             _random = new Random(1234);
         }
@@ -50,7 +49,7 @@ namespace TrueCraft.Core.Test.World
             Assert.False(b.Equals((object)a));
 
             Assert.False(a.Equals(null));
-            Assert.False(a.Equals("some string"));
+            Assert.False(a!.Equals("some string"));
 
             Assert.False(a.Equals(d));
         }
@@ -64,7 +63,7 @@ namespace TrueCraft.Core.Test.World
             Assert.False(a.Equals(b));
             Assert.False(b.Equals(a));
 
-            Assert.False(a.Equals((LocalChunkCoordinates)null));
+            Assert.False(a.Equals((LocalChunkCoordinates?)null));
         }
 
         [Test]
