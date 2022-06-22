@@ -38,9 +38,9 @@ namespace TrueCraft.Client.Rendering
         /// <param name="strikethrough"></param>
         /// <param name="underline"></param>
         /// <param name="italic"></param>
-        public FontRenderer(Font regular, Font bold, Font strikethrough, Font underline, Font italic)
+        public FontRenderer(Font regular, Font? bold, Font? strikethrough, Font? underline, Font? italic)
         {
-            if (regular == null)
+            if (regular is null)
                 throw new ArgumentNullException("regular");
 
             Fonts = new Font[]

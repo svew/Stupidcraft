@@ -24,38 +24,38 @@ namespace TrueCraft.Client
     {
         public MultiplayerClient Client { get; private set; }
         public GraphicsDeviceManager Graphics { get; private set; }
-        public TextureMapper TextureMapper { get; private set; }
-        public Camera Camera { get; private set; }
+        public TextureMapper? TextureMapper { get; private set; }
+        public Camera? Camera { get; private set; }
         public ConcurrentBag<Action> PendingMainThreadActions { get; set; }
         public double Bobbing { get; set; }
-        public ChunkModule ChunkModule { get; set; }
-        public ChatModule ChatModule { get; set; }
+        public ChunkModule? ChunkModule { get; private set; }
+        public ChatModule? _chatModule;
         public float ScaleFactor { get; set; }
         public GlobalVoxelCoordinates? HighlightedBlock { get; set; }
         public BlockFace HighlightedBlockFace { get; set; }
         public DateTime StartDigging { get; set; }
         public DateTime EndDigging { get; set; }
         public GlobalVoxelCoordinates? TargetBlock { get; set; }
-        public AudioManager Audio { get; set; }
-        public Texture2D White1x1 { get; set; }
-        public PlayerControlModule ControlModule { get; set; }
-        public SkyModule SkyModule { get; set; }
+        public AudioManager? Audio { get; private set; }
+        public Texture2D? White1x1 { get; private set; }
+        public PlayerControlModule? ControlModule { get; private set; }
+        public SkyModule? SkyModule { get; private set; }
 
-        private List<IGameplayModule> InputModules { get; set; }
-        private List<IGameplayModule> GraphicalModules { get; set; }
-        private SpriteBatch SpriteBatch { get; set; }
-        private KeyboardHandler KeyboardComponent { get; set; }
-        private MouseHandler MouseComponent { get; set; }
-        private GamePadHandler GamePadComponent { get; set; }
-        private RenderTarget2D RenderTarget { get; set; }
-        private int ThreadID { get; set; }
+        private readonly List<IGameplayModule> _inputModules = new();
+        private readonly List<IGameplayModule> _graphicalModules = new();
+        private SpriteBatch? _spriteBatch;
+        private KeyboardHandler _keyboardComponent;
+        private MouseHandler _mMouseComponent;
+        private GamePadHandler _gamePadComponent;
+        private RenderTarget2D? _renderTarget;
+        private int _threadID;
 
-        private FontRenderer Pixel { get; set; }
-        private IPEndPoint EndPoint { get; set; }
-        private DateTime LastPhysicsUpdate { get; set; }
-        private DateTime NextPhysicsUpdate { get; set; }
-        private GameTime GameTime { get; set; }
-        private DebugInfoModule DebugInfoModule { get; set; }
+        private FontRenderer? _pixel;
+        private IPEndPoint _endPoint;
+        private DateTime _lastPhysicsUpdate;
+        private DateTime _nextPhysicsUpdate;
+        private GameTime? _gameTime;
+        private DebugInfoModule? _debugInfoModule;
 
         public static readonly int Reach = 3;
 
@@ -67,6 +67,7 @@ namespace TrueCraft.Client
             }
         }
 
+        [Obsolete("Inject instead")]
         public IItemRepository ItemRepository { get; set; }
 
         public TrueCraftGame(MultiplayerClient client, IPEndPoint endPoint)
@@ -82,23 +83,23 @@ namespace TrueCraft.Client
             Graphics.ApplyChanges();
             Window.ClientSizeChanged += Window_ClientSizeChanged;
             Client = client;
-            EndPoint = endPoint;
-            LastPhysicsUpdate = DateTime.MinValue;
-            NextPhysicsUpdate = DateTime.MinValue;
+            _endPoint = endPoint;
+            _lastPhysicsUpdate = DateTime.MinValue;
+            _nextPhysicsUpdate = DateTime.MinValue;
             PendingMainThreadActions = new ConcurrentBag<Action>();
             Bobbing = 0;
 
-            KeyboardComponent = new KeyboardHandler(this);
-            Components.Add(KeyboardComponent);
+            _keyboardComponent = new KeyboardHandler(this);
+            Components.Add(_keyboardComponent);
 
-            MouseComponent = new MouseHandler(this);
-            Components.Add(MouseComponent);
+            _mMouseComponent = new MouseHandler(this);
+            Components.Add(_mMouseComponent);
 
-            GamePadComponent = new GamePadHandler(this);
-            Components.Add(GamePadComponent);
+            _gamePadComponent = new GamePadHandler(this);
+            Components.Add(_gamePadComponent);
         }
 
-        void Window_ClientSizeChanged(object sender, EventArgs e)
+        void Window_ClientSizeChanged(object? sender, EventArgs e)
         {
             if (GraphicsDevice.Viewport.Width < 640 || GraphicsDevice.Viewport.Height < 480)
                 ScaleFactor = 0.5f;
@@ -113,9 +114,6 @@ namespace TrueCraft.Client
 
         protected override void Initialize()
         {
-            InputModules = new List<IGameplayModule>();
-            GraphicalModules = new List<IGameplayModule>();
-
             base.Initialize(); // (calls LoadContent)
 
             Camera = new Camera(GraphicsDevice.Viewport.AspectRatio, 70.0f, 0.1f, 1000.0f);
@@ -129,27 +127,27 @@ namespace TrueCraft.Client
 
             SkyModule = new SkyModule(this);
             ChunkModule = new ChunkModule(this);
-            DebugInfoModule = new DebugInfoModule(this, Pixel);
-            ChatModule = new ChatModule(this, Pixel);
-            var hud = new HUDModule(this, Pixel);
-            var windowModule = new WindowModule(this, Pixel);
+            _debugInfoModule = new DebugInfoModule(this, _pixel!);  // LoadContent previously called.
+            _chatModule = new ChatModule(this, _pixel!);
+            var hud = new HUDModule(this, _pixel!);
+            var windowModule = new WindowModule(this, _pixel!);
 
-            GraphicalModules.Add(SkyModule);
-            GraphicalModules.Add(ChunkModule);
-            GraphicalModules.Add(new HighlightModule(this));
-            GraphicalModules.Add(hud);
-            GraphicalModules.Add(ChatModule);
-            GraphicalModules.Add(windowModule);
-            GraphicalModules.Add(DebugInfoModule);
+            _graphicalModules.Add(SkyModule);
+            _graphicalModules.Add(ChunkModule);
+            _graphicalModules.Add(new HighlightModule(this));
+            _graphicalModules.Add(hud);
+            _graphicalModules.Add(_chatModule);
+            _graphicalModules.Add(windowModule);
+            _graphicalModules.Add(_debugInfoModule);
 
-            InputModules.Add(windowModule);
-            InputModules.Add(DebugInfoModule);
-            InputModules.Add(ChatModule);
-            InputModules.Add(new HUDModule(this, Pixel));
-            InputModules.Add(ControlModule = new PlayerControlModule(this));
+            _inputModules.Add(windowModule);
+            _inputModules.Add(_debugInfoModule);
+            _inputModules.Add(_chatModule);
+            _inputModules.Add(new HUDModule(this, _pixel));
+            _inputModules.Add(ControlModule = new PlayerControlModule(this));
 
             Client.PropertyChanged += HandleClientPropertyChanged;
-            Client.Connect(EndPoint);
+            Client.Connect(_endPoint);
 
             ItemRepository = TrueCraft.Core.Logic.ItemRepository.Get();
 
@@ -159,23 +157,23 @@ namespace TrueCraft.Client
             var centerY = GraphicsDevice.Viewport.Height / 2;
             Mouse.SetPosition(centerX, centerY);
 
-            MouseComponent.Scroll += OnMouseComponentScroll;
-            MouseComponent.Move += OnMouseComponentMove;
-            MouseComponent.ButtonDown += OnMouseComponentButtonDown;
-            MouseComponent.ButtonUp += OnMouseComponentButtonUp;
-            KeyboardComponent.KeyDown += OnKeyboardKeyDown;
-            KeyboardComponent.KeyUp += OnKeyboardKeyUp;
-            GamePadComponent.ButtonDown += OnGamePadButtonDown;
-            GamePadComponent.ButtonUp += OnGamePadButtonUp;
+            _mMouseComponent.Scroll += OnMouseComponentScroll;
+            _mMouseComponent.Move += OnMouseComponentMove;
+            _mMouseComponent.ButtonDown += OnMouseComponentButtonDown;
+            _mMouseComponent.ButtonUp += OnMouseComponentButtonUp;
+            _keyboardComponent.KeyDown += OnKeyboardKeyDown;
+            _keyboardComponent.KeyUp += OnKeyboardKeyUp;
+            _gamePadComponent.ButtonDown += OnGamePadButtonDown;
+            _gamePadComponent.ButtonUp += OnGamePadButtonUp;
 
             CreateRenderTarget();
-            SpriteBatch = new SpriteBatch(GraphicsDevice);
-            ThreadID = Thread.CurrentThread.ManagedThreadId;
+            _spriteBatch = new SpriteBatch(GraphicsDevice);
+            _threadID = Thread.CurrentThread.ManagedThreadId;
         }
 
         public void Invoke(Action action)
         {
-            if (ThreadID == Thread.CurrentThread.ManagedThreadId)
+            if (_threadID == Thread.CurrentThread.ManagedThreadId)
                 action();
             else
                 PendingMainThreadActions.Add(action);
@@ -183,11 +181,11 @@ namespace TrueCraft.Client
 
         private void CreateRenderTarget()
         {
-            RenderTarget = new RenderTarget2D(GraphicsDevice, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height,
+            _renderTarget = new RenderTarget2D(GraphicsDevice, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height,
                 false, GraphicsDevice.PresentationParameters.BackBufferFormat, DepthFormat.Depth24);
         }
 
-        void HandleClientPropertyChanged(object sender, PropertyChangedEventArgs e)
+        void HandleClientPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             switch (e.PropertyName)
             {
@@ -208,7 +206,7 @@ namespace TrueCraft.Client
                 TextureMapper.AddTexturePack(TexturePack.FromArchive(Path.Combine(Paths.TexturePacks,
                     UserSettings.Local.SelectedTexturePack)));
 
-            Pixel = new FontRenderer(
+            _pixel = new FontRenderer(
                 new Font(GraphicsDevice, Content.RootDirectory, "Fonts/Pixel"),
                 new Font(GraphicsDevice, Content.RootDirectory, "Fonts/Pixel", FontStyle.Bold), null, null,
                 new Font(GraphicsDevice, Content.RootDirectory, "Fonts/Pixel", FontStyle.Italic));
@@ -216,155 +214,155 @@ namespace TrueCraft.Client
             base.LoadContent();
         }
 
-        private void OnKeyboardKeyDown(object sender, KeyboardKeyEventArgs e)
+        private void OnKeyboardKeyDown(object? sender, KeyboardKeyEventArgs e)
         {
-            foreach (var module in InputModules)
+            if (_gameTime is null)
+                return;
+
+            foreach (IGameplayModule module in _inputModules)
             {
-                var input = module as IInputModule;
-                if (input != null)
-                {
-                    if (input.KeyDown(GameTime, e))
-                        break;
-                }
+                IInputModule? input = module as IInputModule;
+                if (input?.KeyDown(_gameTime, e) ?? false)
+                    break;
             }
         }
 
-        private void OnKeyboardKeyUp(object sender, KeyboardKeyEventArgs e)
+        private void OnKeyboardKeyUp(object? sender, KeyboardKeyEventArgs e)
         {
-            foreach (var module in InputModules)
+            if (_gameTime is null)
+                return;
+
+            foreach (IGameplayModule module in _inputModules)
             {
-                var input = module as IInputModule;
-                if (input != null)
-                {
-                    if (input.KeyUp(GameTime, e))
+                IInputModule? input = module as IInputModule;
+                if (input?.KeyUp(_gameTime, e) ?? false)
                         break;
-                }
             }
         }
 
-        private void OnGamePadButtonUp(object sender, GamePadButtonEventArgs e)
+        private void OnGamePadButtonUp(object? sender, GamePadButtonEventArgs e)
         {
-            foreach (var module in InputModules)
+            if (_gameTime is null)
+                return;
+
+            foreach (var module in _inputModules)
             {
-                var input = module as IInputModule;
-                if (input != null)
-                {
-                    if (input.GamePadButtonUp(GameTime, e))
+                IInputModule? input = module as IInputModule;
+                if (input?.GamePadButtonUp(_gameTime, e) ?? false)
                         break;
-                }
             }
         }
 
-        private void OnGamePadButtonDown(object sender, GamePadButtonEventArgs e)
+        private void OnGamePadButtonDown(object? sender, GamePadButtonEventArgs e)
         {
-            foreach (var module in InputModules)
+            if (_gameTime is null)
+                return;
+
+            foreach (var module in _inputModules)
             {
-                var input = module as IInputModule;
-                if (input != null)
-                {
-                    if (input.GamePadButtonDown(GameTime, e))
+                IInputModule? input = module as IInputModule;
+                if (input?.GamePadButtonDown(_gameTime, e) ?? false)
                         break;
-                }
             }
         }
 
-        private void OnMouseComponentScroll(object sender, MouseScrollEventArgs e)
+        private void OnMouseComponentScroll(object? sender, MouseScrollEventArgs e)
         {
-            foreach (var module in InputModules)
+            if (_gameTime is null)
+                return;
+
+            foreach (var module in _inputModules)
             {
-                var input = module as IInputModule;
-                if (input != null)
-                {
-                    if (input.MouseScroll(GameTime, e))
+                IInputModule? input = module as IInputModule;
+                if (input?.MouseScroll(_gameTime, e) ?? false)
                         break;
-                }
             }
         }
 
-        private void OnMouseComponentButtonDown(object sender, MouseButtonEventArgs e)
+        private void OnMouseComponentButtonDown(object? sender, MouseButtonEventArgs e)
         {
-            foreach (var module in InputModules)
+            if (_gameTime is null)
+                return;
+
+            foreach (var module in _inputModules)
             {
-                var input = module as IInputModule;
-                if (input != null)
-                {
-                    if (input.MouseButtonDown(GameTime, e))
+                IInputModule? input = module as IInputModule;
+                if (input?.MouseButtonDown(_gameTime, e) ?? false)
                         break;
-                }
             }
         }
 
-        private void OnMouseComponentButtonUp(object sender, MouseButtonEventArgs e)
+        private void OnMouseComponentButtonUp(object? sender, MouseButtonEventArgs e)
         {
-            foreach (var module in InputModules)
+            if (_gameTime is null)
+                return;
+
+            foreach (var module in _inputModules)
             {
-                var input = module as IInputModule;
-                if (input != null)
-                {
-                    if (input.MouseButtonUp(GameTime, e))
+                IInputModule? input = module as IInputModule;
+                if (input?.MouseButtonUp(_gameTime, e) ?? false)
                         break;
-                }
             }
         }
 
-        private void OnMouseComponentMove(object sender, MouseMoveEventArgs e)
+        private void OnMouseComponentMove(object? sender, MouseMoveEventArgs e)
         {
-            foreach (var module in InputModules)
+            if (_gameTime is null)
+                return;
+
+            foreach (var module in _inputModules)
             {
-                var input = module as IInputModule;
-                if (input != null)
-                {
-                    if (input.MouseMove(GameTime, e))
+                IInputModule? input = module as IInputModule;
+                if (input?.MouseMove(_gameTime, e) ?? false)
                         break;
-                }
             }
         }
 
         public void TakeScreenshot()
         {
-            var path = Path.Combine(Paths.Screenshots, DateTime.Now.ToString("yyyy-MM-dd_H.mm.ss") + ".png");
-            if (!Directory.Exists(Path.GetDirectoryName(path)))
-                Directory.CreateDirectory(Path.GetDirectoryName(path));
+            string path = Path.Combine(Paths.Screenshots, DateTime.Now.ToString("yyyy-MM-dd_H.mm.ss") + ".png");
+            if (!Directory.Exists(Paths.Screenshots))
+                Directory.CreateDirectory(Paths.Screenshots);
             using (var stream = File.OpenWrite(path))
-                RenderTarget.SaveAsPng(stream, RenderTarget.Width, RenderTarget.Height);
-            ChatModule.AddMessage("Screenshot saved to " + Path.GetFileName(path));
+                _renderTarget?.SaveAsPng(stream, _renderTarget.Width, _renderTarget.Height);
+            _chatModule?.AddMessage("Screenshot saved to " + Path.GetFileName(path));
         }
 
         public void FlushMainThreadActions()
         {
-            Action action;
+            Action? action;
             while (PendingMainThreadActions.TryTake(out action))
                 action();
         }
 
         protected override void Update(GameTime gameTime)
         {
-            GameTime = gameTime;
+            _gameTime = gameTime;
 
-            Action action;
+            Action? action;
             if (PendingMainThreadActions.TryTake(out action))
                 action();
 
-            IChunk chunk;
+            IChunk? chunk;
             LocalVoxelCoordinates adjusted = Client.Dimension.FindBlockPosition(
                 new GlobalVoxelCoordinates((int)Client.Position.X, 0, (int)Client.Position.Z), out chunk);
-            if (chunk != null && Client.LoggedIn)
+            if (chunk is not null && Client.LoggedIn)
             {
                 if (chunk.GetHeight((byte)adjusted.X, (byte)adjusted.Z) != 0)
                     Client.Physics.Update(gameTime.ElapsedGameTime);
             }
-            if (NextPhysicsUpdate < DateTime.UtcNow && Client.LoggedIn)
+            if (_nextPhysicsUpdate < DateTime.UtcNow && Client.LoggedIn)
             {
                 // NOTE: This is to make the vanilla server send us chunk packets
                 // We should eventually make some means of detecing that we're on a vanilla server to enable this
                 // It's a waste of bandwidth to do it on a TrueCraft server
                 Client.QueuePacket(new PlayerGroundedPacket { OnGround = true });
-                NextPhysicsUpdate = DateTime.UtcNow.AddMilliseconds(50);
+                _nextPhysicsUpdate = DateTime.UtcNow.AddMilliseconds(50);
             }
 
-            foreach (var module in InputModules)
+            foreach (var module in _inputModules)
                 module.Update(gameTime);
-            foreach (var module in GraphicalModules)
+            foreach (var module in _graphicalModules)
                 module.Update(gameTime);
 
             UpdateCamera();
@@ -392,14 +390,14 @@ namespace TrueCraft.Client
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.SetRenderTarget(RenderTarget);
+            GraphicsDevice.SetRenderTarget(_renderTarget);
             GraphicsDevice.RasterizerState = RasterizerState.CullCounterClockwise;
 
             GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
             GraphicsDevice.SamplerStates[1] = SamplerState.PointClamp;
 
             Mesh.ResetStats();
-            foreach (var module in GraphicalModules)
+            foreach (var module in _graphicalModules)
             {
                 var drawable = module as IGraphicalModule;
                 if (drawable != null)
@@ -408,9 +406,9 @@ namespace TrueCraft.Client
 
             GraphicsDevice.SetRenderTarget(null);
 
-            SpriteBatch.Begin();
-            SpriteBatch.Draw(RenderTarget, Vector2.Zero, Color.White);
-            SpriteBatch.End();
+            _spriteBatch?.Begin();
+            _spriteBatch?.Draw(_renderTarget, Vector2.Zero, Color.White);
+            _spriteBatch?.End();
 
             base.Draw(gameTime);
         }
@@ -419,8 +417,8 @@ namespace TrueCraft.Client
         {
             if (disposing)
             {
-                KeyboardComponent.Dispose();
-                MouseComponent.Dispose();
+                _keyboardComponent.Dispose();
+                _mMouseComponent.Dispose();
             }
 
             base.Dispose(disposing);
