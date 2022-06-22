@@ -299,10 +299,10 @@ namespace TrueCraft.Client.Modules
             var target = Game.Client.Dimension.GetBlockID(coords);
             if (target == AirBlock.BlockID)
                 target = Game.Client.Dimension.GetBlockID(coords + Vector3i.Down);
-            var provider = Game.BlockRepository.GetBlockProvider(target);
-            if (provider.SoundEffect == SoundEffectClass.None)
+            IBlockProvider? provider = Game.BlockRepository.GetBlockProvider(target);
+            if (provider is null || provider.SoundEffect == SoundEffectClass.None)
                 return;
-            var effect = string.Format("footstep.{0}", Enum.GetName(typeof(SoundEffectClass), provider.SoundEffect).ToLower());
+            var effect = string.Format("footstep.{0}", Enum.GetName(typeof(SoundEffectClass), provider.SoundEffect)?.ToLower());
             Game.Audio.PlayPack(effect, 0.5f);
         }
 
@@ -318,7 +318,7 @@ namespace TrueCraft.Client.Modules
 
             if (gamePad.IsConnected && gamePad.Triggers.Right > 0.5f)
                 digging = true;
-            if (gamePad.IsConnected && gamePad.Triggers.Left > 0.5f && GamePadState.Triggers.Left < 0.5f)
+            if (gamePad.IsConnected && Game.HighlightedBlock is not null && gamePad.Triggers.Left > 0.5f && GamePadState.Triggers.Left < 0.5f)
             {
                 ItemStack item = Game.Client.Hotbar[Game.Client.HotbarSelection].Item;
                 Game.Client.QueuePacket(new PlayerBlockPlacementPacket(
@@ -345,7 +345,7 @@ namespace TrueCraft.Client.Modules
                 }
                 else // Currently digging a block
                 {
-                    var target = Game.HighlightedBlock;
+                    GlobalVoxelCoordinates? target = Game.HighlightedBlock;
                     if (object.ReferenceEquals(target, null)) // Cancel
                     {
                         Game.StartDigging = DateTime.MinValue;
@@ -391,10 +391,11 @@ namespace TrueCraft.Client.Modules
                 }
                 if (DateTime.UtcNow > Game.EndDigging && Game.HighlightedBlock == Game.TargetBlock)
                 {
-                    Game.Client.QueuePacket(new PlayerDiggingPacket(
-                        PlayerDiggingPacket.Action.StopDigging,
-                        Game.TargetBlock.X, (sbyte)Game.TargetBlock.Y, Game.TargetBlock.Z,
-                        Game.HighlightedBlockFace));
+                    if (Game.TargetBlock is not null)
+                        Game.Client.QueuePacket(new PlayerDiggingPacket(
+                            PlayerDiggingPacket.Action.StopDigging,
+                            Game.TargetBlock.X, (sbyte)Game.TargetBlock.Y, Game.TargetBlock.Z,
+                            Game.HighlightedBlockFace));
                     Game.EndDigging = DateTime.MaxValue;
                 }
             }

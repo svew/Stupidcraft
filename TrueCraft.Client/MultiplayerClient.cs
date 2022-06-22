@@ -47,7 +47,7 @@ namespace TrueCraft.Client
 
         public int Health { get; set; }
 
-        public IWindow<ISlot> CurrentWindow { get; set; }
+        public IWindow<ISlot>? CurrentWindow { get; set; }
 
         public bool Connected
         {

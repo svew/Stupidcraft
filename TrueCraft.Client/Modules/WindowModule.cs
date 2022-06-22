@@ -91,7 +91,7 @@ namespace TrueCraft.Client.Modules
             var mouse = Mouse.GetState().Position - new Point((int)(8 * Game.ScaleFactor * 2));
             var rect = new Rectangle(mouse, scale);
 
-            IItemProvider provider = null;
+            IItemProvider? provider = null;
             if (!HeldItem.Empty)
                 provider = Game.ItemRepository.GetItemProvider(HeldItem.ID);
 
@@ -145,18 +145,13 @@ namespace TrueCraft.Client.Modules
                 DrawFurnaceProgress();
 
             // Draw blocks held by Mouse Cursor
-            if (provider != null && provider.GetIconTexture((byte)HeldItem.Metadata) == null && provider is IBlockProvider)
-                IconRenderer.RenderBlockIcon(Game, SpriteBatch, provider as IBlockProvider, (byte)HeldItem.Metadata, rect);
+            if (provider is not null && provider.GetIconTexture((byte)HeldItem.Metadata) == null && provider is IBlockProvider)
+                IconRenderer.RenderBlockIcon(Game, SpriteBatch, (IBlockProvider)provider, (byte)HeldItem.Metadata, rect);
 
             // Draw Items held by Mouse Cursor
-            if (provider != null)
-            {
-                if (provider.GetIconTexture((byte)HeldItem.Metadata) != null)
-                {
+            if (provider is not null && provider.GetIconTexture((byte)HeldItem.Metadata) is not null)
                     IconRenderer.RenderItemIcon(SpriteBatch, Items, provider,
                         (byte)HeldItem.Metadata, rect, Color.White);
-                }
-            }
 
             switch (Game.Client.CurrentWindow.Type)
             {
@@ -243,10 +238,10 @@ namespace TrueCraft.Client.Modules
             bool rightClick = (e.Button == MouseButton.Right);
             bool shiftClick = Keyboard.GetState().IsKeyDown(Keys.LeftShift) || Keyboard.GetState().IsKeyDown(Keys.RightShift);
 
-            ActionConfirmation action;
+            ActionConfirmation? action;
             action = ((IClickHandler)Game.Client.CurrentWindow).HandleClick(SelectedSlot,
                 rightClick, shiftClick, new MyHeldItem(this));
-            if (object.ReferenceEquals(action, null))
+            if (action is null)
                 return true;
             ActionList.Add(action);
 
@@ -283,7 +278,7 @@ namespace TrueCraft.Client.Modules
         private void DrawInventoryWindow(RenderStage stage)
         {
             // TODO fix hard-coded constants
-            InventoryWindow window = (InventoryWindow)Game.Client.CurrentWindow;
+            InventoryWindow window = (InventoryWindow)Game.Client.CurrentWindow!;
             DrawWindowArea(window.CraftingGrid, window.CraftingOutputSlotIndex, 88, 26, InventoryWindowRect, stage);
             DrawWindowArea(window.Armor, window.ArmorSlotIndex, 8, 8, InventoryWindowRect, stage);
             DrawWindowArea(window.MainInventory, window.MainSlotIndex, 8, 84, InventoryWindowRect, stage);
@@ -293,7 +288,7 @@ namespace TrueCraft.Client.Modules
         private void DrawCraftingWindow(RenderStage stage)
         {
             // TODO fix hard-coded constants
-            CraftingBenchWindow window = (CraftingBenchWindow)Game.Client.CurrentWindow;
+            CraftingBenchWindow window = (CraftingBenchWindow)Game.Client.CurrentWindow!;
             DrawWindowArea(window.CraftingGrid, window.CraftingOutputSlotIndex, 29, 16, CraftingWindowRect, stage);
             DrawWindowArea(window.MainInventory, window.MainSlotIndex, 8, 84, CraftingWindowRect, stage);
             DrawWindowArea(window.Hotbar, window.HotbarSlotIndex, 8, 142, CraftingWindowRect, stage);
@@ -301,7 +296,7 @@ namespace TrueCraft.Client.Modules
 
         private void DrawChestWindow(RenderStage stage)
         {
-            ChestWindow window = (ChestWindow)Game.Client.CurrentWindow;
+            ChestWindow window = (ChestWindow)Game.Client.CurrentWindow!;
             bool bSingleChest = !window.DoubleChest;
             Rectangle rect = bSingleChest ? _chestWindowRect : _doubleChestWindowRect;
 
@@ -328,7 +323,7 @@ namespace TrueCraft.Client.Modules
         /// </summary>
         private void DrawFurnaceProgress()
         {
-            IFurnaceProgress furnaceProgress = (IFurnaceProgress)Game.Client.CurrentWindow;
+            IFurnaceProgress furnaceProgress = (IFurnaceProgress)Game.Client.CurrentWindow!;
             Viewport vp = Game.GraphicsDevice.Viewport;
             int x = (int)((vp.Width - Scale(_furnaceWindowRect.Width)) / 2);
             int y = (int)((vp.Height - Scale(_furnaceWindowRect.Height)) / 2);
@@ -364,7 +359,7 @@ namespace TrueCraft.Client.Modules
 
         private void DrawFurnaceWindow(RenderStage stage)
         {
-            FurnaceWindow window = (FurnaceWindow)Game.Client.CurrentWindow;
+            FurnaceWindow window = (FurnaceWindow)Game.Client.CurrentWindow!;
 
             // TODO: hard-coded constants
             // 56: x-location of the Ingredient Slot
@@ -454,14 +449,14 @@ namespace TrueCraft.Client.Modules
                 if (item.Empty)
                     continue;
 
-                var provider = Game.ItemRepository.GetItemProvider(item.ID);
+                IItemProvider provider = Game.ItemRepository.GetItemProvider(item.ID);
                 var texture = provider.GetIconTexture((byte)item.Metadata);
-                if (texture != null && stage == RenderStage.Sprites)
+                if (texture is not null && stage == RenderStage.Sprites)
                     IconRenderer.RenderItemIcon(SpriteBatch, Items, provider,
                         (byte)item.Metadata, rect, Color.White);
 
-                if (texture == null && stage == RenderStage.Sprites && provider is IBlockProvider)
-                    IconRenderer.RenderBlockIcon(Game, SpriteBatch, provider as IBlockProvider, (byte)item.Metadata, rect);
+                if (texture is null && stage == RenderStage.Sprites && provider is IBlockProvider)
+                    IconRenderer.RenderBlockIcon(Game, SpriteBatch, (IBlockProvider)provider, (byte)item.Metadata, rect);
 
                 if (stage == RenderStage.Text && item.Count > 1)
                 {

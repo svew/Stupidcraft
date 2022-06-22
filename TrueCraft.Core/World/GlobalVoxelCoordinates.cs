@@ -121,12 +121,12 @@ namespace TrueCraft.Core.World
 
         #region Operators
 
-        public static bool operator !=(GlobalVoxelCoordinates a, GlobalVoxelCoordinates b)
+        public static bool operator !=(GlobalVoxelCoordinates? a, GlobalVoxelCoordinates? b)
         {
             return !(a == b);
         }
 
-        public static bool operator ==(GlobalVoxelCoordinates a, GlobalVoxelCoordinates b)
+        public static bool operator ==(GlobalVoxelCoordinates? a, GlobalVoxelCoordinates? b)
         {
             if (object.ReferenceEquals(a, null))
             {
@@ -216,7 +216,7 @@ namespace TrueCraft.Core.World
         /// </summary>
         /// <param name="other">The other coordinates.</param>
         /// <returns></returns>
-        public bool Equals(GlobalVoxelCoordinates other)
+        public bool Equals(GlobalVoxelCoordinates? other)
         {
             if (object.ReferenceEquals(other, null))
                 return false;
