@@ -11,7 +11,8 @@ namespace TrueCraft.Client.Rendering
 
         private static CacheEntry<Texture2D>[] _blockIconCache = new CacheEntry<Texture2D>[0x100];
 
-        private static BasicEffect _renderEffect;
+        // This is initialized before use, just not in a way detectable by the compiler.
+        private static BasicEffect _renderEffect = null!;
 
         public static void CreateBlocks(TrueCraftGame game, IBlockRepository repository)
         {
@@ -62,34 +63,32 @@ namespace TrueCraft.Client.Rendering
 
         public static void RenderBlockIcon(TrueCraftGame game, SpriteBatch spriteBatch, IBlockProvider provider, byte metadata, Rectangle destination)
         {
-            CacheEntry<Texture2D> iconCacheEntry = _blockIconCache[provider.ID]?.Find(metadata);
+            CacheEntry<Texture2D>? iconCacheEntry = _blockIconCache[provider.ID]?.Find(metadata);
             if (iconCacheEntry?.Metadata != metadata)
                 iconCacheEntry = null;
 
-            if (iconCacheEntry == null)
+            if (iconCacheEntry is null)
             {
+                // There must be a Mesh for each Block Provider, so we don't test mesh for null.
                 Mesh mesh = _blockMeshes[provider.ID].Find(metadata).Value;
-                if (mesh != null)
-                {
-                    _renderEffect.World = Matrix.Identity
-                        * Matrix.CreateScale(0.6f)
-                        * Matrix.CreateRotationY(-MathHelper.PiOver4)
-                        * Matrix.CreateRotationX(MathHelper.ToRadians(30))
-                        * Matrix.CreateScale(new Vector3(18, 18, 1));    // TODO Hard-coded GUI slot size
+                _renderEffect.World = Matrix.Identity
+                    * Matrix.CreateScale(0.6f)
+                    * Matrix.CreateRotationY(-MathHelper.PiOver4)
+                    * Matrix.CreateRotationX(MathHelper.ToRadians(30))
+                    * Matrix.CreateScale(new Vector3(18, 18, 1));    // TODO Hard-coded GUI slot size
 
-                    RenderTarget2D newIcon = new RenderTarget2D(game.GraphicsDevice, 3 * 18, 3 * 18);   // TODO hard-coded GUI slot size
+                RenderTarget2D newIcon = new RenderTarget2D(game.GraphicsDevice, 3 * 18, 3 * 18);   // TODO hard-coded GUI slot size
 
-                    game.GraphicsDevice.SetRenderTarget(newIcon);
-                    game.GraphicsDevice.Clear(Color.Transparent);
-                    mesh.Draw(_renderEffect);
-                    game.GraphicsDevice.SetRenderTarget(null);
+                game.GraphicsDevice.SetRenderTarget(newIcon);
+                game.GraphicsDevice.Clear(Color.Transparent);
+                mesh.Draw(_renderEffect);
+                game.GraphicsDevice.SetRenderTarget(null);
 
-                    iconCacheEntry = new CacheEntry<Texture2D>(newIcon, metadata);
-                    if (_blockIconCache[provider.ID] == null)
-                        _blockIconCache[provider.ID] = iconCacheEntry;
-                    else
-                        _blockIconCache[provider.ID].Append(iconCacheEntry);
-                }
+                iconCacheEntry = new CacheEntry<Texture2D>(newIcon, metadata);
+                if (_blockIconCache[provider.ID] == null)
+                    _blockIconCache[provider.ID] = iconCacheEntry;
+                else
+                    _blockIconCache[provider.ID].Append(iconCacheEntry);
             }
 
             Texture2D icon = iconCacheEntry.Value;
@@ -101,7 +100,7 @@ namespace TrueCraft.Client.Rendering
         {
             private readonly T _icon;
             private readonly short _metadata;
-            private CacheEntry<T> _next;
+            private CacheEntry<T>? _next;
 
             public CacheEntry(T icon, short metadata)
             {
@@ -114,7 +113,7 @@ namespace TrueCraft.Client.Rendering
 
             public short Metadata { get => _metadata; }
 
-            public CacheEntry<T> Next { get => _next; }
+            public CacheEntry<T>? Next { get => _next; }
 
             public void Append(CacheEntry<T> icon)
             {

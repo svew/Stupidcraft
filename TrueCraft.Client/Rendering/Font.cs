@@ -27,6 +27,9 @@ namespace TrueCraft.Client.Rendering
         /// </summary>
         public FontStyle Style { get; private set; }
 
+        // _definitions, _textures & _glyphs are all initialized
+        // in private methods called from the constructor.
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         /// <summary>
         /// 
         /// </summary>
@@ -43,6 +46,7 @@ namespace TrueCraft.Client.Rendering
             LoadContent(graphicsDevice);
             GenerateGlyphs();
         }
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
         /// <summary>
         /// 
@@ -59,9 +63,9 @@ namespace TrueCraft.Client.Rendering
         /// </summary>
         /// <param name="ch"></param>
         /// <returns></returns>
-        public FontChar GetGlyph(char ch)
+        public FontChar? GetGlyph(char ch)
         {
-            FontChar glyph = null;
+            FontChar? glyph = null;
             _glyphs.TryGetValue(ch, out glyph);
             return glyph;
         }
@@ -75,14 +79,6 @@ namespace TrueCraft.Client.Rendering
             var definitionPath = string.Format("{0}_{1}.fnt", Name, Style);
             using (var contents = File.OpenRead(Path.Combine(_directory, definitionPath)))
                 _definition = FontLoader.Load(contents);
-
-            if (_textures != null)
-            {
-                for (int i = 0; i < _textures.Length; i++)
-                {
-                    _textures[i].Dispose();
-                }
-            }
 
             // We need to support multiple texture pages for more than plain ASCII text.
             _textures = new Texture2D[_definition.Pages.Count];
@@ -98,7 +94,7 @@ namespace TrueCraft.Client.Rendering
         /// </summary>
         private void GenerateGlyphs()
         {
-            _glyphs = new Dictionary<char, FontChar>();
+            _glyphs = new Dictionary<char, FontChar>(_definition.Chars.Count);
             foreach (var glyph in _definition.Chars)
             {
                 char c = (char)glyph.ID;

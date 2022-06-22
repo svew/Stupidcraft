@@ -44,17 +44,17 @@ namespace TrueCraft.Client.Rendering
         /// <summary>
         /// 
         /// </summary>
-        private GraphicsDevice Device { get; set; }
+        private GraphicsDevice _device;
 
         /// <summary>
         /// 
         /// </summary>
-        private IDictionary<string, Texture2D> Customs { get; set; }
+        private IDictionary<string, Texture2D> _customs;
 
         /// <summary>
         /// 
         /// </summary>
-        public bool IsDisposed { get; private set; }
+        private volatile bool _isDisposed;
 
         /// <summary>
         /// 
@@ -62,12 +62,12 @@ namespace TrueCraft.Client.Rendering
         /// <param name="graphicsDevice"></param>
         public TextureMapper(GraphicsDevice graphicsDevice)
         {
-            if (graphicsDevice == null)
+            if (graphicsDevice is null)
                 throw new ArgumentException();
 
-            Device = graphicsDevice;
-            Customs = new Dictionary<string, Texture2D>();
-            IsDisposed = false;
+            _device = graphicsDevice;
+            _customs = new Dictionary<string, Texture2D>();
+            _isDisposed = false;
         }
 
         /// <summary>
@@ -77,13 +77,13 @@ namespace TrueCraft.Client.Rendering
         /// <param name="texture"></param>
         public void AddTexture(string key, Texture2D texture)
         {
-            if (string.IsNullOrEmpty(key) || (texture == null))
+            if (string.IsNullOrEmpty(key) || (texture is null))
                 throw new ArgumentException();
 
-            if (Customs.ContainsKey(key))
-                Customs[key] = texture;
+            if (_customs.ContainsKey(key))
+                _customs[key] = texture;
             else
-                Customs.Add(key, texture);
+                _customs.Add(key, texture);
         }
 
         /// <summary>
@@ -92,7 +92,7 @@ namespace TrueCraft.Client.Rendering
         /// <param name="texturePack"></param>
         public void AddTexturePack(TexturePack texturePack)
         {
-            if (texturePack == null)
+            if (texturePack is null)
                 return;
 
             // Make sure to 'silence' errors loading custom texture packs;
@@ -113,7 +113,7 @@ namespace TrueCraft.Client.Rendering
                                 {
                                     CopyStream(stream, ms);
                                     ms.Seek(0, SeekOrigin.Begin);
-                                    AddTexture(key, Texture2D.FromStream(Device, ms));
+                                    AddTexture(key, Texture2D.FromStream(_device, ms));
                                 }
                             }
                             catch (Exception ex) { Console.WriteLine("Exception occured while loading {0} from texture pack:\n\n{1}", key, ex); }
@@ -141,9 +141,9 @@ namespace TrueCraft.Client.Rendering
         /// <returns></returns>
         public Texture2D GetTexture(string key)
         {
-            Texture2D result = null;
+            Texture2D? result = null;
             TryGetTexture(key, out result);
-            if (result == null)
+            if (result is null)
                 // TODO Load a default texture.
                 throw new InvalidOperationException($"Failed to find Texture {key}");
 
@@ -156,7 +156,7 @@ namespace TrueCraft.Client.Rendering
         /// <param name="key"></param>
         /// <param name="texture"></param>
         /// <returns></returns>
-        public bool TryGetTexture(string key, out Texture2D texture)
+        public bool TryGetTexture(string key, out Texture2D? texture)
         {
             if (string.IsNullOrEmpty(key))
                 throw new ArgumentException();
@@ -165,16 +165,16 @@ namespace TrueCraft.Client.Rendering
             texture = null;
 
             // -> Try to load from custom textures
-            Texture2D customTexture = null;
-            var inCustom = Customs.TryGetValue(key, out customTexture);
+            Texture2D? customTexture = null;
+            bool inCustom = _customs.TryGetValue(key, out customTexture);
             texture = (inCustom) ? customTexture : null;
             hasTexture = inCustom;
 
             // -> Try to load from default textures
             if (!hasTexture)
             {
-                Texture2D defaultTexture = null;
-                var inDefault = TextureMapper.Defaults.TryGetValue(key, out defaultTexture);
+                Texture2D? defaultTexture = null;
+                bool inDefault = TextureMapper.Defaults.TryGetValue(key, out defaultTexture);
                 texture = (inDefault) ? defaultTexture : null;
                 hasTexture = inDefault;
             }
@@ -188,15 +188,16 @@ namespace TrueCraft.Client.Rendering
         /// </summary>
         public void Dispose()
         {
-            if (IsDisposed)
+            if (_isDisposed)
                 return;
 
-            foreach (var pair in Customs)
+            foreach (var pair in _customs)
                 pair.Value.Dispose();
 
-            Customs = null;
-            Device = null;
-            IsDisposed = true;
+            _customs.Clear();
+            _customs = null!;
+            _device = null!;
+            _isDisposed = true;
         }
     }
 }

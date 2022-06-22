@@ -11,13 +11,14 @@ namespace TrueCraft.Client.Rendering
     /// <typeparam name="T">The object to render into a mesh.</typeparam>
     public abstract class Renderer<T> : IDisposable
     {
-        private readonly object _syncLock =
-            new object();
+        // TODO: remove this object - it appears to only protect the ConcurrentQueue
+        // instances, and certainly should not be locked in Dispose.
+        private readonly object _syncLock = new object();
 
         /// <summary>
         /// 
         /// </summary>
-        public event EventHandler<RendererEventArgs<T>> MeshCompleted;
+        public event EventHandler<RendererEventArgs<T>>? MeshCompleted;
 
         private volatile bool _isRunning;
         private Thread[] _rendererThreads;
@@ -89,7 +90,7 @@ namespace TrueCraft.Client.Rendering
         /// 
         /// </summary>
         /// <param name="obj"></param>
-        private void DoRendering(object obj)
+        private void DoRendering(object? obj)
         {
             while (_isRunning)
             {
@@ -101,18 +102,16 @@ namespace TrueCraft.Client.Rendering
                     if (_priorityItems.TryDequeue(out item) && _pending.Remove(item) && TryRender(item, out result))
                     {
                         var args = new RendererEventArgs<T>(item, result, true);
-                        if (MeshCompleted != null)
-                            MeshCompleted(this, args);
+                        MeshCompleted?.Invoke(this, args);
                     }
                     else if (_items.TryDequeue(out item) && _pending.Remove(item) && TryRender(item, out result))
                     {
                         var args = new RendererEventArgs<T>(item, result, false);
-                        if (MeshCompleted != null)
-                            MeshCompleted(this, args);
+                        MeshCompleted?.Invoke(this, args);
                     }
                 }
 
-                if (item == null) // We don't have any work, so sleep for a bit.
+                if (item is null) // We don't have any work, so sleep for a bit.
                     Thread.Sleep(100);
             }
         }
@@ -185,8 +184,9 @@ namespace TrueCraft.Client.Rendering
             Stop();
             lock (_syncLock)
             {
-                _rendererThreads = null;
-                _items = null; _priorityItems = null;
+                _rendererThreads = null!;
+                _items = null!;
+                _priorityItems = null!;
                 _isDisposed = true;
             }
         }

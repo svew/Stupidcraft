@@ -74,10 +74,10 @@ namespace TrueCraft.Client.Rendering
         }
 
         public static VertexPositionNormalColorTexture[] CreateUniformCube(Vector3 offset, Vector2[] texture,
-            VisibleFaces faces, int indiciesOffset, out int[] indicies, Color color, int[] lighting = null)
+            VisibleFaces faces, int indiciesOffset, out int[] indicies, Color color, int[]? lighting = null)
         {
             faces = VisibleFaces.All; // Temporary
-            if (lighting == null)
+            if (lighting is null)
                 lighting = DefaultLighting;
 
             int totalFaces = 0;
