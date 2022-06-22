@@ -21,12 +21,12 @@ namespace TrueCraft.Client
 
     public class MultiplayerClient : IAABBEntity, INotifyPropertyChanged, IDisposable // TODO: Make IMultiplayerClient and so on
     {
-        public event EventHandler<ChatMessageEventArgs> ChatMessage;
-        public event EventHandler<ChunkEventArgs> ChunkModified;
-        public event EventHandler<ChunkEventArgs> ChunkLoaded;
-        public event EventHandler<ChunkEventArgs> ChunkUnloaded;
-        public event EventHandler<BlockChangeEventArgs> BlockChanged;
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event EventHandler<ChatMessageEventArgs>? ChatMessage;
+        public event EventHandler<ChunkEventArgs>? ChunkModified;
+        public event EventHandler<ChunkEventArgs>? ChunkLoaded;
+        public event EventHandler<ChunkEventArgs>? ChunkUnloaded;
+        public event EventHandler<BlockChangeEventArgs>? BlockChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         private long connected;
         private int hotbarSelection;
@@ -68,7 +68,7 @@ namespace TrueCraft.Client
         }
 
         private TcpClient Client { get; set; }
-        private IMinecraftStream Stream { get; set; }
+
         private PacketReader PacketReader { get; set; }
 
         private readonly PacketHandler[] PacketHandlers;
@@ -118,7 +118,7 @@ namespace TrueCraft.Client
                 Connection_Completed(this, args);
         }
 
-        private void Connection_Completed(object sender, SocketAsyncEventArgs e)
+        private void Connection_Completed(object? sender, SocketAsyncEventArgs e)
         {
             try
             {
@@ -193,7 +193,7 @@ namespace TrueCraft.Client
                 OperationCompleted(this, args);
         }
 
-        private void OperationCompleted(object sender, SocketAsyncEventArgs e)
+        private void OperationCompleted(object? sender, SocketAsyncEventArgs e)
         {
             e.Completed -= OperationCompleted;
 
@@ -205,9 +205,7 @@ namespace TrueCraft.Client
                     _socketPool.Add(e);
                     break;
                 case SocketAsyncOperation.Send:
-                    IPacket packet = e.UserToken as IPacket;
-
-                    if (packet is DisconnectPacket)
+                    if (e.UserToken is DisconnectPacket)
                     {
                         Client.Client.Shutdown(SocketShutdown.Send);
                         Client.Close();
@@ -226,11 +224,14 @@ namespace TrueCraft.Client
                 return;
             }
 
-            var packets = PacketReader.ReadPackets(this, e.Buffer, e.Offset, e.BytesTransferred, false);
+            if (e.Buffer is not null)
+            {
+                var packets = PacketReader.ReadPackets(this, e.Buffer, e.Offset, e.BytesTransferred, false);
 
-            foreach (IPacket packet in packets)
-                if (PacketHandlers[packet.ID] != null)
-                    PacketHandlers[packet.ID](packet, this);
+                foreach (IPacket packet in packets)
+                    if (PacketHandlers[packet.ID] != null)
+                        PacketHandlers[packet.ID](packet, this);
+            }
 
             StartReceive();
         }
@@ -368,9 +369,9 @@ namespace TrueCraft.Client
             {
                 Disconnect();
                 _socketPool?.Dispose();
-                _socketPool = null;
-                Inventory = null;
-                Hotbar = null;
+                _socketPool = null!;
+                Inventory = null!;
+                Hotbar = null!;
                 CurrentWindow = null;
             }
         }
