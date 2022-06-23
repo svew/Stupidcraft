@@ -62,7 +62,7 @@ namespace TrueCraft.Core.Test.AI
                 for (int x = -8; x < 8; x++)
                 {
                     GlobalVoxelCoordinates coords = new GlobalVoxelCoordinates(x, h, z);
-                    if (path.Waypoints.Contains(coords))
+                    if (path.Contains(coords))
                         Console.Write("o");
                     else
                     {
@@ -128,9 +128,9 @@ namespace TrueCraft.Core.Test.AI
                 new GlobalVoxelCoordinates(4, h, 0),
                 new GlobalVoxelCoordinates(5, h, 0)
             };
-            Assert.AreEqual(expected.Length, path!.Waypoints.Count);
-            for (int i = 0; i < path!.Waypoints.Count; i++)
-                Assert.AreEqual(expected[i], path!.Waypoints[i]);
+            Assert.AreEqual(expected.Length, path!.Count);
+            for (int i = 0; i < path!.Count; i++)
+                Assert.AreEqual(expected[i], path![i]);
         }
 
         [Test]
@@ -153,8 +153,8 @@ namespace TrueCraft.Core.Test.AI
             Console.WriteLine(watch.ElapsedMilliseconds + "ms");
 
             // Just test the start and end, the exact results need to be eyeballed
-            Assert.AreEqual(start, path!.Waypoints[0]);
-            Assert.AreEqual(end, path!.Waypoints[path.Waypoints.Count - 1]);
+            Assert.AreEqual(start, path![0]);
+            Assert.AreEqual(end, path![path.Count - 1]);
         }
 
         [Test]
@@ -181,9 +181,9 @@ namespace TrueCraft.Core.Test.AI
             Console.WriteLine(watch.ElapsedMilliseconds + "ms");
 
             // Just test the start and end, the exact results need to be eyeballed
-            Assert.AreEqual(start, path!.Waypoints[0]);
-            Assert.AreEqual(end, path!.Waypoints[path.Waypoints.Count - 1]);
-            Assert.IsFalse(path!.Waypoints.Contains(new GlobalVoxelCoordinates(3, 4, 0)));
+            Assert.AreEqual(start, path![0]);
+            Assert.AreEqual(end, path![path.Count - 1]);
+            Assert.IsFalse(path!.Contains(new GlobalVoxelCoordinates(3, 4, 0)));
         }
 
         [Test]
@@ -255,8 +255,8 @@ namespace TrueCraft.Core.Test.AI
             Console.WriteLine(watch.ElapsedMilliseconds + "ms");
 
             // Just test the start and end, the exact results need to be eyeballed
-            Assert.AreEqual(start, path!.Waypoints[0]);
-            Assert.AreEqual(end, path!.Waypoints[path.Waypoints.Count - 1]);
+            Assert.AreEqual(start, path![0]);
+            Assert.AreEqual(end, path![path.Count - 1]);
         }
 
         [Test]
@@ -300,8 +300,8 @@ namespace TrueCraft.Core.Test.AI
             Console.WriteLine(watch.ElapsedMilliseconds + "ms");
 
             // Just test the start and end, the exact results need to be eyeballed
-            Assert.AreEqual(start, path!.Waypoints[0]);
-            Assert.AreEqual(end, path!.Waypoints[path!.Waypoints.Count - 1]);
+            Assert.AreEqual(start, path![0]);
+            Assert.AreEqual(end, path![path!.Count - 1]);
         }
     }
 }

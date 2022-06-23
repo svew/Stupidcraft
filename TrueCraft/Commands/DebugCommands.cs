@@ -215,7 +215,7 @@ namespace TrueCraft.Commands
                 else
                 {
                     client.SendMessage(string.Format(ChatColor.Blue
-                        + "Executing path with {0} waypoints", path.Waypoints.Count()));
+                        + "Executing path with {0} waypoints", path.Count));
                     entity.CurrentPath = path;
                 }
             });
@@ -275,7 +275,7 @@ namespace TrueCraft.Commands
                     "{0}/{1} HP, {2} State, moving to to {3}",
                     mob.Health, mob.MaxHealth,
                     mob.CurrentState?.GetType().Name ?? "null",
-                    mob.CurrentPath?.Waypoints.Last().ToString() ?? "null"));
+                    mob.CurrentPath?.Last().ToString() ?? "null"));
             }
         }
 

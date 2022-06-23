@@ -105,7 +105,7 @@ namespace TrueCraft.Core.Entities
             if (CurrentPath != null)
             {
                 // Advance along path
-                var target = (Vector3)CurrentPath.Waypoints[CurrentPath.Index];
+                var target = (Vector3)CurrentPath[CurrentPath.Index];
                 target += new Vector3(Size.Width / 2, 0, Size.Depth / 2); // Center it
                 target.Y = Position.Y; // TODO: Find better way of doing this
                 if (faceRoute)
@@ -118,7 +118,7 @@ namespace TrueCraft.Core.Entities
                     Position = target;
                     Velocity = Vector3.Zero;
                     CurrentPath.Index++;
-                    if (CurrentPath.Index >= CurrentPath.Waypoints.Count)
+                    if (CurrentPath.Index >= CurrentPath.Count)
                     {
                         CurrentPath = null;
                         if (PathComplete != null)

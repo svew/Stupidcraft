@@ -27,15 +27,15 @@ namespace TrueCraft.Core.AI
 
         private PathResult TracePath(GlobalVoxelCoordinates start, GlobalVoxelCoordinates goal, Dictionary<GlobalVoxelCoordinates, GlobalVoxelCoordinates> parents)
         {
-            var list = new List<GlobalVoxelCoordinates>();
-            var current = goal;
+            List<GlobalVoxelCoordinates> list = new List<GlobalVoxelCoordinates>();
+            GlobalVoxelCoordinates current = goal;
             while (current != start)
             {
                 current = parents[current];
                 list.Insert(0, current);
             }
             list.Add(goal);
-            return new PathResult { Waypoints = list };
+            return new PathResult(list);
         }
 
         // TODO: entity Bounding Box is not taken into account: What if the entity is more than one block high?
