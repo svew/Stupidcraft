@@ -31,7 +31,7 @@ namespace TrueCraft.Inventory
         public IChestWindow<IServerSlot> NewChestWindow(IItemRepository itemRepository,
             ISlotFactory<IServerSlot> slotFactory, sbyte windowID, ISlots<IServerSlot> mainInventory,
             ISlots<IServerSlot> hotBar, IDimension dimension, GlobalVoxelCoordinates location,
-            GlobalVoxelCoordinates otherHalf)
+            GlobalVoxelCoordinates? otherHalf)
         {
             return new ChestWindow(itemRepository, slotFactory, windowID,
                 mainInventory, hotBar, dimension, location, otherHalf);

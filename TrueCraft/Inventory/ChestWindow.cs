@@ -20,7 +20,7 @@ namespace TrueCraft.Inventory
             ISlotFactory<IServerSlot> slotFactory,
             sbyte windowID, ISlots<IServerSlot> mainInventory, ISlots<IServerSlot> hotBar,
             IDimension dimension,
-            GlobalVoxelCoordinates location, GlobalVoxelCoordinates otherHalf) :
+            GlobalVoxelCoordinates location, GlobalVoxelCoordinates? otherHalf) :
             base(itemRepository, slotFactory, windowID, mainInventory, hotBar,
                 otherHalf is not null)
         {

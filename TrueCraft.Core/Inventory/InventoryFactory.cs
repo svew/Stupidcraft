@@ -45,7 +45,7 @@ namespace TrueCraft.Core.Inventory
             ISlotFactory<T> slotFactory,
             sbyte windowID, ISlots<T> mainInventory, ISlots<T> hotBar,
             IDimension dimension,
-            GlobalVoxelCoordinates location, GlobalVoxelCoordinates otherHalf)
+            GlobalVoxelCoordinates location, GlobalVoxelCoordinates? otherHalf)
         {
             return _impl.NewChestWindow(itemRepository, slotFactory, windowID,
                 mainInventory, hotBar, dimension, location, otherHalf);
