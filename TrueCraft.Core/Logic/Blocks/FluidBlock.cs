@@ -66,11 +66,11 @@ namespace TrueCraft.Core.Logic.Blocks
             public byte Level;
         }
 
-        public void ScheduleNextEvent(GlobalVoxelCoordinates coords, IDimension dimension, IMultiplayerServer server)
+        private void ScheduleNextEvent(GlobalVoxelCoordinates coords, IDimension dimension, IMultiplayerServer server)
         {
-            if (dimension.GetBlockID(coords) == StillID)
+            IChunk? chunk = dimension.GetChunk(coords);
+            if (chunk is null || dimension.GetBlockID(coords) == StillID)
                 return;
-            var chunk = dimension.GetChunk(coords);
             server.Scheduler.ScheduleEvent("fluid", chunk,
                 TimeSpan.FromSeconds(SecondsBetweenUpdates), (_server) =>
                 AutomataUpdate(_server, dimension, coords));
@@ -103,14 +103,14 @@ namespace TrueCraft.Core.Logic.Blocks
 
         private void AutomataUpdate(IMultiplayerServer server, IDimension dimension, GlobalVoxelCoordinates coords)
         {
-            if (dimension.GetBlockID(coords) != FlowingID && dimension.GetBlockID(coords) != StillID)
+            IChunk? chunk = dimension.GetChunk(coords);
+            if (chunk is null || (dimension.GetBlockID(coords) != FlowingID && dimension.GetBlockID(coords) != StillID))
                 return;
             server.BlockUpdatesEnabled = false;
             var again = DoAutomata(server, dimension, coords);
             server.BlockUpdatesEnabled = true;
             if (again)
             {
-                var chunk = dimension.GetChunk(coords);
                 server.Scheduler.ScheduleEvent("fluid", chunk,
                     TimeSpan.FromSeconds(SecondsBetweenUpdates), (_server) =>
                     AutomataUpdate(_server, dimension, coords));
@@ -159,13 +159,16 @@ namespace TrueCraft.Core.Logic.Blocks
 
         private void FlowOutward(IDimension dimension, LiquidFlow target, IMultiplayerServer server)
         {
+            IChunk? chunk = dimension.GetChunk(target.TargetBlock);
+            if (chunk is null)
+                return;
+
             // For each block we can flow into, generate an item entity if appropriate
             var provider = dimension.BlockRepository.GetBlockProvider(dimension.GetBlockID(target.TargetBlock));
             provider.GenerateDropEntity(new BlockDescriptor { Coordinates = target.TargetBlock, ID = provider.ID }, dimension, server, ItemStack.EmptyStack);
             // And overwrite the block with a new fluid block.
             dimension.SetBlockID(target.TargetBlock, FlowingID);
             dimension.SetMetadata(target.TargetBlock, target.Level);
-            var chunk = dimension.GetChunk(target.TargetBlock);
             server.Scheduler.ScheduleEvent("fluid", chunk,
                 TimeSpan.FromSeconds(SecondsBetweenUpdates),
                 s => AutomataUpdate(s, dimension, target.TargetBlock));

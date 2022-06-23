@@ -22,7 +22,7 @@ namespace TrueCraft.Core.Logic
         ToolType EffectiveTools { get; }
         BoundingBox? BoundingBox { get; } // NOTE: Will this eventually need to be metadata-aware?
         BoundingBox? InteractiveBoundingBox { get; } // NOTE: Will this eventually need to be metadata-aware?
-        Tuple<int, int> GetTextureMap(byte metadata);
+        Tuple<int, int>? GetTextureMap(byte metadata);
         void GenerateDropEntity(BlockDescriptor descriptor, IDimension world, IMultiplayerServer server, ItemStack heldItem);
         void BlockLeftClicked(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user);
         bool BlockRightClicked(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user);

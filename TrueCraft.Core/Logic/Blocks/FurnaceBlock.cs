@@ -219,7 +219,7 @@ namespace TrueCraft.Core.Logic.Blocks
 
                 public abstract ItemStack Item { get; set; }
 
-                public event PropertyChangedEventHandler PropertyChanged;
+                public event PropertyChangedEventHandler? PropertyChanged;
 
                 public int CanAccept(ItemStack other)
                 {
@@ -231,7 +231,7 @@ namespace TrueCraft.Core.Logic.Blocks
 
                     if (item.CanMerge(other))
                     {
-                        IItemProvider provider = ItemRepository.Get().GetItemProvider(item.ID);
+                        IItemProvider provider = ItemRepository.Get().GetItemProvider(item.ID)!;
                         int maxStack = provider.MaximumStack;
                         return Math.Min(maxStack - item.Count, other.Count);
                     }
@@ -314,7 +314,7 @@ namespace TrueCraft.Core.Logic.Blocks
 
         protected class FurnaceEventSubject : IEventSubject
         {
-            public event EventHandler Disposed;
+            public event EventHandler? Disposed;
 
             public void Dispose()
             {
@@ -509,8 +509,8 @@ namespace TrueCraft.Core.Logic.Blocks
             ItemStack fuelStack = state.Fuel;
             ItemStack outputStack = state.Output;
 
-            ISmeltableItem input = itemRepository.GetItemProvider(inputStack.ID) as ISmeltableItem;
-            IBurnableItem fuel = itemRepository.GetItemProvider(fuelStack.ID) as IBurnableItem;
+            ISmeltableItem? input = itemRepository.GetItemProvider(inputStack.ID) as ISmeltableItem;
+            IBurnableItem? fuel = itemRepository.GetItemProvider(fuelStack.ID) as IBurnableItem;
 
             if (!CanStartBurningFuel(itemRepository, fuel, input, outputStack))
                 return;
@@ -519,7 +519,7 @@ namespace TrueCraft.Core.Logic.Blocks
 
             dimension.SetBlockID(coords, LitFurnaceBlock.BlockID);
 
-            state.BurnTimeTotal = (short)(fuel.BurnTime.TotalSeconds * 20);  // TODO hard-coded ticks per second
+            state.BurnTimeTotal = (short)(fuel!.BurnTime.TotalSeconds * 20);  // TODO hard-coded ticks per second
             state.BurnTimeRemaining = state.BurnTimeTotal;
             state.CookTime = 0;
             state.DecrementFuel();
@@ -548,19 +548,16 @@ namespace TrueCraft.Core.Logic.Blocks
         /// </list>
         /// </para></remarks>
         private bool CanStartBurningFuel(IItemRepository itemRepository,
-            IBurnableItem fuel, ISmeltableItem input, ItemStack outputStack)
+            IBurnableItem? fuel, ISmeltableItem? input, ItemStack outputStack)
         {
-            if (object.ReferenceEquals(fuel, null))
-                return false;
-
-            if (object.ReferenceEquals(input, null))
+            if (fuel is null || input is null)
                 return false;
 
             if (!outputStack.CanMerge(input.SmeltingOutput))
                 return false;
 
-            IItemProvider provider = itemRepository.GetItemProvider(input.SmeltingOutput.ID);
-            if (outputStack.Count == provider.MaximumStack)
+            IItemProvider? provider = itemRepository.GetItemProvider(input.SmeltingOutput.ID);
+            if (provider is null || outputStack.Count == provider.MaximumStack)
                 return false;
 
             return true;
@@ -588,10 +585,10 @@ namespace TrueCraft.Core.Logic.Blocks
             ItemStack fuelStack = state.Fuel;
             ItemStack outputStack = state.Output;
 
-            ISmeltableItem input = itemRepository.GetItemProvider(inputStack.ID) as ISmeltableItem;
-            IBurnableItem fuel = itemRepository.GetItemProvider(fuelStack.ID) as IBurnableItem;
+            ISmeltableItem? input = itemRepository.GetItemProvider(inputStack.ID) as ISmeltableItem;
+            IBurnableItem? fuel = itemRepository.GetItemProvider(fuelStack.ID) as IBurnableItem;
 
-            if (!object.ReferenceEquals(input, null))
+            if (input is not null)
             {
                 // Increase CookTime
                 state.CookTime += 20;   // TODO hard-coded value that must be coordinated with TimeSpan in ScheduleFurnace
@@ -600,7 +597,7 @@ namespace TrueCraft.Core.Logic.Blocks
                     state.DecrementIngredient();
                     inputStack = state.Ingredient;
 
-                    IItemProvider outputItemProvider = itemRepository.GetItemProvider(input.SmeltingOutput.ID);
+                    IItemProvider outputItemProvider = itemRepository.GetItemProvider(input.SmeltingOutput.ID)!;
                     int maxStack = outputItemProvider.MaximumStack;
                     if (outputStack.Empty)
                         outputStack = input.SmeltingOutput;
@@ -626,7 +623,7 @@ namespace TrueCraft.Core.Logic.Blocks
             {
                 if (CanStartBurningFuel(itemRepository, fuel, input, outputStack))
                 {
-                    state.BurnTimeTotal = (short)(fuel.BurnTime.TotalSeconds * 20);  // TODO hard-coded ticks per second
+                    state.BurnTimeTotal = (short)(fuel!.BurnTime.TotalSeconds * 20);  // TODO hard-coded ticks per second
                     state.BurnTimeRemaining = state.BurnTimeTotal;
                     state.DecrementFuel();
                     fuelStack = state.Fuel;

@@ -70,6 +70,10 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public void DoUpdate(IMultiplayerServer server, IDimension dimension, BlockDescriptor descriptor)
         {
+            IChunk? chunk = dimension.GetChunk(descriptor.Coordinates);
+            if (chunk is null)
+                return;
+
             var down = descriptor.Coordinates + Vector3i.Down;
 
             var current = dimension.GetBlockID(descriptor.Coordinates);
@@ -139,7 +143,10 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public void ScheduleUpdate(IMultiplayerServer server, IDimension dimension, BlockDescriptor descriptor)
         {
-            var chunk = dimension.GetChunk(descriptor.Coordinates);
+            IChunk? chunk = dimension.GetChunk(descriptor.Coordinates);
+            if (chunk is null)
+                return;
+
             server.Scheduler.ScheduleEvent("fire.spread", chunk,
                 TimeSpan.FromSeconds(MathHelper.Random.Next(MinSpreadTime, MaxSpreadTime)),
                 s => DoUpdate(s, dimension, descriptor));

@@ -68,7 +68,7 @@ namespace TrueCraft.Core.Test.Logic
                 { ItemStack.EmptyStack, ItemStack.EmptyStack }
             };
 
-            CraftingPattern actual = CraftingPattern.GetCraftingPattern(items);
+            CraftingPattern? actual = CraftingPattern.GetCraftingPattern(items);
             Assert.Null(actual);
 
             // 3x3 case
@@ -117,7 +117,7 @@ namespace TrueCraft.Core.Test.Logic
             XmlDocument doc = new XmlDocument();
             doc.LoadXml(xml);
             // Test cases were constructed to ensure FirstChild is not null.
-            CraftingPattern actual = CraftingPattern.GetCraftingPattern(doc.FirstChild!);
+            CraftingPattern actual = CraftingPattern.GetCraftingPattern(doc.FirstChild!)!;
 
             Assert.AreEqual(expectedWidth, actual.Width);
             Assert.AreEqual(expectedHeight, actual.Height);
@@ -138,7 +138,7 @@ namespace TrueCraft.Core.Test.Logic
         {
             XmlNode xml = GetCraftingAreaXml(grid);
 
-            CraftingPattern actual = CraftingPattern.GetCraftingPattern(xml);
+            CraftingPattern actual = CraftingPattern.GetCraftingPattern(xml)!;
 
             Assert.AreEqual(expectedWidth, actual.Width);
         }
@@ -152,7 +152,7 @@ namespace TrueCraft.Core.Test.Logic
         {
             XmlNode xml = GetCraftingAreaXml(grid);
 
-            CraftingPattern actual = CraftingPattern.GetCraftingPattern(xml);
+            CraftingPattern actual = CraftingPattern.GetCraftingPattern(xml)!;
 
             Assert.AreEqual(expectedHeight, actual.Height);
         }
@@ -168,8 +168,8 @@ namespace TrueCraft.Core.Test.Logic
             XmlNode xml1 = GetCraftingAreaXml(grid1);
             XmlNode xml2 = GetCraftingAreaXml(grid2);
 
-            CraftingPattern a = CraftingPattern.GetCraftingPattern(xml1);
-            CraftingPattern b = CraftingPattern.GetCraftingPattern(xml2);
+            CraftingPattern a = CraftingPattern.GetCraftingPattern(xml1)!;
+            CraftingPattern b = CraftingPattern.GetCraftingPattern(xml2)!;
 
             Assert.False(object.ReferenceEquals(a, b));
             Assert.AreEqual(expected, a.Equals(b));

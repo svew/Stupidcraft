@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text;
 using TrueCraft.Core.Networking;
 
 namespace TrueCraft.Core
@@ -68,22 +69,20 @@ namespace TrueCraft.Core
 
         public override string ToString()
         {
-            System.Text.StringBuilder sb = null;
+            if (entries.Count == 0)
+                return String.Empty;
+
+            StringBuilder sb = new StringBuilder();
 
             foreach (var entry in entries.Values)
             {
-                if (sb != null)
-                    sb.Append(", ");
-                else
-                    sb = new System.Text.StringBuilder();
-
                 sb.Append(entry.ToString());
+                sb.Append(", ");
             }
 
-            if (sb != null)
-                return sb.ToString();
+            sb.Length -= 2;
 
-            return string.Empty;
+            return sb.ToString();
         }
     }
 }

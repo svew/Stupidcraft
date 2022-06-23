@@ -12,7 +12,7 @@ namespace TrueCraft.Core.Logic
         private ItemStack[,] _pattern;
 
         #region Construction
-        public static CraftingPattern GetCraftingPattern(XmlNode pattern)
+        public static CraftingPattern? GetCraftingPattern(XmlNode pattern)
         {
             int xmax = 3, ymax = 3;
             ItemStack[,] items = new ItemStack[xmax, ymax];
@@ -45,7 +45,7 @@ namespace TrueCraft.Core.Logic
                     _pattern[x - xmin, y - ymin] = new ItemStack(items[x, y].ID, 1, items[x, y].Metadata);
         }
 
-        public static CraftingPattern GetCraftingPattern(ItemStack[,] items)
+        public static CraftingPattern? GetCraftingPattern(ItemStack[,] items)
         {
             int xul = items.GetLength(0);
             int yul = items.GetLength(1);
@@ -180,7 +180,7 @@ namespace TrueCraft.Core.Logic
         public ItemStack this[int x, int y] { get => _pattern[x, y]; }
 
         #region object overrides
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return Equals(obj as CraftingPattern);
         }
@@ -204,7 +204,7 @@ namespace TrueCraft.Core.Logic
         #endregion
 
         #region IEquatable<CraftingPattern> & related
-        public bool Equals(CraftingPattern other)
+        public bool Equals(CraftingPattern? other)
         {
             if (object.ReferenceEquals(other, null))
                 return false;
@@ -223,25 +223,25 @@ namespace TrueCraft.Core.Logic
             return true;
         }
 
-        public static bool operator==(CraftingPattern l, CraftingPattern r)
+        public static bool operator==(CraftingPattern? l, CraftingPattern? r)
         {
-            if (!object.ReferenceEquals(l, null))
+            if (l is not null)
             {
-                if (!object.ReferenceEquals(r, null))
+                if (r is not null)
                     return l.Equals(r);
                 else
                     return false;
             }
             else
             {
-                if (!object.ReferenceEquals(r, null))
+                if (r is not null)
                     return false;
                 else
                     return true;
             }
         }
 
-        public static bool operator!=(CraftingPattern l, CraftingPattern r)
+        public static bool operator!=(CraftingPattern? l, CraftingPattern? r)
         {
             return !(l == r);
         }

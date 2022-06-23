@@ -13,14 +13,14 @@ namespace TrueCraft.Core.Logic
         public CraftingRecipe(XmlNode recipe)
         {
             XmlNode pattern = recipe.FirstChild;
-            _input = CraftingPattern.GetCraftingPattern(pattern);
+            _input = CraftingPattern.GetCraftingPattern(pattern)!;
 
             XmlNode input = pattern.NextSibling;
             _output = new ItemStack(input);
         }
 
         #region object overrides
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return Equals(obj as ICraftingRecipe);
         }
@@ -36,9 +36,9 @@ namespace TrueCraft.Core.Logic
 
         public ItemStack Output { get => _output; }
 
-        public bool Equals(ICraftingRecipe other)
+        public bool Equals(ICraftingRecipe? other)
         {
-            if (object.ReferenceEquals(other, null))
+            if (other is null)
                 return false;
 
             return this.Output == other.Output && this.Pattern == other.Pattern;

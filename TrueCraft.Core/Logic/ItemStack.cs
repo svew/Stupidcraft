@@ -106,7 +106,7 @@ namespace TrueCraft.Core
         /// <param name="count">The item count for the item stack.</param>
         /// <param name="metadata">The metadata for the item stack.</param>
         /// <param name="nbt">The NBT compound tag for the item stack.</param>
-        public ItemStack(short id, sbyte count, short metadata, NbtCompound nbt) : this(id, count, metadata)
+        public ItemStack(short id, sbyte count, short metadata, NbtCompound? nbt) : this(id, count, metadata)
         {
             Nbt = nbt;
             if (Count == 0)
@@ -259,7 +259,7 @@ namespace TrueCraft.Core
         /// The NBT compound tag for this item stack, if any.
         /// </summary>
         [IgnoreOnNull]
-        public NbtCompound Nbt { get; set; }
+        public NbtCompound? Nbt { get; set; }
 
         /// <summary>
         /// The index (slot) of this item stack in an inventory.
@@ -340,11 +340,13 @@ namespace TrueCraft.Core
         /// </summary>
         /// <param name="obj">The other object.</param>
         /// <returns></returns>
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
+            if (obj is null) return false;
+
             if (obj is ItemStack)
                 return Equals((ItemStack)obj);
+
             return obj is NbtTag && Equals((NbtTag)obj);
         }
 
@@ -359,26 +361,26 @@ namespace TrueCraft.Core
         }
 
         #region IEquatable<NbtTag> & related
-        public bool Equals(NbtTag nbt)
+        public bool Equals(NbtTag? nbt)
         {
-            NbtCompound other = nbt as NbtCompound;
-            if (object.ReferenceEquals(other, null))
+            NbtCompound? other = nbt as NbtCompound;
+            if (other is null)
                 return false;
 
             NbtShort id = other.Get<NbtShort>("id");
-            if (object.ReferenceEquals(id, null) || _Id != id.Value)
+            if (id is null || _Id != id.Value)
                 return false;
 
             NbtShort metadata = other.Get<NbtShort>("Damage");
-            if (object.ReferenceEquals(metadata, null) || _Metadata != metadata.Value)
+            if (metadata is null || _Metadata != metadata.Value)
                 return false;
 
             NbtByte count = other.Get<NbtByte>("Count");
-            if (object.ReferenceEquals(count, null) || _Count != count.Value)
+            if (count is null || _Count != count.Value)
                 return false;
 
             NbtByte slot = other.Get<NbtByte>("Slot");
-            if (object.ReferenceEquals(slot, null) || Index != slot.Value)
+            if (slot is null || Index != slot.Value)
                 return false;
 
             // TODO: compare Nbt property
@@ -386,22 +388,22 @@ namespace TrueCraft.Core
             return true;
         }
 
-        public static bool operator==(ItemStack l, NbtTag r)
+        public static bool operator==(ItemStack l, NbtTag? r)
         {
             return l.Equals(r);
         }
 
-        public static bool operator !=(ItemStack l, NbtTag r)
+        public static bool operator !=(ItemStack l, NbtTag? r)
         {
             return !(l == r);
         }
 
-        public static bool operator==(NbtTag l, ItemStack r)
+        public static bool operator==(NbtTag? l, ItemStack r)
         {
             return (r == l);
         }
 
-        public static bool operator !=(NbtTag l, ItemStack r)
+        public static bool operator !=(NbtTag? l, ItemStack r)
         {
             return !(r == l);
         }

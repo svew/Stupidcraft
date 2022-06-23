@@ -57,24 +57,24 @@ namespace TrueCraft.Core.Logic.Blocks
         {
             int adjacent = 0;
             GlobalVoxelCoordinates coords = coordinates + MathHelper.BlockFaceToCoordinates(face);
-            GlobalVoxelCoordinates _ = null;
+            GlobalVoxelCoordinates? t = null;
             // Check for adjacent chests. We can only allow one adjacent check block.
             for (int i = 0; i < AdjacentBlocks.Length; i++)
             {
                 if (dimension.GetBlockID(coords + AdjacentBlocks[i]) == ChestBlock.BlockID)
                 {
-                    _ = coords + AdjacentBlocks[i];
+                    t = coords + AdjacentBlocks[i];
                     adjacent++;
                 }
             }
             if (adjacent <= 1)
             {
-                if (!object.ReferenceEquals(_, null))
+                if (t is not null)
                 {
                     // Confirm that adjacent chest is not a double chest
                     for (int i = 0; i < AdjacentBlocks.Length; i++)
                     {
-                        if (dimension.GetBlockID(_ + AdjacentBlocks[i]) == ChestBlock.BlockID)
+                        if (dimension.GetBlockID(t + AdjacentBlocks[i]) == ChestBlock.BlockID)
                             adjacent++;
                     }
                 }
@@ -92,7 +92,7 @@ namespace TrueCraft.Core.Logic.Blocks
         {
             ServerOnly.Assert();
 
-            GlobalVoxelCoordinates adjacent = null; // No adjacent chest
+            GlobalVoxelCoordinates? adjacent = null; // No adjacent chest
             GlobalVoxelCoordinates self = descriptor.Coordinates;
             for (int i = 0; i < AdjacentBlocks.Length; i++)
             {
@@ -110,7 +110,7 @@ namespace TrueCraft.Core.Logic.Blocks
             if (upSelf.Opaque && !(upSelf is WallSignBlock))
                 return false; // Obstructed
 
-            if (!object.ReferenceEquals(adjacent, null))
+            if (adjacent is not null)
             {
                 // TODO LATER: this assumes that chests cannot be placed next to each other.
                 // Ensure that chests are always opened in the same arrangement

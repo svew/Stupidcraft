@@ -21,7 +21,7 @@ namespace TrueCraft.Core.Logic
         void ItemUsedOnNothing(ItemStack item, IDimension dimension, IRemoteClient user);
         void ItemUsedOnEntity(ItemStack item, IEntity usedOn, IDimension dimension, IRemoteClient user);
         void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension dimension, IRemoteClient user);
-        Tuple<int, int> GetIconTexture(byte metadata);
+        Tuple<int, int>? GetIconTexture(byte metadata);
 
         /// <summary>
         /// Gets an enumerable over any metadata which affects rendering.

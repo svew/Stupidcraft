@@ -65,6 +65,7 @@ namespace TrueCraft.Core.Logic.Blocks
                 {
                     for (int z = min.Z; z < max.Z; z++)
                     {
+                        // TODO: what if this crosses a Chunk border and the other Chunk is not loaded?
                         var id = dimension.GetBlockID(new GlobalVoxelCoordinates(x, y, z));
                         if (id == WaterBlock.BlockID || id == StationaryWaterBlock.BlockID)
                             return true;
@@ -76,8 +77,10 @@ namespace TrueCraft.Core.Logic.Blocks
 
         void HydrationCheckEvent(IMultiplayerServer server, GlobalVoxelCoordinates coords, IDimension dimension)
         {
-            if (dimension.GetBlockID(coords) != BlockID)
+            IChunk? chunk = dimension.GetChunk(coords);
+            if (chunk is null || dimension.GetBlockID(coords) != BlockID)
                 return;
+
             if (MathHelper.Random.Next(3) == 0)
             {
                 var meta = dimension.GetMetadata(coords);
@@ -88,13 +91,12 @@ namespace TrueCraft.Core.Logic.Blocks
                     meta--;
                     if (meta == 0)
                     {
-                        dimension.SetBlockID(coords, BlockID);
+                        dimension.SetBlockID(coords, BlockID); // TODO: shouldn't this be a Dirt Block???
                         return;
                     }
                 }
                 dimension.SetMetadata(coords, meta);
             }
-            var chunk = dimension.GetChunk(coords);
             server.Scheduler.ScheduleEvent("farmland", chunk,
                 TimeSpan.FromSeconds(UpdateIntervalSeconds),
                 _server => HydrationCheckEvent(_server, coords, dimension));
@@ -106,7 +108,7 @@ namespace TrueCraft.Core.Logic.Blocks
             {
                 dimension.SetMetadata(descriptor.Coordinates, 1);
             }
-            var chunk = dimension.GetChunk(descriptor.Coordinates);
+            IChunk chunk = dimension.GetChunk(descriptor.Coordinates)!;
             user.Server.Scheduler.ScheduleEvent("farmland", chunk,
                 TimeSpan.FromSeconds(UpdateIntervalSeconds),
                 server => HydrationCheckEvent(server, descriptor.Coordinates, dimension));

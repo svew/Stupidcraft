@@ -7,7 +7,8 @@ namespace TrueCraft.Core.Logic
     {
         private readonly List<IItemProvider> ItemProviders;
 
-        private static ItemRepository _singleton;
+        // Consumers must call Init before this class is used.
+        private static ItemRepository _singleton = null!;
 
         private ItemRepository()
         {
@@ -35,7 +36,7 @@ namespace TrueCraft.Core.Logic
             return _singleton;
         }
 
-        public IItemProvider GetItemProvider(short id)
+        public IItemProvider? GetItemProvider(short id)
         {
             // TODO: Binary search
             for (int i = 0; i < ItemProviders.Count; i++)

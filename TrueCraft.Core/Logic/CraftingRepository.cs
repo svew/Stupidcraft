@@ -8,7 +8,8 @@ namespace TrueCraft.Core.Logic
     {
         private readonly List<ICraftingRecipe> _recipes;
 
-        private static CraftingRepository _singleton;
+        // Consumers must call Init before using this class.
+        private static CraftingRepository _singleton = null!;
 
         private CraftingRepository()
         {
@@ -36,7 +37,7 @@ namespace TrueCraft.Core.Logic
             return _singleton;
         }
 
-        public ICraftingRecipe GetRecipe(CraftingPattern pattern)
+        public ICraftingRecipe? GetRecipe(CraftingPattern pattern)
         {
             foreach (ICraftingRecipe r in _recipes)
                 if (r.Pattern == pattern)

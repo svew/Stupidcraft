@@ -34,7 +34,7 @@ namespace TrueCraft.Core.Test
         {
             XmlDocument doc = new XmlDocument();
             doc.LoadXml(xml);
-            ItemStack actual = new ItemStack(doc.FirstChild);
+            ItemStack actual = new ItemStack(doc.FirstChild!);
 
             Assert.AreEqual(expectedID, actual.ID);
             Assert.AreEqual(expectedCount, actual.Count);

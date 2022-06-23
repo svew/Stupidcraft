@@ -18,6 +18,7 @@ namespace TrueCraft.Core
 
         public MetadataString()
         {
+            Value = String.Empty;
         }
 
         public MetadataString(string value)

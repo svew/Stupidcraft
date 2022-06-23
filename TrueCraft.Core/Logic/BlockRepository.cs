@@ -8,7 +8,7 @@ namespace TrueCraft.Core.Logic
     {
         private readonly IBlockProvider[] BlockProviders = new IBlockProvider[0x100];
 
-        private static BlockRepository _singleton = null;
+        private static BlockRepository? _singleton = null;
 
         private BlockRepository()
         {

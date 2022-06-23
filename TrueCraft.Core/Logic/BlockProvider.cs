@@ -25,8 +25,6 @@ namespace TrueCraft.Core.Logic
             _metadata.Add(0);
         }
 
-        public static IBlockRepository BlockRepository { get; set; }
-
         public virtual void BlockLeftClicked(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
             ServerOnly.Assert();
@@ -210,6 +208,7 @@ namespace TrueCraft.Core.Logic
             }
         }
 
+        // TODO: Add IChunk parameter
         public virtual void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IDimension dimension)
         {
             ServerOnly.Assert();
@@ -237,7 +236,7 @@ namespace TrueCraft.Core.Logic
         /// </summary>
         public abstract byte ID { get; }
 
-        public virtual Tuple<int, int> GetIconTexture(byte metadata)
+        public virtual Tuple<int, int>? GetIconTexture(byte metadata)
         {
             return null; // Blocks are rendered in 3D
         }
@@ -314,7 +313,7 @@ namespace TrueCraft.Core.Logic
 
         public virtual ToolType EffectiveTools { get { return ToolType.All; } }
 
-        public virtual Tuple<int, int> GetTextureMap(byte metadata)
+        public virtual Tuple<int, int>? GetTextureMap(byte metadata)
         {
             return null;
         }
@@ -341,7 +340,7 @@ namespace TrueCraft.Core.Logic
         /// <returns>The harvest time in milliseconds.</returns>
         /// <param name="dimension">The Dimension in which the Block is located.</param>
         /// <param name="blockId">Block identifier.</param>
-        /// <param name="itemId">Item identifier.</param>
+        /// <param name="itemId">Item identifier of the item currently held by the Player.</param>
         /// <param name="damage">Damage sustained by the item.</param>
         public static int GetHarvestTime(IDimension dimension, byte blockId, short itemId, out short damage)
         {
@@ -351,7 +350,7 @@ namespace TrueCraft.Core.Logic
             damage = 0;
 
             IBlockProvider block = dimension.BlockRepository.GetBlockProvider(blockId);
-            IItemProvider item = ItemRepository.Get().GetItemProvider(itemId);
+            IItemProvider? item = ItemRepository.Get().GetItemProvider(itemId);
 
             double hardness = block.Hardness;
             if (hardness == -1)
@@ -364,9 +363,9 @@ namespace TrueCraft.Core.Logic
 
             if (item is ToolItem)
             {
-                var _ = item as ToolItem;
-                tool = _.ToolType;
-                material = _.Material;
+                ToolItem toolItem = (ToolItem)item;
+                tool = toolItem.ToolType;
+                material = toolItem.Material;
 
                 if ((block.EffectiveTools & tool) == 0 || (block.EffectiveToolMaterials & material) == 0)
                 {
