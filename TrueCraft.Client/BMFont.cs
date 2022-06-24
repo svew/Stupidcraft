@@ -9,6 +9,7 @@ using System.Xml.Serialization;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 namespace TrueCraft.Client
 {
     [Serializable]
@@ -354,7 +355,7 @@ namespace TrueCraft.Client
         public static FontFile Load(Stream stream)
         {
             XmlSerializer deserializer = new XmlSerializer(typeof(FontFile));
-            FontFile file = (FontFile) deserializer.Deserialize(stream);
+            FontFile file = (FontFile) deserializer.Deserialize(stream)!;
             return file;
         }
     }
