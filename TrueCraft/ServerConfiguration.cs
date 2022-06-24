@@ -5,6 +5,10 @@ namespace TrueCraft
 {
     public class ServerConfiguration : Configuration
     {
+        public const bool QueryDefault = true;
+        public const bool EnableLightingDefault = true;
+        public const bool EnableEventLoadingDefault = true;
+
         public class DebugConfiguration
         {
             public class ProfilerConfiguration
@@ -45,10 +49,10 @@ namespace TrueCraft
             ServerAddress = "0.0.0.0";
             WorldSaveInterval = 30;
             Singleplayer = false;
-            Query = true;
+            Query = QueryDefault;
             QueryPort = 25566;
-            EnableLighting = true;
-            EnableEventLoading = true;
+            EnableLighting = EnableLightingDefault;
+            EnableEventLoading = EnableEventLoadingDefault;
             DisabledEvents = new string[0];
         }
 

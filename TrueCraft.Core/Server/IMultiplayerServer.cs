@@ -40,7 +40,7 @@ namespace TrueCraft.Core.Server
         IBlockRepository BlockRepository { get; }
 
         IItemRepository ItemRepository { get; }
-        IPEndPoint EndPoint { get; }
+        IPEndPoint? EndPoint { get; }
         bool BlockUpdatesEnabled { get; set; }
         bool EnableClientLogging { get; set; }
 

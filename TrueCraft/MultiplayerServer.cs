@@ -22,11 +22,11 @@ namespace TrueCraft
 {
     public class MultiplayerServer : IMultiplayerServer, IDisposable
     {
-        private static MultiplayerServer _singleton = null;
+        private static MultiplayerServer? _singleton = null;
 
-        public event EventHandler<ChatMessageEventArgs> ChatMessageReceived;
-        public event EventHandler<PlayerJoinedQuitEventArgs> PlayerJoined;
-        public event EventHandler<PlayerJoinedQuitEventArgs> PlayerQuit;
+        public event EventHandler<ChatMessageEventArgs>? ChatMessageReceived;
+        public event EventHandler<PlayerJoinedQuitEventArgs>? PlayerJoined;
+        public event EventHandler<PlayerJoinedQuitEventArgs>? PlayerQuit;
 
         private IWorld? _world = null;
 
@@ -38,14 +38,14 @@ namespace TrueCraft
 
 
 
-        private TcpListener Listener;
+        private TcpListener? _listener;
         private readonly PacketHandler[] PacketHandlers;
         private IList<ILogProvider> LogProviders;
         private Stopwatch Time;
         private ConcurrentBag<Tuple<IDimension, IChunk>> ChunksToSchedule;
         internal object ClientLock = new object();
 
-        private QueryProtocol QueryProtocol;
+        private readonly QueryProtocol _queryProtocol;
 
         private MultiplayerServer()
         {
@@ -75,7 +75,7 @@ namespace TrueCraft
 
             PendingBlockUpdates = new Queue<BlockUpdate>();
             EnableClientLogging = false;
-            QueryProtocol = new TrueCraft.QueryProtocol(this);
+            _queryProtocol = new TrueCraft.QueryProtocol(this);
             WorldLighters = new List<Lighting>();
             ChunksToSchedule = new ConcurrentBag<Tuple<IDimension, IChunk>>();
             Time = new Stopwatch();
@@ -124,7 +124,8 @@ namespace TrueCraft
         public IItemRepository ItemRepository { get; private set; }
 
         public bool EnableClientLogging { get; set; }
-        public IPEndPoint EndPoint { get; private set; }
+
+        public IPEndPoint? EndPoint { get; private set; }
 
         private static readonly int MillisecondsPerTick = 1000 / 20;
 
@@ -189,20 +190,20 @@ namespace TrueCraft
                 throw new InvalidOperationException("Start called before World was set.");
 
             Scheduler.DisabledEvents.Clear();
-            if (Program.ServerConfiguration.DisabledEvents != null)
+            if (Program.ServerConfiguration?.DisabledEvents is not null)
                 Program.ServerConfiguration.DisabledEvents.ToList().ForEach(
                     ev => Scheduler.DisabledEvents.Add(ev));
             ShuttingDown = false;
             Time.Reset();
             Time.Start();
-            Listener = new TcpListener(endPoint);
-            Listener.Start();
-            EndPoint = (IPEndPoint)Listener.LocalEndpoint;
+            _listener = new TcpListener(endPoint);
+            _listener.Start();
+            EndPoint = (IPEndPoint)_listener.LocalEndpoint;
 
             SocketAsyncEventArgs args = new SocketAsyncEventArgs();
             args.Completed += AcceptClient;
 
-            if (!Listener.Server.AcceptAsync(args))
+            if (!_listener.Server.AcceptAsync(args))
                 AcceptClient(this, args);
             
             Log(LogCategory.Notice, "Running TrueCraft server on {0}", EndPoint);
@@ -211,18 +212,18 @@ namespace TrueCraft
             _environmentWorker.Start(new Tuple<Action, AutoResetEvent>(DoEnvironment, _environmentAutoReset));
             _masterTick.Start();
 
-            if(Program.ServerConfiguration.Query)
-                QueryProtocol.Start();
+            if(Program.ServerConfiguration?.Query ?? ServerConfiguration.QueryDefault)
+                _queryProtocol.Start();
         }
 
         public void Stop()
         {
             ShuttingDown = true;
-            Listener.Stop();
-            if(Program.ServerConfiguration.Query)
-                QueryProtocol.Stop();
+            _listener?.Stop();
+            if(Program.ServerConfiguration?.Query ?? ServerConfiguration.QueryDefault)
+                _queryProtocol.Stop();
 
-            _world.Save();
+            _world?.Save();
 
             // NOTE: DisconnectClient modifies the Clients collection!
             for (int j = Clients.Count - 1; j >= 0; j --)
@@ -388,14 +389,14 @@ namespace TrueCraft
             client.Dispose();
         }
 
-        private void AcceptClient(object sender, SocketAsyncEventArgs args)
+        private void AcceptClient(object? sender, SocketAsyncEventArgs args)
         {
             try
             {
                 if (args.SocketError != SocketError.Success)
                     return;
 
-                var client = new RemoteClient(this, PacketReader, PacketHandlers, args.AcceptSocket);
+                var client = new RemoteClient(this, PacketReader, PacketHandlers, args.AcceptSocket!);
 
                 lock (ClientLock)
                     Clients.Add(client);
@@ -404,13 +405,16 @@ namespace TrueCraft
             {
                 args.AcceptSocket = null;
 
-                if (!ShuttingDown && !Listener.Server.AcceptAsync(args))
+                if (!ShuttingDown && !_listener!.Server.AcceptAsync(args))
                     AcceptClient(this, args);
             }
         }
 
-        private void TickedThreadEntry(object args)
+        private void TickedThreadEntry(object? args)
         {
+            if (args is null)
+                throw new ArgumentNullException(nameof(args));
+
             (Action action, AutoResetEvent autoReset) = (Tuple<Action, AutoResetEvent>)args;
 
             while (!ShuttingDown)
@@ -442,7 +446,7 @@ namespace TrueCraft
                 server?.EntityManager.Update();
             Profiler.Done();
 
-            if (Program.ServerConfiguration.EnableLighting)
+            if (Program.ServerConfiguration?.EnableLighting ?? ServerConfiguration.EnableLightingDefault)
             {
                 Profiler.Start("environment.lighting");
                 foreach (var lighter in WorldLighters)
@@ -457,10 +461,10 @@ namespace TrueCraft
                 Profiler.Done();
             }
 
-            if (Program.ServerConfiguration.EnableEventLoading)
+            if (Program.ServerConfiguration?.EnableEventLoading ?? ServerConfiguration.EnableEventLoadingDefault)
             {
                 Profiler.Start("environment.chunks");
-                Tuple<IDimension, IChunk> t;
+                Tuple<IDimension, IChunk>? t;
                 if (ChunksToSchedule.TryTake(out t))
                     ScheduleUpdatesForChunk(t.Item1, t.Item2);
                 Profiler.Done();
