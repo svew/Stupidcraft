@@ -60,8 +60,8 @@ namespace TrueCraft.Launcher.Views
             worldListSelection.Changed += (sender, e) =>
             {
                int selectedCount = worldListSelection.CountSelectedRows();
-               _playButton.Sensitive = (selectedCount == 1);
-               _deleteWorldButton.Sensitive = (selectedCount == 1);
+               _playButton!.Sensitive = (selectedCount == 1);
+               _deleteWorldButton!.Sensitive = (selectedCount == 1);
             };
 
             _createWorldButton = new Button("New world");
@@ -161,7 +161,7 @@ namespace TrueCraft.Launcher.Views
             }
         }
 
-        private void PlayButton_Clicked(object sender, EventArgs e)
+        private void PlayButton_Clicked(object? sender, EventArgs e)
         {
             try
             {
@@ -177,7 +177,6 @@ namespace TrueCraft.Launcher.Views
                 _server.World = world;
                 TrueCraft.Program.ServerConfiguration = new ServerConfiguration()
                 {
-                    MOTD = null,
                     Singleplayer = true
                 };
 
@@ -186,8 +185,8 @@ namespace TrueCraft.Launcher.Views
                 _progressBar.Visible = _progressLabel.Visible = true;
                 Task.Factory.StartNew(() =>
                 {
-                // TODO: What if the player exitted the game from another dimension?
-                IDimensionServer overWorld = (IDimensionServer)world[Core.World.DimensionID.Overworld];
+                    // TODO: What if the player exitted the game from another dimension?
+                    IDimensionServer overWorld = (IDimensionServer)world[Core.World.DimensionID.Overworld];
                     GlobalChunkCoordinates spawnChunk = new GlobalChunkCoordinates(0, 0);
                     overWorld.Initialize(spawnChunk, _server, (value, stage) =>
                         Application.Invoke((sender, e) =>
@@ -202,7 +201,7 @@ namespace TrueCraft.Launcher.Views
                         var process = new Process();
 
                         string clientLocation = Assembly.GetExecutingAssembly().Location;
-                        clientLocation = System.IO.Path.GetDirectoryName(clientLocation);
+                        clientLocation = System.IO.Path.GetDirectoryName(clientLocation)!;
                         clientLocation = System.IO.Path.Combine(clientLocation, "TrueCraft.Client.dll");
 
                         string launchParams = string.Format("{0} {1} {2} {3}", clientLocation, _server.EndPoint, _window.User.Username, _window.User.SessionId);
@@ -255,7 +254,7 @@ namespace TrueCraft.Launcher.Views
             }
         }
 
-        private void NewWorldCommit_Clicked(object sender, EventArgs e)
+        private void NewWorldCommit_Clicked(object? sender, EventArgs e)
         {
             WorldInfo world = _worlds.CreateNewWorld(_newWorldName.Text, _newWorldSeed.Text);
             _createWorldBox.Visible = false;
