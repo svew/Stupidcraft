@@ -15,7 +15,7 @@ namespace TrueCraft.Core.Server
         void SpawnEntity(IEntity entity);
         void DespawnEntity(IEntity entity);
         void FlushDespawns();
-        IEntity GetEntityByID(int id);
+        IEntity? GetEntityByID(int id);
         void Update();
         void SendEntitiesToClient(IRemoteClient client);
         IList<IEntity> EntitiesInRange(Vector3 center, float radius);
