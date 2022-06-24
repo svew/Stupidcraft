@@ -15,7 +15,7 @@ namespace TrueCraft.Core.Entities
             CurrentState = new WanderState();
         }
 
-        public event EventHandler PathComplete;
+        public event EventHandler? PathComplete;
 
         public override IPacket SpawnPacket
         {
@@ -84,7 +84,7 @@ namespace TrueCraft.Core.Entities
             }
         }
 
-        public PathResult CurrentPath { get; set; }
+        public PathResult? CurrentPath { get; set; }
 
         /// <summary>
         /// Mob's current speed in m/s.
@@ -121,8 +121,7 @@ namespace TrueCraft.Core.Entities
                     if (CurrentPath.Index >= CurrentPath.Count)
                     {
                         CurrentPath = null;
-                        if (PathComplete != null)
-                            PathComplete(this, null);
+                        PathComplete?.Invoke(this, null);
                         return true;
                     }
                 }

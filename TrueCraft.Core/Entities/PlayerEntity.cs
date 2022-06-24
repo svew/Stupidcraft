@@ -94,10 +94,10 @@ namespace TrueCraft.Core.Entities
             }
         }
 
-        public event EventHandler<EntityEventArgs> PickUpItem;
+        public event EventHandler<EntityEventArgs>? PickUpItem;
         public void OnPickUpItem(ItemEntity item)
         {
-            if (PickUpItem != null) PickUpItem(this, new EntityEventArgs(item));
+            PickUpItem?.Invoke(this, new EntityEventArgs(item));
         }
     }
 }

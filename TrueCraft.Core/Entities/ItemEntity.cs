@@ -4,6 +4,7 @@ using TrueCraft.Core.Networking;
 using TrueCraft.Core.Networking.Packets;
 using TrueCraft.Core.Server;
 using TrueCraft.Core.Physics;
+using System.Collections.Generic;
 
 namespace TrueCraft.Core.Entities
 {
@@ -97,14 +98,14 @@ namespace TrueCraft.Core.Entities
 
         public override void Update(IEntityManager entityManager)
         {
-            var nearbyEntities = entityManager.EntitiesInRange(Position, PickupRange);
+            IList<IEntity> nearbyEntities = entityManager.EntitiesInRange(Position, PickupRange);
             if ((DateTime.UtcNow - SpawnTime).TotalSeconds > 1)
             {
-                var player = nearbyEntities.FirstOrDefault(e => e is PlayerEntity && (e as PlayerEntity).Health != 0
+                IEntity player = nearbyEntities.FirstOrDefault(e => e is PlayerEntity && ((PlayerEntity)e).Health != 0
                     && e.Position.DistanceTo(Position) <= PickupRange);
-                if (player != null)
+                if (player is not null)
                 {
-                    var playerEntity = player as PlayerEntity;
+                    PlayerEntity playerEntity = (PlayerEntity)player;
                     playerEntity.OnPickUpItem(this);
                     // TODO BUG: what if the player only has room for a partial pickup?
                     entityManager.DespawnEntity(this);

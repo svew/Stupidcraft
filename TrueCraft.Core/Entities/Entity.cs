@@ -103,11 +103,11 @@ namespace TrueCraft.Core.Entities
         }
 
         protected bool EnablePropertyChange { get; set; }
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
         protected internal virtual void OnPropertyChanged(string property)
         {
             if (!EnablePropertyChange) return;
-            if (PropertyChanged != null) PropertyChanged(this, new PropertyChangedEventArgs(property));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
         }
     }
 }
