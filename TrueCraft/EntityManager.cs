@@ -98,7 +98,7 @@ namespace TrueCraft
         
         internal void UpdateClientEntities(RemoteClient client)
         {
-            var entity = client.Entity;
+            IEntity entity = client.Entity!;
             // Calculate entities you shouldn't know about anymore
             for (int i = 0; i < client.KnownEntities.Count; i++)
             {
@@ -342,7 +342,7 @@ namespace TrueCraft
         public void SendEntitiesToClient(IRemoteClient _client)
         {
             RemoteClient client = (RemoteClient)_client;
-            foreach (var entity in GetEntitiesInRange(client.Entity, client.ChunkRadius))
+            foreach (var entity in GetEntitiesInRange(client.Entity!, client.ChunkRadius))
             {
                 if (entity != client.Entity)
                     SendEntityToClient(client, entity);
