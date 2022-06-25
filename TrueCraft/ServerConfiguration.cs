@@ -8,6 +8,7 @@ namespace TrueCraft
         public const bool QueryDefault = true;
         public const bool EnableLightingDefault = true;
         public const bool EnableEventLoadingDefault = true;
+        public const bool SinglePlayerDefault = false;
 
         public class DebugConfiguration
         {
@@ -48,7 +49,7 @@ namespace TrueCraft
             ServerPort = 25565;
             ServerAddress = "0.0.0.0";
             WorldSaveInterval = 30;
-            Singleplayer = false;
+            Singleplayer = SinglePlayerDefault;
             Query = QueryDefault;
             QueryPort = 25566;
             EnableLighting = EnableLightingDefault;

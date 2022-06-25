@@ -47,7 +47,7 @@ namespace TrueCraft
 
             SelectedSlot = 0;
 
-            CurrentWindow = null;
+            _currentWindow = null;
             ItemStaging = ItemStack.EmptyStack;
             KnownEntities = new List<IEntity>();
             Disconnected = false;
@@ -61,7 +61,7 @@ namespace TrueCraft
             StartReceive();
         }
 
-        public event EventHandler Disposed;
+        public event EventHandler? Disposed;
 
         /// <summary>
         /// A list of entities that this client is aware of.
@@ -69,14 +69,12 @@ namespace TrueCraft
         internal List<IEntity> KnownEntities { get; set; }
         internal sbyte NextWindowID { get; set; }
 
-        //public NetworkStream NetworkStream { get; set; }
-        public IMinecraftStream MinecraftStream { get; internal set; }
-        public string Username { get; internal set; }
+        public string? Username { get; internal set; }
         public bool LoggedIn { get; internal set; }
         public IMultiplayerServer Server { get; }
 
         /// <inheritdoc />
-        public IDimension Dimension
+        public IDimension? Dimension
         {
             get => _dimension;
             internal set
@@ -119,7 +117,7 @@ namespace TrueCraft
 
         public ItemStack ItemStaging { get; set; }
 
-        private IWindow<IServerSlot> _currentWindow;
+        private IWindow<IServerSlot>? _currentWindow;
 
         public IWindow<IServerSlot> CurrentWindow
         {
@@ -139,15 +137,15 @@ namespace TrueCraft
         // Set to true when this object has been disposed.
         private bool _thisDisposed = false;
 
-        private Socket _connection;
+        private Socket? _connection;
 
-        private SocketAsyncEventArgsPool _socketPool;
+        private SocketAsyncEventArgsPool? _socketPool;
 
         public IPacketReader PacketReader { get; private set; }
 
         private PacketHandler[] PacketHandlers { get; set; }
 
-        private IEntity _Entity;
+        private IEntity? _entity;
 
         private long disconnected;
 
@@ -163,27 +161,27 @@ namespace TrueCraft
             }
         }
 
-        public IEntity Entity
+        public IEntity? Entity
         {
             get
             {
-                return _Entity;
+                return _entity;
             }
             internal set
             {
-                var player = _Entity as PlayerEntity;
-                if (player != null)
+                PlayerEntity? player = _entity as PlayerEntity;
+                if (player is not null)
                     player.PickUpItem -= HandlePickUpItem;
-                _Entity = value;
-                player = _Entity as PlayerEntity;
-                if (player != null)
+                _entity = value;
+                player = _entity as PlayerEntity;
+                if (player is not null)
                     player.PickUpItem += HandlePickUpItem;
             }
         }
 
-        void HandlePickUpItem(object sender, EntityEventArgs e)
+        void HandlePickUpItem(object? sender, EntityEventArgs e)
         {
-            IPacket packet = new CollectItemPacket(e.Entity.EntityID, Entity.EntityID);
+            IPacket packet = new CollectItemPacket(e.Entity.EntityID, Entity!.EntityID);
 
             // TODO: won't this client be in the set manager.ClientsForEntity,
             //       resulting in sending this packet twice to the client picking
@@ -213,7 +211,7 @@ namespace TrueCraft
         /// <returns>The remaining Items after picking up.</returns>
         private ItemStack PickUpStack(ItemStack item)
         {
-            IItemProvider provider = Server.ItemRepository.GetItemProvider(item.ID);
+            IItemProvider provider = Server.ItemRepository.GetItemProvider(item.ID)!;
             ItemStack remaining = Inventory.StoreItemStack(item, false);
 
             if (!remaining.Empty)
@@ -254,23 +252,29 @@ namespace TrueCraft
         public bool Load()
         {
             var path = Path.Combine(Directory.GetCurrentDirectory(), "players", Username + ".nbt");
-            if (Program.ServerConfiguration.Singleplayer)
-                path = Path.Combine(((IWorld)Server.World).BaseDirectory, "player.nbt");
+            if (Program.ServerConfiguration?.Singleplayer ?? ServerConfiguration.SinglePlayerDefault)
+                path = Path.Combine(((IWorld)Server.World!).BaseDirectory, "player.nbt");
             if (!File.Exists(path))
                 return false;
             try
             {
                 var nbt = new NbtFile(path);
-                Entity.Position = new Vector3(
+                Entity!.Position = new Vector3(
                     nbt.RootTag["position"][0].DoubleValue,
                     nbt.RootTag["position"][1].DoubleValue,
                     nbt.RootTag["position"][2].DoubleValue);
-                InventoryWindowContent.SetSlots(((NbtList)nbt.RootTag["inventory"]).Select(t => ItemStack.FromNbt(t as NbtCompound)).ToArray());
-                (Entity as PlayerEntity).Health = nbt.RootTag["health"].ShortValue;
+                InventoryWindowContent.SetSlots(((NbtList)nbt.RootTag["inventory"]).Select(t => ItemStack.FromNbt((NbtCompound)t)).ToArray());
+                ((PlayerEntity)Entity).Health = nbt.RootTag["health"].ShortValue;
                 Entity.Yaw = nbt.RootTag["yaw"].FloatValue;
                 Entity.Pitch = nbt.RootTag["pitch"].FloatValue;
             }
-            catch { /* Who cares */ }
+            catch
+            {
+                // TODO:
+                //   1. What more specific Exception could be caught here?
+                //   2. When would it be thrown?
+                //   3. Why is it safe to ignore?
+            }
             return true;
         }
 
@@ -281,10 +285,10 @@ namespace TrueCraft
                 return;
 
             var path = Path.Combine(Directory.GetCurrentDirectory(), "players", Username + ".nbt");
-            if (Program.ServerConfiguration.Singleplayer)
-                path = Path.Combine(((IWorld)Server.World).BaseDirectory, "player.nbt");
+            if (Program.ServerConfiguration?.Singleplayer ?? ServerConfiguration.SinglePlayerDefault)
+                path = Path.Combine(((IWorld)Server.World!).BaseDirectory, "player.nbt");
             if (!Directory.Exists(Path.GetDirectoryName(path)))
-                Directory.CreateDirectory(Path.GetDirectoryName(path));
+                Directory.CreateDirectory(Path.GetDirectoryName(path)!);
             if (Entity == null) // I didn't think this could happen but null reference exceptions have been repoted here
                 return;
             var nbt = new NbtFile(new NbtCompound("player", new NbtTag[]
@@ -297,7 +301,7 @@ namespace TrueCraft
                         new NbtDouble(Entity.Position.Z)
                     }),
                     new NbtList("inventory", InventoryTags()),
-                    new NbtShort("health", (Entity as PlayerEntity).Health),
+                    new NbtShort("health", ((PlayerEntity)Entity).Health),
                     new NbtFloat("yaw", Entity.Yaw),
                     new NbtFloat("pitch", Entity.Pitch),
                 }
@@ -338,7 +342,7 @@ namespace TrueCraft
             // TODO Something else instantiates the window and gives it to us.  Then, we destroy it?
             //      Almost certainly the wrong action for a Chest.
             //CurrentWindow.Dispose();
-            CurrentWindow = null;
+            _currentWindow = null;
 
             // We know from packet sniffing that Beta1.7.3 sends Set Slot Packets
             // after a client-initiated window closure.  It is assumed that they
@@ -390,11 +394,11 @@ namespace TrueCraft
             SocketAsyncEventArgs args = _socketPool.Get();
             args.Completed += OperationCompleted;
 
-            if (!_connection.ReceiveAsync(args))
+            if (!_connection!.ReceiveAsync(args))
                 OperationCompleted(this, args);
         }
 
-        private void OperationCompleted(object sender, SocketAsyncEventArgs e)
+        private void OperationCompleted(object? sender, SocketAsyncEventArgs e)
         {
             if (_thisDisposed) return;
 
@@ -408,7 +412,7 @@ namespace TrueCraft
                     _socketPool?.Add(e);
                     break;
                 case SocketAsyncOperation.Send:
-                    IPacket packet = e.UserToken as IPacket;
+                    IPacket? packet = e.UserToken as IPacket;
 
                     if (packet is DisconnectPacket)
                         Server.DisconnectClient(this);
@@ -433,7 +437,7 @@ namespace TrueCraft
                 return;
             }
 
-            var packets = PacketReader.ReadPackets(this, e.Buffer, e.Offset, e.BytesTransferred);
+            var packets = PacketReader.ReadPackets(this, e.Buffer!, e.Offset, e.BytesTransferred);
             try
             {
                 foreach (IPacket packet in packets)
@@ -452,7 +456,8 @@ namespace TrueCraft
                         {
                             Server.Log(LogCategory.Notice, "Disconnecting client due to exception in network worker");
                             Server.Log(LogCategory.Debug, ex.ToString());
-                            Server.Log(LogCategory.Debug, ex.StackTrace.ToString());
+                            if (ex.StackTrace is not null)
+                                Server.Log(LogCategory.Debug, ex.StackTrace.ToString());
 
                             Server.DisconnectClient(this);
                         }
@@ -479,20 +484,20 @@ namespace TrueCraft
 
             Disconnected = true;
 
-            _connection.Shutdown(SocketShutdown.Both);
+            _connection?.Shutdown(SocketShutdown.Both);
 
             SocketAsyncEventArgs args = new SocketAsyncEventArgs();
             args.Completed += DisconnectCompleted;
-            if (!_connection.DisconnectAsync(args))
+            if (!_connection?.DisconnectAsync(args) ?? true)
             {
                 DisconnectCompleted(_connection, args);
                 args.Dispose();
             }
         }
 
-        private void DisconnectCompleted(object sender, SocketAsyncEventArgs e)
+        private void DisconnectCompleted(object? sender, SocketAsyncEventArgs e)
         {
-            _connection.Close();
+            _connection?.Close();
         }
 
         public void SendMessage(string message)
@@ -529,7 +534,7 @@ namespace TrueCraft
         {
             List<IChunk> toLoad = new List<IChunk>();
             int cr = ChunkRadius;
-            GlobalChunkCoordinates entityChunk = (GlobalChunkCoordinates)Entity.Position;
+            GlobalChunkCoordinates entityChunk = (GlobalChunkCoordinates)Entity!.Position;
 
             Profiler.Start("client.new-chunks");
             lock(_loadedChunkLock)
@@ -674,7 +679,7 @@ namespace TrueCraft
 
             if (disposing)
             {
-                IPacketSegmentProcessor processor;
+                IPacketSegmentProcessor? processor;
                 while (!PacketReader.Processors.TryRemove(this, out processor))
                     Thread.Sleep(1);
 
@@ -685,8 +690,7 @@ namespace TrueCraft
                 _connection?.Dispose();
                 _connection = null;
 
-                if (Disposed != null)
-                    Disposed(this, null);
+                Disposed?.Invoke(this, EventArgs.Empty);
             }
 
         }

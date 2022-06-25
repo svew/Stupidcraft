@@ -12,10 +12,6 @@ namespace TrueCraft.Core.Networking
     public interface IRemoteClient
     {
         /// <summary>
-        /// Minecraft stream used to communicate with this client.
-        /// </summary>
-        IMinecraftStream MinecraftStream { get; }
-        /// <summary>
         /// Returns true if this client has data pending in the network stream.
         /// </summary>
         bool DataAvailable { get; }
@@ -23,12 +19,12 @@ namespace TrueCraft.Core.Networking
         /// <summary>
         /// The Dimension this client is present in.
         /// </summary>
-        IDimension Dimension { get; }
+        IDimension? Dimension { get; }
 
         /// <summary>
         /// The entity associated with this client.
         /// </summary>
-        IEntity Entity { get; }
+        IEntity? Entity { get; }
 
         /// <summary>
         /// This client's main inventory.
@@ -58,7 +54,8 @@ namespace TrueCraft.Core.Networking
         /// <summary>
         /// The username of the connected client. May be null if not yet ascertained.
         /// </summary>
-        string Username { get; }
+        string? Username { get; }
+
         /// <summary>
         /// The slot index this user has selected in their hotbar.
         /// </summary>
