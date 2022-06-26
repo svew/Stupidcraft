@@ -256,10 +256,10 @@ namespace TrueCraft.Client.Modules
                     if (Game.HighlightedBlock is null)
                         return true;
 
-                    ItemStack item = Game.Client.Hotbar[Game.Client.HotbarSelection].Item;
+                    ItemStack heldItem = Game.Client.Hotbar[Game.Client.HotbarSelection].Item;
                     Game.Client.QueuePacket(new PlayerBlockPlacementPacket(
                         Game.HighlightedBlock.X, (sbyte)Game.HighlightedBlock.Y, Game.HighlightedBlock.Z,
-                        Game.HighlightedBlockFace, item.ID, item.Count, item.Metadata));
+                        Game.HighlightedBlockFace, heldItem));
                     return true;
             }
             return false;
@@ -320,10 +320,10 @@ namespace TrueCraft.Client.Modules
                 digging = true;
             if (gamePad.IsConnected && Game.HighlightedBlock is not null && gamePad.Triggers.Left > 0.5f && GamePadState.Triggers.Left < 0.5f)
             {
-                ItemStack item = Game.Client.Hotbar[Game.Client.HotbarSelection].Item;
+                ItemStack heldItem = Game.Client.Hotbar[Game.Client.HotbarSelection].Item;
                 Game.Client.QueuePacket(new PlayerBlockPlacementPacket(
                     Game.HighlightedBlock.X, (sbyte)Game.HighlightedBlock.Y, Game.HighlightedBlock.Z,
-                    Game.HighlightedBlockFace, item.ID, item.Count, item.Metadata));
+                    Game.HighlightedBlockFace, heldItem));
             }
             if (gamePad.IsConnected && gamePad.ThumbSticks.Right.Length() != 0)
             {

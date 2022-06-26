@@ -10,16 +10,31 @@ namespace TrueCraft.Core.Networking.Packets
     {
         public byte ID { get { return 0x0F; } }
 
-        public PlayerBlockPlacementPacket(int x, sbyte y, int z, BlockFace face, short itemID,
-            sbyte? amount, short? metadata)
+        /// <summary>
+        /// Constructs a new PlayerBlockPlacementPacket
+        /// </summary>
+        /// <param name="x">The x-coordinate of the Block clicked by the Player.</param>
+        /// <param name="y">The y-coordinate of the Block clicked by the Player.</param>
+        /// <param name="z">The z-coordinate of the Block clicked by the Player.</param>
+        /// <param name="face">Specifies which face of the Block was clicked by the Player.</param>
+        /// <param name="heldItem">The item being held by the Player.</param>
+        public PlayerBlockPlacementPacket(int x, sbyte y, int z, BlockFace face, ItemStack heldItem)
         {
             X = x;
             Y = y;
             Z = z;
             Face = face;
-            ItemID = itemID;
-            Amount = amount;
-            Metadata = metadata;
+            ItemID = heldItem.ID;
+            if (heldItem.ID >= 0)
+            {
+                Amount = heldItem.Count;
+                Metadata = heldItem.Metadata;
+            }
+            else
+            {
+                Amount = 0;
+                Metadata = 0;
+            }
         }
 
         public int X;
@@ -30,14 +45,16 @@ namespace TrueCraft.Core.Networking.Packets
         /// The block or item ID. You should probably ignore this and use a server-side inventory.
         /// </summary>
         public short ItemID;
+
         /// <summary>
-        /// The amount in the player's hand. Who cares?
+        /// The count of items in the player's hand.
         /// </summary>
-        public sbyte? Amount;
+        public sbyte Amount;
+
         /// <summary>
         /// The block metadata. You should probably ignore this and use a server-side inventory.
         /// </summary>
-        public short? Metadata;
+        public short Metadata;
 
         public void ReadPacket(IMinecraftStream stream)
         {
@@ -51,6 +68,11 @@ namespace TrueCraft.Core.Networking.Packets
                 Amount = stream.ReadInt8();
                 Metadata = stream.ReadInt16();
             }
+            else
+            {
+                Amount = 0;
+                Metadata = 0;
+            }
         }
 
         public void WritePacket(IMinecraftStream stream)
@@ -62,8 +84,8 @@ namespace TrueCraft.Core.Networking.Packets
             stream.WriteInt16(ItemID);
             if (ItemID != -1)
             {
-                stream.WriteInt8(Amount.Value);
-                stream.WriteInt16(Metadata.Value);
+                stream.WriteInt8(Amount);
+                stream.WriteInt16(Metadata);
             }
         }
     }
