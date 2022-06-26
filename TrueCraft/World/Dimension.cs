@@ -532,7 +532,7 @@ namespace TrueCraft.World
             _pendingBlockUpdates.Enqueue(e.Position);
             ProcessBlockUpdates();
 
-            if (Program.ServerConfiguration.EnableLighting)
+            if (Program.ServerConfiguration?.EnableLighting ?? ServerConfiguration.EnableLightingDefault)
             {
                 IBlockProvider oldBlock = BlockRepository.GetBlockProvider(e.OldBlock.ID);
                 IBlockProvider newBlock = BlockRepository.GetBlockProvider(e.NewBlock.ID);
@@ -596,10 +596,10 @@ namespace TrueCraft.World
         {
             IChunk chunk = e.Chunk;
 
-            if (Program.ServerConfiguration.EnableEventLoading)
+            if (Program.ServerConfiguration?.EnableEventLoading ?? ServerConfiguration.EnableEventLoadingDefault)
                 _recentlyLoadedChunks.Enqueue(chunk);
 
-            if (Program.ServerConfiguration.EnableLighting)
+            if (Program.ServerConfiguration?.EnableLighting ?? ServerConfiguration.EnableLightingDefault)
                 _lightingQueue.Enqueue((GlobalVoxelCoordinates)chunk.Coordinates, LightingOperationMode.Add, LightingOperationKind.Initial, 15);
 
             ChunkLoaded?.Invoke(this, e);
