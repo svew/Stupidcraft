@@ -83,10 +83,10 @@ namespace TrueCraft.Core.World
 
         // TODO: move to server-side
         [Obsolete("Should be server-side only")]
-        NbtCompound GetTileEntity(LocalVoxelCoordinates coordinates);
+        NbtCompound? GetTileEntity(LocalVoxelCoordinates coordinates);
 
         // TODO: move to server-side
         [Obsolete("Should be server-side only")]
-        void SetTileEntity(LocalVoxelCoordinates coordinates, NbtCompound value);
+        void SetTileEntity(LocalVoxelCoordinates coordinates, NbtCompound? value);
     }
 }

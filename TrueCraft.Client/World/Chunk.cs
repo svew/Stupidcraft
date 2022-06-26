@@ -142,14 +142,14 @@ namespace TrueCraft.Client.World
         }
 
         /// <inheritdoc />
-        public NbtCompound GetTileEntity(LocalVoxelCoordinates coordinates)
+        public NbtCompound? GetTileEntity(LocalVoxelCoordinates coordinates)
         {
             // TODO: this should be server-side only
             throw new NotImplementedException();
         }
 
         /// <inheritdoc />
-        public void SetTileEntity(LocalVoxelCoordinates coordinates, NbtCompound value)
+        public void SetTileEntity(LocalVoxelCoordinates coordinates, NbtCompound? value)
         {
             // TODO: this should be server-side only
             throw new NotImplementedException();

@@ -449,7 +449,7 @@ namespace TrueCraft.World
         }
 
         /// <inheritdoc />
-        public void SetTileEntity(GlobalVoxelCoordinates coordinates, NbtCompound value)
+        public void SetTileEntity(GlobalVoxelCoordinates coordinates, NbtCompound? value)
         {
             IChunk? chunk;
             LocalVoxelCoordinates local = FindBlockPosition(coordinates, out chunk);

@@ -219,7 +219,7 @@ namespace TrueCraft.World
         /// <summary>
         /// Gets the tile entity for the given coordinates. May return null.
         /// </summary>
-        public NbtCompound GetTileEntity(LocalVoxelCoordinates coordinates)
+        public NbtCompound? GetTileEntity(LocalVoxelCoordinates coordinates)
         {
             if (_tileEntities.ContainsKey(coordinates))
                 return _tileEntities[coordinates];
@@ -229,13 +229,18 @@ namespace TrueCraft.World
         /// <summary>
         /// Sets the tile entity at the given coordinates to the given value.
         /// </summary>
-        public void SetTileEntity(LocalVoxelCoordinates coordinates, NbtCompound value)
+        public void SetTileEntity(LocalVoxelCoordinates coordinates, NbtCompound? value)
         {
-            if (value == null && _tileEntities.ContainsKey(coordinates))
+            if (value is null && _tileEntities.ContainsKey(coordinates))
+            {
                 _tileEntities.Remove(coordinates);
-            else
+                IsModified = true;
+            }
+            else if (value is not null)
+            {
                 _tileEntities[coordinates] = value;
-            IsModified = true;
+                IsModified = true;
+            }
         }
 
         #region Height Map
