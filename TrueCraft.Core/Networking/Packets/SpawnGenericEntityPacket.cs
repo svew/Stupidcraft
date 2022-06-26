@@ -9,25 +9,32 @@ namespace TrueCraft.Core.Networking.Packets
     {
         public byte ID { get { return 0x17; } }
 
-        public SpawnGenericEntityPacket(int entityID, sbyte entityType, int x, int y, int z,
-            int data, short? xVelocity, short? yVelocity, short? zVelocity)
+        /// <summary>
+        /// Constructs a SpawnGenericEntityPacket with the optional fields zeroed.
+        /// </summary>
+        /// <param name="entityID">The Entity ID to spawn.</param>
+        /// <param name="entityType">The type of the Entity</param>
+        /// <param name="x">The Absolute Integer x-coordinate of the Entity.</param>
+        /// <param name="y">The Absolute Integer y-coordinate of the Entity.</param>
+        /// <param name="z">The Absolute Integer z-coordinate of the Entity.</param>
+        public SpawnGenericEntityPacket(int entityID, sbyte entityType, int x, int y, int z)
         {
             EntityID = entityID;
             EntityType = entityType;
             X = x;
             Y = y;
             Z = z;
-            Data = data;
-            XVelocity = xVelocity;
-            YVelocity = yVelocity;
-            ZVelocity = zVelocity;
+            Data = 0;
+            XVelocity = 0;
+            YVelocity = 0;
+            ZVelocity = 0;
         }
 
         public int EntityID;
         public sbyte EntityType; // TODO: Enum? Maybe a lookup would be better.
         public int X, Y, Z;
         public int Data;
-        public short? XVelocity, YVelocity, ZVelocity;
+        public short XVelocity, YVelocity, ZVelocity;
 
         public void ReadPacket(IMinecraftStream stream)
         {
@@ -43,6 +50,12 @@ namespace TrueCraft.Core.Networking.Packets
                 YVelocity = stream.ReadInt16();
                 ZVelocity = stream.ReadInt16();
             }
+            else
+            {
+                XVelocity = 0;
+                YVelocity = 0;
+                ZVelocity = 0;
+            }
         }
 
         public void WritePacket(IMinecraftStream stream)
@@ -55,9 +68,9 @@ namespace TrueCraft.Core.Networking.Packets
             stream.WriteInt32(Data);
             if (Data > 0)
             {
-                stream.WriteInt16(XVelocity.Value);
-                stream.WriteInt16(YVelocity.Value);
-                stream.WriteInt16(ZVelocity.Value);
+                stream.WriteInt16(XVelocity);
+                stream.WriteInt16(YVelocity);
+                stream.WriteInt16(ZVelocity);
             }
         }
     }

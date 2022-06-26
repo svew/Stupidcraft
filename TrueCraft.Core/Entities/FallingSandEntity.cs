@@ -34,7 +34,7 @@ namespace TrueCraft.Core.Entities
             {
                 return new SpawnGenericEntityPacket(EntityID, (sbyte)EntityType,
                     MathHelper.CreateAbsoluteInt(Position.X), MathHelper.CreateAbsoluteInt(Position.Y),
-                    MathHelper.CreateAbsoluteInt(Position.Z), 0, null, null, null);
+                    MathHelper.CreateAbsoluteInt(Position.Z));
             }
         }
 
