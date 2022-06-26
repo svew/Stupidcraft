@@ -33,7 +33,7 @@ namespace TrueCraft.Core.Inventory
 
             if (_item.CanMerge(other))
             {
-                IItemProvider provider = _itemRepository.GetItemProvider(_item.ID);
+                IItemProvider provider = _itemRepository.GetItemProvider(_item.ID)!;
                 int maxStack = provider.MaximumStack;
                 return Math.Min(maxStack - _item.Count, other.Count);
             }

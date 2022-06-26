@@ -71,7 +71,7 @@ namespace TrueCraft.Core.Inventory
             if (!this[index].Item.CanMerge(items))
                 return items;
 
-            int maxStack = _itemRepository.GetItemProvider(items.ID).MaximumStack;
+            int maxStack = _itemRepository.GetItemProvider(items.ID)!.MaximumStack;
 
             ItemStack curContent = this[index].Item;
             int numToStore = Math.Min(maxStack - curContent.Count, items.Count);
