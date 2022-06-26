@@ -38,8 +38,9 @@ namespace TrueCraft.Handlers
             else
             {
                 remoteClient.LoggedIn = true;
-                remoteClient.Entity = new PlayerEntity(remoteClient.Username);
-                remoteClient.Dimension = ((IWorld)server.World)[DimensionID.Overworld];  // TODO read dimension from saved player data.
+                IDimensionServer dimension = (IDimensionServer)((IWorld)server.World)[DimensionID.Overworld];  // TODO read dimension from saved player data.
+                remoteClient.Entity = new PlayerEntity(dimension, dimension.EntityManager, remoteClient.Username);
+                remoteClient.Dimension = dimension;
                 remoteClient.ChunkRadius = 2;
 
                 if (!remoteClient.Load())

@@ -1,13 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using TrueCraft.Core.Server;
+using TrueCraft.Core.World;
 
 namespace TrueCraft.Core.Entities
 {
     public abstract class LivingEntity : Entity
     {
-        protected LivingEntity()
+        protected LivingEntity(IDimension dimension, IEntityManager entityManager) : base(dimension, entityManager)
         {
             Health = MaxHealth;
         }

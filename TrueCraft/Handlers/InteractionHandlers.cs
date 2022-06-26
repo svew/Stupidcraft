@@ -22,7 +22,7 @@ namespace TrueCraft.Handlers
         {
             var packet = (PlayerDiggingPacket)_packet;
             var client = (RemoteClient)_client;
-            IDimension dimension = _client.Dimension;
+            IDimension dimension = _client.Dimension!;
             var position = new GlobalVoxelCoordinates(packet.X, packet.Y, packet.Z);
             var descriptor = dimension.GetBlockData(position);
             var provider = server.BlockRepository.GetBlockProvider(descriptor.ID);
@@ -38,10 +38,11 @@ namespace TrueCraft.Handlers
                     spawned.Count = 1;
                     var inventory = client.SelectedItem;
                     inventory.Count--;
-                    var item = new ItemEntity(client.Entity.Position + new Vector3(0, PlayerEntity.Height, 0), spawned);
+                    IEntityManager entityManager = ((IDimensionServer)dimension).EntityManager;
+                    var item = new ItemEntity(dimension, entityManager, client.Entity.Position + new Vector3(0, PlayerEntity.Height, 0), spawned);
                     item.Velocity = MathHelper.RotateY(Vector3.Forwards, MathHelper.DegreesToRadians(client.Entity.Yaw)) * 0.5;
                     client.Hotbar[client.SelectedSlot].Item = inventory;
-                    ((IDimensionServer)_client.Dimension).EntityManager.SpawnEntity(item);
+                    entityManager.SpawnEntity(item);
                     break;
 
                 case PlayerDiggingPacket.Action.StartDigging:
@@ -193,6 +194,8 @@ namespace TrueCraft.Handlers
 
             if (packet.SlotIndex == -999)
             {
+                IDimensionServer dimension = ((IDimensionServer)client.Dimension!);
+                IEntityManager entityManager = dimension.EntityManager;
                 // Throwing item
                 ItemEntity item;
                 if (packet.RightClick)
@@ -201,16 +204,18 @@ namespace TrueCraft.Handlers
                     spawned.Count = 1;
                     var inventory = client.ItemStaging;
                     inventory.Count--;
-                    item = new ItemEntity(client.Entity.Position + new Vector3(0, PlayerEntity.Height, 0), spawned);
+                    item = new ItemEntity(dimension, entityManager,
+                        client.Entity.Position + new Vector3(0, PlayerEntity.Height, 0), spawned);
                     client.ItemStaging = inventory;
                 }
                 else
                 {
-                    item = new ItemEntity(client.Entity.Position + new Vector3(0, PlayerEntity.Height, 0), client.ItemStaging);
+                    item = new ItemEntity(dimension, entityManager,
+                        client.Entity.Position + new Vector3(0, PlayerEntity.Height, 0), client.ItemStaging);
                     client.ItemStaging = ItemStack.EmptyStack;
                 }
                 item.Velocity = MathHelper.FowardVector(client.Entity.Yaw) * 0.3;
-                ((IDimensionServer)client.Dimension).EntityManager.SpawnEntity(item);
+                entityManager.SpawnEntity(item);
                 return;
             }
 

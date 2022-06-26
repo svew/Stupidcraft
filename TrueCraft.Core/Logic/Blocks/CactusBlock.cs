@@ -128,7 +128,7 @@ namespace TrueCraft.Core.Logic.Blocks
 
             IEntityManager manager = ((IDimensionServer)dimension).EntityManager;
             manager.SpawnEntity(
-                new ItemEntity((Vector3)(descriptor.Coordinates + Vector3i.Up),
+                new ItemEntity(dimension, manager, (Vector3)(descriptor.Coordinates + Vector3i.Up),
                     new ItemStack(CactusBlock.BlockID, (sbyte)toDrop)));
         }
 
@@ -144,7 +144,7 @@ namespace TrueCraft.Core.Logic.Blocks
 
                 IEntityManager manager = ((IDimensionServer)dimension).EntityManager;
                 manager.SpawnEntity(
-                    new ItemEntity((Vector3)(descriptor.Coordinates + Vector3i.Up),
+                    new ItemEntity(dimension, manager, (Vector3)(descriptor.Coordinates + Vector3i.Up),
                         new ItemStack(CactusBlock.BlockID, (sbyte)1)));
                 // user.Inventory.PickUpStack() wasn't working?
             }

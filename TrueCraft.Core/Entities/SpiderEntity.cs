@@ -1,9 +1,16 @@
 ﻿using System;
+using TrueCraft.Core.Server;
+using TrueCraft.Core.World;
 
 namespace TrueCraft.Core.Entities
 {
     public class SpiderEntity : MobEntity
     {
+        public SpiderEntity(IDimension dimension, IEntityManager entityManager) :
+            base(dimension, entityManager)
+        {
+        }
+
         public override Size Size
         {
             get

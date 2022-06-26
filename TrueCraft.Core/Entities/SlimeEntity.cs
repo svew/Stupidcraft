@@ -1,4 +1,6 @@
 ﻿using System;
+using TrueCraft.Core.Server;
+using TrueCraft.Core.World;
 
 namespace TrueCraft.Core.Entities
 {
@@ -6,11 +8,13 @@ namespace TrueCraft.Core.Entities
     {
         public byte SlimeSize { get; set; }
 
-        public SlimeEntity() : this(4)
+        public SlimeEntity(IDimension dimension, IEntityManager entityManager) :
+            this(dimension, entityManager, 4)
         {
         }
 
-        public SlimeEntity(byte size)
+        public SlimeEntity(IDimension dimension, IEntityManager entityManager, byte size) :
+            base(dimension, entityManager)
         {
             SlimeSize = size;
         }

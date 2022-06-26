@@ -586,17 +586,18 @@ namespace TrueCraft.Test.Logic
 
             Mock<IItemRepository> mockItemRepository = new Mock<IItemRepository>(MockBehavior.Strict);
 
-            ItemEntity itemEntity = new ItemEntity(new Vector3(3.375, 6, 7.375), new ItemStack(CobblestoneBlock.BlockID, 2));
-
             Mock<IEntityManager> mockEntityManager = new Mock<IEntityManager>(MockBehavior.Strict);
-            mockEntityManager.Setup(x => x.EntitiesInRange(It.IsAny<Vector3>(), It.IsAny<float>()))
-                .Returns(new List<IEntity>() { itemEntity });
 
             GlobalVoxelCoordinates coordinates = new GlobalVoxelCoordinates(3, 5, 7);
             FakeDimension dimension = new FakeDimension(mockBlockRepository.Object,
                 mockItemRepository.Object, mockEntityManager.Object);
             dimension.SetBlockID(coordinates, CobblestoneBlock.BlockID);
             dimension.ResetCounts();
+
+            ItemEntity itemEntity = new ItemEntity(dimension, mockEntityManager.Object,
+                new Vector3(3.375, 6, 7.375), new ItemStack(CobblestoneBlock.BlockID, 2));
+            mockEntityManager.Setup(x => x.EntitiesInRange(It.IsAny<Vector3>(), It.IsAny<float>()))
+                .Returns(new List<IEntity>() { itemEntity });
 
             int blockPlacedCallCount = 0;
             Mock<BlockProvider> testBlockProvider = new Mock<BlockProvider>(MockBehavior.Strict);
@@ -663,18 +664,18 @@ namespace TrueCraft.Test.Logic
 
             Mock<IItemRepository> mockItemRepository = new Mock<IItemRepository>(MockBehavior.Strict);
 
-            PlayerEntity player = new PlayerEntity("Fred");
-            player.Position = new Vector3(3, 6, 7);
-
             Mock<IEntityManager> mockEntityManager = new Mock<IEntityManager>(MockBehavior.Strict);
-            mockEntityManager.Setup(x => x.EntitiesInRange(It.IsAny<Vector3>(), It.IsAny<float>()))
-                .Returns(new List<IEntity>() { player });
 
             GlobalVoxelCoordinates coordinates = new GlobalVoxelCoordinates(3, 5, 7);
             FakeDimension dimension = new FakeDimension(mockBlockRepository.Object,
                 mockItemRepository.Object, mockEntityManager.Object);
             dimension.SetBlockID(coordinates, CobblestoneBlock.BlockID);
             dimension.ResetCounts();
+
+            PlayerEntity player = new PlayerEntity(dimension, mockEntityManager.Object, "Fred");
+            player.Position = new Vector3(3, 6, 7);
+            mockEntityManager.Setup(x => x.EntitiesInRange(It.IsAny<Vector3>(), It.IsAny<float>()))
+                .Returns(new List<IEntity>() { player });
 
             Mock<BlockProvider> testBlockProvider = new Mock<BlockProvider>(MockBehavior.Strict);
             testBlockProvider.Setup(x => x.ItemUsedOnBlock(It.IsAny<GlobalVoxelCoordinates>(),

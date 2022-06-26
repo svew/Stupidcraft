@@ -17,8 +17,17 @@ namespace TrueCraft.Core.Entities
         DateTime SpawnTime { get; set; }
         MetadataDictionary Metadata { get; }
         Size Size { get; }
-        IEntityManager EntityManager { get; set; }
-        IDimension Dimension { get; set;  }
+
+        /// <summary>
+        /// Convenience getter for the Entity Manager responsible for this Entity
+        /// </summary>
+        IEntityManager EntityManager { get; }
+
+        /// <summary>
+        /// Gets the Dimension in which this Entity is located.
+        /// </summary>
+        IDimension Dimension { get; }
+
         bool SendMetadataToClients { get; }
         void Update(IEntityManager entityManager);
     }

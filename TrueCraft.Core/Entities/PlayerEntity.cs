@@ -1,14 +1,19 @@
 ﻿using System;
 using TrueCraft.Core.Networking;
 using TrueCraft.Core.Networking.Packets;
+using TrueCraft.Core.Server;
+using TrueCraft.Core.World;
 
 namespace TrueCraft.Core.Entities
 {
     public class PlayerEntity : LivingEntity
     {
-        public PlayerEntity(string username) : base()
+        private readonly string _username;
+
+        public PlayerEntity(IDimension dimension, IEntityManager entityManager, string username) :
+            base(dimension, entityManager)
         {
-            Username = username;
+            _username = username;
         }
 
         public const double Width = 0.6;
@@ -19,7 +24,7 @@ namespace TrueCraft.Core.Entities
         {
             get
             {
-                return new SpawnPlayerPacket(EntityID, Username,
+                return new SpawnPlayerPacket(EntityID, _username,
                     MathHelper.CreateAbsoluteInt(Position.X),
                     MathHelper.CreateAbsoluteInt(Position.Y),
                     MathHelper.CreateAbsoluteInt(Position.Z),
@@ -38,7 +43,6 @@ namespace TrueCraft.Core.Entities
             get { return 20; }
         }
 
-        public string Username { get; set; }
         public bool IsSprinting { get; set; }
         public bool IsCrouching { get; set; }
         public double PositiveDeltaY { get; set; }

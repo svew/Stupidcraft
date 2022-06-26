@@ -6,12 +6,14 @@ using TrueCraft.Core.Logic.Blocks;
 using TrueCraft.Core.Physics;
 using TrueCraft.Core.Logic;
 using System.Linq;
+using TrueCraft.Core.Server;
 
 namespace TrueCraft.Core.Entities
 {
     public class FallingSandEntity : ObjectEntity, IAABBEntity
     {
-        public FallingSandEntity(Vector3 position)
+        public FallingSandEntity(IDimension dimension, IEntityManager entityManager,
+            Vector3 position) : base(dimension, entityManager)
         {
             _Position = position + new Vector3(0.5);
         }
@@ -51,7 +53,8 @@ namespace TrueCraft.Core.Entities
                 Vector3 position = collisionPoint + Vector3i.Up;
                 var hit = Dimension.BlockRepository.GetBlockProvider(Dimension.GetBlockID((GlobalVoxelCoordinates)position));
                 if (hit.BoundingBox == null && !BlockProvider.Overwritable.Any(o => o == hit.ID))
-                    EntityManager.SpawnEntity(new ItemEntity(position + new Vector3(0.5), new ItemStack(id)));
+                    EntityManager.SpawnEntity(new ItemEntity(Dimension, EntityManager,
+                        position + new Vector3(0.5), new ItemStack(id)));
                 else
                     Dimension.SetBlockID((GlobalVoxelCoordinates)position, id);
             }

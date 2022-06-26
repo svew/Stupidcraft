@@ -48,7 +48,9 @@ namespace TrueCraft.Core.Logic.Blocks
             if (dimension.GetBlockID(descriptor.Coordinates + Vector3i.Down) == AirBlock.BlockID)
             {
                 dimension.SetBlockID(descriptor.Coordinates, AirBlock.BlockID);
-                ((IDimensionServer)server).EntityManager.SpawnEntity(new FallingSandEntity((Vector3)descriptor.Coordinates));
+                IEntityManager entityManager = ((IDimensionServer)server).EntityManager;
+                entityManager.SpawnEntity(
+                    new FallingSandEntity(dimension, entityManager, (Vector3)descriptor.Coordinates));
             }
         }
     }

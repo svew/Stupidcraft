@@ -245,16 +245,16 @@ namespace TrueCraft
             if (entity.Despawned)
                 return;
             entity.SpawnTime = DateTime.UtcNow;
-            entity.EntityManager = this;
-            entity.Dimension = _dimension!;
             entity.EntityID = _nextEntityID++;
             entity.PropertyChanged -= HandlePropertyChanged;
             entity.PropertyChanged += HandlePropertyChanged;
+
+            // TODO: why lock here and not elsewhere this list is accessed?
             lock (_entityLock)
             {
                 _entities.Add(entity);
             }
-            foreach (var clientEntity in GetEntitiesInRange(entity, 8)) // Note: 8 is pretty arbitrary here
+            foreach (var clientEntity in GetEntitiesInRange(entity, 8)) // TODO: fix hard-coded chunk radius
             {
                 if (clientEntity != entity && clientEntity is PlayerEntity)
                 {

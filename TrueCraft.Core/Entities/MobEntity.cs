@@ -4,12 +4,14 @@ using TrueCraft.Core.Networking.Packets;
 using TrueCraft.Core.Server;
 using TrueCraft.Core.AI;
 using TrueCraft.Core.Physics;
+using TrueCraft.Core.World;
 
 namespace TrueCraft.Core.Entities
 {
     public abstract class MobEntity : LivingEntity, IAABBEntity, IMobEntity
     {
-        protected MobEntity()
+        protected MobEntity(IDimension dimension, IEntityManager entityManager) :
+            base(dimension, entityManager)
         {
             Speed = 4;
             CurrentState = new WanderState();

@@ -200,7 +200,7 @@ namespace TrueCraft
             {
                 manager.DespawnEntity(e.Entity);
                 if (!remaining.Empty)
-                    manager.SpawnEntity(new ItemEntity(e.Entity.Position, remaining));
+                    manager.SpawnEntity(new ItemEntity(_dimension, manager, e.Entity.Position, remaining));
             }
         }
 

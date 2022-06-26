@@ -90,7 +90,8 @@ namespace TrueCraft.Core.Logic
             foreach (var i in items)
             {
                 if (i.Empty) continue;
-                var entity = new ItemEntity((Vector3)descriptor.Coordinates + new Vector3(0.5), i);
+                IEntity entity = new ItemEntity(dimension, entityManager,
+                    (Vector3)descriptor.Coordinates + new Vector3(0.5), i);
                 entityManager.SpawnEntity(entity);
             }
         }

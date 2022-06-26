@@ -5,6 +5,7 @@ using TrueCraft.Core.Networking.Packets;
 using TrueCraft.Core.Server;
 using TrueCraft.Core.Physics;
 using System.Collections.Generic;
+using TrueCraft.Core.World;
 
 namespace TrueCraft.Core.Entities
 {
@@ -12,7 +13,9 @@ namespace TrueCraft.Core.Entities
     {
         public static float PickupRange = 2;
 
-        public ItemEntity(Vector3 position, ItemStack item)
+        public ItemEntity(IDimension dimension, IEntityManager entityManager,
+            Vector3 position, ItemStack item) :
+            base(dimension, entityManager)
         {
             Position = position;
             Item = item;

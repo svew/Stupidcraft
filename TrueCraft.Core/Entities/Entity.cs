@@ -8,8 +8,14 @@ namespace TrueCraft.Core.Entities
 {
     public abstract class Entity : IEntity
     {
-        protected Entity()
+        private readonly IDimension _dimension;
+        private readonly IEntityManager _entityManager;
+
+        protected Entity(IDimension dimension, IEntityManager entityManager)
         {
+            _dimension = dimension;
+            _entityManager = entityManager;
+
             EnablePropertyChange = true;
             EntityID = -1;
             SpawnTime = DateTime.UtcNow;
@@ -18,8 +24,12 @@ namespace TrueCraft.Core.Entities
         public DateTime SpawnTime { get; set; }
 
         public int EntityID { get; set; }
-        public IEntityManager EntityManager { get; set; }
-        public IDimension Dimension { get; set; }
+
+        /// <inheritdoc />
+        public IEntityManager EntityManager { get => _entityManager; }
+
+        /// <inheritdoc />
+        public IDimension Dimension { get => _dimension; }
 
         protected Vector3 _Position;
         public virtual Vector3 Position

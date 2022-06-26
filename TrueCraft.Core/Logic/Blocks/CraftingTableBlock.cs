@@ -55,7 +55,8 @@ namespace TrueCraft.Core.Logic.Blocks
                 {
                     if (!item.Empty)
                     {
-                        IEntity entity = new ItemEntity((Vector3)(descriptor.Coordinates + Vector3i.Up), item);
+                        IEntity entity = new ItemEntity(dimension, entityManager,
+                            (Vector3)(descriptor.Coordinates + Vector3i.Up), item);
                         entityManager.SpawnEntity(entity);
                     }
                 }

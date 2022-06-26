@@ -148,7 +148,8 @@ namespace TrueCraft.Core.Logic.Blocks
                 foreach (var item in (NbtList)entity["Items"])
                 {
                     var slot = ItemStack.FromNbt((NbtCompound)item);
-                    manager.SpawnEntity(new ItemEntity(new Vector3(descriptor.Coordinates.X + 0.5, descriptor.Coordinates.Y + 0.5, descriptor.Coordinates.Z + 0.5), slot));
+                    manager.SpawnEntity(new ItemEntity(dimension, manager,
+                        new Vector3(descriptor.Coordinates.X + 0.5, descriptor.Coordinates.Y + 0.5, descriptor.Coordinates.Z + 0.5), slot));
                 }
             }
             dimensionServer.SetTileEntity(self, null);

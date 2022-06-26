@@ -459,7 +459,8 @@ namespace TrueCraft.Core.Logic.Blocks
                 {
                     IEntityManager manager = ((IDimensionServer)dimension).EntityManager;
                     var slot = ItemStack.FromNbt((NbtCompound)item);
-                    manager.SpawnEntity(new ItemEntity(new Vector3(descriptor.Coordinates.X + 0.5, descriptor.Coordinates.Y + 0.5, descriptor.Coordinates.Z + 0.5), slot));
+                    manager.SpawnEntity(new ItemEntity(dimension, manager,
+                        new Vector3(descriptor.Coordinates.X + 0.5, descriptor.Coordinates.Y + 0.5, descriptor.Coordinates.Z + 0.5), slot));
                 }
                 dimensionServer.SetTileEntity(descriptor.Coordinates, null);
             }
