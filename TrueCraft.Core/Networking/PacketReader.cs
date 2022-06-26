@@ -116,10 +116,10 @@ namespace TrueCraft.Core.Networking
 
             IPacketSegmentProcessor processor = Processors[key];
             
-            IPacket packet;
+            IPacket? packet;
             processor.ProcessNextSegment(buffer, offset, length, out packet);
 
-            if (packet == null)
+            if (packet is null)
                 yield break;
 
             while (true)
@@ -128,10 +128,8 @@ namespace TrueCraft.Core.Networking
 
                 if (!processor.ProcessNextSegment(EmptyBuffer, 0, 0, out packet))
                 {
-                    if (packet != null)
-                    {
+                    if (packet is not null)
                         yield return packet;
-                    }
 
                     yield break;
                 }

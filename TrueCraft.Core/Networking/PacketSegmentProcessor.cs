@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using TrueCraft.Core.Collections;
 
@@ -14,16 +15,17 @@ namespace TrueCraft.Core.Networking
 
         public bool ServerBound { get; private set; }
         
-        public IPacket CurrentPacket { get; protected set; }
+        public IPacket? CurrentPacket { get; protected set; }
 
         public PacketSegmentProcessor(PacketReader packetReader, bool serverBound)
         {
             PacketBuffer = new List<byte>();
             PacketReader = packetReader;
             ServerBound = serverBound;
+            CurrentPacket = null;
         }
 
-        public bool ProcessNextSegment(byte[] nextSegment, int offset, int len, out IPacket packet)
+        public bool ProcessNextSegment(byte[] nextSegment, int offset, int len, [MaybeNullWhen(false)] out IPacket packet)
         {
             packet = null;
             CurrentPacket = null;
@@ -36,7 +38,7 @@ namespace TrueCraft.Core.Networking
             if (PacketBuffer.Count == 0)
                 return false;
             
-            if (CurrentPacket == null)
+            if (CurrentPacket is null)
             {
                 byte packetId = PacketBuffer[0];
 
@@ -46,7 +48,7 @@ namespace TrueCraft.Core.Networking
                 else
                     createPacket = PacketReader.ClientboundPackets[packetId];
 
-                if (createPacket == null)
+                if (createPacket is null)
                     throw new NotSupportedException("Unable to read packet type 0x" + packetId.ToString("X2"));
 
                 CurrentPacket = createPacket();
