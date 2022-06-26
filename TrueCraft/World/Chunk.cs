@@ -20,11 +20,12 @@ namespace TrueCraft.World
 
         private Dictionary<LocalVoxelCoordinates, NbtCompound> _tileEntities;
 
-        public event EventHandler Disposed;
+        public event EventHandler? Disposed;
 
         #region Constructors
-        public Chunk()
+        public Chunk(GlobalChunkCoordinates coordinates)
         {
+            _coordinates = coordinates;
             _biomes = new Biome[Width * Depth];
             _heightMap = new int[Width * Depth];
             _tileEntities = new Dictionary<LocalVoxelCoordinates, NbtCompound>();
@@ -38,17 +39,11 @@ namespace TrueCraft.World
             BlockLight = new NybbleArray(Data, size + halfSize, size);
             SkyLight = new NybbleArray(Data, size + halfSize * 2, size);
         }
-
-        public Chunk(GlobalChunkCoordinates coordinates) : this()
-        {
-            _coordinates = coordinates;
-        }
         #endregion
 
         public void Dispose()
         {
-            if (Disposed != null)
-                Disposed(this, null);
+            Disposed?.Invoke(this, EventArgs.Empty);
         }
 
         [Conditional("DEBUG")]
@@ -347,7 +342,6 @@ namespace TrueCraft.World
             if (tag.Contains("LightPopulated"))
                 LightPopulated = tag["LightPopulated"].ByteValue > 0;
             const int size = Width * Height * Depth;
-            const int halfSize = size / 2;
             Data = new byte[(int)(size * 2.5)];
             Buffer.BlockCopy(tag["Blocks"].ByteArrayValue, 0, Data, 0, size);
             Metadata = new NybbleArray();
@@ -360,11 +354,11 @@ namespace TrueCraft.World
             
             if (tag.Contains("TileEntities"))
             {
-                foreach (var entity in tag["TileEntities"] as NbtList)
+                foreach (NbtTag entity in (NbtList)tag["TileEntities"])
                 {
                     _tileEntities[new LocalVoxelCoordinates(entity["coordinates"][0].IntValue,
                         entity["coordinates"][1].IntValue,
-                        entity["coordinates"][2].IntValue)] = entity["value"][0] as NbtCompound;
+                        entity["coordinates"][2].IntValue)] = (NbtCompound)entity["value"][0];
                 }
             }
             UpdateHeightMap();

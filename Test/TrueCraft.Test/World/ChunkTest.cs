@@ -12,7 +12,7 @@ namespace TrueCraft.Test.World
         [Test]
         public void TestGetBlockID()
         {
-            var chunk = new Chunk();
+            var chunk = new Chunk(GlobalChunkCoordinates.Zero);
             chunk.SetBlockID(LocalVoxelCoordinates.Zero, 12);
             Assert.AreEqual(12, chunk.GetBlockID(LocalVoxelCoordinates.Zero));
         }
@@ -20,7 +20,7 @@ namespace TrueCraft.Test.World
         [Test]
         public void TestGetBlockLight()
         {
-            var chunk = new Chunk();
+            var chunk = new Chunk(GlobalChunkCoordinates.Zero);
             chunk.SetBlockLight(LocalVoxelCoordinates.Zero, 5);
             Assert.AreEqual(5, chunk.GetBlockLight(LocalVoxelCoordinates.Zero));
         }
@@ -28,7 +28,7 @@ namespace TrueCraft.Test.World
         [Test]
         public void TestGetSkyLight()
         {
-            var chunk = new Chunk();
+            var chunk = new Chunk(GlobalChunkCoordinates.Zero);
             chunk.SetSkyLight(LocalVoxelCoordinates.Zero, 5);
             Assert.AreEqual(5, chunk.GetSkyLight(LocalVoxelCoordinates.Zero));
         }
@@ -36,7 +36,7 @@ namespace TrueCraft.Test.World
         [Test]
         public void TestGetMetadata()
         {
-            var chunk = new Chunk();
+            var chunk = new Chunk(GlobalChunkCoordinates.Zero);
             chunk.SetMetadata(LocalVoxelCoordinates.Zero, 5);
             Assert.AreEqual(5, chunk.GetMetadata(LocalVoxelCoordinates.Zero));
         }
@@ -44,7 +44,7 @@ namespace TrueCraft.Test.World
         [Test]
         public void TestHeightMap()
         {
-            var chunk = new Chunk();
+            var chunk = new Chunk(GlobalChunkCoordinates.Zero);
             for (int x = 0; x < Chunk.Width; ++x)
             for (int z = 0; z < Chunk.Width; ++z)
                 chunk.SetBlockID(new LocalVoxelCoordinates(x, 20, z), StoneBlock.BlockID);
@@ -58,7 +58,7 @@ namespace TrueCraft.Test.World
         [Test]
         public void TestConsistency()
         {
-            var chunk = new Chunk();
+            var chunk = new Chunk(GlobalChunkCoordinates.Zero);
             byte val = 0;
             for (int y = 0; y < Chunk.Height; y++)
             for (int x = 0; x < Chunk.Width; x++)
