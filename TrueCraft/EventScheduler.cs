@@ -44,13 +44,13 @@ namespace TrueCraft
             Events.Insert(i, e);
         }
 
-        public void ScheduleEvent(string name, IEventSubject subject, TimeSpan when, Action<IMultiplayerServer> action)
+        public void ScheduleEvent(string name, IEventSubject? subject, TimeSpan when, Action<IMultiplayerServer> action)
         {
             if (DisabledEvents.Contains(name))
                 return;
 
             long _when = Stopwatch.ElapsedTicks + TimeSpanTicksToStopWatchTicks(when.Ticks);
-            if (subject != null && !Subjects.Contains(subject))
+            if (subject is not null && !Subjects.Contains(subject))
             {
                 Subjects.Add(subject);
                 subject.Disposed += Subject_Disposed;
@@ -74,8 +74,11 @@ namespace TrueCraft
             return (long)(tsTicks * (swTicksPerSecond / tsTicksPerSecond));
         }
 
-        void Subject_Disposed(object sender, EventArgs e)
+        void Subject_Disposed(object? sender, EventArgs e)
         {
+            if (sender is null)
+                return;
+
             DisposedSubjects.Enqueue((IEventSubject)sender);
         }
 
@@ -108,8 +111,9 @@ namespace TrueCraft
             Profiler.Start("scheduler.dispose-subjects");
             while (DisposedSubjects.Count > 0 && Stopwatch.ElapsedMilliseconds < limit)
             {
-                IEventSubject subject;
+                IEventSubject? subject;
                 bool dequeued = false;
+                // TODO why spin in a tight loop when nothing is there to dequeue?
                 while (!(dequeued = DisposedSubjects.TryDequeue(out subject))
                     && Stopwatch.ElapsedMilliseconds < limit) ;
                 if (dequeued)
@@ -123,7 +127,7 @@ namespace TrueCraft
                             i--;
                         }
                     }
-                    Subjects.Remove(subject);
+                    Subjects.Remove(subject!);
                 }
             }
             limit = Stopwatch.ElapsedMilliseconds + 10;
@@ -150,7 +154,7 @@ namespace TrueCraft
         {
             public long When;
             public Action<IMultiplayerServer> Action;
-            public IEventSubject Subject;
+            public IEventSubject? Subject;
             public string Name;
         }
     }
