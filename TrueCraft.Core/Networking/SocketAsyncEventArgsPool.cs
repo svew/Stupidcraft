@@ -98,7 +98,7 @@ namespace TrueCraft.Core.Networking
                 }
             }
 
-            bufferManager = null;
+            bufferManager = null!;
         }
 
         ~SocketAsyncEventArgsPool()
