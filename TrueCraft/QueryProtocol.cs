@@ -14,42 +14,44 @@ namespace TrueCraft
 {
     public class QueryProtocol
     {
-        private UdpClient Udp;
-        private int Port;
-        private Timer Timer;
-        private Random Rnd;
-        private IMultiplayerServer Server;
-        private CancellationTokenSource CToken;
+        private readonly UdpClient _udp;
+        private readonly int _port;
+        private readonly Timer _timer;
+        private readonly Random _rnd;
+        private readonly IMultiplayerServer _server;
+        private readonly CancellationTokenSource _cToken;
 
         private readonly byte[] ProtocolVersion = { 0xFE, 0xFD };
         private readonly byte Type_Handshake = 0x09;
         private readonly byte Type_Stat = 0x00;
 
-        private ConcurrentDictionary<IPEndPoint, QueryUser> UserList;
+        private readonly ConcurrentDictionary<IPEndPoint, QueryUser> _userList;
 
         public QueryProtocol(IMultiplayerServer server)
         {
-            Rnd = new Random();
-            Server = server;
+            _udp = new UdpClient(_port);
+            _port = Program.ServerConfiguration?.QueryPort ?? ServerConfiguration.QueryPortDefault;
+            _timer = new Timer(ResetUserList, null, Timeout.Infinite, Timeout.Infinite);
+            _rnd = new Random();
+            _server = server;
+            _cToken = new CancellationTokenSource();
+            _userList = new ConcurrentDictionary<IPEndPoint, QueryUser>();
         }
+
         public void Start()
         {
-            Port = Program.ServerConfiguration.QueryPort;
-            Udp = new UdpClient(Port);
-            UserList = new ConcurrentDictionary<IPEndPoint, QueryUser>();
-            Timer = new Timer(ResetUserList, null, 0, 30000);
-            CToken = new CancellationTokenSource();
-            Udp.BeginReceive(HandleReceive, null);
+            _timer.Change(0, 30000);
+            _udp.BeginReceive(HandleReceive, null);
         }
 
         private void HandleReceive(IAsyncResult ar)
         {
-            if (CToken.IsCancellationRequested) return;
+            if (_cToken.IsCancellationRequested) return;
             
             try
             {
-                var clientEP = new IPEndPoint(IPAddress.Any, Port);
-                byte[] buffer = Udp.EndReceive(ar, ref clientEP);
+                IPEndPoint clientEP = new IPEndPoint(IPAddress.Any, _port);
+                byte[] buffer = _udp.EndReceive(ar, ref clientEP!);
 
                 DoReverseEndian(buffer);
 
@@ -66,10 +68,16 @@ namespace TrueCraft
                     }
                 }
             }
-            catch { }
-            if (CToken.IsCancellationRequested) return;
+            catch
+            {
+                // TODO:
+                //  1. What more specific Exception type could be caught?
+                //  2. When is such an Exception thrown?
+                //  3. Why is it safe to ignore?
+            }
+            if (_cToken.IsCancellationRequested) return;
 
-            Udp.BeginReceive(HandleReceive, null);
+            _udp.BeginReceive(HandleReceive, null);
         }
 
         private void HandleHandshake(byte[] buffer, IPEndPoint clientEP)
@@ -80,16 +88,16 @@ namespace TrueCraft
                 {
                     int sessionId = GetSessionId(stream);
 
-                    var user = new QueryUser { SessionId = sessionId, ChallengeToken = Rnd.Next() };
+                    var user = new QueryUser { SessionId = sessionId, ChallengeToken = _rnd.Next() };
 
-                    if (UserList.ContainsKey(clientEP))
+                    if (_userList.ContainsKey(clientEP))
                     {
                         QueryUser u;
-                        while (!UserList.TryRemove(clientEP, out u))
+                        while (!_userList.TryRemove(clientEP, out u))
                             Thread.Sleep(1);
                     }
 
-                    UserList[clientEP] = user;
+                    _userList[clientEP] = user;
 
                     using (var response = new MemoryStream())
                     {
@@ -201,40 +209,43 @@ namespace TrueCraft
 
         private void SendResponse(byte[] res, IPEndPoint destination)
         {
-            Udp.Send(res, res.Length, destination);
+            _udp.Send(res, res.Length, destination);
         }
         private QueryUser GetUser(IPEndPoint ipe)
         {
-            if (!UserList.ContainsKey(ipe))
+            if (!_userList.ContainsKey(ipe))
                 throw new Exception("Undefined user");
 
-            return UserList[ipe];
+            return _userList[ipe];
         }
         private Dictionary<string, string> GetStats()
         {
             var stats = new Dictionary<string, string>
             {
-                {"hostname", Program.ServerConfiguration.MOTD},
+                // TODO: why is a key called hostname storing the Message Of The Day???
+                {"hostname", Program.ServerConfiguration?.MOTD ?? String.Empty},
                 {"gametype", "SMP"},
                 {"game_id", "TRUECRAFT"},
                 {"version", "1.0"},
                 {"plugins", "TrueCraft"},
-                {"map", ((IWorld)Server.World).Name},
-                {"numplayers", Server.Clients.Count.ToString()},
+                {"map", ((IWorld?)_server.World)?.Name ?? String.Empty },
+                {"numplayers", _server.Clients.Count.ToString()},
                 {"maxplayers", "64"},
-                {"hostport", Program.ServerConfiguration.ServerPort.ToString()},
-                {"hostip", Program.ServerConfiguration.ServerAddress}
+                {"hostport", (Program.ServerConfiguration?.ServerPort ?? ServerConfiguration.ServerPortDefault).ToString()},
+                {"hostip", Program.ServerConfiguration?.ServerAddress ?? "?" }
             };
             return stats;
         }
+
         private List<string> GetPlayers()
         {
             var names = new List<string>();
-            lock (Program.Server.ClientLock)
-                foreach (var client in Server.Clients)
-                    names.Add(client.Username);
+            lock (Program.Server!.ClientLock)
+                foreach (var client in _server.Clients)
+                    names.Add(client.Username ?? "n/a");
             return names;
         }
+
         private void DoReverseEndian(byte[] buffer)
         {
             if (buffer.Length >= 7)
@@ -257,14 +268,14 @@ namespace TrueCraft
 
         public void Stop()
         {
-            Timer.Dispose();
-            CToken.Cancel();
-            Udp.Close();
+            _timer.Dispose();
+            _cToken.Cancel();
+            _udp.Close();
         }
 
-        private void ResetUserList(object state)
+        private void ResetUserList(object? state)
         {
-            UserList.Clear();
+            _userList.Clear();
         }
 
         struct QueryUser

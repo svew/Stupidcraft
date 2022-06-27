@@ -5,7 +5,9 @@ namespace TrueCraft
 {
     public class ServerConfiguration : Configuration
     {
+        public const int ServerPortDefault = 25565;
         public const bool QueryDefault = true;
+        public const int QueryPortDefault = 25566;
         public const bool EnableLightingDefault = true;
         public const bool EnableEventLoadingDefault = true;
         public const bool SinglePlayerDefault = false;
@@ -46,12 +48,12 @@ namespace TrueCraft
         {
             MOTD = "Welcome to TrueCraft!";
             Debug = new DebugConfiguration();
-            ServerPort = 25565;
+            ServerPort = ServerPortDefault;
             ServerAddress = "0.0.0.0";
             WorldSaveInterval = 30;
             Singleplayer = SinglePlayerDefault;
             Query = QueryDefault;
-            QueryPort = 25566;
+            QueryPort = QueryPortDefault;
             EnableLighting = EnableLightingDefault;
             EnableEventLoading = EnableEventLoadingDefault;
             DisabledEvents = new string[0];
