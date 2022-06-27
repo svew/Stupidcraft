@@ -13,7 +13,7 @@ namespace TrueCraft.Client.Handlers
             _lst.Add(action);
         }
 
-        public static ActionConfirmation Get(int actionNumber)
+        public static ActionConfirmation? Get(int actionNumber)
         {
             int n = 0;
             while (n < _lst.Count && _lst[n].ActionNumber != actionNumber)

@@ -88,9 +88,9 @@ namespace TrueCraft.Client.Handlers
         public static void HandleTransactionStatusPacket(IPacket packet, MultiplayerClient client)
         {
             TransactionStatusPacket statusPacket = (TransactionStatusPacket)packet;
-            ActionConfirmation action = ActionList.Get(statusPacket.ActionNumber);
+            ActionConfirmation? action = ActionList.Get(statusPacket.ActionNumber);
 
-            if (object.ReferenceEquals(action, null))
+            if (action is null)
                 throw new ApplicationException($"Unexpected Action Number from server: {statusPacket.ActionNumber}");
 
             action.TakeAction();
