@@ -103,7 +103,7 @@ namespace TrueCraft.Inventory
                     {
                         // The mouse pointer has some items in it, and they
                         // are compatible with the output
-                        sbyte maxItems = ItemRepository.GetItemProvider(itemStaging.ID).MaximumStack;
+                        sbyte maxItems = ItemRepository.GetItemProvider(itemStaging.ID)!.MaximumStack;   // itemStaging is known to not be Empty
                         int totalItems = itemStaging.Count + this[slotIndex].Count;
                         if (totalItems > maxItems)
                         {   // There are too many items, so this is a No-Op.
@@ -143,7 +143,7 @@ namespace TrueCraft.Inventory
                 if (itemStaging.CanMerge(this[slotIndex]))
                 {
                     // How many Items can be placed?
-                    sbyte maxItems = ItemRepository.GetItemProvider(itemStaging.ID).MaximumStack;
+                    sbyte maxItems = ItemRepository.GetItemProvider(itemStaging.ID)!.MaximumStack;   // itemStaging is known to not be Empty
                     int totalItems = itemStaging.Count + this[slotIndex].Count;
                     ItemStack old = this[slotIndex];
                     if (totalItems > maxItems)
@@ -249,7 +249,7 @@ namespace TrueCraft.Inventory
 
                 // Pick up one Recipe's worth of output.
                 // Q: do we have room for it?
-                IItemProvider itemInOutput = ItemRepository.GetItemProvider(output.ID);
+                IItemProvider itemInOutput = ItemRepository.GetItemProvider(output.ID)!;   // output is known to not be Empty
                 int maxHandStack = itemInOutput.MaximumStack;
 
                 if (!output.Empty && itemStaging.CanMerge(output) && itemStaging.Count + output.Count <= maxHandStack)
@@ -268,7 +268,7 @@ namespace TrueCraft.Inventory
                 if (this[slotIndex].CanMerge(itemStaging))
                 {
                     // The hand holds something, and the slot contents are compatible, place one item.
-                    int maxStack = ItemRepository.GetItemProvider(itemStaging.ID).MaximumStack;
+                    int maxStack = ItemRepository.GetItemProvider(itemStaging.ID)!.MaximumStack;   // itemStaging is known to not be Empty
                     if (maxStack > this[slotIndex].Count)
                     {
                         this[slotIndex] = new ItemStack(itemStaging.ID, (sbyte)(this[slotIndex].Count + 1), itemStaging.Metadata, itemStaging.Nbt);

@@ -64,7 +64,7 @@ namespace TrueCraft.Client.Inventory
                     {
                         // The mouse pointer has some items in it, and they
                         // are compatible with the output
-                        sbyte maxItems = ItemRepository.GetItemProvider(inHand.ID).MaximumStack;
+                        sbyte maxItems = ItemRepository.GetItemProvider(inHand.ID)!.MaximumStack;    // inHand is known to not be Empty
                         int totalItems = inHand.Count + this[slotIndex].Count;
                         if (totalItems > maxItems)
                         {   // There are too many items.  This is a No-OP.
@@ -104,7 +104,7 @@ namespace TrueCraft.Client.Inventory
                 if (inHand.CanMerge(this[slotIndex]))
                 {
                     // How many Items can be placed?
-                    sbyte maxItems = ItemRepository.GetItemProvider(inHand.ID).MaximumStack;
+                    sbyte maxItems = ItemRepository.GetItemProvider(inHand.ID)!.MaximumStack;    // inHand is known to not be Empty
                     int totalItems = inHand.Count + this[slotIndex].Count;
                     ItemStack old = this[slotIndex];
                     if (totalItems > maxItems)
@@ -215,7 +215,7 @@ namespace TrueCraft.Client.Inventory
                     return null;
 
                 // If we have room for it, pick up one Recipe's worth of output.
-                IItemProvider itemInOutput = ItemRepository.GetItemProvider(output.ID);
+                IItemProvider itemInOutput = ItemRepository.GetItemProvider(output.ID)!;   // output is known to not be Empty
                 int maxHandStack = itemInOutput.MaximumStack;
 
                 if (!output.Empty && heldItem.HeldItem.CanMerge(output) && heldItem.HeldItem.Count + output.Count <= maxHandStack)
@@ -240,7 +240,7 @@ namespace TrueCraft.Client.Inventory
                 if (this[slotIndex].CanMerge(heldItem.HeldItem))
                 {
                     // The hand holds something, and the slot contents are compatible, place one item.
-                    int maxStack = ItemRepository.GetItemProvider(heldItem.HeldItem.ID).MaximumStack;
+                    int maxStack = ItemRepository.GetItemProvider(heldItem.HeldItem.ID)!.MaximumStack;   // heldItem is known to not be Empty
                     if (maxStack > this[slotIndex].Count)
                         return ActionConfirmation.GetActionConfirmation(() =>
                         {
