@@ -34,7 +34,13 @@ namespace TrueCraft.Core.Inventory
 
         private void UpdateOutput()
         {
-            CraftingPattern pattern = CraftingPattern.GetCraftingPattern(this.GetItemStacks());
+            CraftingPattern? pattern = CraftingPattern.GetCraftingPattern(this.GetItemStacks());
+            if (pattern is null)
+            {
+                base[0].Item = ItemStack.EmptyStack;
+                return;
+            }
+
             this.Recipe = _repository.GetRecipe(pattern);
             base[0].Item = this.Recipe?.Output ?? ItemStack.EmptyStack;
         }
