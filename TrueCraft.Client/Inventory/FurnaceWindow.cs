@@ -129,8 +129,8 @@ namespace TrueCraft.Client.Inventory
                 {
                     short itemID = output.ID;
                     short metadata = output.Metadata;
-                    NbtCompound nbt = output.Nbt;
-                    int maxStack = ItemRepository.GetItemProvider(itemID).MaximumStack;
+                    NbtCompound? nbt = output.Nbt;
+                    int maxStack = ItemRepository.GetItemProvider(itemID)!.MaximumStack;   // output is known to not be Empty
                     int numToPickUp = Math.Min(maxStack - heldItem.HeldItem.Count, output.Count);
 
                     heldItem.HeldItem = new ItemStack(itemID, (sbyte)(heldItem.HeldItem.Count + numToPickUp), metadata, nbt);
@@ -155,7 +155,7 @@ namespace TrueCraft.Client.Inventory
             {
                 return ActionConfirmation.GetActionConfirmation(() =>
                 {
-                    int maxStack = ItemRepository.GetItemProvider(heldItem.HeldItem.ID).MaximumStack;
+                    int maxStack = ItemRepository.GetItemProvider(heldItem.HeldItem.ID)!.MaximumStack;   // heldItem is known to not be Empty
                     int numToPlace = Math.Min(maxStack - slotContent.Count, heldItem.HeldItem.Count);
                     this[slotIndex] = new ItemStack(slotContent.ID, (sbyte)(slotContent.Count + numToPlace),
                         slotContent.Metadata, slotContent.Nbt);
@@ -219,7 +219,7 @@ namespace TrueCraft.Client.Inventory
                 if (output.Empty || !output.CanMerge(heldItem.HeldItem))
                     return null;
 
-                maxStack = ItemRepository.GetItemProvider(output.ID).MaximumStack;
+                maxStack = ItemRepository.GetItemProvider(output.ID)!.MaximumStack;   // output is known to not be Empty
                 if (heldItem.HeldItem.Empty)
                 {
                     return ActionConfirmation.GetActionConfirmation(() =>
@@ -273,7 +273,7 @@ namespace TrueCraft.Client.Inventory
                     });
 
                 // Place one item.
-                maxStack = ItemRepository.GetItemProvider(stack.ID).MaximumStack;
+                maxStack = ItemRepository.GetItemProvider(stack.ID)!.MaximumStack;   // stack is known to not be Empty
                 if (stack.Count < maxStack)
                     return ActionConfirmation.GetActionConfirmation(() =>
                     {

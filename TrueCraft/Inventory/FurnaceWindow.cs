@@ -166,8 +166,8 @@ namespace TrueCraft.Inventory
 
                 short itemID = output.ID;
                 short metadata = output.Metadata;
-                NbtCompound nbt = output.Nbt;
-                int maxStack = ItemRepository.GetItemProvider(itemID).MaximumStack;
+                NbtCompound? nbt = output.Nbt;
+                int maxStack = ItemRepository.GetItemProvider(itemID)!.MaximumStack;   // output is known to not be Empty
                 int numToPickUp = Math.Min(maxStack - itemStaging.Count, output.Count);
 
                 itemStaging = new ItemStack(itemID, (sbyte)(itemStaging.Count + numToPickUp), metadata, nbt);
@@ -190,7 +190,7 @@ namespace TrueCraft.Inventory
             }
             else
             {
-                int maxStack = ItemRepository.GetItemProvider(itemStaging.ID).MaximumStack;
+                int maxStack = ItemRepository.GetItemProvider(itemStaging.ID)!.MaximumStack;   // itemStaging is known to not be Empty
                 int numToPlace = Math.Min(maxStack - slotContent.Count, itemStaging.Count);
                 this[slotIndex] = new ItemStack(slotContent.ID, (sbyte)(slotContent.Count + numToPlace),
                     slotContent.Metadata, slotContent.Nbt);
@@ -252,7 +252,7 @@ namespace TrueCraft.Inventory
                 if (output.Empty || !output.CanMerge(itemStaging))
                     return true;
 
-                maxStack = ItemRepository.GetItemProvider(output.ID).MaximumStack;
+                maxStack = ItemRepository.GetItemProvider(output.ID)!.MaximumStack;   // output is known to not be Empty
                 if (itemStaging.Empty)
                 {
                     sbyte amt = (sbyte)(output.Count / 2 + output.Count % 2);
@@ -300,7 +300,7 @@ namespace TrueCraft.Inventory
                 }
 
                 // Place one item.
-                maxStack = ItemRepository.GetItemProvider(stack.ID).MaximumStack;
+                maxStack = ItemRepository.GetItemProvider(stack.ID)!.MaximumStack;   // stack is known to not be Empty
                 if (stack.Count < maxStack)
                 {
                     this[slotIndex] = new ItemStack(itemStaging.ID, (sbyte)(stack.Count + 1), itemStaging.Metadata);
