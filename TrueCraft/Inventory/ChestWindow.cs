@@ -166,7 +166,7 @@ namespace TrueCraft.Inventory
 
                 if (itemStaging.CanMerge(this[slotIndex]))
                 {
-                    int maxStack = ItemRepository.GetItemProvider(itemStaging.ID).MaximumStack;
+                    int maxStack = ItemRepository.GetItemProvider(itemStaging.ID)!.MaximumStack;  // itemStaging is known to not be Empty.
                     int numToPlace = Math.Min(maxStack - this[slotIndex].Count, itemStaging.Count);
                     if (numToPlace > 0)
                     {
@@ -217,7 +217,7 @@ namespace TrueCraft.Inventory
             {
                 if (stack.CanMerge(itemStaging))
                 {
-                    int maxStack = ItemRepository.GetItemProvider(itemStaging.ID).MaximumStack;
+                    int maxStack = ItemRepository.GetItemProvider(itemStaging.ID)!.MaximumStack;  // itemStaging is known to not be Empty
                     if (stack.Count < maxStack)
                     {
                         this[slotIndex] = new ItemStack(itemStaging.ID, (sbyte)(stack.Count + 1), itemStaging.Metadata, itemStaging.Nbt);
