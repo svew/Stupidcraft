@@ -39,7 +39,7 @@ namespace TrueCraft.Handlers
                     var inventory = client.SelectedItem;
                     inventory.Count--;
                     IEntityManager entityManager = ((IDimensionServer)dimension).EntityManager;
-                    var item = new ItemEntity(dimension, entityManager, client.Entity.Position + new Vector3(0, PlayerEntity.Height, 0), spawned);
+                    var item = new ItemEntity(dimension, entityManager, client.Entity!.Position + new Vector3(0, PlayerEntity.Height, 0), spawned);
                     item.Velocity = MathHelper.RotateY(Vector3.Forwards, MathHelper.DegreesToRadians(client.Entity.Yaw)) * 0.5;
                     client.Hotbar[client.SelectedSlot].Item = inventory;
                     entityManager.SpawnEntity(item);
@@ -49,10 +49,10 @@ namespace TrueCraft.Handlers
                     foreach (var nearbyClient in server.Clients) // TODO: Send this repeatedly during the course of the digging
                     {
                         var c = (RemoteClient)nearbyClient;
-                        if (c.KnownEntities.Contains(client.Entity))
-                            c.QueuePacket(new AnimationPacket(client.Entity.EntityID, AnimationPacket.PlayerAnimation.SwingArm));
+                        if (c.KnownEntities.Contains(client.Entity!))
+                            c.QueuePacket(new AnimationPacket(client.Entity!.EntityID, AnimationPacket.PlayerAnimation.SwingArm));
                     }
-                    if (provider == null)
+                    if (provider is null)
                         server.SendMessage(ChatColor.Red + "WARNING: block provider for ID {0} is null (player digging)", descriptor.ID);
                     else
                         provider.BlockLeftClicked(descriptor, packet.Face, dimension, client);
@@ -69,10 +69,10 @@ namespace TrueCraft.Handlers
                     // So if you want to blame anyone, send flames to Notch for the stupid idea of not sending "stop digging" packets
                     // for hardness == 0 blocks.
 
-                    time = BlockProvider.GetHarvestTime(_client.Dimension, descriptor.ID, client.SelectedItem.ID, out damage);
+                    time = BlockProvider.GetHarvestTime(_client.Dimension!, descriptor.ID, client.SelectedItem.ID, out damage);
                     if (time <= 20)
                     {
-                        provider.BlockMined(descriptor, packet.Face, dimension, client);
+                        provider?.BlockMined(descriptor, packet.Face, dimension, client);
                         break;
                     }
                     client.ExpectedDigComplete = DateTime.UtcNow.AddMilliseconds(time);
@@ -81,12 +81,12 @@ namespace TrueCraft.Handlers
                     foreach (var nearbyClient in server.Clients)
                     {
                         var c = (RemoteClient)nearbyClient;
-                        if (c.KnownEntities.Contains(client.Entity))
-                            c.QueuePacket(new AnimationPacket(client.Entity.EntityID, AnimationPacket.PlayerAnimation.None));
+                        if (c.KnownEntities.Contains(client.Entity!))
+                            c.QueuePacket(new AnimationPacket(client.Entity!.EntityID, AnimationPacket.PlayerAnimation.None));
                     }
                     if (provider != null && descriptor.ID != 0)
                     {
-                        time = BlockProvider.GetHarvestTime(_client.Dimension, descriptor.ID, client.SelectedItem.ID, out damage);
+                        time = BlockProvider.GetHarvestTime(_client.Dimension!, descriptor.ID, client.SelectedItem.ID, out damage);
                         if (time <= 20)
                             break; // Already handled earlier
                         var diff = (DateTime.UtcNow - client.ExpectedDigComplete).TotalMilliseconds;
@@ -122,9 +122,9 @@ namespace TrueCraft.Handlers
             BlockDescriptor? block = null;
             if (position != -GlobalVoxelCoordinates.One)
             {
-                if (position.DistanceTo(client.Entity.Position) > 10 /* TODO: Reach */)
+                if (position.DistanceTo(client.Entity!.Position) > 10 /* TODO: Reach */)
                     return;
-                block = client.Dimension.GetBlockData(position);
+                block = client.Dimension!.GetBlockData(position);
             }
             else
             {
@@ -138,7 +138,7 @@ namespace TrueCraft.Handlers
                 if (provider == null)
                 {
                     server.SendMessage(ChatColor.Red + "WARNING: block provider for ID {0} is null (player placing)", block.Value.ID);
-                    server.SendMessage(ChatColor.Red + "Error occured from client {0} at coordinates {1}", client.Username, block.Value.Coordinates);
+                    server.SendMessage(ChatColor.Red + "Error occured from client {0} at coordinates {1}", client.Username ?? "?", block.Value.Coordinates);
                     server.SendMessage(ChatColor.Red + "Packet logged at {0}, please report upstream", DateTime.UtcNow);
                     return;
                 }
@@ -161,8 +161,8 @@ namespace TrueCraft.Handlers
                     var itemProvider = server.ItemRepository.GetItemProvider(slot.ID);
                     if (itemProvider == null)
                     {
-                        server.SendMessage(ChatColor.Red + "WARNING: item provider for ID {0} is null (player placing)", block.Value.ID);
-                        server.SendMessage(ChatColor.Red + "Error occured from client {0} at coordinates {1}", client.Username, block.Value.Coordinates);
+                        server.SendMessage(ChatColor.Red + "WARNING: item provider for ID {0} is null (player placing)", block?.ID.ToString() ?? "(null)");
+                        server.SendMessage(ChatColor.Red + "Error occured from client {0} at coordinates {1}", client.Username ?? "?", block?.Coordinates.ToString() ?? "(null)" );
                         server.SendMessage(ChatColor.Red + "Packet logged at {0}, please report upstream", DateTime.UtcNow);
                     }
                     if (block != null)
@@ -205,13 +205,13 @@ namespace TrueCraft.Handlers
                     var inventory = client.ItemStaging;
                     inventory.Count--;
                     item = new ItemEntity(dimension, entityManager,
-                        client.Entity.Position + new Vector3(0, PlayerEntity.Height, 0), spawned);
+                        client.Entity!.Position + new Vector3(0, PlayerEntity.Height, 0), spawned);
                     client.ItemStaging = inventory;
                 }
                 else
                 {
                     item = new ItemEntity(dimension, entityManager,
-                        client.Entity.Position + new Vector3(0, PlayerEntity.Height, 0), client.ItemStaging);
+                        client.Entity!.Position + new Vector3(0, PlayerEntity.Height, 0), client.ItemStaging);
                     client.ItemStaging = ItemStack.EmptyStack;
                 }
                 item.Velocity = MathHelper.FowardVector(client.Entity.Yaw) * 0.3;
@@ -236,7 +236,7 @@ namespace TrueCraft.Handlers
         {
             var packet = (CloseWindowPacket)_packet;
             if (packet.WindowID != 0)
-                (_client as RemoteClient).CloseWindow(true);
+                ((RemoteClient)_client).CloseWindow(true);
         }
 
         public static void HandleChangeHeldItem(IPacket _packet, IRemoteClient _client, IMultiplayerServer server)
@@ -244,16 +244,16 @@ namespace TrueCraft.Handlers
             var packet = (ChangeHeldItemPacket)_packet;
             var client = (RemoteClient)_client;
             client.SelectedSlot = packet.Slot;
-            IList<IRemoteClient> notified = ((IDimensionServer)client.Dimension).EntityManager.ClientsForEntity(client.Entity);
+            IList<IRemoteClient> notified = ((IDimensionServer)client.Dimension!).EntityManager.ClientsForEntity(client.Entity!);
             foreach (IRemoteClient c in notified)
-                c.QueuePacket(new EntityEquipmentPacket(client.Entity.EntityID, 0, client.SelectedItem.ID, client.SelectedItem.Metadata));
+                c.QueuePacket(new EntityEquipmentPacket(client.Entity!.EntityID, 0, client.SelectedItem.ID, client.SelectedItem.Metadata));
         }
 
         public static void HandlePlayerAction(IPacket _packet, IRemoteClient _client, IMultiplayerServer server)
         {
             var packet = (PlayerActionPacket)_packet;
             var client = (RemoteClient)_client;
-            var entity = (PlayerEntity)client.Entity;
+            PlayerEntity entity = (PlayerEntity)client.Entity!;
             switch (packet.Action)
             {
                 case PlayerActionPacket.PlayerAction.Crouch:
@@ -269,9 +269,9 @@ namespace TrueCraft.Handlers
         {
             var packet = (AnimationPacket)_packet;
             var client = (RemoteClient)_client;
-            if (packet.EntityID == client.Entity.EntityID)
+            if (packet.EntityID == client.Entity!.EntityID)
             {
-                IList<IRemoteClient> nearby = ((IDimensionServer)client.Dimension).EntityManager
+                IList<IRemoteClient> nearby = ((IDimensionServer)client.Dimension!).EntityManager
                     .ClientsForEntity(client.Entity);
                 foreach (IRemoteClient player in nearby)
                     player.QueuePacket(packet);
@@ -283,9 +283,9 @@ namespace TrueCraft.Handlers
             var packet = (UpdateSignPacket)_packet;
             var client = (RemoteClient)_client;
             var coords = new GlobalVoxelCoordinates(packet.X, packet.Y, packet.Z);
-            if (client.Entity.Position.DistanceTo((Vector3)coords) < 10) // TODO: Reach
+            if (client.Entity!.Position.DistanceTo((Vector3)coords) < 10) // TODO: Reach
             {
-                var block = client.Dimension.GetBlockID(coords);
+                var block = client.Dimension!.GetBlockID(coords);
                 if (block == UprightSignBlock.BlockID || block == WallSignBlock.BlockID)
                 {
                     ((IDimensionServer)client.Dimension).SetTileEntity(coords, new NbtCompound(new[]
