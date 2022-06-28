@@ -28,8 +28,7 @@ namespace TrueCraft.Client.Inventory
 
         public FurnaceWindow(IItemRepository itemRepository,
             ISlotFactory<ISlot> slotFactory, sbyte windowID,
-            ISlots<ISlot> mainInventory, ISlots<ISlot> hotBar,
-            IDimension dimension, GlobalVoxelCoordinates location) :
+            ISlots<ISlot> mainInventory, ISlots<ISlot> hotBar) :
             base(itemRepository, windowID, WindowType.Furnace, "Furnace",
                 new ISlots<ISlot>[] { GetSlots(itemRepository, slotFactory),
                     GetSlots(itemRepository, slotFactory),

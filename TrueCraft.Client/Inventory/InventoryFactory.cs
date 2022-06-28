@@ -21,7 +21,7 @@ namespace TrueCraft.Client.Inventory
             IDimension dimension, GlobalVoxelCoordinates location, GlobalVoxelCoordinates? otherHalf)
         {
             return new ChestWindow(itemRepository, slotFactory, windowID, mainInventory, hotBar,
-                dimension, location, otherHalf);
+                otherHalf is not null);
         }
 
         public ICraftingBenchWindow<ISlot> NewCraftingBenchWindow(IItemRepository itemRepository,
@@ -39,7 +39,7 @@ namespace TrueCraft.Client.Inventory
             IDimension dimension, GlobalVoxelCoordinates location)
         {
             return new FurnaceWindow(itemRepository, slotFactory, windowID,
-                mainInventory, hotBar, dimension, location);
+                mainInventory, hotBar);
         }
     }
 }

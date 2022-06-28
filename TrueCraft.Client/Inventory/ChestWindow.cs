@@ -13,9 +13,9 @@ namespace TrueCraft.Client.Inventory
         public ChestWindow(IItemRepository itemRepository,
             ISlotFactory<ISlot> slotFactory, sbyte windowID,
             ISlots<ISlot> mainInventory, ISlots<ISlot> hotBar,
-            IDimension dimension, GlobalVoxelCoordinates location, GlobalVoxelCoordinates? otherHalf) :
+            bool doubleChest) :
             base(itemRepository, slotFactory, windowID, mainInventory, hotBar,
-                otherHalf is not null)
+                doubleChest)
         {
         }
 

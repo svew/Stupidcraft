@@ -29,9 +29,9 @@ namespace TrueCraft.Handlers
                 remoteClient.QueuePacket(new DisconnectPacket("Client outdated! Use beta 1.7.3."));
             else if (loginRequestPacket.ProtocolVersion > server.PacketReader.ProtocolVersion)
                 remoteClient.QueuePacket(new DisconnectPacket("Server outdated! Use beta 1.7.3."));
-            else if (((IWorld)server.World).Count == 0)
+            else if (((IWorld)server.World!).Count == 0)
                 remoteClient.QueuePacket(new DisconnectPacket("Server has no worlds configured."));
-            else if (!server.PlayerIsWhitelisted(remoteClient.Username) && server.PlayerIsBlacklisted(remoteClient.Username))
+            else if (!server.PlayerIsWhitelisted(remoteClient.Username!) && server.PlayerIsBlacklisted(remoteClient.Username!))
                 remoteClient.QueuePacket(new DisconnectPacket("You're banned from this server"));
             else if (server.Clients.Count(c => c.Username == client.Username) > 1)
                 remoteClient.QueuePacket(new DisconnectPacket("The player with this username is already logged in"));
@@ -39,7 +39,7 @@ namespace TrueCraft.Handlers
             {
                 remoteClient.LoggedIn = true;
                 IDimensionServer dimension = (IDimensionServer)((IWorld)server.World)[DimensionID.Overworld];  // TODO read dimension from saved player data.
-                remoteClient.Entity = new PlayerEntity(dimension, dimension.EntityManager, remoteClient.Username);
+                remoteClient.Entity = new PlayerEntity(dimension, dimension.EntityManager, remoteClient.Username!);
                 remoteClient.Dimension = dimension;
                 remoteClient.ChunkRadius = 2;
 
@@ -48,23 +48,23 @@ namespace TrueCraft.Handlers
                 // Make sure they don't spawn in the ground
                 var collision = new Func<bool>(() =>
                 {
-                    byte feet = client.Dimension.GetBlockID((GlobalVoxelCoordinates)client.Entity.Position);
+                    byte feet = client.Dimension!.GetBlockID((GlobalVoxelCoordinates)client.Entity!.Position);
                     byte head = client.Dimension.GetBlockID((GlobalVoxelCoordinates)(client.Entity.Position + Vector3.Up));
                     var feetBox = server.BlockRepository.GetBlockProvider(feet).BoundingBox;
                     var headBox = server.BlockRepository.GetBlockProvider(head).BoundingBox;
                     return feetBox != null || headBox != null;
                 });
                 while (collision())
-                    client.Entity.Position += Vector3.Up;
+                    client.Entity!.Position += Vector3.Up;
 
                 IEntityManager entityManager = ((IDimensionServer)remoteClient.Dimension).EntityManager;
                 entityManager.SpawnEntity(remoteClient.Entity);
 
                 // Send setup packets
-                remoteClient.QueuePacket(new LoginResponsePacket(client.Entity.EntityID, 0, DimensionID.Overworld));
+                remoteClient.QueuePacket(new LoginResponsePacket(client.Entity!.EntityID, 0, DimensionID.Overworld));
                 remoteClient.UpdateChunks(block: true);
                 remoteClient.QueuePacket(((IServerWindow)remoteClient.InventoryWindowContent).GetWindowItemsPacket());
-                remoteClient.QueuePacket(new UpdateHealthPacket((remoteClient.Entity as PlayerEntity).Health));
+                remoteClient.QueuePacket(new UpdateHealthPacket(((PlayerEntity)remoteClient.Entity).Health));
                 remoteClient.QueuePacket(new SpawnPositionPacket((int)remoteClient.Entity.Position.X,
                         (int)remoteClient.Entity.Position.Y, (int)remoteClient.Entity.Position.Z));
                 remoteClient.QueuePacket(new SetPlayerPositionPacket(remoteClient.Entity.Position.X,
@@ -78,10 +78,10 @@ namespace TrueCraft.Handlers
                 server.Scheduler.ScheduleEvent("remote.keepalive", remoteClient, TimeSpan.FromSeconds(10), remoteClient.SendKeepAlive);
                 server.Scheduler.ScheduleEvent("remote.chunks", remoteClient, TimeSpan.FromSeconds(1), remoteClient.ExpandChunkRadius);
 
-                if (!string.IsNullOrEmpty(Program.ServerConfiguration.MOTD))
+                if (!string.IsNullOrEmpty(Program.ServerConfiguration?.MOTD))
                     remoteClient.SendMessage(Program.ServerConfiguration.MOTD);
-                if (!Program.ServerConfiguration.Singleplayer)
-                    server.SendMessage(ChatColor.Yellow + "{0} joined the server.", remoteClient.Username);
+                if (!(Program.ServerConfiguration?.Singleplayer ?? ServerConfiguration.SinglePlayerDefault))
+                    server.SendMessage(ChatColor.Yellow + "{0} joined the server.", remoteClient.Username!);
             }
         }
     }

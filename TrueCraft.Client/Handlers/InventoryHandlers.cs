@@ -17,53 +17,51 @@ namespace TrueCraft.Client.Handlers
             if (packet.WindowID == 0)
                 client.InventoryWindow.SetSlots(packet.Items);
             else
-                client.CurrentWindow.SetSlots(packet.Items);
+                client.CurrentWindow?.SetSlots(packet.Items);
         }
 
         public static void HandleSetSlot(IPacket _packet, MultiplayerClient client)
         {
             var packet = (SetSlotPacket)_packet;
-            IWindow<ISlot> window = null;
+            IWindow<ISlot>? window = null;
             if (packet.WindowID == 0)
                 window = client.InventoryWindow;
             else
                 window = client.CurrentWindow;
-            if (window != null)
-            {
-                if (packet.SlotIndex >= 0 && packet.SlotIndex < window.Count)
-                {
-                    window[packet.SlotIndex] = new ItemStack(packet.ItemID, packet.Count, packet.Metadata);
-                }
-            }
+            if (window is not null && packet.SlotIndex >= 0 && packet.SlotIndex < window.Count)
+                window[packet.SlotIndex] = new ItemStack(packet.ItemID, packet.Count, packet.Metadata);
         }
 
         public static void HandleOpenWindowPacket(IPacket _packet, MultiplayerClient client)
         {
             var packet = (OpenWindowPacket)_packet;
             sbyte windowID = packet.WindowID;
-            IInventoryFactory<ISlot> factory = new InventoryFactory<ISlot>();
             IItemRepository itemRepository = ItemRepository.Get();
             ISlotFactory<ISlot> slotFactory = SlotFactory<ISlot>.Get();
 
-            IWindow<ISlot> window = null;
+            // NOTE: Since we are instantiating client implementations of the
+            //       windows from within the Client, there is no need to invoke the
+            //       Inventory Factory.
+            IWindow<ISlot> window;
             switch (packet.Type)
             {
                 case WindowType.CraftingBench:
-                    window = factory.NewCraftingBenchWindow(itemRepository,
-                        CraftingRepository.Get(), slotFactory,
-                        windowID, client.Inventory, client.Hotbar, packet.Title, 3, 3);    // TODO hard-coded constants
+                    window = new CraftingBenchWindow(itemRepository, CraftingRepository.Get(),
+                        slotFactory,  windowID, client.Inventory, client.Hotbar, packet.Title, 3, 3);    // TODO hard-coded constants
                     break;
 
                 case WindowType.Chest:
-                    window = factory.NewChestWindow(itemRepository, slotFactory,
-                        windowID, client.Inventory, client.Hotbar,
-                        null, null, null);
+                    window = new ChestWindow(itemRepository, slotFactory, windowID,
+                        client.Inventory, client.Hotbar, packet.TotalSlots == 2 * ChestWindow.ChestLength);
                     break;
 
                 case WindowType.Furnace:
-                    window = factory.NewFurnaceWindow(itemRepository, slotFactory,
-                        windowID, null, client.Inventory, client.Hotbar, null, null);
+                    window = new FurnaceWindow(itemRepository, slotFactory, windowID,
+                        client.Inventory, client.Hotbar);
                     break;
+
+                default:
+                    throw new ApplicationException($"Unknown Window Type: {packet.Type}");
             }
 
             client.CurrentWindow = window;
@@ -71,7 +69,10 @@ namespace TrueCraft.Client.Handlers
 
         public static void HandleUpdateProgressPacket(IPacket packet, MultiplayerClient client)
         {
-            IFurnaceProgress furnace = (IFurnaceProgress)client.CurrentWindow;
+            IFurnaceProgress? furnace = client.CurrentWindow as IFurnaceProgress;
+            if (furnace is null)
+                return;
+
             UpdateProgressPacket progressPacket = (UpdateProgressPacket)packet;
 
             if (progressPacket.Target == UpdateProgressPacket.ProgressTarget.ItemCompletion)
