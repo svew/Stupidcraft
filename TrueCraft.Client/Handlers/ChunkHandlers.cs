@@ -15,18 +15,12 @@ namespace TrueCraft.Client.Handlers
             var packet = (BlockChangePacket)_packet;
             var coordinates = new GlobalVoxelCoordinates(packet.X, packet.Y, packet.Z);
             LocalVoxelCoordinates adjusted;
-            IChunk chunk;
-            try
-            {
-                adjusted = client.Dimension.FindBlockPosition(coordinates, out chunk);
-            }
-            catch (ArgumentException)
-            {
-                // TODO: FindBlockPosition will cause the loading or generation
-                //       of the block, which is totally inappropriate on the client.
-                // Relevant chunk is not loaded - ignore packet
+            IChunk? chunk;
+            adjusted = client.Dimension.FindBlockPosition(coordinates, out chunk);
+            // Relevant chunk is not loaded - ignore packet
+            if (chunk is null)
                 return;
-            }
+
             chunk.SetBlockID(adjusted, (byte)packet.BlockID);
             chunk.SetMetadata(adjusted, (byte)packet.Metadata);
             client.OnBlockChanged(new BlockChangeEventArgs(coordinates, new TrueCraft.Core.Logic.BlockDescriptor(),
@@ -52,9 +46,11 @@ namespace TrueCraft.Client.Handlers
             }
             else // Slow path
             {
+                // TODO: Is this code path ever used?  If so, will it ever be for a new-to-the-client
+                //   chunk?  If so, this will generate a NullReferenceException.
                 GlobalVoxelCoordinates coords = new GlobalVoxelCoordinates(packet.X, packet.Y, packet.Z);
                 var data = ZlibStream.UncompressBuffer(packet.CompressedData);
-                var adjustedCoords = client.Dimension.FindBlockPosition(coords, out chunk);
+                var adjustedCoords = client.Dimension.FindBlockPosition(coords, out chunk!);
                 int x = adjustedCoords.X, y = adjustedCoords.Y, z = adjustedCoords.Z;
                 int fullLength = packet.Width * packet.Height * packet.Depth; // Length of full sized byte section
                 int nibbleLength = fullLength / 2; // Length of nibble sections
