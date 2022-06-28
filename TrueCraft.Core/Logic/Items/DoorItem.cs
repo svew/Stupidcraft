@@ -34,7 +34,7 @@ namespace TrueCraft.Core.Logic.Items
             if (dimension.GetBlockID(top) != 0 || dimension.GetBlockID(bottom) != 0)
                 return;
             DoorFlags direction;
-            switch (MathHelper.DirectionByRotationFlat(user.Entity.Yaw))
+            switch (MathHelper.DirectionByRotationFlat(user.Entity!.Yaw))
             {
                 case Direction.North:
                     direction = DoorFlags.Northwest;

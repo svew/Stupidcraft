@@ -32,7 +32,7 @@ namespace TrueCraft.Core.Logic.Items
             var head = coordinates;
             var foot = coordinates;
             BedBlock.BedDirection direction = BedBlock.BedDirection.North;
-            switch (MathHelper.DirectionByRotationFlat(user.Entity.Yaw))
+            switch (MathHelper.DirectionByRotationFlat(user.Entity!.Yaw))
             {
                 case Direction.North:
                     head += Vector3i.North;
@@ -53,9 +53,9 @@ namespace TrueCraft.Core.Logic.Items
             }
             var bedProvider = (BedBlock)dimension.BlockRepository.GetBlockProvider(BedBlock.BlockID);
             if (!bedProvider.ValidBedPosition(new BlockDescriptor { Coordinates = head },
-                dimension.BlockRepository, user.Dimension, false, true) ||
+                dimension.BlockRepository, user.Dimension!, false, true) ||
                 !bedProvider.ValidBedPosition(new BlockDescriptor { Coordinates = foot },
-                dimension.BlockRepository, user.Dimension, false, true))
+                dimension.BlockRepository, user.Dimension!, false, true))
             {
                 return;
             }
