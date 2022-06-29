@@ -128,7 +128,7 @@ namespace TrueCraft.Test.World
             _skyLight[CoordinatesToIndex(coordinates)] = value;
         }
 
-        public void SetTileEntity(LocalVoxelCoordinates coordinates, NbtCompound value)
+        public void SetTileEntity(LocalVoxelCoordinates coordinates, NbtCompound? value)
         {
             throw new NotImplementedException();
         }
