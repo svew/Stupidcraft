@@ -23,9 +23,10 @@ namespace TrueCraft.World
         public event EventHandler? Disposed;
 
         #region Constructors
-        public Chunk(GlobalChunkCoordinates coordinates)
+        // Note: this Constructor is required for deserializing chunks from NBT.
+        public Chunk()
         {
-            _coordinates = coordinates;
+            _coordinates = GlobalChunkCoordinates.Zero;
             _biomes = new Biome[Width * Depth];
             _heightMap = new int[Width * Depth];
             _tileEntities = new Dictionary<LocalVoxelCoordinates, NbtCompound>();
@@ -38,6 +39,11 @@ namespace TrueCraft.World
             Metadata = new NybbleArray(Data, size, size);
             BlockLight = new NybbleArray(Data, size + halfSize, size);
             SkyLight = new NybbleArray(Data, size + halfSize * 2, size);
+        }
+
+        public Chunk(GlobalChunkCoordinates coordinates) : this()
+        {
+            _coordinates = coordinates;
         }
         #endregion
 
