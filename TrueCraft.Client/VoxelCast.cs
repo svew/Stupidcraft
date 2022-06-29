@@ -13,13 +13,13 @@ namespace TrueCraft.Client
     {
         // Thanks to http://gamedev.stackexchange.com/questions/47362/cast-ray-to-select-block-in-voxel-game
 
-        public static Tuple<GlobalVoxelCoordinates, BlockFace> Cast(IDimension dimension,
+        public static Tuple<GlobalVoxelCoordinates, BlockFace>? Cast(IDimension dimension,
             Ray ray, IBlockRepository repository, int posmax, int negmax)
         {
             // TODO: There are more efficient ways of doing this, fwiw
 
             double min = negmax * 2;
-            GlobalVoxelCoordinates pick = null;
+            GlobalVoxelCoordinates? pick = null;
             var face = BlockFace.PositiveY;
             for (int x = -posmax; x <= posmax; x++)
             {
@@ -50,8 +50,10 @@ namespace TrueCraft.Client
                     }
                 }
             }
-            if (object.ReferenceEquals(pick, null))
+
+            if (pick is null)
                 return null;
+
             return new Tuple<GlobalVoxelCoordinates, BlockFace>(pick, face);
         }
     }
