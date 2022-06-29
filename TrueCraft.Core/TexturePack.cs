@@ -19,7 +19,7 @@ namespace TrueCraft.Core
             File.OpenRead(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Content/pack.png")),
             File.ReadAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Content/pack.txt")));
 
-        public static TexturePack FromArchive(string path)
+        public static TexturePack? FromArchive(string path)
         {
             if (string.IsNullOrEmpty(path))
                 throw new ArgumentException();
@@ -54,7 +54,14 @@ namespace TrueCraft.Core
                     }
                 }
             }
-            catch { return null; }
+            catch
+            {
+                // TODO:
+                //  1. What more specific Exception could be caught?
+                //  2. Under what circumstances might it be thrown?
+                //  3. Why is it safe to ignore?
+                return null;
+            }
 
             string name = new FileInfo(path).Name;
             return new TexturePack(name, image, description);

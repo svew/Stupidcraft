@@ -242,8 +242,8 @@ namespace TrueCraft.Launcher.Views
                     Application.Invoke((sender, e) =>
                     {
                         OfficialAssetsProgress.Visible = false;
-                        var texturePack = TexturePack.FromArchive(
-                            System.IO.Path.Combine(Paths.TexturePacks, "Minecraft.zip"));
+                        TexturePack texturePack = TexturePack.FromArchive(
+                            System.IO.Path.Combine(Paths.TexturePacks, "Minecraft.zip"))!;  // file was just created, so this won't return null.
                         _texturePacks.Add(texturePack);
                         AddTexturePackRow(texturePack);
                     });
@@ -309,8 +309,8 @@ namespace TrueCraft.Launcher.Views
                 if (System.IO.Path.GetFileName(zip) == "Minecraft.zip")
                     officialPresent = true;
 
-                var texturePack = TexturePack.FromArchive(zip);
-                if (texturePack != null)
+                TexturePack? texturePack = TexturePack.FromArchive(zip);
+                if (texturePack is not null)
                 {
                     _texturePacks.Add(texturePack);
                     AddTexturePackRow(texturePack);
