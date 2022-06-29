@@ -52,7 +52,7 @@ namespace TrueCraft.Core.World
 
 
         #region Object overrides
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return Equals(obj as Vector3i);
         }
@@ -76,33 +76,33 @@ namespace TrueCraft.Core.World
         #endregion
 
         #region IEquatable<> & related
-        public bool Equals(Vector3i other)
+        public bool Equals(Vector3i? other)
         {
-            if (object.ReferenceEquals(other, null))
+            if (other is null)
                 return false;
 
             return this.X == other.X && this.Y == other.Y && this.Z == other.Z;
         }
 
-        public static bool operator ==(Vector3i l, Vector3i r)
+        public static bool operator ==(Vector3i? l, Vector3i? r)
         {
-            if (object.ReferenceEquals(l, null))
+            if (l is null)
             {
-                if (object.ReferenceEquals(r, null))
+                if (r is null)
                     return true;
                 else
                     return false;
             }
             else
             {
-                if (object.ReferenceEquals(r, null))
+                if (r is null)
                     return false;
                 else
                     return l.Equals(r);
             }
         }
 
-        public static bool operator !=(Vector3i l , Vector3i r)
+        public static bool operator !=(Vector3i? l , Vector3i? r)
         {
             return !(l == r);
         }
