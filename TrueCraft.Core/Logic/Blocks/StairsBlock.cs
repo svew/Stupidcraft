@@ -25,7 +25,7 @@ namespace TrueCraft.Core.Logic.Blocks
         public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
             byte meta = 0;
-            switch (MathHelper.DirectionByRotationFlat(user.Entity.Yaw))
+            switch (MathHelper.DirectionByRotationFlat(user.Entity!.Yaw))
             {
                 case Direction.East:
                     meta = (byte)StairDirection.East;

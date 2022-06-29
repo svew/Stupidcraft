@@ -52,7 +52,7 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
-            double rotation = user.Entity.Yaw + 180 % 360;
+            double rotation = user.Entity!.Yaw + 180 % 360;  // TODO: possible order of operations problem.
             if (rotation < 0)
                 rotation += 360;
 

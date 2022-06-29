@@ -82,7 +82,7 @@ namespace TrueCraft.Core.Logic.Blocks
             coordinates += MathHelper.BlockFaceToCoordinates(face);
             var descriptor = dimension.GetBlockData(coordinates);
             LadderDirection direction;
-            switch (MathHelper.DirectionByRotationFlat(user.Entity.Yaw))
+            switch (MathHelper.DirectionByRotationFlat(user.Entity!.Yaw))
             {
                 case Direction.North:
                     direction = LadderDirection.North;

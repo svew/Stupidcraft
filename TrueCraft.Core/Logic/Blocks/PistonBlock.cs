@@ -31,7 +31,7 @@ namespace TrueCraft.Core.Logic.Blocks
         public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
             dimension.SetMetadata(descriptor.Coordinates,
-                (byte)MathHelper.DirectionByRotation(user.Entity.Position, user.Entity.Yaw,
+                (byte)MathHelper.DirectionByRotation(user.Entity!.Position, user.Entity.Yaw,
                 descriptor.Coordinates, true));
         }
     }
@@ -63,7 +63,7 @@ namespace TrueCraft.Core.Logic.Blocks
         public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
             dimension.SetMetadata(descriptor.Coordinates,
-                (byte)MathHelper.DirectionByRotation(user.Entity.Position, user.Entity.Yaw,
+                (byte)MathHelper.DirectionByRotation(user.Entity!.Position, user.Entity.Yaw,
                 descriptor.Coordinates, true));
         }
     }
