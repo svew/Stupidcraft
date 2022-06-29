@@ -45,7 +45,7 @@ namespace TrueCraft.Client.Modules
             Font = font;
             SpriteBatch = new SpriteBatch(game.GraphicsDevice);
 
-            Inventory = game.TextureMapper.GetTexture("gui/inventory.png");
+            Inventory = game.TextureMapper!.GetTexture("gui/inventory.png");
             Crafting = game.TextureMapper.GetTexture("gui/crafting.png");
             _furnace = game.TextureMapper.GetTexture("gui/furnace.png");
             Items = game.TextureMapper.GetTexture("gui/items.png");
@@ -187,7 +187,7 @@ namespace TrueCraft.Client.Modules
                 ItemStack item = Game.Client.CurrentWindow[SelectedSlot];
                 if (!item.Empty)
                 {
-                    IItemProvider p = Game.ItemRepository.GetItemProvider(item.ID);
+                    IItemProvider p = Game.ItemRepository.GetItemProvider(item.ID)!;   // item is known to not be Empty
                     Point size = Font.MeasureText(p.GetDisplayName(item.Metadata));
                     mouse = Mouse.GetState().Position.ToVector2().ToPoint();
                     mouse += new Point(10, 10);
@@ -268,7 +268,7 @@ namespace TrueCraft.Client.Modules
                     Game.Client.QueuePacket(new CloseWindowPacket(Game.Client.CurrentWindow.WindowID));
                     Game.Client.CurrentWindow = null;
                     Mouse.SetPosition(Game.GraphicsDevice.Viewport.Width / 2, Game.GraphicsDevice.Viewport.Height / 2);
-                    Game.ControlModule.IgnoreNextUpdate = true;
+                    Game.ControlModule!.IgnoreNextUpdate = true;
                 }
                 return true;
             }
@@ -449,7 +449,7 @@ namespace TrueCraft.Client.Modules
                 if (item.Empty)
                     continue;
 
-                IItemProvider provider = Game.ItemRepository.GetItemProvider(item.ID);
+                IItemProvider provider = Game.ItemRepository.GetItemProvider(item.ID)!;  // item is known to not be Empty
                 var texture = provider.GetIconTexture((byte)item.Metadata);
                 if (texture is not null && stage == RenderStage.Sprites)
                     IconRenderer.RenderItemIcon(SpriteBatch, Items, provider,

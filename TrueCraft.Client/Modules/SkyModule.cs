@@ -194,7 +194,7 @@ namespace TrueCraft.Client.Modules
             var backup = Game.GraphicsDevice.BlendState;
             Game.GraphicsDevice.BlendState = BlendState.Additive;
             Game.GraphicsDevice.DepthStencilState = DepthStencilState.DepthRead;
-            CelestialPlaneEffect.Texture = Game.TextureMapper.GetTexture("terrain/sun.png");
+            CelestialPlaneEffect.Texture = Game.TextureMapper!.GetTexture("terrain/sun.png");
             CelestialPlaneEffect.World = Matrix.CreateRotationX(MathHelper.Pi)
                 * Matrix.CreateTranslation(0, 100, 0)
                 * Matrix.CreateRotationX(MathHelper.TwoPi * CelestialAngle);

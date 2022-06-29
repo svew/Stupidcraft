@@ -21,7 +21,7 @@ namespace TrueCraft.Client.Modules
             Game = game;
             Font = font;
             SpriteBatch = new SpriteBatch(game.GraphicsDevice);
-            GUI = game.TextureMapper.GetTexture("gui/gui.png");
+            GUI = game.TextureMapper!.GetTexture("gui/gui.png");
             Icons = game.TextureMapper.GetTexture("gui/icons.png");
             Items = game.TextureMapper.GetTexture("gui/items.png");
         }
@@ -130,7 +130,7 @@ namespace TrueCraft.Client.Modules
                 ItemStack item = Game.Client.Hotbar[i].Item;
                 if (item.Empty)
                     continue;
-                var provider = Game.ItemRepository.GetItemProvider(item.ID);
+                IItemProvider provider = Game.ItemRepository.GetItemProvider(item.ID)!;  // item is known to not be Empty
                 if (provider.GetIconTexture((byte)item.Metadata) == null)
                     continue;
                 var position = origin + new Point((int)Scale(i * 20), 0);
@@ -152,8 +152,8 @@ namespace TrueCraft.Client.Modules
                 ItemStack item = Game.Client.Hotbar[i].Item;
                 if (item.Empty)
                     continue;
-                var provider = Game.ItemRepository.GetItemProvider(item.ID) as IBlockProvider;
-                if (provider == null || provider.GetIconTexture((byte)item.Metadata) != null)
+                IBlockProvider? provider = Game.ItemRepository.GetItemProvider(item.ID) as IBlockProvider;
+                if (provider is null || provider.GetIconTexture((byte)item.Metadata) != null)
                     continue;
                 var position = origin + new Point((int)Scale(i * 20), 0);
                 var rect = new Rectangle(position, scale);

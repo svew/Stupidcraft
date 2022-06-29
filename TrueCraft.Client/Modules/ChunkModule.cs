@@ -41,7 +41,7 @@ namespace TrueCraft.Client.Modules
 
             _opaqueEffect = new BasicEffect(_game.GraphicsDevice);
             _opaqueEffect.TextureEnabled = true;
-            _opaqueEffect.Texture = _game.TextureMapper.GetTexture("terrain.png");
+            _opaqueEffect.Texture = _game.TextureMapper!.GetTexture("terrain.png");
             _opaqueEffect.FogEnabled = true;
             _opaqueEffect.FogStart = 0;
             _opaqueEffect.FogEnd = _game.Camera.Frustum.Far.D * 0.8f;
@@ -169,7 +169,7 @@ namespace TrueCraft.Client.Modules
 
         public void Draw(GameTime gameTime)
         {
-            _opaqueEffect.FogColor = _game.SkyModule.WorldFogColor.ToVector3();
+            _opaqueEffect.FogColor = _game.SkyModule!.WorldFogColor.ToVector3();
             _game.Camera.ApplyTo(_opaqueEffect);
             _game.Camera.ApplyTo(_transparentEffect);
             _opaqueEffect.AmbientLightColor = _transparentEffect.DiffuseColor = Color.White.ToVector3() 

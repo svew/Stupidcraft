@@ -63,7 +63,7 @@ namespace TrueCraft.Client.Modules
             _highlightEffect = new BasicEffect(_game.GraphicsDevice);
             _highlightEffect.VertexColorEnabled = true;
             _destructionEffect = new AlphaTestEffect(_game.GraphicsDevice);
-            _destructionEffect.Texture = game.TextureMapper.GetTexture("terrain.png");
+            _destructionEffect.Texture = game.TextureMapper!.GetTexture("terrain.png");
             _destructionEffect.ReferenceAlpha = 1;
 
             _progressMesh = GenerateProgressMesh();
