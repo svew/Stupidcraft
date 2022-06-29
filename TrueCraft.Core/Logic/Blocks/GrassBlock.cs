@@ -93,7 +93,7 @@ namespace TrueCraft.Core.Logic.Blocks
             }
         }
 
-        public void TrySpread(GlobalVoxelCoordinates coords, IDimension dimension, IMultiplayerServer server)
+        private void TrySpread(IMultiplayerServer server, IDimension dimension, GlobalVoxelCoordinates coords)
         {
             if (!dimension.IsValidPosition(coords + Vector3i.Up))
                 return;
@@ -135,7 +135,7 @@ namespace TrueCraft.Core.Logic.Blocks
                         dimension.SetBlockID(candidate, GrassBlock.BlockID);
                         server.Scheduler.ScheduleEvent("grass", chunk,
                             TimeSpan.FromSeconds(MathHelper.Random.Next(MinGrowthTime, MaxGrowthTime)),
-                            s => TrySpread(candidate, dimension, server));
+                            s => TrySpread(server, dimension, candidate));
                     }
                     break;
                 }
@@ -144,20 +144,21 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
+            // TODO: Investigate inconsistency - some methods change this coordinate per BlockFace.  Why not here?
             IChunk? chunk = dimension.GetChunk(descriptor.Coordinates);
             user.Server.Scheduler.ScheduleEvent("grass",
                 chunk!,    // very unlikely to be null as the block can't be placed in an unloaded Chunk.
                 TimeSpan.FromSeconds(MathHelper.Random.Next(MinGrowthTime, MaxGrowthTime)),
-                s => TrySpread(descriptor.Coordinates, dimension, user.Server));
+                s => TrySpread(user.Server, dimension, descriptor.Coordinates));
         }
 
-        public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IDimension dimension)
+        public override void BlockLoadedFromChunk(IMultiplayerServer server, IDimension dimension, GlobalVoxelCoordinates coords)
         {
-            IChunk? chunk = dimension.GetChunk(coords);
+            IChunk chunk = dimension.GetChunk(coords)!;
             server.Scheduler.ScheduleEvent("grass",
-                chunk!,    // Chunk loading caused this method to be called.
+                chunk,    // Chunk loading caused this method to be called.
                 TimeSpan.FromSeconds(MathHelper.Random.Next(MinGrowthTime, MaxGrowthTime)),
-                s => TrySpread(coords, dimension, server));
+                s => TrySpread(server, dimension, coords));
         }
     }
 }

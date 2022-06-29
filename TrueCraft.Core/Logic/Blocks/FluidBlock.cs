@@ -66,11 +66,12 @@ namespace TrueCraft.Core.Logic.Blocks
             public byte Level;
         }
 
-        private void ScheduleNextEvent(GlobalVoxelCoordinates coords, IDimension dimension, IMultiplayerServer server)
+        private void ScheduleNextEvent(IMultiplayerServer server, IDimension dimension, GlobalVoxelCoordinates coords)
         {
             IChunk? chunk = dimension.GetChunk(coords);
             if (chunk is null || dimension.GetBlockID(coords) == StillID)
                 return;
+
             server.Scheduler.ScheduleEvent("fluid", chunk,
                 TimeSpan.FromSeconds(SecondsBetweenUpdates), (_server) =>
                 AutomataUpdate(_server, dimension, coords));
@@ -79,7 +80,7 @@ namespace TrueCraft.Core.Logic.Blocks
         public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
             if (ID == FlowingID)
-                ScheduleNextEvent(descriptor.Coordinates, dimension, user.Server);
+                ScheduleNextEvent(user.Server, dimension, descriptor.Coordinates);
         }
 
         public override void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IDimension dimension)
@@ -91,14 +92,14 @@ namespace TrueCraft.Core.Logic.Blocks
                 if (outward.Length != 0 || inward != descriptor.Metadata)
                 {
                     dimension.SetBlockID(descriptor.Coordinates, FlowingID);
-                    ScheduleNextEvent(descriptor.Coordinates, dimension, server);
+                    ScheduleNextEvent(server, dimension, descriptor.Coordinates);
                 }
             }
         }
 
-        public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IDimension dimension)
+        public override void BlockLoadedFromChunk(IMultiplayerServer server, IDimension dimension, GlobalVoxelCoordinates coordinates)
         {
-            ScheduleNextEvent(coords, dimension, server);
+            ScheduleNextEvent(server, dimension, coordinates);
         }
 
         private void AutomataUpdate(IMultiplayerServer server, IDimension dimension, GlobalVoxelCoordinates coords)

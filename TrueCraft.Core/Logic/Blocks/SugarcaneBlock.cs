@@ -102,11 +102,12 @@ namespace TrueCraft.Core.Logic.Blocks
             }
         }
 
-        private void TryGrowth(IMultiplayerServer server, GlobalVoxelCoordinates coords, IDimension dimension)
+        private void TryGrowth(IMultiplayerServer server, IDimension dimension, GlobalVoxelCoordinates coords)
         {
             IChunk? chunk = dimension.GetChunk(coords);
             if (chunk is null || dimension.GetBlockID(coords) != BlockID)
                 return;
+
             // Find current height of stalk
             int height = 0;
             for (int y = -MaxGrowHeight; y <= MaxGrowHeight; y++)
@@ -126,14 +127,14 @@ namespace TrueCraft.Core.Logic.Blocks
                         dimension.SetBlockID(coords + Vector3i.Up, BlockID);
                         server.Scheduler.ScheduleEvent("sugarcane", chunk,
                             TimeSpan.FromSeconds(MathHelper.Random.Next(MinGrowthSeconds, MaxGrowthSeconds)),
-                            (_server) => TryGrowth(_server, coords + Vector3i.Up, dimension));
+                            (_server) => TryGrowth(_server, dimension, coords + Vector3i.Up));
                     }
                 }
                 else
                 {
                     server.Scheduler.ScheduleEvent("sugarcane", chunk,
                         TimeSpan.FromSeconds(MathHelper.Random.Next(MinGrowthSeconds, MaxGrowthSeconds)),
-                        (_server) => TryGrowth(_server, coords, dimension));
+                        (_server) => TryGrowth(_server, dimension, coords));
                 }
             }
         }
@@ -143,15 +144,15 @@ namespace TrueCraft.Core.Logic.Blocks
             IChunk chunk = dimension.GetChunk(descriptor.Coordinates)!;
             user.Server.Scheduler.ScheduleEvent("sugarcane", chunk,
                 TimeSpan.FromSeconds(MathHelper.Random.Next(MinGrowthSeconds, MaxGrowthSeconds)),
-                (server) => TryGrowth(server, descriptor.Coordinates, dimension));
+                (server) => TryGrowth(server, dimension, descriptor.Coordinates));
         }
 
-        public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IDimension dimension)
+        public override void BlockLoadedFromChunk(IMultiplayerServer server, IDimension dimension, GlobalVoxelCoordinates coords)
         {
-            var chunk = dimension.GetChunk(coords);
+            IChunk chunk = dimension.GetChunk(coords)!;
             server.Scheduler.ScheduleEvent("sugarcane", chunk,
                 TimeSpan.FromSeconds(MathHelper.Random.Next(MinGrowthSeconds, MaxGrowthSeconds)),
-                s => TryGrowth(s, coords, dimension));
+                s => TryGrowth(s, dimension, coords));
         }
     }
 }

@@ -436,7 +436,7 @@ namespace TrueCraft.Core.Logic.Blocks
             UpdateWindows(coords, state);
         }
 
-        public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IDimension dimension)
+        public override void BlockLoadedFromChunk(IMultiplayerServer server, IDimension dimension, GlobalVoxelCoordinates coords)
         {
             ServerOnly.Assert();
 

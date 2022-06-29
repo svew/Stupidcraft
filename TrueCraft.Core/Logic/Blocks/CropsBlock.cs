@@ -56,19 +56,19 @@ namespace TrueCraft.Core.Logic.Blocks
                 return new[] { new ItemStack(SeedsItem.ItemID) };
         }
 
-        private void GrowBlock(IMultiplayerServer server, IDimension dimension, GlobalVoxelCoordinates coords)
+        private void GrowBlock(IMultiplayerServer server, IChunk chunk, LocalVoxelCoordinates coords)
         {
-            IChunk? chunk = dimension.GetChunk(coords);
-            if (chunk is null || dimension.GetBlockID(coords) != BlockID)
+            if (chunk.GetBlockID(coords) != BlockID)
                 return;
-            var meta = dimension.GetMetadata(coords);
+
+            byte meta = chunk.GetMetadata(coords);
             meta++;
-            dimension.SetMetadata(coords, meta);
+            chunk.SetMetadata(coords, meta);
             if (meta < 7)
             {
                 server.Scheduler.ScheduleEvent("crops",
                     chunk, TimeSpan.FromSeconds(MathHelper.Random.Next(30, 60)),
-                   (_server) => GrowBlock(_server, dimension, coords));
+                   (_server) => GrowBlock(_server, chunk, coords));
             }
         }
 
@@ -83,18 +83,19 @@ namespace TrueCraft.Core.Logic.Blocks
 
         public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
-            IChunk chunk = dimension.GetChunk(descriptor.Coordinates)!;
+            GlobalVoxelCoordinates coordinates = descriptor.Coordinates + MathHelper.BlockFaceToCoordinates(face);
+            IChunk chunk = dimension.GetChunk(coordinates)!;
             user.Server.Scheduler.ScheduleEvent("crops", chunk,
                 TimeSpan.FromSeconds(MathHelper.Random.Next(30, 60)),
-                (server) => GrowBlock(server, dimension, descriptor.Coordinates + MathHelper.BlockFaceToCoordinates(face)));
+                (server) => GrowBlock(server, chunk, (LocalVoxelCoordinates)coordinates));
         }
 
-        public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IDimension dimension)
+        public override void BlockLoadedFromChunk(IMultiplayerServer server, IDimension dimension, GlobalVoxelCoordinates coordinates)
         {
-            var chunk = dimension.GetChunk(coords);
+            IChunk chunk = dimension.GetChunk(coordinates)!;
             server.Scheduler.ScheduleEvent("crops", chunk,
                 TimeSpan.FromSeconds(MathHelper.Random.Next(30, 60)),
-                (s) => GrowBlock(s, dimension, coords));
+                (s) => GrowBlock(s, chunk, (LocalVoxelCoordinates)coordinates));
         }
     }
 }

@@ -29,7 +29,15 @@ namespace TrueCraft.Core.Logic
         void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user);
         void BlockMined(BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user);
         void BlockUpdate(BlockDescriptor descriptor, BlockDescriptor source, IMultiplayerServer server, IDimension world);
-        void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IDimension world);
+
+        /// <summary>
+        /// Called for each Block in a newly loaded Chunk.
+        /// </summary>
+        /// <param name="server"></param>
+        /// <param name="dimension">The Dimension containing the Block</param>
+        /// <param name="coordinates">The coordinates of the Block within the Dimension.</param>
+        void BlockLoadedFromChunk(IMultiplayerServer server, IDimension dimension, GlobalVoxelCoordinates coordinates);
+
         void TileEntityLoadedForClient(BlockDescriptor descriptor, IDimension world, NbtCompound compound, IRemoteClient client);
     }
 }

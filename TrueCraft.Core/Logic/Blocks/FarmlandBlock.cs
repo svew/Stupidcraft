@@ -75,7 +75,7 @@ namespace TrueCraft.Core.Logic.Blocks
             return false;
         }
 
-        void HydrationCheckEvent(IMultiplayerServer server, GlobalVoxelCoordinates coords, IDimension dimension)
+        private void HydrationCheckEvent(IMultiplayerServer server, IDimension dimension, GlobalVoxelCoordinates coords)
         {
             IChunk? chunk = dimension.GetChunk(coords);
             if (chunk is null || dimension.GetBlockID(coords) != BlockID)
@@ -99,7 +99,7 @@ namespace TrueCraft.Core.Logic.Blocks
             }
             server.Scheduler.ScheduleEvent("farmland", chunk,
                 TimeSpan.FromSeconds(UpdateIntervalSeconds),
-                _server => HydrationCheckEvent(_server, coords, dimension));
+                _server => HydrationCheckEvent(_server, dimension, coords));
         }
 
         public override void BlockPlaced(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
@@ -111,15 +111,15 @@ namespace TrueCraft.Core.Logic.Blocks
             IChunk chunk = dimension.GetChunk(descriptor.Coordinates)!;
             user.Server.Scheduler.ScheduleEvent("farmland", chunk,
                 TimeSpan.FromSeconds(UpdateIntervalSeconds),
-                server => HydrationCheckEvent(server, descriptor.Coordinates, dimension));
+                server => HydrationCheckEvent(server, dimension, descriptor.Coordinates));
         }
 
-        public override void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IDimension dimension)
+        public override void BlockLoadedFromChunk(IMultiplayerServer server, IDimension dimension, GlobalVoxelCoordinates coords)
         {
-            var chunk = dimension.GetChunk(coords);
+            IChunk chunk = dimension.GetChunk(coords)!;
             server.Scheduler.ScheduleEvent("farmland", chunk,
                 TimeSpan.FromSeconds(UpdateIntervalSeconds),
-                s => HydrationCheckEvent(s, coords, dimension));
+                s => HydrationCheckEvent(s, dimension, coords));
         }
     }
 }

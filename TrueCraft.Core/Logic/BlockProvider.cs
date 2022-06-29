@@ -209,8 +209,8 @@ namespace TrueCraft.Core.Logic
             }
         }
 
-        // TODO: Add IChunk parameter
-        public virtual void BlockLoadedFromChunk(GlobalVoxelCoordinates coords, IMultiplayerServer server, IDimension dimension)
+        /// <inheritdoc />
+        public virtual void BlockLoadedFromChunk(IMultiplayerServer server, IDimension dimension, GlobalVoxelCoordinates coordinates)
         {
             ServerOnly.Assert();
 

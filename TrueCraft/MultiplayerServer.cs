@@ -233,8 +233,9 @@ namespace TrueCraft
         void ScheduleUpdatesForChunk(IDimension dimension, IChunk chunk)
         {
             chunk.UpdateHeightMap();
-            int _x = chunk.Coordinates.X * WorldConstants.ChunkWidth;
-            int _z = chunk.Coordinates.Z * WorldConstants.ChunkDepth;
+            // NOTE: adhoc coordinate conversion.
+            int xg = chunk.Coordinates.X * WorldConstants.ChunkWidth;
+            int zg = chunk.Coordinates.Z * WorldConstants.ChunkDepth;
             LocalVoxelCoordinates _coords;
             GlobalVoxelCoordinates coords;
             for (byte x = 0; x < WorldConstants.ChunkWidth; x++)
@@ -245,11 +246,11 @@ namespace TrueCraft
                     {
                         _coords = new LocalVoxelCoordinates(x, y, z);
                         var id = chunk.GetBlockID(_coords);
-                        if (id == 0)
+                        if (id == 0)  // TODO: Fix hard-coded air block ID.
                             continue;
-                        coords = new GlobalVoxelCoordinates(_x + x, y, _z + z);
+                        coords = new GlobalVoxelCoordinates(xg + x, y, zg + z);
                         var provider = BlockRepository.GetBlockProvider(id);
-                        provider.BlockLoadedFromChunk(coords, this, dimension);
+                        provider.BlockLoadedFromChunk(this, dimension, coords);
                     }
                 }
             }
