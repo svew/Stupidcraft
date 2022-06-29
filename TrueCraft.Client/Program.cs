@@ -23,33 +23,60 @@ namespace TrueCraft.Client
             UserSettings.Local = new UserSettings();
             UserSettings.Local.Load();
 
+            IPEndPoint? serverEndPoint = null;
+
+            try
+            {
+                serverEndPoint = ParseEndPoint(args[0]);
+            }
+            catch(Exception ex)
+            {
+                Console.Error.WriteLine(ex.Message);
+                return;
+            }
+            if (serverEndPoint is null)
+            {
+                Console.Error.WriteLine($"Unable to resolve server: {args[0]}");
+                return;
+            }
+
             var user = new TrueCraftUser { Username = args[1] };
             var client = new MultiplayerClient(user);
-            var game = new TrueCraftGame(client, ParseEndPoint(args[0]));
+            var game = new TrueCraftGame(client, serverEndPoint);
             game.Run();
             client.Disconnect();
         }
 
-        private static IPEndPoint ParseEndPoint(string arg)
+        private static IPEndPoint? ParseEndPoint(string arg)
         {
-            IPAddress address;
+            IPAddress? address;
             int port;
+
             if (arg.Contains(':'))
             {
                 // Both IP and port are specified
                 var parts = arg.Split(':');
                 if (!IPAddress.TryParse(parts[0], out address))
                     address = Resolve(parts[0]);
+                if (address is null)
+                    return null;
                 return new IPEndPoint(address, int.Parse(parts[1]));
             }
+
             if (IPAddress.TryParse(arg, out address))
                 return new IPEndPoint(address, 25565);
+
             if (int.TryParse(arg, out port))
                 return new IPEndPoint(IPAddress.Loopback, port);
-            return new IPEndPoint(Resolve(arg), 25565);
+
+            address = Resolve(arg);
+            if (address is not null)
+                return new IPEndPoint(address, 25565);
+            else
+                return null;
         }
 
-        private static IPAddress Resolve(string arg)
+        private static IPAddress? Resolve(string arg)
         {
             return Dns.GetHostEntry(arg).AddressList.FirstOrDefault(item => item.AddressFamily == AddressFamily.InterNetwork);
         }
