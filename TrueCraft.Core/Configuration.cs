@@ -27,11 +27,10 @@ namespace TrueCraft.Core
             else
             {
                 config = new T();
+                var serializer = new Serializer();
+                using (var writer = new StreamWriter(configFileName))
+                    serializer.Serialize(writer, config);
             }
-
-            var serializer = new Serializer();
-            using (var writer = new StreamWriter(configFileName))
-                serializer.Serialize(writer, config);
 
             return config;
         }
