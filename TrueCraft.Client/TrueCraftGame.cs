@@ -147,7 +147,7 @@ namespace TrueCraft.Client
             _inputModules.Add(windowModule);
             _inputModules.Add(_debugInfoModule);
             _inputModules.Add(_chatModule);
-            _inputModules.Add(new HUDModule(this, _pixel));
+            _inputModules.Add(new HUDModule(this, _pixel!));    // _pixel was initialized in LoadContent
             _inputModules.Add(ControlModule = new PlayerControlModule(this));
 
             Client.PropertyChanged += HandleClientPropertyChanged;
