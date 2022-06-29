@@ -22,21 +22,24 @@ namespace TrueCraft.Client
 {
     public class TrueCraftGame : Game
     {
+        private readonly Camera _camera;
+        private readonly AudioManager _audio;
+
         public MultiplayerClient Client { get; private set; }
         public GraphicsDeviceManager Graphics { get; private set; }
         public TextureMapper? TextureMapper { get; private set; }
-        public Camera? Camera { get; private set; }
+        public Camera Camera { get => _camera; }
         public ConcurrentBag<Action> PendingMainThreadActions { get; set; }
         public double Bobbing { get; set; }
         public ChunkModule? ChunkModule { get; private set; }
-        public ChatModule? _chatModule;
+        private ChatModule? _chatModule;
         public float ScaleFactor { get; set; }
         public GlobalVoxelCoordinates? HighlightedBlock { get; set; }
         public BlockFace HighlightedBlockFace { get; set; }
         public DateTime StartDigging { get; set; }
         public DateTime EndDigging { get; set; }
         public GlobalVoxelCoordinates? TargetBlock { get; set; }
-        public AudioManager? Audio { get; private set; }
+        public AudioManager Audio { get => _audio; }
         public Texture2D? White1x1 { get; private set; }
         public PlayerControlModule? ControlModule { get; private set; }
         public SkyModule? SkyModule { get; private set; }
@@ -97,6 +100,9 @@ namespace TrueCraft.Client
 
             _gamePadComponent = new GamePadHandler(this);
             Components.Add(_gamePadComponent);
+
+            _camera = new Camera(GraphicsDevice.Viewport.AspectRatio, 70.0f, 0.1f, 1000.0f);
+            _audio = new AudioManager();
         }
 
         void Window_ClientSizeChanged(object? sender, EventArgs e)
@@ -116,14 +122,12 @@ namespace TrueCraft.Client
         {
             base.Initialize(); // (calls LoadContent)
 
-            Camera = new Camera(GraphicsDevice.Viewport.AspectRatio, 70.0f, 0.1f, 1000.0f);
             UpdateCamera();
 
             White1x1 = new Texture2D(GraphicsDevice, 1, 1);
             White1x1.SetData<Color>(new[] { Color.White });
 
-            Audio = new AudioManager();
-            Audio.LoadDefaultPacks(Content);
+            _audio.LoadDefaultPacks(Content);
 
             SkyModule = new SkyModule(this);
             ChunkModule = new ChunkModule(this);
@@ -372,20 +376,17 @@ namespace TrueCraft.Client
 
         private void UpdateCamera()
         {
-            if (Camera == null)
-                return;
-
             const double bobbingMultiplier = 0.05;
 
             var bobbing = Bobbing * 1.5;
             var xbob = Math.Cos(bobbing + Math.PI / 2) * bobbingMultiplier;
             var ybob = Math.Sin(Math.PI / 2 - (2 * bobbing)) * bobbingMultiplier;
 
-            Camera.Position = new TVector3(
+            _camera.Position = new TVector3(
                 Client.Position.X + xbob, Client.Position.Y + Client.Size.Height + ybob, Client.Position.Z);
 
-            Camera.Pitch = Client.Pitch;
-            Camera.Yaw = Client.Yaw;
+            _camera.Pitch = Client.Pitch;
+            _camera.Yaw = Client.Yaw;
         }
 
         protected override void Draw(GameTime gameTime)
