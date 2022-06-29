@@ -55,7 +55,10 @@ namespace TrueCraft.Client.Rendering
         public static void RenderItemIcon(SpriteBatch spriteBatch, Texture2D texture, IItemProvider provider,
             byte metadata, Rectangle destination, Color color)
         {
-            var icon = provider.GetIconTexture(metadata);
+            Tuple<int, int>? icon = provider.GetIconTexture(metadata);
+            if (icon is null)
+                icon = new Tuple<int, int>(0, 0);  // TODO: can we do a better default?
+
             var scale = texture.Width / 16;
             var source = new Rectangle(icon.Item1 * scale, icon.Item2 * scale, scale, scale);
             spriteBatch.Draw(texture, destination, source, color);

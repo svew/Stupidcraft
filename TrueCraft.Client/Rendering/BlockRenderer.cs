@@ -47,9 +47,9 @@ namespace TrueCraft.Client.Rendering
 
         public static VertexPositionNormalColorTexture[] RenderIcon(IBlockProvider provider, short metadata, out int[] indices)
         {
-            Tuple<int, int> textureMap = provider.GetTextureMap((byte)metadata);
-            if (textureMap == null)
-                textureMap = new Tuple<int, int>(0, 0);
+            Tuple<int, int>? textureMap = provider.GetTextureMap((byte)metadata);
+            if (textureMap is null)
+                textureMap = new Tuple<int, int>(0, 0);   // TODO: Better default texture?
 
             var texCoords = new Vector2(textureMap.Item1, textureMap.Item2);
             var texture = new[]
