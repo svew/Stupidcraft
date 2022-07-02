@@ -55,7 +55,7 @@ namespace TrueCraft.Commands
 
         public override string Description
         {
-            get { return "Saves the world!"; }
+            get { return "Saves the dimension!"; }
         }
 
         public override string[] Aliases
@@ -75,7 +75,7 @@ namespace TrueCraft.Commands
 
         public override void Help(IRemoteClient client, string alias, string[] arguments)
         {
-            client.SendMessage("/save: Saves the world!");
+            client.SendMessage("/save: Saves the dimension!");
         }
     }
 
@@ -207,7 +207,7 @@ namespace TrueCraft.Commands
             var entity = manager.GetEntityByID(id) as MobEntity;
             if (entity == null)
             {
-                client.SendMessage(ChatColor.Red + "An entity with that ID does not exist in this world.");
+                client.SendMessage(ChatColor.Red + "An entity with that ID does not exist in this dimension.");
                 return;
             }
 
@@ -461,7 +461,7 @@ namespace TrueCraft.Commands
 
         public override void Help(IRemoteClient client, string alias, string[] arguments)
         {
-            client.SendMessage("/pos: Toggles client logging.");
+            client.SendMessage("/log: Toggles client logging.");
         }
     }
     
@@ -551,7 +551,7 @@ namespace TrueCraft.Commands
 
         public override void Help(IRemoteClient client, string alias, string[] arguments)
         {
-            client.SendMessage("/reinv: Resends your inventory.");
+            client.SendMessage("/relight: Relights the chunk you're standing in.");
         }
     }
 }
