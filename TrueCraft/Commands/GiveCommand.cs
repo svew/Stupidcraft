@@ -43,9 +43,8 @@ namespace TrueCraft.Commands
             if(arguments.Length >= 3)
                     amount = arguments[2];
             
-            var receivingPlayer = GetPlayerByName(client, username);
-
-            if (receivingPlayer == null)
+            IRemoteClient? receivingPlayer = GetPlayerByName(client, username);
+            if (receivingPlayer is null)
             {
                 client.SendMessage("No client with the username \"" + username + "\" was found.");
                 return;
@@ -57,7 +56,7 @@ namespace TrueCraft.Commands
             }
         }
 
-        protected static IRemoteClient GetPlayerByName(IRemoteClient client, string username)
+        protected static IRemoteClient? GetPlayerByName(IRemoteClient client, string username)
         {
             var receivingPlayer =
                 client.Server.Clients.FirstOrDefault(
@@ -87,7 +86,7 @@ namespace TrueCraft.Commands
                 return true;
             }
 
-            string username = receivingPlayer.Username;
+            string username = receivingPlayer.Username!;
             IInventoryWindow<IServerSlot> inventory = receivingPlayer.InventoryWindowContent;
             if (inventory == null) return false;
 
