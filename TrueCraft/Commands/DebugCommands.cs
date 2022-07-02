@@ -37,7 +37,7 @@ namespace TrueCraft.Commands
                 Help(client, alias, arguments);
                 return;
             }
-            client.SendMessage(client.Entity.Position.ToString());
+            client.SendMessage(client.Entity!.Position.ToString());
         }
 
         public override void Help(IRemoteClient client, string alias, string[] arguments)
@@ -70,7 +70,7 @@ namespace TrueCraft.Commands
                 Help(client, alias, arguments);
                 return;
             }
-            ((IDimensionServer)client.Dimension).Save();
+            ((IDimensionServer)client.Dimension!).Save();
         }
 
         public override void Help(IRemoteClient client, string alias, string[] arguments)
@@ -101,8 +101,8 @@ namespace TrueCraft.Commands
             int mod = 0;
             if (arguments.Length == 1)
                 int.TryParse(arguments[0], out mod);
-            client.SendMessage(client.Dimension.GetSkyLight(
-                (GlobalVoxelCoordinates)(client.Entity.Position + new Vector3(0, -mod, 0))).ToString());
+            client.SendMessage(client.Dimension!.GetSkyLight(
+                (GlobalVoxelCoordinates)(client.Entity!.Position + new Vector3(0, -mod, 0))).ToString());
         }
 
         public override void Help(IRemoteClient client, string alias, string[] arguments)
@@ -146,15 +146,22 @@ namespace TrueCraft.Commands
             }
 
             arguments[0] = arguments[0].ToUpper();
-            var type = entityTypes.SingleOrDefault(t => t.Name.ToUpper() == arguments[0] + "ENTITY");
-            if (type == null)
+            Type? type = entityTypes.SingleOrDefault(t => t.Name.ToUpper() == arguments[0] + "ENTITY");
+            if (type is null)
             {
                 client.SendMessage(ChatColor.Red + "Unknown entity type.");
                 return;
             }
-            IEntity entity = (IEntity)Activator.CreateInstance(type);
-            IEntityManager em = ((IDimensionServer)client.Dimension).EntityManager;
-            entity.Position = client.Entity.Position + MathHelper.FowardVector(client.Entity.Yaw) * 3;
+
+            IEntity? entity = (IEntity?)Activator.CreateInstance(type);
+            if (entity is null)
+            {
+                client.SendMessage(ChatColor.Red + "Unable to create entity.  Most likely a missing default constructor.");
+                return;
+            }
+
+            IEntityManager em = ((IDimensionServer)client.Dimension!).EntityManager;
+            entity.Position = client.Entity!.Position + MathHelper.FowardVector(client.Entity.Yaw) * 3;
             em.SpawnEntity(entity);
         }
 
@@ -196,7 +203,7 @@ namespace TrueCraft.Commands
                 return;
             }
 
-            IEntityManager manager = ((IDimensionServer)client.Dimension).EntityManager;
+            IEntityManager manager = ((IDimensionServer)client.Dimension!).EntityManager;
             var entity = manager.GetEntityByID(id) as MobEntity;
             if (entity == null)
             {
@@ -207,8 +214,8 @@ namespace TrueCraft.Commands
             Task.Factory.StartNew(() =>
             {
                 var astar = new AStarPathFinder();
-                PathResult path = astar.FindPath(client.Dimension, entity.BoundingBox, (GlobalVoxelCoordinates)entity.Position, (GlobalVoxelCoordinates)client.Entity.Position);
-                if (path == null)
+                PathResult? path = astar.FindPath(client.Dimension, entity.BoundingBox, (GlobalVoxelCoordinates)entity.Position, (GlobalVoxelCoordinates)client.Entity!.Position);
+                if (path is null)
                 {
                     client.SendMessage(ChatColor.Red + "It is impossible for this entity to reach you.");
                 }
@@ -259,18 +266,18 @@ namespace TrueCraft.Commands
                 return;
             }
 
-            IEntityManager manager = ((IDimensionServer)client.Dimension).EntityManager;
+            IEntityManager manager = ((IDimensionServer)client.Dimension!).EntityManager;
             var entity = manager.GetEntityByID(id);
-            if (entity == null)
+            if (entity is null)
             {
-                client.SendMessage(ChatColor.Red + "An entity with that ID does not exist in this world.");
+                client.SendMessage(ChatColor.Red + "An entity with that ID does not exist in this dimension.");
                 return;
             }
             client.SendMessage(string.Format(
                 "{0} {1}", entity.GetType().Name, entity.Position));
             if (entity is MobEntity)
             {
-                var mob = entity as MobEntity;
+                MobEntity mob = (MobEntity)entity;
                 client.SendMessage(string.Format(
                     "{0}/{1} HP, {2} State, moving to to {3}",
                     mob.Health, mob.MaxHealth,
@@ -317,9 +324,9 @@ namespace TrueCraft.Commands
                 return;
             }
 
-            IEntityManager manager = ((IDimensionServer)client.Dimension).EntityManager;
-            var entity = manager.GetEntityByID(id) as MobEntity;
-            if (entity == null)
+            IEntityManager manager = ((IDimensionServer)client.Dimension!).EntityManager;
+            MobEntity? entity = manager.GetEntityByID(id) as MobEntity;
+            if (entity is null)
             {
                 client.SendMessage(ChatColor.Red + "An entity with that ID does not exist in this world.");
                 return;
@@ -530,14 +537,15 @@ namespace TrueCraft.Commands
                 Help(client, alias, arguments);
                 return;
             }
-            var server = client.Server as MultiplayerServer;
-            IChunk chunk = client.Dimension.GetChunk((GlobalVoxelCoordinates)client.Entity.Position);
-            Lighting lighter = server.WorldLighters.SingleOrDefault(l => l.Dimension == client.Dimension);
-            if (lighter != null)
+            MultiplayerServer server = (MultiplayerServer)client.Server;
+            IChunk chunk = client.Dimension!.GetChunk((GlobalVoxelCoordinates)client.Entity!.Position)!;
+            Lighting? lighter = server.WorldLighters.SingleOrDefault(l => l.Dimension == client.Dimension);
+            if (lighter is not null)
             {
+                // TODO: what does it mean to queue up initial lighting, then unload and reload the chunk?
                 lighter.InitialLighting(chunk, true);
-                (client as RemoteClient).UnloadChunk(chunk.Coordinates);
-                (client as RemoteClient).LoadChunk(chunk);
+                ((RemoteClient)client).UnloadChunk(chunk.Coordinates);
+                ((RemoteClient)client).LoadChunk(chunk);
             }
         }
 
