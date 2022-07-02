@@ -20,7 +20,6 @@ namespace TrueCraft.Client
             TrueCraft.Core.Inventory.InventoryFactory<ISlot>.RegisterInventoryFactory(new TrueCraft.Client.Inventory.InventoryFactory());
             TrueCraft.Core.Inventory.SlotFactory<ISlot>.RegisterSlotFactory(new TrueCraft.Client.Inventory.SlotFactory());
 
-            UserSettings.Local = new UserSettings();
             UserSettings.Local.Load();
 
             IPEndPoint? serverEndPoint = null;

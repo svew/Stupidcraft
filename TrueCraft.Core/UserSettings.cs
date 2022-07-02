@@ -6,7 +6,7 @@ namespace TrueCraft.Core
 {
     public class UserSettings
     {
-        public static UserSettings Local { get; set; }
+        public static UserSettings Local { get; }
 
         public bool AutoLogin { get; set; }
         public string Username { get; set; }
@@ -17,6 +17,11 @@ namespace TrueCraft.Core
         public bool IsFullscreen { get; set; }
         public bool InvertedMouse { get; set; }
         public WindowResolution WindowResolution { get; set; }
+
+        static UserSettings()
+        {
+            Local = new UserSettings();
+        }
 
         public UserSettings()
         {

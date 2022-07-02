@@ -13,7 +13,6 @@ namespace TrueCraft.Launcher
         [STAThread]
         public static void Main(string[] args)
         {
-            UserSettings.Local = new UserSettings();
             UserSettings.Local.Load();
 
             Application.Init();
