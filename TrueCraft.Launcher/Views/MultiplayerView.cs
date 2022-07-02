@@ -122,11 +122,7 @@ namespace TrueCraft.Launcher.Views
 
             CommitAddNewServer.Clicked += (sender, e) => 
             {
-                var server = new FavoriteServer
-                {
-                    Name = NewServerName.Text,
-                    Address = NewServerAddress.Text
-                };
+                FavoriteServer server = new FavoriteServer(NewServerName.Text, NewServerAddress.Text);
 
                 TreeIter iter = _serverListStore.Append();
                 using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("TrueCraft.Launcher.Content.default-server-icon.png"))

@@ -50,8 +50,14 @@ namespace TrueCraft.Core
 
     public class FavoriteServer
     {
-        public string Name { get; set; }
-        public string Address { get; set; }
+        public FavoriteServer(string name, string address)
+        {
+            Name = name;
+            Address = address;
+        }
+
+        public string Name { get; }
+        public string Address { get; }
     }
 
     public class WindowResolution
