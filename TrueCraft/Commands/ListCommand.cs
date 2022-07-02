@@ -21,7 +21,7 @@ namespace TrueCraft.Commands
             StringBuilder listMessage = new StringBuilder("Currently connected players: ");
             foreach (IRemoteClient c in client.Server.Clients)
             {
-                if (listMessage.Length + c.Username.Length + 2 >= 120)
+                if (listMessage.Length + c.Username!.Length + 2 >= 120)
                 {
                     client.SendMessage(listMessage.ToString());
                     listMessage.Clear();
