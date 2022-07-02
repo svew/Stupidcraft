@@ -6,9 +6,9 @@ namespace TrueCraft.Commands
 {
     public interface ICommandManager : IList<ICommand>
     {
-        ICommand FindByName(string name);
+        ICommand? FindByName(string name);
 
-        ICommand FindByAlias(string alias);
+        ICommand? FindByAlias(string alias);
 
         void HandleCommand(IRemoteClient Client, string Alias, string[] Arguments);
     }

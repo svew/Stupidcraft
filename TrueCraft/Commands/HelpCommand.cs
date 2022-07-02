@@ -26,13 +26,13 @@ namespace TrueCraft.Commands
 
             var identifier = arguments.Length == 1 ? arguments[0] : "1";
 
-            ICommand found;
-            if ((found = CommandManager.Instance.FindByName(identifier)) != null)
+            ICommand? found;
+            if ((found = CommandManager.Instance.FindByName(identifier)) is not null)
             {
                 found.Help(client, identifier, new string[0]);
                 return;
             }
-            else if ((found = CommandManager.Instance.FindByAlias(identifier)) != null)
+            else if ((found = CommandManager.Instance.FindByAlias(identifier)) is not null)
             {
                 found.Help(client, identifier, new string[0]);
                 return;

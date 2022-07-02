@@ -9,7 +9,7 @@ namespace TrueCraft.Commands
 {
     public class CommandManager : ICommandManager
     {
-        private static CommandManager _instance = null;
+        private static CommandManager? _instance = null;
 
         private readonly IList<ICommand> _commands;
 
@@ -38,8 +38,9 @@ namespace TrueCraft.Commands
                 .Where(t => !t.IsDefined(typeof(DoNotAutoLoadAttribute), true))
                 .Where(t => !t.IsAbstract);
 
-            foreach (var command in types.Select(type => (ICommand)Activator.CreateInstance(type)))
-                _commands.Add(command);
+            foreach (var command in types.Select(type => (ICommand?)Activator.CreateInstance(type)))
+                if (command is not null)
+                    _commands.Add(command);
         }
 
         /// <summary>
@@ -52,8 +53,8 @@ namespace TrueCraft.Commands
         /// <param name="arguments"></param>
         public void HandleCommand(IRemoteClient client, string alias, string[] arguments)
         {
-            ICommand foundCommand = FindByName(alias) ?? FindByAlias(alias);
-            if (foundCommand == null)
+            ICommand? foundCommand = FindByName(alias) ?? FindByAlias(alias);
+            if (foundCommand is null)
             {
                 client.SendMessage("Invalid command \"" + alias + "\".");
                 return;
@@ -61,12 +62,12 @@ namespace TrueCraft.Commands
             foundCommand.Handle(client, alias, arguments);
         }
 
-        public ICommand FindByName(string name)
+        public ICommand? FindByName(string name)
         {
             return _commands.FirstOrDefault(c => c.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
         }
 
-        public ICommand FindByAlias(string alias)
+        public ICommand? FindByAlias(string alias)
         {
             // uncomment below if alias searching should be case-insensitive
             return _commands.FirstOrDefault(c => c.Aliases.Contains(alias /*, StringComparer.OrdinalIgnoreCase*/));
