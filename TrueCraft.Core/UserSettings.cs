@@ -28,11 +28,8 @@ namespace TrueCraft.Core
             FavoriteServers = new FavoriteServer[0];
             IsFullscreen = false;
             InvertedMouse = false;
-            WindowResolution = new WindowResolution()
-            {
-                Width = 1280,
-                Height = 720
-            };
+            // TODO: Why is the default resolution not contained in the static Defaults?
+            WindowResolution = new WindowResolution(1280, 720);
         }
 
         public void Load()
@@ -65,30 +62,34 @@ namespace TrueCraft.Core
         public static readonly WindowResolution[] Defaults =
             new WindowResolution[]
             {
-                                                            // (from Wikipedia/other)
-                WindowResolution.FromString("800 x 600"),   // SVGA
-                WindowResolution.FromString("960 x 640"),   // DVGA
-                WindowResolution.FromString("1024 x 600"),  // WSVGA
-                WindowResolution.FromString("1024 x 768"),  // XGA
-                WindowResolution.FromString("1280 x 1024"), // SXGA
-                WindowResolution.FromString("1600 x 1200"), // UXGA
-                WindowResolution.FromString("1920 x 1080"), // big
-                WindowResolution.FromString("1920 x 1200"), // really big
-                WindowResolution.FromString("4096 x 2160"), // huge
+                                                  // (from Wikipedia/other)
+                new WindowResolution(800, 600),   // SVGA
+                new WindowResolution(960, 640),   // DVGA
+                new WindowResolution(1024, 600),  // WSVGA
+                new WindowResolution(1024, 768),  // XGA
+                new WindowResolution(1280, 1024), // SXGA
+                new WindowResolution(1600, 1200), // UXGA
+                new WindowResolution(1920, 1080), // big
+                new WindowResolution(1920, 1200), // really big
+                new WindowResolution(4096, 2160), // huge
             };
 
         public static WindowResolution FromString(string str)
         {
-            var tmp = str.Split('x');
-            return new WindowResolution()
-            {
-                Width = int.Parse(tmp[0].Trim()),
-                Height = int.Parse(tmp[1].Trim())
-            };
+            string[] tmp = str.Split('x');
+            int width = int.Parse(tmp[0].Trim());
+            int height = int.Parse(tmp[1].Trim());
+            return new WindowResolution(width, height);
         }
 
-        public int Width { get; set; }
-        public int Height { get; set; }
+        public WindowResolution(int width, int height)
+        {
+            Width = width;
+            Height = height;
+        }
+
+        public int Width { get; }
+        public int Height { get; }
 
         public override string ToString()
         {
