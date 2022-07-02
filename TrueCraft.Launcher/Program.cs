@@ -8,7 +8,7 @@ namespace TrueCraft.Launcher
 {
     class Program
     {
-        public static LauncherWindow Window { get; set; }
+        private static LauncherWindow _window = null!;
 
         [STAThread]
         public static void Main(string[] args)
@@ -20,10 +20,10 @@ namespace TrueCraft.Launcher
             {
                 app.Register(GLib.Cancellable.Current);
 
-                Window = new LauncherWindow(app);
-                app.AddWindow(Window);
-                Window.DeleteEvent += (sender, e) => Application.Quit();
-                Window.Show();
+                _window = new LauncherWindow(app);
+                app.AddWindow(_window);
+                _window.DeleteEvent += (sender, e) => Application.Quit();
+                _window.Show();
 
                 // TODO: restore Keep Session Alive for multiplayer.
                 //Thread thread = new Thread(KeepSessionAlive);
@@ -32,7 +32,7 @@ namespace TrueCraft.Launcher
                 //thread.Start();
 
                 Application.Run();
-                Window.Dispose();
+                _window.Dispose();
             }
         }
 
@@ -40,11 +40,11 @@ namespace TrueCraft.Launcher
         {
             while (true)
             {
-                if (!string.IsNullOrEmpty(Window.User.SessionId))
+                if (!string.IsNullOrEmpty(_window.User.SessionId))
                 {
                     var wc = new WebClient();
                     wc.DownloadString(string.Format(TrueCraftUser.AuthServer + "/session?name={0}&session={1}",
-                        Window.User.Username, Window.User.SessionId));
+                        _window.User.Username, _window.User.SessionId));
                 }
                 Thread.Sleep(60 * 5 * 1000);
             }
