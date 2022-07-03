@@ -15,21 +15,16 @@ namespace TrueCraft.TerrainGen
             DiscoverBiomes();
         }
 
-        internal void DiscoverBiomes()
+        private void DiscoverBiomes()
         {
+            // TODO: this will only load Biomes from already loaded Assemblies.
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
-                try
+                foreach (var type in assembly.GetTypes().Where(t => typeof(IBiomeProvider).IsAssignableFrom(t) && !t.IsAbstract))
                 {
-                    foreach (var type in assembly.GetTypes().Where(t => typeof(IBiomeProvider).IsAssignableFrom(t) && !t.IsAbstract))
-                    {
-                        var instance = (IBiomeProvider)Activator.CreateInstance(type);
+                    IBiomeProvider? instance = (IBiomeProvider?)Activator.CreateInstance(type);
+                    if (instance is not null)
                         RegisterBiomeProvider(instance);
-                    }
-                }
-                catch
-                {
-                    // There are some bugs with loading mscorlib during a unit test like this
                 }
             }
         }
@@ -57,7 +52,7 @@ namespace TrueCraft.TerrainGen
 
             if (temperatureResults.Count.Equals(0))
             {
-                IBiomeProvider provider = null;
+                IBiomeProvider? provider = null;
                 float temperatureDifference = 100.0f;
                 foreach (var biome in BiomeProviders)
                 {
@@ -71,7 +66,8 @@ namespace TrueCraft.TerrainGen
                         }
                     }
                 }
-                temperatureResults.Add(provider);
+                if (provider is not null)
+                    temperatureResults.Add(provider);
             }
 
             foreach (var biome in BiomeProviders)
@@ -85,12 +81,13 @@ namespace TrueCraft.TerrainGen
                 }
             }
 
-            IBiomeProvider biomeProvider = null;
+            IBiomeProvider? biomeProvider = null;
             float rainfallDifference = 100.0f;
             foreach (var biome in BiomeProviders)
             {
                 if (biome != null)
                 {
+                    // TODO: why take the difference in temperature when we are checking Rainfall?
                     var difference = Math.Abs(temperature - biome.Temperature);
                     if ((biomeProvider == null || difference < rainfallDifference)
                         && (!spawn || biome.Spawn))
