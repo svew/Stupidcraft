@@ -32,6 +32,7 @@ namespace TrueCraft
             {
                 DeleteWorldOnStartup = false;
                 DeletePlayersOnStartup = false;
+                Profiler = new ProfilerConfiguration();
             }
 
             [YamlMember(Alias = "deleteWorldOnStartup")]
