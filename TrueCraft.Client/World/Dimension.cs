@@ -40,7 +40,7 @@ namespace TrueCraft.Client.World
         public IItemRepository ItemRepository { get => _itemRepository; }
 
         /// <inheritdoc />
-        public long TimeOfDay { get; set; }
+        public long TimeOfDay { get; set; }  // TODO: validate set value.
 
         /// <inheritdoc />
         public IChunk? GetChunk(GlobalVoxelCoordinates coordinates)

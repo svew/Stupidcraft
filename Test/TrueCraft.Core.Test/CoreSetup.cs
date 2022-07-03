@@ -189,7 +189,7 @@ namespace TrueCraft.Core.Test
                 {
                     XmlDocument doc= new XmlDocument();
                     doc.LoadXml(recipeXML[j]);
-                    XmlNode item = doc.DocumentElement;
+                    XmlNode item = doc.DocumentElement!;
 
                     repository.RegisterRecipe(new CraftingRecipe(item));
                 }
