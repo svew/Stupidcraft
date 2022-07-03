@@ -37,9 +37,8 @@ namespace TrueCraft.Commands
                 messageBuilder.Append(arguments[i] + " ");
             var message = messageBuilder.ToString();
 
-            var receivingPlayer = GetPlayerByName(client, username);
-
-            if (receivingPlayer == null)
+            IRemoteClient? receivingPlayer = GetPlayerByName(client, username);
+            if (receivingPlayer is null)
             {
                 client.SendMessage("No client with the username \"" + username + "\" was found.");
                 return;
@@ -53,9 +52,9 @@ namespace TrueCraft.Commands
             receivingPlayer.SendMessage(ChatColor.Gray + "<"+ client.Username + " -> You> " + message);
         }
         
-        protected static IRemoteClient GetPlayerByName(IRemoteClient client, string username)
+        protected static IRemoteClient? GetPlayerByName(IRemoteClient client, string username)
         {
-            var receivingPlayer =
+            IRemoteClient? receivingPlayer =
                 client.Server.Clients.FirstOrDefault(
                     c => String.Equals(c.Username, username, StringComparison.CurrentCultureIgnoreCase));
             return receivingPlayer;
