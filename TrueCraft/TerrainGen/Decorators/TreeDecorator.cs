@@ -17,7 +17,7 @@ namespace TrueCraft.TerrainGen.Decorators
             INoise noise = new Perlin(seed);
             ClampNoise chanceNoise = new ClampNoise(noise);
             chanceNoise.MaxValue = 2;
-            LocalColumnCoordinates lastTree = null;
+            LocalColumnCoordinates? lastTree = null;
             for (int x = 0; x < Chunk.Width; x++)
             {
                 for (int z = 0; z < Chunk.Depth; z++)
@@ -27,7 +27,7 @@ namespace TrueCraft.TerrainGen.Decorators
                     var blockZ = MathHelper.ChunkToBlockZ(z, chunk.Coordinates.Z);
                     int height = chunk.GetHeight(x, z);
 
-                    if (lastTree != null && lastTree.DistanceTo(new LocalColumnCoordinates(x, z)) < biome.TreeDensity)
+                    if (lastTree is not null && lastTree.DistanceTo(new LocalColumnCoordinates(x, z)) < biome.TreeDensity)
                         continue;
 
                     if (noise.Value2D(blockX, blockZ) > 0.3)

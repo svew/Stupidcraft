@@ -7,55 +7,42 @@ namespace TrueCraft.TerrainGen
 {
     public class FlatlandGenerator : Generator
     {
-        static FlatlandGenerator()
-        {
-            DefaultGeneratorOptions = "1;7,2x3,2;1";
-        }
+        private const string DefaultGeneratorOptions = "1;7,2x3,2;1";
+
+        private readonly List<GeneratorLayer> _layers;
+        private readonly string _generatorOptions;
 
         public FlatlandGenerator(int seed) : base(seed)
         {
-            GeneratorOptions = DefaultGeneratorOptions;
+            _generatorOptions = DefaultGeneratorOptions;
+            _layers = new List<GeneratorLayer>();
+            CreateLayers();
         }
-
-        public static string DefaultGeneratorOptions { get; set; }
-
-        public string GeneratorOptions
-        {
-            get { return generatorOptions; }
-            set
-            {
-                generatorOptions = value;
-                CreateLayers();
-            }
-        }
-
-        public Biome Biome { get; set; }
-
-        protected List<GeneratorLayer> Layers;
-        private string generatorOptions;
 
         private void CreateLayers()
         {
             var parts = GeneratorOptions.Split(';');
             var layers = parts[1].Split(',');
-            Layers = new List<GeneratorLayer>();
+            _layers = new List<GeneratorLayer>();
             double y = 0;
             foreach (var layer in layers)
             {
                 var generatorLayer = new GeneratorLayer(layer);
                 y += generatorLayer.Height;
-                Layers.Add(generatorLayer);
+                _layers.Add(generatorLayer);
             }
             Biome = (Biome)byte.Parse(parts[2]);
         }
+
+        public Biome Biome { get; set; }
 
         public override IChunk GenerateChunk(GlobalChunkCoordinates position)
         {
             var chunk = new Chunk(position);
             int y = 0;
-            for (int i = 0; i < Layers.Count; i++)
+            for (int i = 0; i < _layers.Count; i++)
             {
-                int height = y + Layers[i].Height;
+                int height = y + _layers[i].Height;
                 while (y < height)
                 {
                     for (int x = 0; x < 16; x++)
@@ -63,8 +50,8 @@ namespace TrueCraft.TerrainGen
                         for (int z = 0; z < 16; z++)
                         {
                             LocalVoxelCoordinates local = new LocalVoxelCoordinates(x, y, z);
-                            chunk.SetBlockID(local, Layers[i].BlockId);
-                            chunk.SetMetadata(local, Layers[i].Metadata);
+                            chunk.SetBlockID(local, _layers[i].BlockId);
+                            chunk.SetMetadata(local, _layers[i].Metadata);
                         }
                     }
                     y++;
