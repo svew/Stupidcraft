@@ -21,9 +21,8 @@ namespace TrueCraft.TerrainGen
 
         private void CreateLayers()
         {
-            var parts = GeneratorOptions.Split(';');
-            var layers = parts[1].Split(',');
-            _layers = new List<GeneratorLayer>();
+            string[] parts = _generatorOptions.Split(';');
+            string[] layers = parts[1].Split(',');
             double y = 0;
             foreach (var layer in layers)
             {
@@ -45,9 +44,9 @@ namespace TrueCraft.TerrainGen
                 int height = y + _layers[i].Height;
                 while (y < height)
                 {
-                    for (int x = 0; x < 16; x++)
+                    for (int x = 0; x < Chunk.Width; x++)
                     {
-                        for (int z = 0; z < 16; z++)
+                        for (int z = 0; z < Chunk.Depth; z++)
                         {
                             LocalVoxelCoordinates local = new LocalVoxelCoordinates(x, y, z);
                             chunk.SetBlockID(local, _layers[i].BlockId);
