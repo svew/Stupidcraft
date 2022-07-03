@@ -314,7 +314,7 @@ namespace TrueCraft
             var message = e.Message;
 
             if (!message.StartsWith("/") || message.StartsWith("//"))
-                SendChatMessage(e.Client.Username, message);
+                SendChatMessage(e.Client.Username!, message);
             else
                 e.PreventDefault = ProcessChatCommand(e);
         }
@@ -378,9 +378,9 @@ namespace TrueCraft
 
             if (client.LoggedIn)
             {
-                SendMessage(ChatColor.Yellow + "{0} has left the server.", client.Username);
-                IEntityManager manager = ((IDimensionServer)_client.Dimension).EntityManager;
-                manager.DespawnEntity(client.Entity);
+                SendMessage(ChatColor.Yellow + "{0} has left the server.", client.Username!);
+                IEntityManager manager = ((IDimensionServer)_client.Dimension!).EntityManager;
+                manager.DespawnEntity(client.Entity!);
                 manager.FlushDespawns();
             }
             client.Save();
