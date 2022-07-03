@@ -21,7 +21,7 @@ namespace TrueCraft
 
         public static MultiplayerServer? Server;
 
-        public static IServiceLocator ServiceLocator;
+        public static IServiceLocator ServiceLocator = null!;
 
         public static void Main(string[] args)
         {
@@ -46,7 +46,7 @@ namespace TrueCraft
                     }
                 }
 
-                if (ServerConfiguration.Debug.DeleteWorldOnStartup)
+                if (ServerConfiguration.Debug!.DeleteWorldOnStartup)
                 {
                     if (Directory.Exists("world"))
                         Directory.Delete("world", true);
@@ -104,16 +104,16 @@ namespace TrueCraft
         {
             // TODO: Surely, this is too time consuming of an operation to be done from
             //       a scheduled event.
-            Server.Log(LogCategory.Notice, "Saving world...");
-            ((IWorld)Server.World).Save();
+            Server!.Log(LogCategory.Notice, "Saving world...");
+            ((IWorld?)Server.World)?.Save();
             Server.Log(LogCategory.Notice, "Done.");
             server.Scheduler.ScheduleEvent("world.save", null,
-                TimeSpan.FromSeconds(ServerConfiguration.WorldSaveInterval), SaveWorlds);
+                TimeSpan.FromSeconds(ServerConfiguration!.WorldSaveInterval), SaveWorlds);
         }
 
-        static void HandleCancelKeyPress(object sender, ConsoleCancelEventArgs e)
+        static void HandleCancelKeyPress(object? sender, ConsoleCancelEventArgs e)
         {
-            Server.Stop();
+            Server!.Stop();
         }
     }
 }
