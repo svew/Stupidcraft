@@ -23,7 +23,7 @@ namespace TrueCraft.World
         void AddCell(BiomeCell cell);
         byte GetBiome(GlobalColumnCoordinates location);
         byte GenerateBiome(int seed, IBiomeRepository biomes, GlobalColumnCoordinates location, bool spawn);
-        BiomeCell ClosestCell(GlobalColumnCoordinates location);
+        BiomeCell? ClosestCell(GlobalColumnCoordinates location);
         double ClosestCellPoint(GlobalColumnCoordinates location);
     }
 }

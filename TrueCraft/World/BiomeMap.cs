@@ -37,7 +37,7 @@ namespace TrueCraft.World
 
         public byte GetBiome(GlobalColumnCoordinates location)
         {
-            byte BiomeID = (ClosestCell(location) != null) ? ClosestCell(location).BiomeID : (byte)Biome.Plains;
+            byte BiomeID = ClosestCell(location)?.BiomeID ?? (byte)Biome.Plains;
             return BiomeID;
         }
 
@@ -52,9 +52,9 @@ namespace TrueCraft.World
         /*
          * The closest biome cell to the specified location(uses the Chebyshev distance function).
          */
-        public BiomeCell ClosestCell(GlobalColumnCoordinates location)
+        public BiomeCell? ClosestCell(GlobalColumnCoordinates location)
         {
-            BiomeCell cell = null;
+            BiomeCell? cell = null;
             var distance = double.MaxValue;
             foreach (BiomeCell C in BiomeCells)
             {
