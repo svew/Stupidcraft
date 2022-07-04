@@ -99,12 +99,19 @@ namespace TrueCraft.Launcher.Views
 
         private class LogInAsyncState
         {
-            public HttpWebRequest Request { get; set; }
-            public string Username { get; set; }
-            public string Password { get; set; }
+            public LogInAsyncState(HttpWebRequest request, string username, string password)
+            {
+                Request = request;
+                Username = username;
+                Password = password;
+            }
+
+            public HttpWebRequest Request { get; }
+            public string Username { get; }
+            public string Password { get; }
         }
 
-        private void LogInButton_Clicked(object sender, EventArgs e)
+        private void LogInButton_Clicked(object? sender, EventArgs e)
         {
             if (string.IsNullOrEmpty(UsernameText.Text) || string.IsNullOrEmpty(PasswordText.Text))
             {
@@ -120,21 +127,17 @@ namespace TrueCraft.Launcher.Views
             request.Method = "POST";
             request.ContentType = "application/x-www-form-urlencoded";
             request.AllowAutoRedirect = false;
-            request.BeginGetRequestStream(HandleLoginRequestReady, new LogInAsyncState
-            {
-                Request = request,
-                Username = _window.User.Username,
-                Password = PasswordText.Text
-            });
+            request.BeginGetRequestStream(HandleLoginRequestReady, new LogInAsyncState(
+                request, _window.User.Username, PasswordText.Text));
         }
 
         private void HandleLoginRequestReady(IAsyncResult asyncResult)
         {
             try
             {
-                var state = (LogInAsyncState)asyncResult.AsyncState;
-                var request = state.Request;
-                var requestStream = request.EndGetRequestStream(asyncResult);
+                LogInAsyncState state = (LogInAsyncState)asyncResult.AsyncState!;
+                HttpWebRequest request = state.Request;
+                Stream requestStream = request.EndGetRequestStream(asyncResult);
                 using (var writer = new StreamWriter(requestStream))
                     writer.Write(string.Format("user={0}&password={1}&version=12", state.Username, state.Password));
                 request.BeginGetResponse(HandleLoginResponse, request);
@@ -155,8 +158,8 @@ namespace TrueCraft.Launcher.Views
         {
             try
             {
-                var request = (HttpWebRequest)asyncResult.AsyncState;
-                var response = request.EndGetResponse(asyncResult);
+                HttpWebRequest request = (HttpWebRequest)asyncResult.AsyncState!;
+                WebResponse response = request.EndGetResponse(asyncResult);
                 string session;
                 using (var reader = new StreamReader(response.GetResponseStream()))
                     session = reader.ReadToEnd();

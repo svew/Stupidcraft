@@ -19,29 +19,29 @@ namespace TrueCraft.Launcher.Views
            Name
         }
 
-        private LauncherWindow _window;
+        private readonly LauncherWindow _window;
 
-        public Label OptionLabel { get; set; }
+        private readonly Label _optionLabel;
 
-        public Label ResolutionLabel { get; set; }
-        private ComboBox _resolutionComboBox;
-        private ListStore _resolutionList;
+        private readonly Label _resolutionLabel;
+        private readonly ComboBox _resolutionComboBox;
+        private readonly ListStore _resolutionList;
 
-        private CheckButton _fullscreenCheckBox;
-        private CheckButton _invertMouseCheckBox;
+        private readonly CheckButton _fullscreenCheckBox;
+        private readonly CheckButton _invertMouseCheckBox;
 
-        public Label TexturePackLabel { get; set; }
+        private readonly Label _texturePackLabel;
 
-        private ListStore _texturePackStore;
-        private TreeView _texturePackListView;
+        private readonly ListStore _texturePackStore;
+        private readonly TreeView _texturePackListView;
 
-        public Button OfficialAssetsButton { get; set; }
-        public ProgressBar OfficialAssetsProgress { get; set; }
-        public Button OpenFolderButton { get; set; }
-        public Button BackButton { get; set; }
+        private readonly Button _officialAssetsButton;
+        private readonly ProgressBar _officialAssetsProgress;
+        private readonly Button _openFolderButton;
+        private readonly Button _backButton;
 
-        private List<TexturePack> _texturePacks;
-        private TexturePack _lastTexturePack;
+        private readonly List<TexturePack> _texturePacks;
+        private readonly TexturePack? _lastTexturePack;
 
         public OptionView(LauncherWindow window)
         {
@@ -51,12 +51,12 @@ namespace TrueCraft.Launcher.Views
             _window = window;
             this.SetSizeRequest(250, -1);
 
-            OptionLabel = new Label("Options")
+            _optionLabel = new Label("Options")
             {
                 Justify = Justification.Center
             };
 
-            ResolutionLabel = new Label("Select a resolution...");
+            _resolutionLabel = new Label("Select a resolution...");
             _resolutionList = new ListStore(typeof(string));
             _resolutionComboBox = new ComboBox(_resolutionList);
 
@@ -85,7 +85,7 @@ namespace TrueCraft.Launcher.Views
             _invertMouseCheckBox = new CheckButton("Inverted mouse");
             _invertMouseCheckBox.Active = UserSettings.Local.InvertedMouse;
 
-            TexturePackLabel = new Label("Select a texture pack...");
+            _texturePackLabel = new Label("Select a texture pack...");
             _texturePackStore = new ListStore(typeof(Image), typeof(string));
             _texturePackListView = new TreeView(_texturePackStore);
             _texturePackListView.SetSizeRequest(-1, 200);
@@ -94,8 +94,8 @@ namespace TrueCraft.Launcher.Views
             texturePackSelection.Mode = SelectionMode.Single;
             AddTexturePackColumns(_texturePackListView);
 
-            OpenFolderButton = new Button("Open texture pack folder");
-            BackButton = new Button("Back");
+            _openFolderButton = new Button("Open texture pack folder");
+            _backButton = new Button("Back");
 
             _resolutionComboBox.Changed += (sender, e) =>
             {
@@ -123,7 +123,7 @@ namespace TrueCraft.Launcher.Views
 
             _texturePackListView.Selection.Changed += (sender, e) =>
             {
-                TreeSelection selection = (TreeSelection)sender;
+                TreeSelection selection = (TreeSelection)sender!;
                 TreeIter iter;
                 ITreeModel model;
                 selection.GetSelected(out model, out iter);
@@ -139,32 +139,32 @@ namespace TrueCraft.Launcher.Views
                 }
             };
 
-            OpenFolderButton.Clicked += (sender, e) =>
+            _openFolderButton.Clicked += (sender, e) =>
             {
                 var dir = new DirectoryInfo(Paths.TexturePacks);
                 Process.Start(dir.FullName);
             };
 
-            BackButton.Clicked += (sender, e) => _window.ShowMainMenuView();
+            _backButton.Clicked += (sender, e) => _window.ShowMainMenuView();
 
-            OfficialAssetsButton = new Button("Download Minecraft assets") { Visible = false };
-            OfficialAssetsButton.Clicked += OfficialAssetsButton_Clicked;
+            _officialAssetsButton = new Button("Download Minecraft assets") { Visible = false };
+            _officialAssetsButton.Clicked += OfficialAssetsButton_Clicked;
             // TODO: we have to call Pulse on the Progress Bar once in a while.
-            OfficialAssetsProgress = new ProgressBar() { Visible = false };
+            _officialAssetsProgress = new ProgressBar() { Visible = false };
 
             LoadTexturePacks();
 
-            this.PackStart(OptionLabel, true, false, 0);
-            this.PackStart(ResolutionLabel, true, false, 0);
+            this.PackStart(_optionLabel, true, false, 0);
+            this.PackStart(_resolutionLabel, true, false, 0);
             this.PackStart(_resolutionComboBox, true, false, 0);
             this.PackStart(_fullscreenCheckBox, true, false, 0);
             this.PackStart(_invertMouseCheckBox, true, false, 0);
-            this.PackStart(TexturePackLabel, true, false, 0);
+            this.PackStart(_texturePackLabel, true, false, 0);
             this.PackStart(_texturePackListView, true, false, 0);
-            this.PackStart(OfficialAssetsProgress, true, false, 0);
-            this.PackStart(OfficialAssetsButton, true, false, 0);
-            this.PackStart(OpenFolderButton, true, false, 0);
-            this.PackEnd(BackButton, true, false, 0);
+            this.PackStart(_officialAssetsProgress, true, false, 0);
+            this.PackStart(_officialAssetsButton, true, false, 0);
+            this.PackStart(_openFolderButton, true, false, 0);
+            this.PackEnd(_backButton, true, false, 0);
         }
 
         private static void AddTexturePackColumns(TreeView tv)
@@ -183,7 +183,7 @@ namespace TrueCraft.Launcher.Views
             tv.AppendColumn(column);
         }
 
-        void OfficialAssetsButton_Clicked(object sender, EventArgs e)
+        void OfficialAssetsButton_Clicked(object? sender, EventArgs e)
         {
            using (MessageDialog msg = new MessageDialog(_window,
                      DialogFlags.Modal | DialogFlags.DestroyWithParent,
@@ -206,8 +206,8 @@ namespace TrueCraft.Launcher.Views
            if (e.ResponseId != ResponseType.Yes)
               return;
 
-            OfficialAssetsButton.Visible = false;
-            OfficialAssetsProgress.Visible = true;
+            _officialAssetsButton.Visible = false;
+            _officialAssetsProgress.Visible = true;
             Task.Factory.StartNew(() =>
             {
                 try
@@ -241,7 +241,7 @@ namespace TrueCraft.Launcher.Views
                     zip.Save(System.IO.Path.Combine(Paths.TexturePacks, "Minecraft.zip"));
                     Application.Invoke((sender, e) =>
                     {
-                        OfficialAssetsProgress.Visible = false;
+                        _officialAssetsProgress.Visible = false;
                         TexturePack texturePack = TexturePack.FromArchive(
                             System.IO.Path.Combine(Paths.TexturePacks, "Minecraft.zip"))!;  // file was just created, so this won't return null.
                         _texturePacks.Add(texturePack);
@@ -262,8 +262,8 @@ namespace TrueCraft.Launcher.Views
                        {
                           msg.Run();
                        }
-                        OfficialAssetsProgress.Visible = false;
-                        OfficialAssetsButton.Visible = true;
+                        _officialAssetsProgress.Visible = false;
+                        _officialAssetsButton.Visible = true;
                     });
                 }
             });
@@ -271,8 +271,14 @@ namespace TrueCraft.Launcher.Views
 
         public static void CopyBetweenZips(string name, ZipFile source, ZipFile destination)
         {
-            using (var stream = source.Entries.SingleOrDefault(f => f.FileName == name).OpenReader())
+            ZipEntry? sourceEntry = source.Entries.SingleOrDefault(f => f.FileName == name);
+            if (sourceEntry is null)
+                return;
+
+            using (var stream = sourceEntry.OpenReader())
             {
+                // TODO: MemoryStream is not disposed?
+                // TODO: why copy this stream to a MemoryStream instead of just using it?
                 var ms = new MemoryStream();
                 CopyStream(stream, ms);
                 ms.Seek(0, SeekOrigin.Begin);
@@ -317,7 +323,7 @@ namespace TrueCraft.Launcher.Views
                 }
             }
             if (!officialPresent)
-                OfficialAssetsButton.Visible = true;
+                _officialAssetsButton.Visible = true;
         }
 
         private void AddTexturePackRow(TexturePack pack)
