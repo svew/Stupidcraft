@@ -42,9 +42,14 @@ namespace TrueCraft.Core
                         using (Stream stream = entry.Open())
                         {
                             byte[] buffer = new byte[entry.Length];
-                            stream.Read(buffer, 0, buffer.Length);
                             image = new MemoryStream((int)entry.Length);
-                            image.Write(buffer, 0, buffer.Length);
+                            int nBytes;
+                            do
+                            {
+                                nBytes = stream.Read(buffer, 0, buffer.Length);
+                                if (nBytes > 0)
+                                    image.Write(buffer, 0, nBytes);
+                            } while (nBytes > 0);
 
                             // Fixes 'GLib.GException: Unrecognized image file format' on Linux.
                             image.Seek(0, SeekOrigin.Begin);
