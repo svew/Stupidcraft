@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.IO.Compression;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,7 +8,6 @@ using System.Net;
 using System.Threading.Tasks;
 using Gtk;
 using TrueCraft.Core;
-using Ionic.Zip;
 
 namespace TrueCraft.Launcher.Views
 {
@@ -210,35 +210,64 @@ namespace TrueCraft.Launcher.Views
             _officialAssetsProgress.Visible = true;
             Task.Factory.StartNew(() =>
             {
+                Stream ms = new MemoryStream();
+
                 try
                 {
-                    var stream = new WebClient().OpenRead("http://s3.amazonaws.com/Minecraft.Download/versions/b1.7.3/b1.7.3.jar");
-                    var ms = new MemoryStream();
-                    CopyStream(stream, ms);
-                    ms.Seek(0, SeekOrigin.Begin);
-                    stream.Dispose();
-                    var jar = ZipFile.Read(ms);
-                    var zip = new ZipFile();
-                    zip.AddEntry("pack.txt", "Minecraft textures");
-
-                    string[] dirs = {
-                                "terrain", "gui", "armor", "art",
-                                "environment", "item", "misc", "mob"
-                            };
-
-                    foreach (var entry in jar.Entries)
+                    using (Stream stream = new WebClient().OpenRead("http://s3.amazonaws.com/Minecraft.Download/versions/b1.7.3/b1.7.3.jar"))
                     {
-                        foreach (var c in dirs)
-                        {
-                            if (entry.FileName.StartsWith(c + "/"))
-                                CopyBetweenZips(entry.FileName, jar, zip);
-                        }
+                        CopyStream(stream, ms);
+                        ms.Seek(0, SeekOrigin.Begin);
                     }
-                    CopyBetweenZips("pack.png", jar, zip);
-                    CopyBetweenZips("terrain.png", jar, zip);
-                    CopyBetweenZips("particles.png", jar, zip);
+                }
+                catch (Exception ex)
+                {
+                    Application.Invoke((sender, e) =>
+                    {
+                        using (MessageDialog msg = new MessageDialog(_window,
+                                 DialogFlags.DestroyWithParent | DialogFlags.Modal,
+                                 MessageType.Error,
+                                 ButtonsType.Close,
+                                 $"Error retrieving assets:\n{ex}",
+                                 Array.Empty<object>()))
+                        {
+                            msg.Run();
+                        }
+                        _officialAssetsProgress.Visible = false;
+                        _officialAssetsButton.Visible = true;
+                    });
+                    return;
+                }
 
-                    zip.Save(System.IO.Path.Combine(Paths.TexturePacks, "Minecraft.zip"));
+                ZipArchive jar = new ZipArchive(ms, ZipArchiveMode.Read);
+                using (Stream outputPack = new FileStream(System.IO.Path.Combine(Paths.TexturePacks, "Minecraft.zip"), FileMode.Create))
+                using (ZipArchive outputZip = new ZipArchive(outputPack, ZipArchiveMode.Create, true))
+                {
+                    ZipArchiveEntry pack = outputZip.CreateEntry("pack.txt");
+                    using (Stream outStrm = pack.Open())
+                    using (StreamWriter sw = new StreamWriter(outStrm))
+                        sw.WriteLine("Minecraft textures");
+
+                    // TODO: achievement? font?
+                    string[] dirs = {
+                            "terrain", "gui", "armor", "art",
+                            "environment", "item", "misc", "mob"
+                        };
+
+                    foreach (ZipArchiveEntry entry in jar.Entries)
+                        foreach (string c in dirs)
+                            if (entry.FullName.StartsWith(c + "/"))
+                            {
+                                ZipArchiveEntry outputEntry = outputZip.CreateEntry(entry.FullName);
+                                using (Stream inStrm = entry.Open())
+                                using (Stream outStrm = outputEntry.Open())
+                                    CopyStream(inStrm, outStrm);
+                            }
+
+                    CopyBetweenZips("pack.png", jar, outputZip);
+                    CopyBetweenZips("terrain.png", jar, outputZip);
+                    CopyBetweenZips("particles.png", jar, outputZip);
+
                     Application.Invoke((sender, e) =>
                     {
                         _officialAssetsProgress.Visible = false;
@@ -247,43 +276,24 @@ namespace TrueCraft.Launcher.Views
                         _texturePacks.Add(texturePack);
                         AddTexturePackRow(texturePack);
                     });
-                    ms.Dispose();
                 }
-                catch (Exception ex)
-                {
-                    Application.Invoke((sender, e) =>
-                    {
-                       using (MessageDialog msg = new MessageDialog(_window,
-                                DialogFlags.DestroyWithParent | DialogFlags.Modal,
-                                MessageType.Error,
-                                ButtonsType.Close,
-                                $"Error retrieving assets:\n{ex}",
-                                Array.Empty<object>()))
-                       {
-                          msg.Run();
-                       }
-                        _officialAssetsProgress.Visible = false;
-                        _officialAssetsButton.Visible = true;
-                    });
-                }
+                ms.Dispose();
+            }).ContinueWith((x) =>
+            {
+                _officialAssetsProgress.Visible = false;
+                _officialAssetsButton.Visible = true;
             });
         }
 
-        public static void CopyBetweenZips(string name, ZipFile source, ZipFile destination)
+        public static void CopyBetweenZips(string name, ZipArchive source, ZipArchive destination)
         {
-            ZipEntry? sourceEntry = source.Entries.SingleOrDefault(f => f.FileName == name);
+            ZipArchiveEntry? sourceEntry = source.Entries.SingleOrDefault(f => f.FullName == name);
             if (sourceEntry is null)
                 return;
 
-            using (var stream = sourceEntry.OpenReader())
-            {
-                // TODO: MemoryStream is not disposed?
-                // TODO: why copy this stream to a MemoryStream instead of just using it?
-                var ms = new MemoryStream();
-                CopyStream(stream, ms);
-                ms.Seek(0, SeekOrigin.Begin);
-                destination.AddEntry(name, ms);
-            }
+            using (Stream src = sourceEntry.Open())
+            using (Stream dest = destination.CreateEntry(name).Open())
+                CopyStream(src, dest);
         }
 
         public static void CopyStream(Stream input, Stream output)

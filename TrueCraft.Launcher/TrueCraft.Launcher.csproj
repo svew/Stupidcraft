@@ -25,7 +25,6 @@
   <ItemGroup>
     <PackageReference Include="GtkSharp" Version="3.24.24.38" />
     <PackageReference Include="GdkSharp" Version="3.24.24.38" />
-    <PackageReference Include="Ionic.Zip" Version="1.9.1.8" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
   </ItemGroup>
 
