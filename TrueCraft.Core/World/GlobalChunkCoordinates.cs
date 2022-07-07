@@ -79,7 +79,7 @@ namespace TrueCraft.Core.World
         /// </summary>
         /// <param name="obj">The other object.</param>
         /// <returns></returns>
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return Equals(obj as GlobalChunkCoordinates);
         }

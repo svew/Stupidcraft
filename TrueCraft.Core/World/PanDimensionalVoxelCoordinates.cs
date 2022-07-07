@@ -22,7 +22,7 @@ namespace TrueCraft.Core.World
         public int Z { get => _z; }
 
         #region object overrides
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return Equals(obj as PanDimensionalVoxelCoordinates);
         }

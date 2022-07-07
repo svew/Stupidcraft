@@ -49,7 +49,7 @@ namespace TrueCraft.Core
         /// </summary>
         /// <param name="obj">The other object.</param>
         /// <returns></returns>
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return (obj is Ray) && Equals((Ray)obj);
         }
