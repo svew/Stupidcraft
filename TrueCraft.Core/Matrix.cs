@@ -842,8 +842,11 @@ namespace TrueCraft.Core
         /// </summary>
         /// <param name="obj">The <see cref="Object"/> to compare.</param>
         /// <returns><c>true</c> if the instances are equal; <c>false</c> otherwise.</returns>
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
+            if (obj is null)
+                return false;
+
             bool flag = false;
             if (obj is Matrix)
             {
