@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using fNbt;
-using Ionic.Zlib;
 using TrueCraft.Core;
 using TrueCraft.Core.Entities;
 using TrueCraft.Core.Inventory;
@@ -657,8 +657,8 @@ namespace TrueCraft
             using (var ms = new MemoryStream())
             {
                 using (var msOut = new MemoryStream(chunk.Data))
-                using (var deflate = new ZlibStream(msOut, CompressionMode.Compress, CompressionLevel.BestSpeed))
-                    deflate.CopyTo(ms);
+                using (ZLibStream deflate = new ZLibStream(ms, CompressionLevel.SmallestSize))
+                    msOut.CopyTo(deflate);
                 result = ms.ToArray();
             }
             Profiler.Done();

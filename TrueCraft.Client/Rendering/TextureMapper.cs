@@ -1,11 +1,9 @@
 ﻿using System;
 using System.IO;
-using System.Collections;
+using System.IO.Compression;
 using System.Collections.Generic;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using TrueCraft.Core;
-using Ionic.Zip;
 
 namespace TrueCraft.Client.Rendering
 {
@@ -99,24 +97,32 @@ namespace TrueCraft.Client.Rendering
             // they're unimportant as we can just use default textures.
             try
             {
-                var archive = new ZipFile(Path.Combine(Paths.TexturePacks, texturePack.Name));
-                foreach (var entry in archive.Entries)
+                using (Stream strm = new FileStream(Path.Combine(Paths.TexturePacks, texturePack.Name), FileMode.Open, FileAccess.Read))
+                using (ZipArchive archive = new ZipArchive(strm))
                 {
-                    var key = entry.FileName;
-                    if (Path.GetExtension(key) == ".png")
+                    foreach (ZipArchiveEntry entry in archive.Entries)
                     {
-                        using (var stream = entry.OpenReader())
+                        var key = entry.Name;
+                        if (Path.GetExtension(key) == ".png")
                         {
-                            try
+                            using (Stream stream = entry.Open())
                             {
-                                using (var ms = new MemoryStream())
+                                // TODO: why copy this stream to a Memory Stream and then use it?
+                                //       Why not just use this Stream?
+                                try
                                 {
-                                    CopyStream(stream, ms);
-                                    ms.Seek(0, SeekOrigin.Begin);
-                                    AddTexture(key, Texture2D.FromStream(_device, ms));
+                                    using (var ms = new MemoryStream())
+                                    {
+                                        CopyStream(stream, ms);
+                                        ms.Seek(0, SeekOrigin.Begin);
+                                        AddTexture(key, Texture2D.FromStream(_device, ms));
+                                    }
+                                }
+                                catch (Exception ex)
+                                {  // TODO: what causes Exceptions to be thrown?  Can we use a more specific type of Exception?
+                                    Console.WriteLine("Exception ({0}) occurred while loading {1} from texture pack:\n\n{2}", ex.GetType().ToString(), key, ex);
                                 }
                             }
-                            catch (Exception ex) { Console.WriteLine("Exception occured while loading {0} from texture pack:\n\n{1}", key, ex); }
                         }
                     }
                 }

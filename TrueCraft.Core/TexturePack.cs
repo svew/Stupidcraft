@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using Ionic.Zip;
+using System.IO.Compression;
 
 namespace TrueCraft.Core
 {
@@ -26,26 +26,24 @@ namespace TrueCraft.Core
 
             string description = Unknown.Description;
             Stream image = Unknown.Image;
-            try
-            {
-                var archive = new ZipFile(path);
-                foreach (var entry in archive.Entries)
+
+            using (Stream strm = new FileStream(path, FileMode.Open, FileAccess.Read))
+            using (ZipArchive archive = new ZipArchive(strm))
+                foreach (ZipArchiveEntry entry in archive.Entries)
                 {
-                    if (entry.FileName == "pack.txt")
+                    if (entry.Name == "pack.txt")
                     {
-                        using (var stream = entry.OpenReader())
-                        {
-                            using (var reader = new StreamReader(stream))
-                                description = reader.ReadToEnd().TrimEnd('\n', '\r', ' ');
-                        }
+                        using (Stream stream = entry.Open())
+                        using (StreamReader reader = new StreamReader(stream))
+                            description = reader.ReadToEnd().TrimEnd('\n', '\r', ' ');
                     }
-                    else if (entry.FileName == "pack.png")
+                    else if (entry.Name == "pack.png")
                     {
-                        using (var stream = entry.OpenReader())
+                        using (Stream stream = entry.Open())
                         {
-                            var buffer = new byte[entry.UncompressedSize];
+                            byte[] buffer = new byte[entry.Length];
                             stream.Read(buffer, 0, buffer.Length);
-                            image = new MemoryStream((int)entry.UncompressedSize);
+                            image = new MemoryStream((int)entry.Length);
                             image.Write(buffer, 0, buffer.Length);
 
                             // Fixes 'GLib.GException: Unrecognized image file format' on Linux.
@@ -53,15 +51,6 @@ namespace TrueCraft.Core
                         }
                     }
                 }
-            }
-            catch
-            {
-                // TODO:
-                //  1. What more specific Exception could be caught?
-                //  2. Under what circumstances might it be thrown?
-                //  3. Why is it safe to ignore?
-                return null;
-            }
 
             string name = new FileInfo(path).Name;
             return new TexturePack(name, image, description);
