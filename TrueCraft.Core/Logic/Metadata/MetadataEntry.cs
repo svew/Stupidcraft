@@ -56,7 +56,7 @@ namespace TrueCraft.Core
             FieldInfo[] fields = type.GetFields();
             string result = FriendlyName + "[" + Index + "]: ";
             if (fields.Length != 0)
-                result += fields[0].GetValue(this).ToString();
+                result += fields[0].GetValue(this)?.ToString() ?? String.Empty;
             return result;
         }
     }

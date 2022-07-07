@@ -12,11 +12,15 @@ namespace TrueCraft.Core.Logic
 
         public CraftingRecipe(XmlNode recipe)
         {
-            XmlNode pattern = recipe.FirstChild;
+            XmlNode? pattern = recipe.FirstChild;
+            if (pattern is null)
+                throw new ArgumentException("The given recipe node has no children.");
             _input = CraftingPattern.GetCraftingPattern(pattern)!;
 
-            XmlNode input = pattern.NextSibling;
-            _output = new ItemStack(input);
+            XmlNode? output = pattern.NextSibling;
+            if (output is null)
+                throw new ArgumentException("The given recipe has no output.");
+            _output = new ItemStack(output);
         }
 
         #region object overrides

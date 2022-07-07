@@ -185,8 +185,6 @@ namespace TrueCraft.Core
         /// <returns></returns>
         public bool Equals(BoundingBox other)
         {
-            if (object.ReferenceEquals(other, null))
-                return false;
             return (this.Min == other.Min) && (this.Max == other.Max);
         }
 
@@ -195,7 +193,7 @@ namespace TrueCraft.Core
         /// </summary>
         /// <param name="obj">The other object.</param>
         /// <returns></returns>
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return (obj is BoundingBox) && this.Equals((BoundingBox)obj);
         }
@@ -245,20 +243,7 @@ namespace TrueCraft.Core
 
         public static bool operator ==(BoundingBox a, BoundingBox b)
         {
-            if (!object.ReferenceEquals(a, null))
-            {
-                if (!object.ReferenceEquals(b, null))
-                    return a.Equals(b);
-                else
-                    return false;
-            }
-            else
-            {
-                if (!object.ReferenceEquals(b, null))
-                    return false;
-                else
-                    return true;
-            }
+            return a.Equals(b);
         }
 
         public static bool operator !=(BoundingBox a, BoundingBox b)

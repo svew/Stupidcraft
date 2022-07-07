@@ -34,8 +34,11 @@ namespace TrueCraft.Core.Logic
 
             providerTypes.ForEach(t =>
             {
-                var instance = (IBlockProvider)Activator.CreateInstance(t);
-                repository.RegisterBlockProvider(instance);
+                IBlockProvider? instance = (IBlockProvider?)Activator.CreateInstance(t);
+                // TODO: If instance is null, it means the developer forgot to
+                //       include a parameterless constructor.  Log a warning.
+                if (instance is not null)
+                    repository.RegisterBlockProvider(instance);
             });
         }
 
@@ -55,8 +58,11 @@ namespace TrueCraft.Core.Logic
 
             providerTypes.ForEach(t =>
             {
-                var instance = (IItemProvider)Activator.CreateInstance(t);
-                repository.RegisterItemProvider(instance);
+                IItemProvider? instance = (IItemProvider?)Activator.CreateInstance(t);
+                // TODO: If instance is null, it means the developer forgot to
+                //       include a parameterless constructor.  Log a warning.
+                if (instance is not null)
+                    repository.RegisterItemProvider(instance);
             });
         }
 
@@ -66,10 +72,10 @@ namespace TrueCraft.Core.Logic
             XmlDocument doc = new XmlDocument();
 
             Assembly thisAssembly = this.GetType().Assembly;
-            using (Stream xsd = thisAssembly.GetManifestResourceStream("TrueCraft.Core.Assets.TrueCraft.xsd"))
-                doc.Schemas.Add(XmlSchema.Read(xsd, null));
+            using (Stream xsd = thisAssembly.GetManifestResourceStream("TrueCraft.Core.Assets.TrueCraft.xsd")!)
+                doc.Schemas.Add(XmlSchema.Read(xsd, null)!);
 
-            using (Stream sz = thisAssembly.GetManifestResourceStream("TrueCraft.Core.Assets.TrueCraft.xml.gz"))
+            using (Stream sz = thisAssembly.GetManifestResourceStream("TrueCraft.Core.Assets.TrueCraft.xml.gz")!)
             using (Stream s = new GZipStream(sz, CompressionMode.Decompress))
             using (XmlReader xmlr = XmlReader.Create(s))
             {
