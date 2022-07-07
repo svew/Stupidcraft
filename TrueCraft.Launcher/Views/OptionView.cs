@@ -16,7 +16,8 @@ namespace TrueCraft.Launcher.Views
         private enum TexturePackColumns
         {
            Image,
-           Name
+           Name,
+           Description
         }
 
         private readonly LauncherWindow _window;
@@ -86,7 +87,7 @@ namespace TrueCraft.Launcher.Views
             _invertMouseCheckBox.Active = UserSettings.Local.InvertedMouse;
 
             _texturePackLabel = new Label("Select a texture pack...");
-            _texturePackStore = new ListStore(typeof(Image), typeof(string));
+            _texturePackStore = new ListStore(typeof(Image), typeof(string), typeof(string));
             _texturePackListView = new TreeView(_texturePackStore);
             _texturePackListView.SetSizeRequest(-1, 200);
             _texturePackListView.HeadersVisible = false;
@@ -180,6 +181,12 @@ namespace TrueCraft.Launcher.Views
             CellRendererText rendererText = new CellRendererText();
             column = new TreeViewColumn("Name", rendererText, "text", TexturePackColumns.Name);
             column.SortColumnId = (int)TexturePackColumns.Name;
+            tv.AppendColumn(column);
+
+            // Texture Pack Description column
+            rendererText = new CellRendererText();
+            column = new TreeViewColumn("Description", rendererText, "text", TexturePackColumns.Description);
+            column.SortColumnId = (int)TexturePackColumns.Description;
             tv.AppendColumn(column);
         }
 
@@ -338,10 +345,11 @@ namespace TrueCraft.Launcher.Views
 
         private void AddTexturePackRow(TexturePack pack)
         {
-           TreeIter row = _texturePackStore.Append();
+            TreeIter row = _texturePackStore.Append();
 
-           _texturePackStore.SetValue(row, (int)TexturePackColumns.Image, new Image(new Gdk.Pixbuf(pack.Image, 24, 24)));
-           _texturePackStore.SetValue(row, (int)TexturePackColumns.Name, pack.Name + "\r\n" + pack.Description);
+            _texturePackStore.SetValue(row, (int)TexturePackColumns.Image, new Image(new Gdk.Pixbuf(pack.Image, 24, 24)));
+            _texturePackStore.SetValue(row, (int)TexturePackColumns.Name, pack.Name);
+            _texturePackStore.SetValue(row, (int)TexturePackColumns.Description, pack.Description);
         }
     }
 }
