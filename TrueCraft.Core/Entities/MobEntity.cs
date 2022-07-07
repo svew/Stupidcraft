@@ -123,7 +123,7 @@ namespace TrueCraft.Core.Entities
                     if (CurrentPath.Index >= CurrentPath.Count)
                     {
                         CurrentPath = null;
-                        PathComplete?.Invoke(this, null);
+                        PathComplete?.Invoke(this, EventArgs.Empty);
                         return true;
                     }
                 }

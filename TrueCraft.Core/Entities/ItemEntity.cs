@@ -104,7 +104,7 @@ namespace TrueCraft.Core.Entities
             IList<IEntity> nearbyEntities = entityManager.EntitiesInRange(Position, PickupRange);
             if ((DateTime.UtcNow - SpawnTime).TotalSeconds > 1)
             {
-                IEntity player = nearbyEntities.FirstOrDefault(e => e is PlayerEntity && ((PlayerEntity)e).Health != 0
+                IEntity? player = nearbyEntities.FirstOrDefault(e => e is PlayerEntity && ((PlayerEntity)e).Health != 0
                     && e.Position.DistanceTo(Position) <= PickupRange);
                 if (player is not null)
                 {
