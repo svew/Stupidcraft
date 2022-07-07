@@ -12,7 +12,7 @@ namespace TrueCraft.Core.Logging
             else
                 log.Log(LogCategory.Packets, "[SERVER > CLIENT] 0x{0:X2} {1}", packet.ID, packet.GetType().Name);
             foreach (var prop in packet.GetType().GetFields())
-                log.Log(LogCategory.Packets, "\t{0} ({1}): {2}", prop.Name, prop.FieldType.Name, prop.GetValue(packet));
+                log.Log(LogCategory.Packets, "\t{0} ({1}): {2}", prop.Name, prop.FieldType.Name, prop.GetValue(packet) ?? string.Empty);
             log.Log(LogCategory.Packets, ""); // newline
             // TODO: Log packet payload
         }
