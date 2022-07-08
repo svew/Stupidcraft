@@ -34,7 +34,7 @@ namespace TrueCraft.Core.Networking
 
         public SocketAsyncEventArgs Get()
         {
-            SocketAsyncEventArgs args;
+            SocketAsyncEventArgs? args;
             if (!argsPool.TryTake(out args))
             {
                 args = CreateEventArgs();
@@ -66,7 +66,7 @@ namespace TrueCraft.Core.Networking
         {
             for (int i = 0; i < count; i++)
             {
-                SocketAsyncEventArgs args;
+                SocketAsyncEventArgs? args;
 
                 if (argsPool.TryTake(out args))
                 {

@@ -45,7 +45,7 @@ namespace TrueCraft.Core
 
         public void Save()
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(Paths.Settings));
+            Directory.CreateDirectory(Path.GetDirectoryName(Paths.Settings)!);
             File.WriteAllText(Paths.Settings, JsonConvert.SerializeObject(this, Formatting.Indented));
         }
     }

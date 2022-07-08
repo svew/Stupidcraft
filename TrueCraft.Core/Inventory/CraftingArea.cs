@@ -24,7 +24,7 @@ namespace TrueCraft.Core.Inventory
                 this[j].PropertyChanged += HandleSlotPropertyChanged;
         }
 
-        private void HandleSlotPropertyChanged(object sender, PropertyChangedEventArgs e)
+        private void HandleSlotPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             UpdateOutput();
         }

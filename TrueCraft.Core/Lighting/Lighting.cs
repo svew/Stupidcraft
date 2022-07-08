@@ -176,7 +176,7 @@ namespace TrueCraft.Core.Lighting
             byte emissiveness = provider.Luminance;
             if (op.SkyLight)
             {
-                byte[,] map;
+                byte[,]? map;
                 if (!HeightMaps.TryGetValue(chunk.Coordinates, out map))
                 {
                     GenerateHeightMap(chunk);

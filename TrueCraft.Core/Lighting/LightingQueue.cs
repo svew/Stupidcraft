@@ -42,7 +42,7 @@ namespace TrueCraft.Core.Lighting
         /// <inheritdoc />
         public LightingOperation? Dequeue()
         {
-            LightingOperation rv;
+            LightingOperation? rv;
 
             if (_initialLightingStack.TryPop(out rv))
                 return rv;
