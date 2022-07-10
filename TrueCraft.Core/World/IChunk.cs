@@ -58,6 +58,11 @@ namespace TrueCraft.Core.World
         [Obsolete("Violation of encapsulation")]
         byte[] Data { get; }
 
+        // TODO: move to server-side
+        // Documentation of this field at https://minecraft.fandom.com/wiki/Chunk_format?oldid=120992
+        // appears to indicate that there are 2 phases to generation of chunks
+        // in Beta 1.7.3.  In order to load Beta 1.7.3 worlds, we may need to handle this.
+        [Obsolete("Should be server-side only")]
         bool TerrainPopulated { get; set; }
 
         // TODO: remove this method
