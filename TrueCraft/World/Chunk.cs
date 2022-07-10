@@ -31,7 +31,6 @@ namespace TrueCraft.World
             _heightMap = new int[Width * Depth];
             _tileEntities = new Dictionary<LocalVoxelCoordinates, NbtCompound>();
             TerrainPopulated = false;
-            LightPopulated = false;
             MaxHeight = 0;
             const int size = Width * Height * Depth;
             const int halfSize = size / 2;
@@ -101,27 +100,9 @@ namespace TrueCraft.World
         /// <inheritdoc />
         public GlobalChunkCoordinates Coordinates { get => _coordinates; }
 
-        [NbtIgnore]
-        private bool _LightPopulated;
-        public bool LightPopulated
-        {
-            get
-            {
-                return _LightPopulated;
-            }
-            set
-            {
-                _LightPopulated = value;
-                IsModified = true;
-            }
-        }
-
         public long LastUpdate { get; set; }
 
         public bool TerrainPopulated { get; set; }
-
-        //[NbtIgnore]
-        //public IRegion ParentRegion { get; set; }
 
         public byte GetBlockID(LocalVoxelCoordinates coordinates)
         {
@@ -310,7 +291,6 @@ namespace TrueCraft.World
             chunk.Add(entities);
             chunk.Add(new NbtInt("X", X));
             chunk.Add(new NbtInt("Z", Z));
-            chunk.Add(new NbtByte("LightPopulated", (byte)(LightPopulated ? 1 : 0)));
             chunk.Add(new NbtByte("TerrainPopulated", (byte)(TerrainPopulated ? 1 : 0)));
             chunk.Add(new NbtByteArray("Blocks", Data));
             chunk.Add(new NbtByteArray("Data", Metadata.ToArray()));
@@ -345,8 +325,6 @@ namespace TrueCraft.World
 
             if (tag.Contains("TerrainPopulated"))
                 TerrainPopulated = tag["TerrainPopulated"].ByteValue > 0;
-            if (tag.Contains("LightPopulated"))
-                LightPopulated = tag["LightPopulated"].ByteValue > 0;
             const int size = Width * Height * Depth;
             Data = new byte[(int)(size * 2.5)];
             Buffer.BlockCopy(tag["Blocks"].ByteArrayValue, 0, Data, 0, size);

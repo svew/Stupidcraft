@@ -64,8 +64,6 @@ namespace TrueCraft.Core.Test.World
 
         public bool IsModified => throw new NotImplementedException();
 
-        public bool LightPopulated { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-
         public DateTime LastAccessed { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public byte[] Data => throw new NotImplementedException();

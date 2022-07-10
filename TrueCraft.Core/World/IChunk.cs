@@ -44,8 +44,6 @@ namespace TrueCraft.Core.World
         [Obsolete("Should be server-side only")]
         bool IsModified { get; }
 
-        bool LightPopulated { get; set; }
-
         /// <summary>
         /// Gets the Biome at the specified column within the Chunk.
         /// </summary>
