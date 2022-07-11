@@ -211,7 +211,7 @@ namespace TrueCraft
         /// <returns>The remaining Items after picking up.</returns>
         private ItemStack PickUpStack(ItemStack item)
         {
-            IItemProvider provider = Server.ItemRepository.GetItemProvider(item.ID)!;
+            IItemProvider provider = _dimension!.ItemRepository.GetItemProvider(item.ID)!;
             ItemStack remaining = Inventory.StoreItemStack(item, false);
 
             if (!remaining.Empty)

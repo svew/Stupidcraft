@@ -80,7 +80,7 @@ namespace TrueCraft.Commands
                 if (!short.TryParse(itemid, out id) || !Int32.TryParse(amount, out count)) return false;
             }
 
-            if (client.Server.ItemRepository.GetItemProvider(id) == null)
+            if (client.Dimension!.ItemRepository.GetItemProvider(id) == null)
             {
                 client.SendMessage("Invalid item id \"" + id + "\".");
                 return true;
