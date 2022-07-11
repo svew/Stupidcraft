@@ -18,8 +18,6 @@ namespace TrueCraft.World
 {
     public class Dimension : IDisposable, IDimensionServer, IEnumerable<IChunk>, IEquatable<IDimension>
     {
-        public static readonly int Height = 128;
-
         private readonly DimensionID _dimensionID;
 
         private readonly IMultiplayerServer _server;
