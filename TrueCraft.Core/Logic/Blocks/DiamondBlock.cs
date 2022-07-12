@@ -19,6 +19,8 @@ namespace TrueCraft.Core.Logic.Blocks
             return "Block of Diamond";
         }
 
+        // TODO: should GetDrop be implemented?
+
         public override Tuple<int, int> GetTextureMap(byte metadata)
         {
             return new Tuple<int, int>(8, 1);

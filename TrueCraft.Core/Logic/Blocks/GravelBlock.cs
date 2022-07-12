@@ -43,6 +43,7 @@ namespace TrueCraft.Core.Logic.Blocks
             if (MathHelper.Random.Next(10) == 0)
                 return new[] { new ItemStack(FlintItem.ItemID, 1, descriptor.Metadata) };
             else
+                // TODO: shouldn't this be a gravel block item???
                 return new ItemStack[0];
         }
 

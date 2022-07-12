@@ -362,6 +362,7 @@ namespace TrueCraft.Core.Logic.Blocks
 
         protected override ItemStack[] GetDrop(BlockDescriptor descriptor, ItemStack item)
         {
+            // TODO: should Furnaces also drop their contents?
             return new[] { new ItemStack(BlockID) };
         }
 
