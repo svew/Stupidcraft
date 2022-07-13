@@ -33,6 +33,7 @@ namespace TrueCraft.Core.Logic
         /// Gets the single instance of the BlockRepository.
         /// </summary>
         /// <returns>The BlockRepository.</returns>
+        [Obsolete("Use ServiceLocator to inject the BlockRepository")]
         public static BlockRepository Get()
         {
 #if DEBUG
