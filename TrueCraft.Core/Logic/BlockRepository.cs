@@ -15,7 +15,7 @@ namespace TrueCraft.Core.Logic
 
         }
 
-        internal static IRegisterBlockProvider Init(IDiscover discover)
+        internal static IBlockRepository Init(IDiscover discover)
         {
             // Creating a new Single Player World requires an initialized
             // Block Provider.  Starting an existing world must also initialize

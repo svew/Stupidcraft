@@ -15,7 +15,7 @@ namespace TrueCraft.Core.Logic
             ItemProviders = new List<IItemProvider>();
         }
 
-        internal static IRegisterItemProvider Init(IDiscover discover)
+        internal static IItemRepository Init(IDiscover discover)
         {
             if (!object.ReferenceEquals(_singleton, null))
                 return _singleton;

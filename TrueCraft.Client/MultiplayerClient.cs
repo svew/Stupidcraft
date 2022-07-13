@@ -84,8 +84,6 @@ namespace TrueCraft.Client
             PacketHandlers = new PacketHandler[0x100];
             Handlers.PacketHandlers.RegisterHandlers(this);
 
-            Discover.DoDiscovery(new Discover());
-
             Dimension = new Dimension(BlockRepository.Get(), ItemRepository.Get());
 
             Physics = new PhysicsEngine(Dimension);

@@ -22,6 +22,8 @@ namespace TrueCraft.Client
 
             UserSettings.Local.Load();
 
+            IServiceLocator _serviceLocator = Discover.DoDiscovery(new Discover());
+
             IPEndPoint? serverEndPoint = null;
 
             try
