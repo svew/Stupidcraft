@@ -9,6 +9,8 @@ namespace TrueCraft.Client.Modules
 {
     public class HUDModule : IGraphicalModule
     {
+        private readonly IItemRepository _itemRepository;
+
         private TrueCraftGame Game { get; set; }
         private SpriteBatch SpriteBatch { get; set; }
         private Texture2D GUI { get; set; }
@@ -16,8 +18,9 @@ namespace TrueCraft.Client.Modules
         private Texture2D Items { get; set; }
         private FontRenderer Font { get; set; }
 
-        public HUDModule(TrueCraftGame game, FontRenderer font)
+        public HUDModule(IItemRepository itemRepository, TrueCraftGame game, FontRenderer font)
         {
+            _itemRepository = itemRepository;
             Game = game;
             Font = font;
             SpriteBatch = new SpriteBatch(game.GraphicsDevice);
@@ -130,7 +133,7 @@ namespace TrueCraft.Client.Modules
                 ItemStack item = Game.Client.Hotbar[i].Item;
                 if (item.Empty)
                     continue;
-                IItemProvider provider = Game.ItemRepository.GetItemProvider(item.ID)!;  // item is known to not be Empty
+                IItemProvider provider = _itemRepository.GetItemProvider(item.ID)!;  // item is known to not be Empty
                 if (provider.GetIconTexture((byte)item.Metadata) == null)
                     continue;
                 var position = origin + new Point((int)Scale(i * 20), 0);
@@ -152,7 +155,7 @@ namespace TrueCraft.Client.Modules
                 ItemStack item = Game.Client.Hotbar[i].Item;
                 if (item.Empty)
                     continue;
-                IBlockProvider? provider = Game.ItemRepository.GetItemProvider(item.ID) as IBlockProvider;
+                IBlockProvider? provider = _itemRepository.GetItemProvider(item.ID) as IBlockProvider;
                 if (provider is null || provider.GetIconTexture((byte)item.Metadata) != null)
                     continue;
                 var position = origin + new Point((int)Scale(i * 20), 0);

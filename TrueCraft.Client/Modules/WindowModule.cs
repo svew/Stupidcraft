@@ -17,6 +17,8 @@ namespace TrueCraft.Client.Modules
 {
     public class WindowModule : InputModule, IGraphicalModule
     {
+        private readonly IItemRepository _itemRepository
+;
         private TrueCraftGame Game { get; }
         private SpriteBatch SpriteBatch { get; }
         private Texture2D Inventory { get; }
@@ -39,8 +41,10 @@ namespace TrueCraft.Client.Modules
             Text
         }
 
-        public WindowModule(TrueCraftGame game, FontRenderer font)
+        public WindowModule(IItemRepository itemRepository, TrueCraftGame game, FontRenderer font)
         {
+            _itemRepository = itemRepository;
+
             Game = game;
             Font = font;
             SpriteBatch = new SpriteBatch(game.GraphicsDevice);
@@ -93,7 +97,7 @@ namespace TrueCraft.Client.Modules
 
             IItemProvider? provider = null;
             if (!HeldItem.Empty)
-                provider = Game.ItemRepository.GetItemProvider(HeldItem.ID);
+                provider = _itemRepository.GetItemProvider(HeldItem.ID);
 
             // Draw background
             SpriteBatch.Begin(samplerState: SamplerState.PointClamp, blendState: BlendState.NonPremultiplied);
@@ -187,7 +191,7 @@ namespace TrueCraft.Client.Modules
                 ItemStack item = Game.Client.CurrentWindow[SelectedSlot];
                 if (!item.Empty)
                 {
-                    IItemProvider p = Game.ItemRepository.GetItemProvider(item.ID)!;   // item is known to not be Empty
+                    IItemProvider p = _itemRepository.GetItemProvider(item.ID)!;   // item is known to not be Empty
                     Point size = Font.MeasureText(p.GetDisplayName(item.Metadata));
                     mouse = Mouse.GetState().Position.ToVector2().ToPoint();
                     mouse += new Point(10, 10);
@@ -449,7 +453,7 @@ namespace TrueCraft.Client.Modules
                 if (item.Empty)
                     continue;
 
-                IItemProvider provider = Game.ItemRepository.GetItemProvider(item.ID)!;  // item is known to not be Empty
+                IItemProvider provider = _itemRepository.GetItemProvider(item.ID)!;  // item is known to not be Empty
                 var texture = provider.GetIconTexture((byte)item.Metadata);
                 if (texture is not null && stage == RenderStage.Sprites)
                     IconRenderer.RenderItemIcon(SpriteBatch, Items, provider,

@@ -22,6 +22,8 @@ namespace TrueCraft.Client
 {
     public class TrueCraftGame : Game
     {
+        private readonly IServiceLocator _serviceLocator;
+
         private readonly Camera _camera;
         private readonly AudioManager _audio;
 
@@ -62,19 +64,10 @@ namespace TrueCraft.Client
 
         public static readonly int Reach = 3;
 
-        public IBlockRepository BlockRepository
+        public TrueCraftGame(IServiceLocator serviceLocator, MultiplayerClient client, IPEndPoint endPoint)
         {
-            get
-            {
-                return Client.Dimension.BlockRepository;
-            }
-        }
+            _serviceLocator = serviceLocator;
 
-        [Obsolete("Inject instead")]
-        public IItemRepository ItemRepository { get; set; }
-
-        public TrueCraftGame(MultiplayerClient client, IPEndPoint endPoint)
-        {
             Window.Title = "TrueCraft";
             Content.RootDirectory = "Content";
             Graphics = new GraphicsDeviceManager(this);
@@ -130,15 +123,15 @@ namespace TrueCraft.Client
             _audio.LoadDefaultPacks(Content);
 
             SkyModule = new SkyModule(this);
-            ChunkModule = new ChunkModule(this);
+            ChunkModule = new ChunkModule(_serviceLocator, this);
             _debugInfoModule = new DebugInfoModule(this, _pixel!);  // LoadContent previously called.
             _chatModule = new ChatModule(this, _pixel!);
-            var hud = new HUDModule(this, _pixel!);
-            var windowModule = new WindowModule(this, _pixel!);
+            HUDModule hud = new HUDModule(_serviceLocator.ItemRepository, this, _pixel!);
+            var windowModule = new WindowModule(_serviceLocator.ItemRepository, this, _pixel!);
 
             _graphicalModules.Add(SkyModule);
             _graphicalModules.Add(ChunkModule);
-            _graphicalModules.Add(new HighlightModule(this));
+            _graphicalModules.Add(new HighlightModule(_serviceLocator, this));
             _graphicalModules.Add(hud);
             _graphicalModules.Add(_chatModule);
             _graphicalModules.Add(windowModule);
@@ -147,15 +140,14 @@ namespace TrueCraft.Client
             _inputModules.Add(windowModule);
             _inputModules.Add(_debugInfoModule);
             _inputModules.Add(_chatModule);
-            _inputModules.Add(new HUDModule(this, _pixel!));    // _pixel was initialized in LoadContent
-            _inputModules.Add(ControlModule = new PlayerControlModule(this));
+            // TODO: Why create a second HUDModule?
+            _inputModules.Add(new HUDModule(_serviceLocator.ItemRepository, this, _pixel!));    // _pixel was initialized in LoadContent
+            _inputModules.Add(ControlModule = new PlayerControlModule(_serviceLocator, this));
 
             Client.PropertyChanged += HandleClientPropertyChanged;
             Client.Connect(_endPoint);
 
-            ItemRepository = TrueCraft.Core.Logic.ItemRepository.Get();
-
-            IconRenderer.CreateBlocks(this, BlockRepository);
+            IconRenderer.CreateBlocks(this, _serviceLocator.BlockRepository);
 
             var centerX = GraphicsDevice.Viewport.Width / 2;
             var centerY = GraphicsDevice.Viewport.Height / 2;

@@ -6,11 +6,13 @@ using Matrix = Microsoft.Xna.Framework.Matrix;
 using XVector3 = Microsoft.Xna.Framework.Vector3;
 using TVector3 = TrueCraft.Core.Vector3;
 using TRay = TrueCraft.Core.Ray;
+using TrueCraft.Core.Logic;
 
 namespace TrueCraft.Client.Modules
 {
     public class HighlightModule : IGraphicalModule
     {
+        private readonly IServiceLocator _serviceLocator;
         private readonly TrueCraftGame _game;
 
         private readonly BasicEffect _highlightEffect;
@@ -57,8 +59,9 @@ namespace TrueCraft.Client.Modules
             };
         }
 
-        public HighlightModule(TrueCraftGame game)
+        public HighlightModule(IServiceLocator serviceLocator, TrueCraftGame game)
         {
+            _serviceLocator = serviceLocator;
             _game = game;
             _highlightEffect = new BasicEffect(_game.GraphicsDevice);
             _highlightEffect.VertexColorEnabled = true;
@@ -95,13 +98,13 @@ namespace TrueCraft.Client.Modules
 
             var cast = VoxelCast.Cast(_game.Client.Dimension,
                 new TRay(_game.Camera.Position, new TVector3(direction.X, direction.Y, direction.Z)),
-                _game.BlockRepository, TrueCraftGame.Reach, TrueCraftGame.Reach + 2);
+                _serviceLocator.BlockRepository, TrueCraftGame.Reach, TrueCraftGame.Reach + 2);
 
             if (cast == null)
                 _game.HighlightedBlock = null;
             else
             {
-                var provider = _game.BlockRepository.GetBlockProvider(_game.Client.Dimension.GetBlockID(cast.Item1));
+                IBlockProvider provider = _serviceLocator.BlockRepository.GetBlockProvider(_game.Client.Dimension.GetBlockID(cast.Item1));
                 if (provider.InteractiveBoundingBox != null)
                 {
                     var box = provider.InteractiveBoundingBox.Value;

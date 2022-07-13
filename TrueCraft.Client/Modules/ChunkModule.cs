@@ -13,6 +13,7 @@ namespace TrueCraft.Client.Modules
 {
     public class ChunkModule : IGraphicalModule
     {
+        private readonly IServiceLocator _serviceLocator;
         private readonly TrueCraftGame _game;
         public ChunkRenderer ChunkRenderer { get; }
         public int ChunksRendered { get; set; }
@@ -26,8 +27,9 @@ namespace TrueCraft.Client.Modules
         private readonly BasicEffect _opaqueEffect;
         private readonly AlphaTestEffect _transparentEffect;
 
-        public ChunkModule(TrueCraftGame game)
+        public ChunkModule(IServiceLocator serviceLocator, TrueCraftGame game)
         {
+            _serviceLocator = serviceLocator;
             _game = game;
 
             ChunkRenderer = new ChunkRenderer(_game, _game.Client.Dimension);
@@ -37,7 +39,7 @@ namespace TrueCraft.Client.Modules
             _game.Client.BlockChanged += Game_Client_BlockChanged;
             ChunkRenderer.MeshCompleted += MeshCompleted;
             ChunkRenderer.Start();
-            WorldLighting = new Lighting(_game.Client.Dimension, _game.BlockRepository);
+            WorldLighting = new Lighting(_game.Client.Dimension, _serviceLocator.BlockRepository);
 
             _opaqueEffect = new BasicEffect(_game.GraphicsDevice);
             _opaqueEffect.TextureEnabled = true;

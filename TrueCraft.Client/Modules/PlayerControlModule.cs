@@ -17,6 +17,8 @@ namespace TrueCraft.Client.Modules
 {
     public class PlayerControlModule : InputModule
     {
+        private readonly IServiceLocator _serviceLocator;
+
         private TrueCraftGame Game { get; set; }
         private DateTime NextAnimation { get; set; }
         private XVector3 Delta { get; set; }
@@ -25,8 +27,10 @@ namespace TrueCraft.Client.Modules
         private GamePadState GamePadState { get; set; }
         public bool IgnoreNextUpdate { get; set; }
 
-        public PlayerControlModule(TrueCraftGame game)
+        public PlayerControlModule(IServiceLocator serviceLocator, TrueCraftGame game)
         {
+            _serviceLocator = serviceLocator;
+
             Game = game;
             Capture = true;
             Digging = false;
@@ -299,7 +303,7 @@ namespace TrueCraft.Client.Modules
             var target = Game.Client.Dimension.GetBlockID(coords);
             if (target == AirBlock.BlockID)
                 target = Game.Client.Dimension.GetBlockID(coords + Vector3i.Down);
-            IBlockProvider? provider = Game.BlockRepository.GetBlockProvider(target);
+            IBlockProvider? provider = _serviceLocator.BlockRepository.GetBlockProvider(target);
             if (provider is null || provider.SoundEffect == SoundEffectClass.None)
                 return;
             var effect = string.Format("footstep.{0}", Enum.GetName(typeof(SoundEffectClass), provider.SoundEffect)?.ToLower());
