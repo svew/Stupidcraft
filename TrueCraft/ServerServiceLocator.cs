@@ -16,8 +16,8 @@ namespace TrueCraft
         /// Constructs a new instance of the Service Locator.
         /// </summary>
         public ServerServiceLocator(IMultiplayerServer server,
-            IBlockRepository blockRepository,
-            IItemRepository itemRepository) : base(blockRepository, itemRepository)
+            IServiceLocator serviceLocator) :
+            base(serviceLocator.BlockRepository, serviceLocator.ItemRepository)
         {
             if (server is null)
                 throw new ArgumentNullException(nameof(server));

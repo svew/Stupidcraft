@@ -24,6 +24,8 @@ namespace TrueCraft
     {
         private static MultiplayerServer? _singleton = null;
 
+        private readonly IServiceLocator _serviceLocator;
+
         public event EventHandler<ChatMessageEventArgs>? ChatMessageReceived;
         public event EventHandler<PlayerJoinedQuitEventArgs>? PlayerJoined;
         public event EventHandler<PlayerJoinedQuitEventArgs>? PlayerQuit;
@@ -47,9 +49,12 @@ namespace TrueCraft
 
         private readonly QueryProtocol _queryProtocol;
 
-        private MultiplayerServer()
+        public MultiplayerServer(IServiceLocator serviceLocator)
         {
             TrueCraft.Core.WhoAmI.Answer = Core.IAm.Server;
+
+            _serviceLocator = serviceLocator;
+
             TrueCraft.Core.Inventory.InventoryFactory<IServerSlot>.RegisterInventoryFactory(new TrueCraft.Inventory.InventoryFactory());
             TrueCraft.Core.Inventory.SlotFactory<IServerSlot>.RegisterSlotFactory(new TrueCraft.Inventory.SlotFactory());
             var reader = new PacketReader();
@@ -69,10 +74,6 @@ namespace TrueCraft
             LogProviders = new List<ILogProvider>();
             Scheduler = new EventScheduler(this);
 
-            BlockRepository = TrueCraft.Core.Logic.BlockRepository.Get();
-
-            ItemRepository = TrueCraft.Core.Logic.ItemRepository.Get();
-
             PendingBlockUpdates = new Queue<BlockUpdate>();
             EnableClientLogging = false;
             _queryProtocol = new TrueCraft.QueryProtocol(this);
@@ -86,6 +87,7 @@ namespace TrueCraft
             Handlers.PacketHandlers.RegisterHandlers(this);
         }
 
+        [Obsolete("Inject instance of IMultiplayerServer instead")]
         public static MultiplayerServer Get()
         {
             if (_singleton is null)
@@ -120,8 +122,11 @@ namespace TrueCraft
 
         public IList<Lighting> WorldLighters { get; set; }
         public IEventScheduler Scheduler { get; private set; }
-        public IBlockRepository BlockRepository { get; private set; }
-        public IItemRepository ItemRepository { get; private set; }
+
+        [Obsolete]
+        public IBlockRepository BlockRepository { get => _serviceLocator.BlockRepository; }
+        [Obsolete]
+        public IItemRepository ItemRepository { get => _serviceLocator.ItemRepository; }
 
         public bool EnableClientLogging { get; set; }
 
@@ -249,7 +254,7 @@ namespace TrueCraft
                         if (id == 0)  // TODO: Fix hard-coded air block ID.
                             continue;
                         coords = new GlobalVoxelCoordinates(xg + x, y, zg + z);
-                        var provider = BlockRepository.GetBlockProvider(id);
+                        var provider = _serviceLocator.BlockRepository.GetBlockProvider(id);
                         provider.BlockLoadedFromChunk(this, dimension, coords);
                     }
                 }
@@ -269,7 +274,7 @@ namespace TrueCraft
                 foreach (var offset in Vector3i.Neighbors6)
                 {
                     var descriptor = update.Dimension.GetBlockData(update.Coordinates + offset);
-                    var provider = BlockRepository.GetBlockProvider(descriptor.ID);
+                    var provider = _serviceLocator.BlockRepository.GetBlockProvider(descriptor.ID);
                     if (provider != null)
                         provider.BlockUpdate(descriptor, source, this, update.Dimension);
                 }

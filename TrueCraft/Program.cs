@@ -12,6 +12,7 @@ using TrueCraft.World;
 using System.Collections.Generic;
 using TrueCraft.Core.Logic;
 using TrueCraft.Core.Lighting;
+using TrueCraft.Handlers;
 
 namespace TrueCraft
 {
@@ -27,8 +28,13 @@ namespace TrueCraft
         {
             try
             {
+                IServiceLocator coreServiceLocator = Discover.DoDiscovery(new Discover());
+
                 // TODO: World path must be passed here.
-                Server = MultiplayerServer.Get();
+                Server = new MultiplayerServer(coreServiceLocator);
+
+                ServiceLocator = new ServerServiceLocator(Server, coreServiceLocator);
+                InteractionHandlers.ServiceLocator = ServiceLocator;
 
                 Server.AddLogProvider(new ConsoleLogProvider(LogCategory.Notice | LogCategory.Warning | LogCategory.Error | LogCategory.Debug));
 #if DEBUG
@@ -63,9 +69,6 @@ namespace TrueCraft
                     int seed = MathHelper.Random.Next();
                     TrueCraft.World.World.CreateWorld(seed, Paths.Worlds, "world");
                 }
-
-                Discover.DoDiscovery(new Discover());
-                ServiceLocator = new ServerServiceLocator(Server, BlockRepository.Get(), ItemRepository.Get());
 
                 world = TrueCraft.World.World.LoadWorld(ServiceLocator, "world");
                 ServiceLocator.World = world;

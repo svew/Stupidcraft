@@ -18,6 +18,17 @@ namespace TrueCraft.Handlers
 {
     public static class InteractionHandlers
     {
+        private static IServerServiceLocator _serviceLocator = null!;
+
+        public static IServerServiceLocator ServiceLocator
+        {
+            set
+            {
+                _serviceLocator = value;
+            }
+        }
+
+
         public static void HandlePlayerDiggingPacket(IPacket _packet, IRemoteClient _client, IMultiplayerServer server)
         {
             var packet = (PlayerDiggingPacket)_packet;
@@ -25,7 +36,7 @@ namespace TrueCraft.Handlers
             IDimension dimension = _client.Dimension!;
             var position = new GlobalVoxelCoordinates(packet.X, packet.Y, packet.Z);
             var descriptor = dimension.GetBlockData(position);
-            var provider = server.BlockRepository.GetBlockProvider(descriptor.ID);
+            var provider = _serviceLocator.BlockRepository.GetBlockProvider(descriptor.ID);
             short damage;
             int time;
             switch (packet.PlayerAction)
@@ -134,7 +145,7 @@ namespace TrueCraft.Handlers
             bool use = true;
             if (block != null)
             {
-                var provider = server.BlockRepository.GetBlockProvider(block.Value.ID);
+                var provider = _serviceLocator.BlockRepository.GetBlockProvider(block.Value.ID);
                 if (provider == null)
                 {
                     server.SendMessage(ChatColor.Red + "WARNING: block provider for ID {0} is null (player placing)", block.Value.ID);

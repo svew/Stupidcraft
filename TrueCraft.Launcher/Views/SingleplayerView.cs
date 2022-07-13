@@ -170,9 +170,9 @@ namespace TrueCraft.Launcher.Views
                 //string worldName = (string)_worldListStore.GetValue(iter, 0);
                 WorldInfo worldInfo = (WorldInfo)_worldListStore.GetValue(iter, 1);
 
-                Discover.DoDiscovery(new Discover());
-                MultiplayerServer _server = MultiplayerServer.Get();
-                TrueCraft.Program.ServiceLocator = new ServerServiceLocator(_server, BlockRepository.Get(), ItemRepository.Get());
+                IServiceLocator coreServiceLocator = Discover.DoDiscovery(new Discover());
+                MultiplayerServer _server = new MultiplayerServer(coreServiceLocator);
+                TrueCraft.Program.ServiceLocator = new ServerServiceLocator(_server, coreServiceLocator);
                 TrueCraft.World.IWorld world = TrueCraft.World.World.LoadWorld(TrueCraft.Program.ServiceLocator, worldInfo.Directory);
                 _server.World = world;
                 TrueCraft.Program.ServerConfiguration = new ServerConfiguration()
