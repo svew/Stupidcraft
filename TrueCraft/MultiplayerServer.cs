@@ -87,15 +87,6 @@ namespace TrueCraft
             Handlers.PacketHandlers.RegisterHandlers(this);
         }
 
-        [Obsolete("Inject instance of IMultiplayerServer instead")]
-        public static MultiplayerServer Get()
-        {
-            if (_singleton is null)
-                _singleton = new MultiplayerServer();
-
-            return _singleton;
-        }
-
         public IAccessConfiguration AccessConfiguration { get; internal set; }
 
         public IPacketReader PacketReader { get; private set; }

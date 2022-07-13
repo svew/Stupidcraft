@@ -26,20 +26,22 @@ namespace TrueCraft.Inventory
             Hotbar = 4
         }
 
+        private readonly IServerServiceLocator _serviceLocator;
         private readonly IDimension _dimension;
         private readonly GlobalVoxelCoordinates _location;
 
         private const int _outputSlotIndex = 2;
-        public FurnaceWindow(IItemRepository itemRepository,
+        public FurnaceWindow(IServiceLocator serviceLocator,
             ISlotFactory<IServerSlot> slotFactory, sbyte windowID, IFurnaceSlots furnaceSlots,
             ISlots<IServerSlot> mainInventory,
             ISlots<IServerSlot> hotBar, IDimension dimension, GlobalVoxelCoordinates location) :
-            base(itemRepository, windowID, Core.Windows.WindowType.Furnace, "Furnace",
-                new ISlots<IServerSlot>[] { new ServerSlots(itemRepository, new List<IServerSlot> {furnaceSlots.IngredientSlot }),
-                    new ServerSlots(itemRepository, new List<IServerSlot> { furnaceSlots.FuelSlot }),
-                    new ServerSlots(itemRepository, new List<IServerSlot> {furnaceSlots.OutputSlot }),
+            base(serviceLocator.ItemRepository, windowID, Core.Windows.WindowType.Furnace, "Furnace",
+                new ISlots<IServerSlot>[] { new ServerSlots(serviceLocator.ItemRepository, new List<IServerSlot> {furnaceSlots.IngredientSlot }),
+                    new ServerSlots(serviceLocator.ItemRepository, new List<IServerSlot> { furnaceSlots.FuelSlot }),
+                    new ServerSlots(serviceLocator.ItemRepository, new List<IServerSlot> {furnaceSlots.OutputSlot }),
                     mainInventory, hotBar })
         {
+            _serviceLocator = (IServerServiceLocator)serviceLocator;
             _dimension = dimension;
             _location = location;
 
@@ -142,8 +144,8 @@ namespace TrueCraft.Inventory
 
                 client.QueuePacket(new TransactionStatusPacket(packet.WindowID, packet.TransactionID, handled));
 
-                FurnaceBlock furnace = (FurnaceBlock)BlockRepository.Get().GetBlockProvider(0x3D);  // TODO hard-coded block id.
-                furnace.TryStartFurnace(MultiplayerServer.Get().Scheduler, _dimension, _location, ItemRepository);
+                FurnaceBlock furnace = (FurnaceBlock)_serviceLocator.BlockRepository.GetBlockProvider(FurnaceBlock.BlockID);
+                furnace.TryStartFurnace(_serviceLocator.Server.Scheduler, _dimension, _location, ItemRepository);
             }
             else
             {

@@ -24,7 +24,7 @@ namespace TrueCraft.Core.Inventory
             IDimension dimension,
             GlobalVoxelCoordinates location, GlobalVoxelCoordinates? otherHalf);
 
-        public IFurnaceWindow<T> NewFurnaceWindow(IItemRepository itemRepository, ISlotFactory<T> slotFactory,
+        public IFurnaceWindow<T> NewFurnaceWindow(IServiceLocator serviceLocator, ISlotFactory<T> slotFactory,
             sbyte windowID, IFurnaceSlots furnaceSlots,
             ISlots<T> mainInventory, ISlots<T> hotBar,
             IDimension dimension, GlobalVoxelCoordinates location);

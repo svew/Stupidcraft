@@ -33,12 +33,12 @@ namespace TrueCraft.Client.Inventory
                 mainInventory, hotBar, name, width, height);
         }
 
-        public IFurnaceWindow<ISlot> NewFurnaceWindow(IItemRepository itemRepository,
+        public IFurnaceWindow<ISlot> NewFurnaceWindow(IServiceLocator serviceLocator,
             ISlotFactory<ISlot> slotFactory, sbyte windowID, 
             IFurnaceSlots furnaceSlots, ISlots<ISlot> mainInventory, ISlots<ISlot> hotBar,
             IDimension dimension, GlobalVoxelCoordinates location)
         {
-            return new FurnaceWindow(itemRepository, slotFactory, windowID,
+            return new FurnaceWindow(serviceLocator.ItemRepository, slotFactory, windowID,
                 mainInventory, hotBar);
         }
     }
