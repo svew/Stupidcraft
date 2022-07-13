@@ -18,7 +18,7 @@ namespace TrueCraft.Test.World
     {
         private readonly string _assemblyDir;
 
-        private readonly IServiceLocator _serviceLocator;
+        private readonly IServerServiceLocator _serviceLocator;
 
         private readonly ILightingQueue _lightingQueue;
 
@@ -36,7 +36,7 @@ namespace TrueCraft.Test.World
 
             Mock<IMultiplayerServer> mockServer = new Mock<IMultiplayerServer>(MockBehavior.Strict);
 
-            Mock<IServiceLocator> mockServiceLocator = new Mock<IServiceLocator>(MockBehavior.Strict);
+            Mock<IServerServiceLocator> mockServiceLocator = new Mock<IServerServiceLocator>(MockBehavior.Strict);
             mockServiceLocator.Setup(x => x.BlockRepository).Returns(mockRepository.Object);
             mockServiceLocator.Setup(x => x.ItemRepository).Returns(mockItemRepository.Object);
             mockServiceLocator.Setup(x => x.Server).Returns(mockServer.Object);

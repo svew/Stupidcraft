@@ -134,7 +134,6 @@ namespace TrueCraft.Test.Logic
             Mock<IMultiplayerServer> mockServer = new Mock<IMultiplayerServer>(MockBehavior.Strict);
 
             Mock<IServiceLocator> mockServiceLocator = new Mock<IServiceLocator>(MockBehavior.Strict);
-            mockServiceLocator.Setup(x => x.Server).Returns(mockServer.Object);
             mockServiceLocator.Setup(x => x.BlockRepository).Returns(mockBlockRepository.Object);
             mockServiceLocator.Setup(x => x.ItemRepository).Returns(mockItemRepository.Object);
 

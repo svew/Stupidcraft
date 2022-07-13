@@ -16,7 +16,7 @@ namespace TrueCraft.World
         }
 
         /// <inheritdoc />
-        public IList<IDimensionServer> BuildDimensions(IServiceLocator serviceLocator, string baseDirectory, int seed)
+        public IList<IDimensionServer> BuildDimensions(IServerServiceLocator serviceLocator, string baseDirectory, int seed)
         {
             List<IDimensionServer> dimensions = new List<IDimensionServer>(2);
 

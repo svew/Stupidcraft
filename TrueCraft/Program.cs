@@ -21,7 +21,7 @@ namespace TrueCraft
 
         public static MultiplayerServer? Server;
 
-        public static IServiceLocator ServiceLocator = null!;
+        public static IServerServiceLocator ServiceLocator = null!;
 
         public static void Main(string[] args)
         {
@@ -65,7 +65,7 @@ namespace TrueCraft
                 }
 
                 Discover.DoDiscovery(new Discover());
-                ServiceLocator = new ServiceLocater(Server, BlockRepository.Get(), ItemRepository.Get());
+                ServiceLocator = new ServerServiceLocator(Server, BlockRepository.Get(), ItemRepository.Get());
 
                 world = TrueCraft.World.World.LoadWorld(ServiceLocator, "world");
                 ServiceLocator.World = world;

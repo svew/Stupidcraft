@@ -8,9 +8,9 @@ using TrueCraft.World;
 
 namespace TrueCraft.Test
 {
-    public class ServiceLocatorTest
+    public class ServerServiceLocatorTest
     {
-        public ServiceLocatorTest()
+        public ServerServiceLocatorTest()
         {
         }
 
@@ -21,7 +21,7 @@ namespace TrueCraft.Test
             Mock<IBlockRepository> mockBlockRepository = new Mock<IBlockRepository>(MockBehavior.Strict);
             Mock<IItemRepository> mockItemRepository = new Mock<IItemRepository>(MockBehavior.Strict);
 
-            IServiceLocator locator = new ServiceLocater(mockServer.Object,
+            IServerServiceLocator locator = new ServerServiceLocator(mockServer.Object,
                 mockBlockRepository.Object,
                 mockItemRepository.Object);
 
@@ -38,9 +38,9 @@ namespace TrueCraft.Test
             Mock<IBlockRepository> mockBlockRepository = new Mock<IBlockRepository>(MockBehavior.Strict);
             Mock<IItemRepository> mockItemRepository = new Mock<IItemRepository>(MockBehavior.Strict);
 
-            Assert.Throws<ArgumentNullException>(() => new ServiceLocater(null!, mockBlockRepository.Object, mockItemRepository.Object));
-            Assert.Throws<ArgumentNullException>(() => new ServiceLocater(mockServer.Object, null!, mockItemRepository.Object));
-            Assert.Throws<ArgumentNullException>(() => new ServiceLocater(mockServer.Object, mockBlockRepository.Object, null!));
+            Assert.Throws<ArgumentNullException>(() => new ServerServiceLocator(null!, mockBlockRepository.Object, mockItemRepository.Object));
+            Assert.Throws<ArgumentNullException>(() => new ServerServiceLocator(mockServer.Object, null!, mockItemRepository.Object));
+            Assert.Throws<ArgumentNullException>(() => new ServerServiceLocator(mockServer.Object, mockBlockRepository.Object, null!));
         }
 
         [Test]
@@ -50,7 +50,7 @@ namespace TrueCraft.Test
             Mock<IBlockRepository> mockBlockRepository = new Mock<IBlockRepository>(MockBehavior.Strict);
             Mock<IItemRepository> mockItemRepository = new Mock<IItemRepository>(MockBehavior.Strict);
 
-            IServiceLocator locator = new ServiceLocater(mockServer.Object,
+            IServerServiceLocator locator = new ServerServiceLocator(mockServer.Object,
                 mockBlockRepository.Object,
                 mockItemRepository.Object);
 

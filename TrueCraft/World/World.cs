@@ -38,7 +38,7 @@ namespace TrueCraft.World
         /// <param name="name">The name of the World, as seen by the Player.</param>
         /// <param name="dimensionFactory">A Factory for building the set of Dimensions.</param>
         /// <param name="spawnPoint">The default Spawn Point for all Players.</param>
-        private World(IServiceLocator serviceLocator, int seed, string baseDirectory,
+        private World(IServerServiceLocator serviceLocator, int seed, string baseDirectory,
             string name, IDimensionFactory dimensionFactory, PanDimensionalVoxelCoordinates spawnPoint)
         {
             _seed = seed;
@@ -98,7 +98,7 @@ namespace TrueCraft.World
             return worldFolder;
         }
 
-        public static IWorld LoadWorld(IServiceLocator serviceLocator, string baseDirectory)
+        public static IWorld LoadWorld(IServerServiceLocator serviceLocator, string baseDirectory)
         {
             if (!Directory.Exists(baseDirectory))
                 throw new DirectoryNotFoundException();

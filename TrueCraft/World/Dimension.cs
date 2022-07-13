@@ -86,7 +86,7 @@ namespace TrueCraft.World
         /// <param name="chunkProvider"></param>
         /// <param name="lightingQueue">The Lighting Queue for lighting this Dimension</param>
         /// <param name="entityManager"></param>
-        public Dimension(IServiceLocator serviceLocator,
+        public Dimension(IServerServiceLocator serviceLocator,
             string baseDirectory, DimensionID dimensionID,
             IChunkProvider chunkProvider, ILightingQueue lightingQueue, 
             IEntityManager entityManager)
