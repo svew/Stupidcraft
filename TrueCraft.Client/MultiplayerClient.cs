@@ -75,7 +75,7 @@ namespace TrueCraft.Client
 
         private SocketAsyncEventArgsPool _socketPool;
 
-        public MultiplayerClient(TrueCraftUser user)
+        public MultiplayerClient(IServiceLocator serviceLocator, TrueCraftUser user)
         {
             User = user;
             Client = new TcpClient();
@@ -84,7 +84,7 @@ namespace TrueCraft.Client
             PacketHandlers = new PacketHandler[0x100];
             Handlers.PacketHandlers.RegisterHandlers(this);
 
-            Dimension = new Dimension(BlockRepository.Get(), ItemRepository.Get());
+            Dimension = new Dimension(serviceLocator.BlockRepository, serviceLocator.ItemRepository);
 
             Physics = new PhysicsEngine(Dimension);
             _socketPool = new SocketAsyncEventArgsPool(100, 200, 65536);
@@ -92,7 +92,7 @@ namespace TrueCraft.Client
             Health = 20;
 
             ISlotFactory<ISlot> slotFactory = new SlotFactory<ISlot>();
-            IItemRepository itemRepository = ItemRepository.Get();
+            IItemRepository itemRepository = serviceLocator.ItemRepository;
             Inventory = new Slots<ISlot>(itemRepository, slotFactory.GetSlots(itemRepository, 27), 9);   // TODO hard-coded constants
             Hotbar = new Slots<ISlot>(itemRepository, slotFactory.GetSlots(itemRepository,9), 9);        // TODO hard-coded constants
 

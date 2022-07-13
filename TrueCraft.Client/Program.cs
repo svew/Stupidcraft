@@ -8,6 +8,7 @@ using System.Threading;
 using System.Reflection;
 using TrueCraft.Core.Logic;
 using TrueCraft.Core.Inventory;
+using TrueCraft.Client.Handlers;
 
 namespace TrueCraft.Client
 {
@@ -22,7 +23,8 @@ namespace TrueCraft.Client
 
             UserSettings.Local.Load();
 
-            IServiceLocator _serviceLocator = Discover.DoDiscovery(new Discover());
+            IServiceLocator serviceLocator = Discover.DoDiscovery(new Discover());
+            InventoryHandlers.ItemRepository = serviceLocator.ItemRepository;
 
             IPEndPoint? serverEndPoint = null;
 
@@ -42,7 +44,7 @@ namespace TrueCraft.Client
             }
 
             var user = new TrueCraftUser { Username = args[1] };
-            var client = new MultiplayerClient(user);
+            MultiplayerClient client = new MultiplayerClient(serviceLocator, user);
             var game = new TrueCraftGame(client, serverEndPoint);
             game.Run();
             client.Disconnect();

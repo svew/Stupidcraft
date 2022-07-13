@@ -11,6 +11,16 @@ namespace TrueCraft.Client.Handlers
 {
     internal static class InventoryHandlers
     {
+        private static IItemRepository _itemRepository = null!;
+
+        public static IItemRepository ItemRepository
+        {
+            set
+            {
+                _itemRepository = value;
+            }
+        }
+
         public static void HandleWindowItems(IPacket _packet, MultiplayerClient client)
         {
             var packet = (WindowItemsPacket)_packet;
@@ -36,7 +46,6 @@ namespace TrueCraft.Client.Handlers
         {
             var packet = (OpenWindowPacket)_packet;
             sbyte windowID = packet.WindowID;
-            IItemRepository itemRepository = ItemRepository.Get();
             ISlotFactory<ISlot> slotFactory = SlotFactory<ISlot>.Get();
 
             // NOTE: Since we are instantiating client implementations of the
@@ -46,17 +55,17 @@ namespace TrueCraft.Client.Handlers
             switch (packet.Type)
             {
                 case WindowType.CraftingBench:
-                    window = new CraftingBenchWindow(itemRepository, CraftingRepository.Get(),
+                    window = new CraftingBenchWindow(_itemRepository, CraftingRepository.Get(),
                         slotFactory,  windowID, client.Inventory, client.Hotbar, packet.Title, 3, 3);    // TODO hard-coded constants
                     break;
 
                 case WindowType.Chest:
-                    window = new ChestWindow(itemRepository, slotFactory, windowID,
+                    window = new ChestWindow(_itemRepository, slotFactory, windowID,
                         client.Inventory, client.Hotbar, packet.TotalSlots == 2 * ChestWindow.ChestLength);
                     break;
 
                 case WindowType.Furnace:
-                    window = new FurnaceWindow(itemRepository, slotFactory, windowID,
+                    window = new FurnaceWindow(_itemRepository, slotFactory, windowID,
                         client.Inventory, client.Hotbar);
                     break;
 
