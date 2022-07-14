@@ -156,7 +156,7 @@ namespace TrueCraft.Client.Modules
                 if (item.Empty)
                     continue;
                 IBlockProvider? provider = _itemRepository.GetItemProvider(item.ID) as IBlockProvider;
-                if (provider is null || provider.GetIconTexture((byte)item.Metadata) != null)
+                if (provider is null)
                     continue;
                 var position = origin + new Point((int)Scale(i * 20), 0);
                 var rect = new Rectangle(position, scale);

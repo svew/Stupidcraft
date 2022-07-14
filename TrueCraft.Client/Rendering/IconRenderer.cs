@@ -18,8 +18,8 @@ namespace TrueCraft.Client.Rendering
         {
             for (int i = 0; i < 0x100; i++)
             {
-                var provider = repository.GetBlockProvider((byte)i);
-                if (provider == null || provider.GetIconTexture(0) != null)
+                IBlockProvider? provider = repository.GetBlockProvider((byte)i);
+                if (provider is null)
                     continue;
 
                 int[] indices;

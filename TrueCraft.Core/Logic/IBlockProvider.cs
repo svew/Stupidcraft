@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using TrueCraft.Core.World;
 using TrueCraft.Core.Networking;
 using TrueCraft.Core.Server;
@@ -6,7 +7,7 @@ using fNbt;
 
 namespace TrueCraft.Core.Logic
 {
-    public interface IBlockProvider : IItemProvider
+    public interface IBlockProvider
     {
         byte ID { get; }
         double BlastResistance { get; }
@@ -23,6 +24,11 @@ namespace TrueCraft.Core.Logic
         BoundingBox? BoundingBox { get; } // NOTE: Will this eventually need to be metadata-aware?
         BoundingBox? InteractiveBoundingBox { get; } // NOTE: Will this eventually need to be metadata-aware?
         Tuple<int, int>? GetTextureMap(byte metadata);
+
+        /// <summary>
+        /// Gets an enumerable over any metadata which affects rendering.
+        /// </summary>
+        IEnumerable<short> VisibleMetadata { get; }
 
         void GenerateDropEntity(BlockDescriptor descriptor, IDimension world, IMultiplayerServer server, ItemStack heldItem);
         void BlockLeftClicked(IServiceLocator serviceLocator, BlockDescriptor descriptor, BlockFace face, IDimension world, IRemoteClient user);
