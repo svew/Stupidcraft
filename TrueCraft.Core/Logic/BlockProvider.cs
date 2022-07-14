@@ -25,7 +25,8 @@ namespace TrueCraft.Core.Logic
             _metadata.Add(0);
         }
 
-        public virtual void BlockLeftClicked(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
+        public virtual void BlockLeftClicked(IServiceLocator serviceLocator,
+            BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
             ServerOnly.Assert();
 
@@ -42,7 +43,8 @@ namespace TrueCraft.Core.Logic
         /// <param name="dimension"></param>
         /// <param name="user"></param>
         /// <returns>True if the right-click has been handled; false otherwise.</returns>
-        public virtual bool BlockRightClicked(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
+        public virtual bool BlockRightClicked(IServiceLocator serviceLocator,
+            BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
             ServerOnly.Assert();
 

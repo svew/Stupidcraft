@@ -35,13 +35,14 @@ namespace TrueCraft.Core.Logic.Blocks
             }
         }
 
-        public override bool BlockRightClicked(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
+        public override bool BlockRightClicked(IServiceLocator serviceLocator,
+            BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
             Server.ServerOnly.Assert();
 
             IInventoryFactory<IServerSlot> factory = new InventoryFactory<IServerSlot>();
             ICraftingBenchWindow<IServerSlot> window = factory.NewCraftingBenchWindow(
-                ItemRepository.Get(), CraftingRepository.Get(), SlotFactory<IServerSlot>.Get(),
+                serviceLocator.ItemRepository, CraftingRepository.Get(), SlotFactory<IServerSlot>.Get(),
                 WindowIDs.GetWindowID(), user.Inventory, user.Hotbar, "Crafting", 3, 3);
             user.OpenWindow(window);
 

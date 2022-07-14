@@ -88,7 +88,8 @@ namespace TrueCraft.Core.Logic.Blocks
             dimension.SetMetadata(descriptor.Coordinates, (byte)MathHelper.DirectionByRotationFlat(user.Entity!.Yaw, true));
         }
 
-        public override bool BlockRightClicked(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
+        public override bool BlockRightClicked(IServiceLocator serviceLocator,
+            BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
             ServerOnly.Assert();
 
@@ -124,10 +125,9 @@ namespace TrueCraft.Core.Logic.Blocks
             }
 
             IInventoryFactory<IServerSlot> factory = new InventoryFactory<IServerSlot>();
-            IItemRepository itemRepository = ItemRepository.Get();
             ISlotFactory<IServerSlot> slotFactory = SlotFactory<IServerSlot>.Get();
             sbyte windowID = WindowIDs.GetWindowID();
-            IChestWindow<IServerSlot> window = factory.NewChestWindow(itemRepository,
+            IChestWindow<IServerSlot> window = factory.NewChestWindow(serviceLocator.ItemRepository,
                 slotFactory, windowID, user.Inventory, user.Hotbar,
                 dimension, descriptor.Coordinates, adjacent);
 

@@ -58,12 +58,14 @@ namespace TrueCraft.Core.Logic.Blocks
             return new Tuple<int, int>(1, 6);
         }
 
-        public override void BlockLeftClicked(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
+        public override void BlockLeftClicked(IServiceLocator serviceLocator,
+            BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
-            BlockRightClicked(descriptor, face, dimension, user);
+            BlockRightClicked(serviceLocator, descriptor, face, dimension, user);
         }
 
-        public override bool BlockRightClicked(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
+        public override bool BlockRightClicked(IServiceLocator serviceLocator,
+            BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
             bool upper = ((DoorItem.DoorFlags)descriptor.Metadata & DoorItem.DoorFlags.Upper) == DoorItem.DoorFlags.Upper;
             var other = upper ? Vector3i.Down : Vector3i.Up;

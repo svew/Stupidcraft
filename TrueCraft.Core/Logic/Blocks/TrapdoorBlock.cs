@@ -53,12 +53,14 @@ namespace TrueCraft.Core.Logic.Blocks
             return new Tuple<int, int>(4, 5);
         }
 
-        public override void BlockLeftClicked(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
+        public override void BlockLeftClicked(IServiceLocator serviceLocator,
+            BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
-            BlockRightClicked(descriptor, face, dimension, user);
+            BlockRightClicked(serviceLocator, descriptor, face, dimension, user);
         }
 
-        public override bool BlockRightClicked(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
+        public override bool BlockRightClicked(IServiceLocator serviceLocator,
+            BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
             // Flip bit back and forth between Open and Closed
             dimension.SetMetadata(descriptor.Coordinates, (byte)(descriptor.Metadata ^ (byte)TrapdoorFlags.Open));

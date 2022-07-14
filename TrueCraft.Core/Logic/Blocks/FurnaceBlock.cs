@@ -467,13 +467,14 @@ namespace TrueCraft.Core.Logic.Blocks
             base.BlockMined(descriptor, face, dimension, user);
         }
 
-        public override bool BlockRightClicked(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
+        public override bool BlockRightClicked(IServiceLocator serviceLocator,
+            BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
             ServerOnly.Assert();
 
             FurnaceState state = GetState(dimension, descriptor.Coordinates);
             IInventoryFactory<IServerSlot> factory = new InventoryFactory<IServerSlot>();
-            IFurnaceWindow<IServerSlot> window = factory.NewFurnaceWindow(user.Server.ItemRepository,
+            IFurnaceWindow<IServerSlot> window = factory.NewFurnaceWindow(serviceLocator,
                 SlotFactory<IServerSlot>.Get(), WindowIDs.GetWindowID(),
                 state, user.Inventory, user.Hotbar,
                 dimension, descriptor.Coordinates);

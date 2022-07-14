@@ -66,7 +66,7 @@ namespace TrueCraft.Handlers
                     if (provider is null)
                         server.SendMessage(ChatColor.Red + "WARNING: block provider for ID {0} is null (player digging)", descriptor.ID);
                     else
-                        provider.BlockLeftClicked(descriptor, packet.Face, dimension, client);
+                        provider.BlockLeftClicked(_serviceLocator, descriptor, packet.Face, dimension, client);
 
                     // "But why on Earth does this behavior change if you use shears on leaves?"
                     // "This is poor seperation of concerns"
@@ -107,7 +107,7 @@ namespace TrueCraft.Handlers
                             // Damage the item
                             if (damage != 0)
                             {
-                                var tool = server.ItemRepository.GetItemProvider(client.SelectedItem.ID) as ToolItem;
+                                var tool = _serviceLocator.ItemRepository.GetItemProvider(client.SelectedItem.ID) as ToolItem;
                                 if (tool != null && tool.Uses != -1)
                                 {
                                     var slot = client.SelectedItem;
@@ -153,7 +153,7 @@ namespace TrueCraft.Handlers
                     server.SendMessage(ChatColor.Red + "Packet logged at {0}, please report upstream", DateTime.UtcNow);
                     return;
                 }
-                if (!provider.BlockRightClicked(block.Value, packet.Face, client.Dimension, client))
+                if (!provider.BlockRightClicked(_serviceLocator, block.Value, packet.Face, client.Dimension, client))
                 {
                     position += MathHelper.BlockFaceToCoordinates(packet.Face);
                     var oldID = client.Dimension.GetBlockID(position);
@@ -169,7 +169,7 @@ namespace TrueCraft.Handlers
             {
                 if (use)
                 {
-                    var itemProvider = server.ItemRepository.GetItemProvider(slot.ID);
+                    var itemProvider = _serviceLocator.ItemRepository.GetItemProvider(slot.ID);
                     if (itemProvider == null)
                     {
                         server.SendMessage(ChatColor.Red + "WARNING: item provider for ID {0} is null (player placing)", block?.ID.ToString() ?? "(null)");

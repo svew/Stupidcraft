@@ -36,7 +36,8 @@ namespace TrueCraft.Core.Logic.Blocks
             return new Tuple<int, int>(9, 7);
         }
 
-        public override bool BlockRightClicked(BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
+        public override bool BlockRightClicked(IServiceLocator serviceLocator,
+            BlockDescriptor descriptor, BlockFace face, IDimension dimension, IRemoteClient user)
         {
             if (descriptor.Metadata == 5)
                 dimension.SetBlockID(descriptor.Coordinates, AirBlock.BlockID);
