@@ -22,7 +22,17 @@ namespace TrueCraft
 
         public static MultiplayerServer? Server;
 
-        public static IServerServiceLocator ServiceLocator = null!;
+        public static IServerServiceLocator _serviceLocator = null!;
+
+        public static IServerServiceLocator ServiceLocator
+        {
+            get => _serviceLocator;
+            set
+            {
+                _serviceLocator = value;
+                InteractionHandlers.ServiceLocator = _serviceLocator;
+            }
+        }
 
         public static void Main(string[] args)
         {
@@ -34,7 +44,6 @@ namespace TrueCraft
                 Server = new MultiplayerServer(coreServiceLocator);
 
                 ServiceLocator = new ServerServiceLocator(Server, coreServiceLocator);
-                InteractionHandlers.ServiceLocator = ServiceLocator;
 
                 Server.AddLogProvider(new ConsoleLogProvider(LogCategory.Notice | LogCategory.Warning | LogCategory.Error | LogCategory.Debug));
 #if DEBUG
