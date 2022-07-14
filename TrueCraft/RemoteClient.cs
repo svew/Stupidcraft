@@ -27,13 +27,13 @@ namespace TrueCraft
     {
         private IDimensionServer? _dimension = null;
 
-        public RemoteClient(IMultiplayerServer server, IPacketReader packetReader, PacketHandler[] packetHandlers, Socket connection)
+        public RemoteClient(IServiceLocator serviceLocator, IMultiplayerServer server, IPacketReader packetReader, PacketHandler[] packetHandlers, Socket connection)
         {
             _loadedChunks = new HashSet<GlobalChunkCoordinates>();
             Server = server;
 
             ISlotFactory<IServerSlot> slotFactory = SlotFactory<IServerSlot>.Get();
-            IItemRepository itemRepository = ItemRepository.Get();
+            IItemRepository itemRepository = serviceLocator.ItemRepository;
 
             Inventory = ServerSlots.GetServerSlots(itemRepository, 27);   // TODO hard-coded constant
             Hotbar = ServerSlots.GetServerSlots(itemRepository, 9);       // TODO hard-coded constant
