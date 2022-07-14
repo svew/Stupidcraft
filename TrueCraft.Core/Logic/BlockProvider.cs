@@ -341,19 +341,19 @@ namespace TrueCraft.Core.Logic
         /// Gets the time required to mine the given block with the given item.
         /// </summary>
         /// <returns>The harvest time in milliseconds.</returns>
-        /// <param name="dimension">The Dimension in which the Block is located.</param>
+        /// <param name="serviceLocator">The Service Locator.</param>
         /// <param name="blockId">Block identifier.</param>
         /// <param name="itemId">Item identifier of the item currently held by the Player.</param>
         /// <param name="damage">Damage sustained by the item.</param>
-        public static int GetHarvestTime(IDimension dimension, byte blockId, short itemId, out short damage)
+        public static int GetHarvestTime(IServiceLocator serviceLocator, byte blockId, short itemId, out short damage)
         {
             // Reference:
             // http://minecraft.gamepedia.com/index.php?title=Breaking&oldid=138286
 
             damage = 0;
 
-            IBlockProvider block = dimension.BlockRepository.GetBlockProvider(blockId);
-            IItemProvider? item = ItemRepository.Get().GetItemProvider(itemId);
+            IBlockProvider block = serviceLocator.BlockRepository.GetBlockProvider(blockId);
+            IItemProvider? item = serviceLocator.ItemRepository.GetItemProvider(itemId);
 
             double hardness = block.Hardness;
             if (hardness == -1)

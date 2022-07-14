@@ -80,7 +80,7 @@ namespace TrueCraft.Handlers
                     // So if you want to blame anyone, send flames to Notch for the stupid idea of not sending "stop digging" packets
                     // for hardness == 0 blocks.
 
-                    time = BlockProvider.GetHarvestTime(_client.Dimension!, descriptor.ID, client.SelectedItem.ID, out damage);
+                    time = BlockProvider.GetHarvestTime(_serviceLocator, descriptor.ID, client.SelectedItem.ID, out damage);
                     if (time <= 20)
                     {
                         provider?.BlockMined(descriptor, packet.Face, dimension, client);
@@ -97,7 +97,7 @@ namespace TrueCraft.Handlers
                     }
                     if (provider != null && descriptor.ID != 0)
                     {
-                        time = BlockProvider.GetHarvestTime(_client.Dimension!, descriptor.ID, client.SelectedItem.ID, out damage);
+                        time = BlockProvider.GetHarvestTime(_serviceLocator, descriptor.ID, client.SelectedItem.ID, out damage);
                         if (time <= 20)
                             break; // Already handled earlier
                         var diff = (DateTime.UtcNow - client.ExpectedDigComplete).TotalMilliseconds;
