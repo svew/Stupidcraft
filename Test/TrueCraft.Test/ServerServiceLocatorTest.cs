@@ -20,10 +20,12 @@ namespace TrueCraft.Test
             Mock<IMultiplayerServer> mockServer = new Mock<IMultiplayerServer>(MockBehavior.Strict);
             Mock<IBlockRepository> mockBlockRepository = new Mock<IBlockRepository>(MockBehavior.Strict);
             Mock<IItemRepository> mockItemRepository = new Mock<IItemRepository>(MockBehavior.Strict);
+            Mock<IServiceLocator> mockServiceLocator = new Mock<IServiceLocator>(MockBehavior.Strict);
+            mockServiceLocator.Setup(x => x.ItemRepository).Returns(mockItemRepository.Object);
+            mockServiceLocator.Setup(x => x.BlockRepository).Returns(mockBlockRepository.Object);
 
             IServerServiceLocator locator = new ServerServiceLocator(mockServer.Object,
-                mockBlockRepository.Object,
-                mockItemRepository.Object);
+                mockServiceLocator.Object);
 
             Assert.Throws<InvalidOperationException>(() => { IWorld t = locator.World; });
             Assert.True(object.ReferenceEquals(mockServer.Object, locator.Server));
@@ -37,10 +39,11 @@ namespace TrueCraft.Test
             Mock<IMultiplayerServer> mockServer = new Mock<IMultiplayerServer>(MockBehavior.Strict);
             Mock<IBlockRepository> mockBlockRepository = new Mock<IBlockRepository>(MockBehavior.Strict);
             Mock<IItemRepository> mockItemRepository = new Mock<IItemRepository>(MockBehavior.Strict);
+            Mock<IServiceLocator> mockServiceLocator = new Mock<IServiceLocator>(MockBehavior.Strict);
+            mockServiceLocator.Setup(x => x.ItemRepository).Returns(mockItemRepository.Object);
+            mockServiceLocator.Setup(x => x.BlockRepository).Returns(mockBlockRepository.Object);
 
-            Assert.Throws<ArgumentNullException>(() => new ServerServiceLocator(null!, mockBlockRepository.Object, mockItemRepository.Object));
-            Assert.Throws<ArgumentNullException>(() => new ServerServiceLocator(mockServer.Object, null!, mockItemRepository.Object));
-            Assert.Throws<ArgumentNullException>(() => new ServerServiceLocator(mockServer.Object, mockBlockRepository.Object, null!));
+            Assert.Throws<ArgumentNullException>(() => new ServerServiceLocator(null!, mockServiceLocator.Object));
         }
 
         [Test]
@@ -49,10 +52,12 @@ namespace TrueCraft.Test
             Mock<IMultiplayerServer> mockServer = new Mock<IMultiplayerServer>(MockBehavior.Strict);
             Mock<IBlockRepository> mockBlockRepository = new Mock<IBlockRepository>(MockBehavior.Strict);
             Mock<IItemRepository> mockItemRepository = new Mock<IItemRepository>(MockBehavior.Strict);
+            Mock<IServiceLocator> mockServiceLocator = new Mock<IServiceLocator>(MockBehavior.Strict);
+            mockServiceLocator.Setup(x => x.ItemRepository).Returns(mockItemRepository.Object);
+            mockServiceLocator.Setup(x => x.BlockRepository).Returns(mockBlockRepository.Object);
 
             IServerServiceLocator locator = new ServerServiceLocator(mockServer.Object,
-                mockBlockRepository.Object,
-                mockItemRepository.Object);
+                mockServiceLocator.Object);
 
             Mock<IWorld> mockWorld = new Mock<IWorld>(MockBehavior.Strict);
 
