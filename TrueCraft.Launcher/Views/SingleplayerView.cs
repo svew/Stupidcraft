@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Gdk;
 using Gtk;
 using TrueCraft.Core;
+using TrueCraft.Core.Logging;
 using TrueCraft.Core.Logic;
 using TrueCraft.Core.Server;
 using TrueCraft.Core.World;
@@ -179,6 +180,7 @@ namespace TrueCraft.Launcher.Views
                 {
                     Singleplayer = true
                 };
+                _server.AddLogProvider(new ConsoleLogProvider(LogCategory.Notice | LogCategory.Warning | LogCategory.Error | LogCategory.Debug));
 
                 _playButton.Sensitive = _backButton.Sensitive = _createWorldButton.Sensitive =
                     _createWorldBox.Visible = _worldListView.Sensitive = false;
