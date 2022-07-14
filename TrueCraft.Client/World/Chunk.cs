@@ -54,7 +54,7 @@ namespace TrueCraft.Client.World
 
         public byte[] Data => throw new NotImplementedException();
 
-        public bool TerrainPopulated { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public bool TerrainPopulated { get => true; set => throw new NotImplementedException(); }
 
         /// <inheritdoc />
         public NybbleArray Metadata => throw new NotImplementedException();
