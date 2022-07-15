@@ -12,12 +12,9 @@ namespace TrueCraft.Core.Test.Inventory
     [TestFixture]
     public class CraftingAreaTest
     {
-        // NOTE: These tests depend upon an initialized CraftingRepository
-        //  containing the recipe for sticks.
         private static ICraftingRepository GetCraftingRepository()
         {
-            // TODO Mock Crafting Repository
-            return CraftingRepository.Get();
+            return CoreSetup.CraftingRepository;
         }
 
         private static IItemRepository GetItemRepository()

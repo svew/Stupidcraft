@@ -10,11 +10,18 @@ namespace TrueCraft.Core.Test
     [SetUpFixture]
     public class CoreSetup
     {
+        // The test framework will make calls to this class that will
+        // initialize these members prior to running tests.  So we can get
+        // away with "faking" them as non-nullable.
+        private static IBlockRepository _blockRepository = null!;
+        private static IItemRepository _itemRepository = null!;
+        private static ICraftingRepository _craftingRepository = null!;
+
         public CoreSetup()
         {
         }
 
-        // BlockProviderTest, WorldLighterTest and PhysicsEngineTest depend upon
+        // BlockProviderTest, WorldLighterTest, PhysicsEngineTest, and CraftingAreaTest depend upon
         // having some blocks and items available in their repositories.
         private class MockDiscover : IDiscover
         {
@@ -26,6 +33,7 @@ namespace TrueCraft.Core.Test
                 repository.RegisterBlockProvider(new AirBlock());
                 repository.RegisterBlockProvider(new BedrockBlock());
                 repository.RegisterBlockProvider(new LeavesBlock());
+                repository.RegisterBlockProvider(new CobblestoneBlock());
             }
 
             public void DiscoverItemProviders(IRegisterItemProvider repository)
@@ -36,6 +44,7 @@ namespace TrueCraft.Core.Test
                 repository.RegisterItemProvider(new GrassBlock()); // Item ID 2
                 repository.RegisterItemProvider(new DirtBlock());  // Item ID 3
                 repository.RegisterItemProvider(new SnowballItem());
+                repository.RegisterItemProvider(new CobblestoneBlock());  // Item ID 4
             }
 
             public void DiscoverRecipes(IRegisterRecipe repository)
@@ -196,13 +205,17 @@ namespace TrueCraft.Core.Test
             }
         }
 
+        public static IBlockRepository BlockRepository { get => _blockRepository; }
+        public static IItemRepository ItemRepository { get => _itemRepository; }
+        public static ICraftingRepository CraftingRepository { get => _craftingRepository; }
+
         [OneTimeSetUp]
         public void SetupRepositories()
         {
             IDiscover discover = new MockDiscover();
-            BlockRepository.Init(discover);
-            ItemRepository.Init(discover);
-            CraftingRepository.Init(discover);
+            _blockRepository = TrueCraft.Core.Logic.BlockRepository.Init(discover);
+            _itemRepository = TrueCraft.Core.Logic.ItemRepository.Init(discover);
+            _craftingRepository =  TrueCraft.Core.Logic.CraftingRepository.Init(discover);
         }
     }
 }

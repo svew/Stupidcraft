@@ -27,17 +27,6 @@ namespace TrueCraft.Core.Logic
             return _singleton;
         }
 
-        [Obsolete()]
-        public static ICraftingRepository Get()
-        {
-#if DEBUG
-            if (object.ReferenceEquals(_singleton, null))
-                throw new ApplicationException("Call to CraftingRepository.Get without initialization.");
-#endif
-
-            return _singleton;
-        }
-
         public ICraftingRecipe? GetRecipe(CraftingPattern pattern)
         {
             foreach (ICraftingRecipe r in _recipes)
