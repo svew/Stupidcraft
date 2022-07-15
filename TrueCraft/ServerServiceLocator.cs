@@ -17,7 +17,8 @@ namespace TrueCraft
         /// </summary>
         public ServerServiceLocator(IMultiplayerServer server,
             IServiceLocator serviceLocator) :
-            base(serviceLocator.BlockRepository, serviceLocator.ItemRepository)
+            base(serviceLocator.BlockRepository, serviceLocator.ItemRepository,
+                serviceLocator.CraftingRepository)
         {
             if (server is null)
                 throw new ArgumentNullException(nameof(server));

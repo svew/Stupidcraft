@@ -16,7 +16,7 @@ namespace TrueCraft.Core.Logic
             _recipes = new List<ICraftingRecipe>();
         }
 
-        internal static IRegisterRecipe Init(IDiscover discover)
+        internal static ICraftingRepository Init(IDiscover discover)
         {
             if (!object.ReferenceEquals(_singleton, null))
                 return _singleton;
@@ -27,6 +27,7 @@ namespace TrueCraft.Core.Logic
             return _singleton;
         }
 
+        [Obsolete()]
         public static ICraftingRepository Get()
         {
 #if DEBUG

@@ -14,5 +14,10 @@ namespace TrueCraft
         /// Gets the Item Repository.
         /// </summary>
         IItemRepository ItemRepository { get; }
+
+        /// <summary>
+        /// Gets the Crafting Repository
+        /// </summary>
+        ICraftingRepository CraftingRepository { get; }
     }
 }

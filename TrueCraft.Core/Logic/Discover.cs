@@ -19,11 +19,9 @@ namespace TrueCraft.Core.Logic
         {
             IBlockRepository blockRepository = BlockRepository.Init(discoverer);
             IItemRepository itemRepository = ItemRepository.Init(discoverer);
+            ICraftingRepository craftingRepository = CraftingRepository.Init(discoverer);
 
-            // TODO: Add Crafting Repository to ServiceLocator
-            CraftingRepository.Init(discoverer);
-
-            return new ServiceLocator(blockRepository, itemRepository);
+            return new ServiceLocator(blockRepository, itemRepository, craftingRepository);
         }
 
         public virtual void DiscoverBlockProviders(IRegisterBlockProvider repository)
