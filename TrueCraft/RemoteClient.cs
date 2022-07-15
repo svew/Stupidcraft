@@ -39,10 +39,10 @@ namespace TrueCraft
             Hotbar = ServerSlots.GetServerSlots(itemRepository, 9);       // TODO hard-coded constant
             Armor = new ArmorSlots<IServerSlot>(itemRepository, slotFactory);
             CraftingGrid = new CraftingArea<IServerSlot>(itemRepository,
-                CraftingRepository.Get(), slotFactory, 2, 2);                 // TODO hard-coded constants
+                serviceLocator.CraftingRepository, slotFactory, 2, 2);                 // TODO hard-coded constants
 
             InventoryWindowContent = new TrueCraft.Inventory.InventoryWindow(itemRepository,
-                CraftingRepository.Get(),
+                serviceLocator.CraftingRepository,
                 slotFactory, Inventory, Hotbar);
 
             SelectedSlot = 0;

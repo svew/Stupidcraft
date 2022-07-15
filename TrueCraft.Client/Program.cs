@@ -24,7 +24,7 @@ namespace TrueCraft.Client
             UserSettings.Local.Load();
 
             IServiceLocator serviceLocator = Discover.DoDiscovery(new Discover());
-            InventoryHandlers.ItemRepository = serviceLocator.ItemRepository;
+            InventoryHandlers.ServiceLocator = serviceLocator;
 
             IPEndPoint? serverEndPoint = null;
 

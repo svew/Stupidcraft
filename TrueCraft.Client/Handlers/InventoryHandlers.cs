@@ -13,11 +13,14 @@ namespace TrueCraft.Client.Handlers
     {
         private static IItemRepository _itemRepository = null!;
 
-        public static IItemRepository ItemRepository
+        private static ICraftingRepository _craftingRepository = null!;
+
+        public static IServiceLocator ServiceLocator
         {
             set
             {
-                _itemRepository = value;
+                _itemRepository = value.ItemRepository;
+                _craftingRepository = value.CraftingRepository;
             }
         }
 
@@ -55,7 +58,7 @@ namespace TrueCraft.Client.Handlers
             switch (packet.Type)
             {
                 case WindowType.CraftingBench:
-                    window = new CraftingBenchWindow(_itemRepository, CraftingRepository.Get(),
+                    window = new CraftingBenchWindow(_itemRepository, _craftingRepository,
                         slotFactory,  windowID, client.Inventory, client.Hotbar, packet.Title, 3, 3);    // TODO hard-coded constants
                     break;
 

@@ -42,7 +42,7 @@ namespace TrueCraft.Core.Logic.Blocks
 
             IInventoryFactory<IServerSlot> factory = new InventoryFactory<IServerSlot>();
             ICraftingBenchWindow<IServerSlot> window = factory.NewCraftingBenchWindow(
-                serviceLocator.ItemRepository, CraftingRepository.Get(), SlotFactory<IServerSlot>.Get(),
+                serviceLocator.ItemRepository, serviceLocator.CraftingRepository, SlotFactory<IServerSlot>.Get(),
                 WindowIDs.GetWindowID(), user.Inventory, user.Hotbar, "Crafting", 3, 3);
             user.OpenWindow(window);
 

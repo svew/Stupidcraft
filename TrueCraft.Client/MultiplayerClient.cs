@@ -98,7 +98,7 @@ namespace TrueCraft.Client
 
             IInventoryFactory<ISlot> factory = new InventoryFactory<ISlot>();
             InventoryWindow = (InventoryWindow)factory.NewInventoryWindow(itemRepository,
-                CraftingRepository.Get(), slotFactory, Inventory, Hotbar);
+                serviceLocator.CraftingRepository, slotFactory, Inventory, Hotbar);
         }
 
         public void RegisterPacketHandler(byte packetId, PacketHandler handler)
