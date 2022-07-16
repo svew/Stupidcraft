@@ -3,6 +3,10 @@
    xmlns:xs="http://www.w3.org/2001/XMLSchema" 
    elementFormDefault="unqualified">
 
+  <xs:simpleType name="metadataType">
+    <xs:restriction base="xs:byte" />
+  </xs:simpleType>
+
   <xs:complexType name="itemStackType">
      <xs:sequence>
         <xs:element name="id" minOccurs="1" maxOccurs="1">
@@ -54,10 +58,94 @@
      </xs:sequence>
   </xs:complexType>
 
+  <xs:complexType name="textureType">
+    <xs:sequence>
+      <xs:element name="x">
+        <xs:simpleType>
+          <xs:restriction base="xs:byte">
+            <xs:minInclusive value="0" />
+            <xs:maxInclusive value="15" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="y">
+        <xs:simpleType>
+          <xs:restriction base="xs:byte">
+            <xs:minInclusive value="0" />
+            <xs:maxInclusive value="15" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="itemType">
+    <xs:sequence>
+      <xs:element name="id" minOccurs="1" maxOccurs="1">
+        <xs:simpleType>
+          <xs:restriction base="xs:short">
+            <xs:minInclusive value ="1" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="maximumstack">
+        <xs:simpleType>
+          <xs:restriction base="xs:byte">
+            <xs:minInclusive value="0" />
+            <xs:maxInclusive value="64" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="visiblemetadata" minOccurs="0" maxOccurs="1">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="metadata" minOccurs="1" maxOccurs="unbounded">
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name="value" type="metadataType" minOccurs="1" maxOccurs="1" />
+                  <xs:element name="displayname" minOccurs="1" maxOccurs="1">
+                    <xs:simpleType>
+                      <xs:restriction base="xs:string">
+                        <xs:minLength value="1" />
+                        <xs:maxLength value="32" />
+                      </xs:restriction>
+                    </xs:simpleType>
+                  </xs:element>
+                  <xs:element name="icontexture" type="textureType" minOccurs="1" maxOccurs="1" />
+                </xs:sequence>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <!-- The behavior element defines the name of the server-side class specifying
+           the behavior of the Item.  The class name will be the value within
+           this element plus "Behavior" -->
+      <xs:element name="behavior" minOccurs="0" maxOccurs="1">
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:minLength value="1" />
+            <xs:maxLength value="32" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="itemListType">
+    <xs:sequence>
+      <xs:element name="item" type="itemType" minOccurs="0" maxOccurs="32767" />
+    </xs:sequence>
+  </xs:complexType>
+
   <xs:element name="truecraft">
      <xs:complexType>
         <xs:sequence>
+          <!-- This element represents the Crafting Repository -->
            <xs:element name="recipes" type="recipeListType" minOccurs="1" maxOccurs="1" />
+           <!-- This element represents the Item Repository -->
+           <!-- TODO: set minOccurs to 1 -->
+           <xs:element name="itemrepository" type ="itemListType" minOccurs="0" maxOccurs="1" />
         </xs:sequence>
      </xs:complexType>
   </xs:element>
