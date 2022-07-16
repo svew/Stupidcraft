@@ -143,8 +143,7 @@
           <!-- This element represents the Crafting Repository -->
            <xs:element name="recipes" type="recipeListType" minOccurs="1" maxOccurs="1" />
            <!-- This element represents the Item Repository -->
-           <!-- TODO: set minOccurs to 1 -->
-           <xs:element name="itemrepository" type ="itemListType" minOccurs="0" maxOccurs="1" />
+           <xs:element name="itemrepository" type ="itemListType" minOccurs="1" maxOccurs="1" />
         </xs:sequence>
      </xs:complexType>
   </xs:element>
