@@ -5,6 +5,12 @@ namespace TrueCraft.Core.Logic.Items
 {
     public abstract class ToolItem : ItemProvider
     {
+        // Parameterless constructor to support testing
+        public ToolItem()
+        {
+
+        }
+
         protected ToolItem(XmlNode node) : base(node)
         {
             // TODO: add ToolItem properties to TrueCraft.xsd item repository.

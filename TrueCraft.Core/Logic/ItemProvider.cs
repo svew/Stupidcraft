@@ -14,6 +14,29 @@ namespace TrueCraft.Core.Logic
         private readonly sbyte _maxStack;
         private readonly CacheEntry<Metadata> _metadata;
 
+        // Parameterless constructor to support testing
+        protected ItemProvider()
+        {
+            _id = 1;
+            _maxStack = 64;
+
+            string xml = @"<metadata>
+          <value>0</value>
+        <displayname>Snowball</displayname>
+        <icontexture>
+          <x>14</x>
+          <y>0</y>
+        </icontexture>
+        </metadata>";
+            XmlDocument doc = new XmlDocument();
+            using (System.IO.StringReader sr = new System.IO.StringReader(xml))
+            using (System.Xml.XmlReader xmlr = System.Xml.XmlReader.Create(sr))
+                doc.Load(xmlr);
+
+            Metadata md = new Metadata(doc.FirstChild!);
+            _metadata = new CacheEntry<Metadata>(md, md.Key);
+        }
+
         public ItemProvider(XmlNode item)
         {
             if (item.LocalName != "item")
