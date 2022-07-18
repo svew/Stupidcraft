@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Xml;
 using NUnit.Framework;
 using TrueCraft.Core.Logic;
@@ -43,8 +44,34 @@ namespace TrueCraft.Core.Test
                 repository.RegisterItemProvider(new StoneBlock()); // Item ID 1
                 repository.RegisterItemProvider(new GrassBlock()); // Item ID 2
                 repository.RegisterItemProvider(new DirtBlock());  // Item ID 3
-                repository.RegisterItemProvider(new SnowballItem());
                 repository.RegisterItemProvider(new CobblestoneBlock());  // Item ID 4
+
+                string xmlSnowBall = @"    <item>
+      <id>332</id>
+      <maximumstack>16</maximumstack>
+      <visiblemetadata>
+        <metadata>
+          <value>0</value>
+        <displayname>Snowball</displayname>
+        <icontexture>
+          <x>14</x>
+          <y>0</y>
+        </icontexture>
+        </metadata>
+      </visiblemetadata>
+    </item>
+";
+                repository.RegisterItemProvider(new SnowballItem(GetTopNode(xmlSnowBall)));
+            }
+
+            private static XmlNode GetTopNode(string xml)
+            {
+                XmlDocument doc = new XmlDocument();
+                using (StringReader sr = new StringReader(xml))
+                using (XmlReader xmlr = XmlReader.Create(sr))
+                    doc.Load(xmlr);
+
+                return doc.FirstChild!;
             }
 
             public void DiscoverRecipes(IRegisterRecipe repository)

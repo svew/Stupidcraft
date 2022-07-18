@@ -1,21 +1,21 @@
 ﻿using System;
+using System.Xml;
 
 namespace TrueCraft.Core.Logic.Items
 {
     public abstract class BootsItem : ArmorItem
     {
-        public override sbyte MaximumStack { get { return 1; } }
+        public BootsItem(XmlNode node) : base(node)
+        {
+        }
     }
 
     public class LeatherBootsItem : BootsItem
     {
         public static readonly short ItemID = 0x12D;
 
-        public override short ID { get { return 0x12D; } }
-
-        public override Tuple<int, int> GetIconTexture(byte metadata)
+        public LeatherBootsItem(XmlNode node) : base(node)
         {
-            return new Tuple<int, int>(0, 3);
         }
 
         public override ArmorMaterial Material { get { return ArmorMaterial.Leather; } }
@@ -23,22 +23,14 @@ namespace TrueCraft.Core.Logic.Items
         public override short BaseDurability { get { return 40; } }
 
         public override float BaseArmor { get { return 1.5f; } }
-
-        public override string GetDisplayName(short metadata)
-        {
-            return "Leather Boots";
-        }
     }
 
     public class IronBootsItem : BootsItem
     {
         public static readonly short ItemID = 0x135;
 
-        public override short ID { get { return 0x135; } }
-
-        public override Tuple<int, int> GetIconTexture(byte metadata)
+        public IronBootsItem(XmlNode node) : base(node)
         {
-            return new Tuple<int, int>(2, 3);
         }
 
         public override ArmorMaterial Material { get { return ArmorMaterial.Iron; } }
@@ -46,22 +38,14 @@ namespace TrueCraft.Core.Logic.Items
         public override short BaseDurability { get { return 160; } }
 
         public override float BaseArmor { get { return 1.5f; } }
-
-        public override string GetDisplayName(short metadata)
-        {
-            return "Iron Boots";
-        }
     }
 
     public class GoldenBootsItem : BootsItem
     {
         public static readonly short ItemID = 0x13D;
 
-        public override short ID { get { return 0x13D; } }
-
-        public override Tuple<int, int> GetIconTexture(byte metadata)
+        public GoldenBootsItem(XmlNode node) : base(node)
         {
-            return new Tuple<int, int>(4, 3);
         }
 
         public override ArmorMaterial Material { get { return ArmorMaterial.Gold; } }
@@ -69,23 +53,14 @@ namespace TrueCraft.Core.Logic.Items
         public override short BaseDurability { get { return 80; } }
 
         public override float BaseArmor { get { return 1.5f; } }
-
-        public override string GetDisplayName(short metadata)
-        {
-            return "Golden Boots";
-
-        }
     }
 
     public class DiamondBootsItem : BootsItem
     {
         public static readonly short ItemID = 0x139;
 
-        public override short ID { get { return 0x139; } }
-
-        public override Tuple<int, int> GetIconTexture(byte metadata)
+        public DiamondBootsItem(XmlNode node) : base(node)
         {
-            return new Tuple<int, int>(3, 3);
         }
 
         public override ArmorMaterial Material { get { return ArmorMaterial.Diamond; } }
@@ -93,23 +68,14 @@ namespace TrueCraft.Core.Logic.Items
         public override short BaseDurability { get { return 320; } }
 
         public override float BaseArmor { get { return 1.5f; } }
-
-        public override string GetDisplayName(short metadata)
-        {
-            return "Diamond Boots";
-
-        }
     }
 
-    public class ChainBootsItem : ArmorItem // Not HelmentItem because it can't inherit the recipe
+    public class ChainBootsItem : BootsItem
     {
         public static readonly short ItemID = 0x131;
 
-        public override short ID { get { return 0x131; } }
-
-        public override Tuple<int, int> GetIconTexture(byte metadata)
+        public ChainBootsItem(XmlNode node) : base(node)
         {
-            return new Tuple<int, int>(1, 3);
         }
 
         public override ArmorMaterial Material { get { return ArmorMaterial.Chain; } }
@@ -117,10 +83,5 @@ namespace TrueCraft.Core.Logic.Items
         public override short BaseDurability { get { return 79; } }
 
         public override float BaseArmor { get { return 1.5f; } }
-
-        public override string GetDisplayName(short metadata)
-        {
-            return "Chain Boots";
-        }
     }
 }

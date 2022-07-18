@@ -1,21 +1,15 @@
 using System;
+using System.Xml;
 
 namespace TrueCraft.Core.Logic.Items
 {
     public class DiamondItem : ItemProvider
     {
+        // TODO: Once references to this field are removed, this file can be removed.
         public static readonly short ItemID = 0x108;
 
-        public override short ID { get { return 0x108; } }
-
-        public override Tuple<int, int> GetIconTexture(byte metadata)
+        public DiamondItem(XmlNode node) : base(node)
         {
-            return new Tuple<int, int>(7, 3);
-        }
-
-        public override string GetDisplayName(short metadata)
-        {
-            return "Diamond";
         }
     }
 }

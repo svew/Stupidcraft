@@ -1,4 +1,5 @@
 using System;
+using System.Xml;
 using TrueCraft.Core.Logic.Blocks;
 using TrueCraft.Core.Networking;
 using TrueCraft.Core.World;
@@ -9,16 +10,8 @@ namespace TrueCraft.Core.Logic.Items
     {
         public static readonly short ItemID = 0x127;
 
-        public override short ID { get { return 0x127; } }
-
-        public override Tuple<int, int> GetIconTexture(byte metadata)
+        public SeedsItem(XmlNode node) : base(node)
         {
-            return new Tuple<int, int>(9, 0);
-        }
-
-        public override string GetDisplayName(short metadata)
-        {
-            return "Seeds";
         }
 
         public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension dimension, IRemoteClient user)

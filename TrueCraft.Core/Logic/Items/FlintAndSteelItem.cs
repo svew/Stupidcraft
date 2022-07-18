@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Xml;
 using TrueCraft.Core.Logic.Blocks;
 using TrueCraft.Core.Networking;
 using TrueCraft.Core.Server;
@@ -9,18 +10,12 @@ namespace TrueCraft.Core.Logic.Items
     public class FlintAndSteelItem : ToolItem
     {
         public static readonly short ItemID = 0x103;
-        public override short ID { get { return 0x103; } }
-        public override sbyte MaximumStack { get { return 1; } }
-        public override short BaseDurability { get { return 65; } }
-        public override string GetDisplayName(short metadata)
+
+        public FlintAndSteelItem(XmlNode node) : base(node)
         {
-            return "Flint and Steel";
         }
 
-        public override Tuple<int, int> GetIconTexture(byte metadata)
-        {
-            return new Tuple<int, int>(5, 0);
-        }
+        public override short BaseDurability { get { return 65; } }
 
         public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension dimension, IRemoteClient user)
         {

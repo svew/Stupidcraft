@@ -1,4 +1,5 @@
 using System;
+using System.Xml;
 
 namespace TrueCraft.Core.Logic.Items
 {
@@ -12,19 +13,8 @@ namespace TrueCraft.Core.Logic.Items
 
         public static readonly short ItemID = 0x107;
 
-        public override short ID { get { return 0x107; } }
-
-        public override Tuple<int, int> GetIconTexture(byte metadata)
+        public CoalItem(XmlNode node) : base(node)
         {
-            return new Tuple<int, int>(7, 0);
-        }
-
-        public override string GetDisplayName(short metadata)
-        {
-            if ((MetaData)metadata == MetaData.Charcoal)
-                return "Charcoal";
-
-            return "Coal";
         }
 
         public TimeSpan BurnTime { get { return TimeSpan.FromSeconds(80); } }

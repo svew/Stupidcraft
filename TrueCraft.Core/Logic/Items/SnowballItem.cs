@@ -1,4 +1,5 @@
 using System;
+using System.Xml;
 
 namespace TrueCraft.Core.Logic.Items
 {
@@ -6,18 +7,10 @@ namespace TrueCraft.Core.Logic.Items
     {
         public static readonly short ItemID = 0x14C;
 
-        public override short ID { get { return 0x14C; } }
-
-        public override Tuple<int, int> GetIconTexture(byte metadata)
+        public SnowballItem(XmlNode node) : base(node)
         {
-            return new Tuple<int, int>(14, 0);
         }
 
-        public override sbyte MaximumStack { get { return 16; } }
-
-        public override string GetDisplayName(short metadata)
-        {
-            return "Snowball";
-        }
+        // TODO: Has behavior (can be thrown)
     }
 }

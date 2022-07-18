@@ -1,4 +1,5 @@
 using System;
+using System.Xml;
 
 namespace TrueCraft.Core.Logic.Items
 {
@@ -6,18 +7,8 @@ namespace TrueCraft.Core.Logic.Items
     {
         public static readonly short ItemID = 0x148;
 
-        public override short ID { get { return 0x148; } }
-
-        public override Tuple<int, int> GetIconTexture(byte metadata)
+        public MinecartItem(XmlNode node) : base(node)
         {
-            return new Tuple<int, int>(7, 8);
-        }
-
-        public override sbyte MaximumStack { get { return 1; } }
-
-        public override string GetDisplayName(short metadata)
-        {
-            return "Minecart";
         }
     }
 
@@ -25,11 +16,8 @@ namespace TrueCraft.Core.Logic.Items
     {
         public static readonly new short ItemID = 0x156;
 
-        public override short ID { get { return 0x156; } }
-
-        public override string GetDisplayName(short metadata)
+        public MinecartWithChestItem(XmlNode node) : base(node)
         {
-            return "Minecart with Chest";
         }
     }
 
@@ -37,11 +25,8 @@ namespace TrueCraft.Core.Logic.Items
     {
         public static readonly new short ItemID = 0x157;
 
-        public override short ID { get { return 0x157; } }
-
-        public override string GetDisplayName(short metadata)
+        public MinecartWithFurnaceItem(XmlNode node) : base(node)
         {
-            return "Minecart with Furnace";
         }
     }
 }

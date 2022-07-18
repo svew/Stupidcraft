@@ -1,21 +1,15 @@
 using System;
+using System.Xml;
 
 namespace TrueCraft.Core.Logic.Items
 {
     public class FlintItem : ItemProvider
     {
+        // TODO: Once references to this field are removed, this file can be removed.
         public static readonly short ItemID = 0x13E;
 
-        public override short ID { get { return 0x13E; } }
-
-        public override Tuple<int, int> GetIconTexture(byte metadata)
+        public FlintItem(XmlNode node) : base(node)
         {
-            return new Tuple<int, int>(6, 0);
-        }
-
-        public override string GetDisplayName(short metadata)
-        {
-            return "Flint";
         }
     }
 }

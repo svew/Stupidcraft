@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Xml;
 using TrueCraft.Core.Logic.Blocks;
 using TrueCraft.Core.Networking;
 using TrueCraft.Core.Server;
@@ -21,9 +22,11 @@ namespace TrueCraft.Core.Logic.Items
             Open = 0x4
         }
 
-        protected abstract byte BlockID { get; }
+        public DoorItem(XmlNode node) : base(node)
+        {
+        }
 
-        public override sbyte MaximumStack { get { return 1; } }
+        protected abstract byte BlockID { get; }
 
         public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension dimension, IRemoteClient user)
         {
@@ -64,16 +67,8 @@ namespace TrueCraft.Core.Logic.Items
     {
         public static readonly short ItemID = 0x14A;
 
-        public override short ID { get { return 0x14A; } }
-
-        public override Tuple<int, int> GetIconTexture(byte metadata)
+        public IronDoorItem(XmlNode node) : base(node)
         {
-            return new Tuple<int, int>(12, 2);
-        }
-
-        public override string GetDisplayName(short metadata)
-        {
-            return "Iron Door";
         }
 
         protected override byte BlockID { get { return IronDoorBlock.BlockID; } }
@@ -83,16 +78,8 @@ namespace TrueCraft.Core.Logic.Items
     {
         public static readonly short ItemID = 0x144;
 
-        public override short ID { get { return 0x144; } }
-
-        public override Tuple<int, int> GetIconTexture(byte metadata)
+        public WoodenDoorItem(XmlNode node) : base(node)
         {
-            return new Tuple<int, int>(11, 2);
-        }
-
-        public override string GetDisplayName(short metadata)
-        {
-            return "Wooden Door";
         }
 
         protected override byte BlockID { get { return WoodenDoorBlock.BlockID; } }

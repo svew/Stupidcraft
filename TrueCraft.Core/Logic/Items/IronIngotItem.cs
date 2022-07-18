@@ -1,21 +1,15 @@
 using System;
+using System.Xml;
 
 namespace TrueCraft.Core.Logic.Items
 {
     public class IronIngotItem : ItemProvider
     {
+        // TODO: once references to this field are removed, this file can be removed.
         public static readonly short ItemID = 0x109;
 
-        public override short ID { get { return 0x109; } }
-
-        public override Tuple<int, int> GetIconTexture(byte metadata)
+        public IronIngotItem(XmlNode node) : base(node)
         {
-            return new Tuple<int, int>(7, 1);
-        }
-
-        public override string GetDisplayName(short metadata)
-        {
-            return "Iron Ingot";
         }
     }
 }

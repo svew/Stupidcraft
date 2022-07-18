@@ -1,21 +1,15 @@
 using System;
+using System.Xml;
 
 namespace TrueCraft.Core.Logic.Items
 {
     public class GlowstoneDustItem : ItemProvider
     {
+        // TODO: Once references to this field are removed, this file can be removed.
         public static readonly short ItemID = 0x15C;
 
-        public override short ID { get { return 0x15C; } }
-
-        public override Tuple<int, int> GetIconTexture(byte metadata)
+        public GlowstoneDustItem(XmlNode node) : base(node)
         {
-            return new Tuple<int, int>(9, 4);
-        }
-
-        public override string GetDisplayName(short metadata)
-        {
-            return "Glowstone Dust";
         }
     }
 }

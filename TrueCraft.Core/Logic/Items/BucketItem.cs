@@ -1,4 +1,5 @@
 using System;
+using System.Xml;
 using TrueCraft.Core.Logic.Blocks;
 using TrueCraft.Core.Networking;
 using TrueCraft.Core.Server;
@@ -10,16 +11,8 @@ namespace TrueCraft.Core.Logic.Items
     {
         public static readonly short ItemID = 0x145;
 
-        public override short ID { get { return 0x145; } }
-
-        public override Tuple<int, int> GetIconTexture(byte metadata)
+        public BucketItem(XmlNode node) : base(node)
         {
-            return new Tuple<int, int>(10, 4);
-        }
-
-        public override string GetDisplayName(short metadata)
-        {
-            return "Bucket";
         }
 
         protected virtual byte? RelevantBlockType { get { return null; } }
@@ -76,11 +69,8 @@ namespace TrueCraft.Core.Logic.Items
     {
         public static readonly new short ItemID = 0x147;
 
-        public override short ID { get { return 0x147; } }
-
-        public override string GetDisplayName(short metadata)
+        public LavaBucketItem(XmlNode node) : base(node)
         {
-            return "Lava Bucket";
         }
 
         public TimeSpan BurnTime { get { return TimeSpan.FromSeconds(1000); } }
@@ -98,11 +88,8 @@ namespace TrueCraft.Core.Logic.Items
     {
         public static readonly new short ItemID = 0x14F;
 
-        public override short ID { get { return 0x14F; } }
-
-        public override string GetDisplayName(short metadata)
+        public MilkItem(XmlNode node) : base(node)
         {
-            return "Milk";
         }
 
         protected override byte? RelevantBlockType
@@ -118,11 +105,8 @@ namespace TrueCraft.Core.Logic.Items
     {
         public static readonly new short ItemID = 0x146;
 
-        public override short ID { get { return 0x146; } }
-
-        public override string GetDisplayName(short metadata)
+        public WaterBucketItem(XmlNode node) : base(node)
         {
-            return "Water Bucket";
         }
 
         protected override byte? RelevantBlockType
