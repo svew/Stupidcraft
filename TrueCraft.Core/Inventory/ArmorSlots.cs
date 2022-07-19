@@ -18,12 +18,11 @@ namespace TrueCraft.Core.Inventory
             Footwear = 3
         }
 
-        private readonly short[][] _armorIDs = new short[][] {
-            new short[] { LeatherCapItem.ItemID, IronHelmetItem.ItemID, GoldenHelmetItem.ItemID, DiamondHelmetItem.ItemID, ChainHelmetItem.ItemID },
-            new short[] { LeatherTunicItem.ItemID, IronChestplateItem.ItemID, GoldenChestplateItem.ItemID, DiamondChestplateItem.ItemID, ChainChestplateItem.ItemID },
-            new short[] { LeatherPantsItem.ItemID, IronLeggingsItem.ItemID, GoldenLeggingsItem.ItemID, DiamondLeggingsItem.ItemID, ChainLeggingsItem.ItemID },
-            new short[] { LeatherBootsItem.ItemID, IronBootsItem.ItemID, GoldenBootsItem.ItemID, DiamondBootsItem.ItemID, ChainBootsItem.ItemID }
-    };
+        // This defines the kinds of armor that can go in each slot.
+        // The indices of this array match those of the Slots collection.
+        private readonly ArmorKind[] _armorKinds = new ArmorKind[] {
+            ArmorKind.Helmet, ArmorKind.Chestplate, ArmorKind.Leggings,
+            ArmorKind.Boots };
 
         public ArmorSlots(IItemRepository itemRepository, ISlotFactory<T> slotFactory) :
             base(itemRepository, GetSlots(itemRepository, slotFactory), 1)
@@ -44,8 +43,13 @@ namespace TrueCraft.Core.Inventory
             if (item.Empty)
                 return ItemStack.EmptyStack;
 
+            IArmorItem? itemProvider = _itemRepository.GetItemProvider(item.ID) as IArmorItem;
+            if (itemProvider is null)
+                return item;
+
             for (int j = 0; j < 4; j++)
-                if (_armorIDs[j].Contains(item.ID))
+            {
+                if (_armorKinds[j] == itemProvider.Kind)
                 {
                     if (this[j].Item.Empty)
                     {
@@ -57,6 +61,7 @@ namespace TrueCraft.Core.Inventory
                         return item;
                     }
                 }
+            }
 
             return item;
         }

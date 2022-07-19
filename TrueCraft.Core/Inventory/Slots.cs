@@ -8,7 +8,7 @@ namespace TrueCraft.Core.Inventory
 {
     public class Slots<T> : ISlots<T> where T : ISlot
     {
-        private readonly IItemRepository _itemRepository;
+        protected readonly IItemRepository _itemRepository;
         private readonly List<T> _lst;
         private readonly int _width;
 

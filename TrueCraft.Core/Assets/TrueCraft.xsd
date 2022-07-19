@@ -79,6 +79,27 @@
     </xs:sequence>
   </xs:complexType>
 
+  <!-- Note values in this armorMaterialType must correspond to values
+       in the enum ArmorMaterial.-->
+  <xs:simpleType name="armorMaterialType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="Leather" />
+      <xs:enumeration value="Chain" />
+      <xs:enumeration value="Iron" />
+      <xs:enumeration value="Gold" />
+      <xs:enumeration value="Diamond" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="armorKindType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value ="Helmet" />
+      <xs:enumeration value ="Chestplate" />
+      <xs:enumeration value ="Leggings" />
+      <xs:enumeration value ="Boots" />
+    </xs:restriction>
+  </xs:simpleType>
+
   <xs:complexType name="itemType">
     <xs:sequence>
       <xs:element name="id" minOccurs="1" maxOccurs="1">
@@ -139,6 +160,29 @@
               <xs:element name="restores" minOccurs="1" maxOccurs="1">
                 <xs:simpleType>
                   <xs:restriction base="xs:decimal">
+                    <xs:minInclusive value="0" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+
+        <xs:element name="armor">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="kind" type="armorKindType" minOccurs="1" maxOccurs="1" />
+              <xs:element name="material" type="armorMaterialType" minOccurs="1" maxOccurs="1" />
+              <xs:element name="durability" minOccurs="1" maxOccurs="1">
+                <xs:simpleType>
+                  <xs:restriction base="xs:short">
+                    <xs:minInclusive value="1" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="defencepoints">
+                <xs:simpleType>
+                  <xs:restriction base="xs:float">
                     <xs:minInclusive value="0" />
                   </xs:restriction>
                 </xs:simpleType>

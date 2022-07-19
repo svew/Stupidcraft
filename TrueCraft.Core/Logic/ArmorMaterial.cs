@@ -8,6 +8,12 @@ namespace TrueCraft.Core
     /// <summary>
     /// Enumerates the materials armor can be crafted from.
     /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Note that the values in this enum must correspond to values in the
+    /// armorMaterialType in the TrueCraft.xsd.
+    /// </para>
+    /// </remarks>
     public enum ArmorMaterial
     {
         /// <summary>
