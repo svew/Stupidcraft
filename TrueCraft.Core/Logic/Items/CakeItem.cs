@@ -7,16 +7,13 @@ using TrueCraft.Core.World;
 
 namespace TrueCraft.Core.Logic.Items
 {
-    public class CakeItem : FoodItem // TODO: This isn't really a FoodItem
+    public class CakeItem : FoodItem // TODO: This is a special sort of FoodItem that isn't fully consumed.
     {
         public static readonly short ItemID = 0x162;
 
         public CakeItem(XmlNode node) : base(node)
         {
         }
-
-        //This is per "slice"
-        public override float Restores { get { return 1.5f; } }
 
         public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension dimension, IRemoteClient user)
         {

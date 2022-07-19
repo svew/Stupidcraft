@@ -1,25 +1,32 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Xml;
 
 namespace TrueCraft.Core.Logic.Items
 {
-    public abstract class FoodItem : ItemProvider
+    public class FoodItem : ItemProvider, IFoodItem
     {
+        // This must match the node name under <itemrepository> in TrueCraft.xsd
+        private const string FoodNodeName = "food";
+
+        // This must match the "restores" node name under <food> in TrueCraft.xsd
+        private const string RestoresNodeName = "restores";
+
+        private readonly float _restores;
+
         public FoodItem(XmlNode node) : base(node)
         {
+            XmlNode? foodNode = node[FoodNodeName];
+            if (foodNode is null)
+                throw new ArgumentException($"Missing <{FoodNodeName}> node.");
+            XmlNode? restoreNode = foodNode[RestoresNodeName];
+            if (restoreNode is null)
+                throw new ArgumentException($"Missing <{RestoresNodeName}> node.");
 
+            _restores = float.Parse(restoreNode.InnerText);
         }
 
-        /// <summary>
-        /// The amount of health this food restores.
-        /// </summary>
-        public abstract float Restores { get; }  // TODO: add to ItemRepository tag in TrueCraft.xsd.
-
-        //Most foods aren't stackable
-        public override sbyte MaximumStack { get { return 1; } }
+        /// <inheritdoc />
+        public float Restores { get => _restores; }
 
         // TODO: requires ItemUsedOn... overrides (server-side)
     }

@@ -128,6 +128,25 @@
           </xs:restriction>
         </xs:simpleType>
       </xs:element>
+
+      <xs:choice minOccurs="0" maxOccurs="1">
+        <!-- The food element is a necessary part of the definition of a FoodItem.
+             It must be accompanied by a behavior tag specifying a type of
+             'TrueCraft.Core.Logic.Items.FoodItem' -->
+        <xs:element name="food">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="restores" minOccurs="1" maxOccurs="1">
+                <xs:simpleType>
+                  <xs:restriction base="xs:decimal">
+                    <xs:minInclusive value="0" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:choice>
     </xs:sequence>
   </xs:complexType>
 
