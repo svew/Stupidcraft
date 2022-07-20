@@ -8,6 +8,12 @@ namespace TrueCraft.Core
     /// <summary>
     /// Enumerates the materials tools can be crafted from.
     /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Note: Values in this enum must correspond to the values
+    /// in the toolMaterialType in the TrueCraft.xsd file.
+    /// </para>
+    /// </remarks>
     [Flags]
     public enum ToolMaterial
     {

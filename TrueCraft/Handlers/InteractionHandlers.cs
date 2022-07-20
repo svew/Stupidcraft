@@ -107,12 +107,12 @@ namespace TrueCraft.Handlers
                             // Damage the item
                             if (damage != 0)
                             {
-                                var tool = _serviceLocator.ItemRepository.GetItemProvider(client.SelectedItem.ID) as ToolItem;
-                                if (tool != null && tool.Uses != -1)
+                                IDurableItem? tool = _serviceLocator.ItemRepository.GetItemProvider(client.SelectedItem.ID) as IDurableItem;
+                                if (tool is not null)
                                 {
                                     var slot = client.SelectedItem;
                                     slot.Metadata += damage;
-                                    if (slot.Metadata >= tool.Uses)
+                                    if (slot.Metadata >= tool.Durability)
                                         slot.Count = 0; // Destroy item
                                     client.Hotbar[client.SelectedSlot].Item = slot;
                                 }

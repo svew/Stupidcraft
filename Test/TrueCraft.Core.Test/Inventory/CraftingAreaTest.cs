@@ -220,7 +220,7 @@ namespace TrueCraft.Core.Test.Inventory
 
             // Take out a pickaxe & confirm
             ItemStack ax = area.TakeOutput();
-            Assert.AreEqual(StonePickaxeItem.ItemID, ax.ID);
+            Assert.AreEqual((short)ItemIDs.StonePickaxe, ax.ID);
             Assert.AreEqual(1, ax.Count);
 
             // Confirm remaining inputs
@@ -232,7 +232,7 @@ namespace TrueCraft.Core.Test.Inventory
 
             // Take out a Hoe and confirm
             ItemStack hoe = area.TakeOutput();
-            Assert.AreEqual(StoneHoeItem.ItemID, hoe.ID);
+            Assert.AreEqual((short)ItemIDs.StoneHoe, hoe.ID);
             Assert.AreEqual(1, hoe.Count);
 
             // confirm remaining inputs
@@ -244,7 +244,7 @@ namespace TrueCraft.Core.Test.Inventory
 
             // Take out a shovel & confirm
             ItemStack shovel = area.TakeOutput();
-            Assert.AreEqual(StoneShovelItem.ItemID, shovel.ID);
+            Assert.AreEqual((short)ItemIDs.StoneShovel, shovel.ID);
             Assert.AreEqual(1, shovel.Count);
 
             // Confirm entire grid is now empty

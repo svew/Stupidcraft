@@ -100,6 +100,39 @@
     </xs:restriction>
   </xs:simpleType>
 
+  <!-- Note: Values in this toolMaterialType must correspond to values
+       in the enum ToolMaterial. -->
+  <xs:simpleType name="toolMaterialType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="None" />
+      <xs:enumeration value="Wood" />
+      <xs:enumeration value="Stone" />
+      <xs:enumeration value="Iron" />
+      <xs:enumeration value="Gold" />
+      <xs:enumeration value="Diamond" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Note: Values in this toolKindType must correspond to values
+       in the enum ToolType. -->
+  <xs:simpleType name="toolKindType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="None" />
+      <xs:enumeration value="Pickaxe" />
+      <xs:enumeration value="Axe" />
+      <xs:enumeration value="Shovel" />
+      <xs:enumeration value="Hoe" />
+      <xs:enumeration value="Sword" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="durabilityType">
+    <xs:restriction base="xs:short">
+      <xs:minInclusive value="1" />
+    </xs:restriction>
+  </xs:simpleType>
+
+
   <xs:complexType name="itemType">
     <xs:sequence>
       <xs:element name="id" minOccurs="1" maxOccurs="1">
@@ -168,19 +201,36 @@
           </xs:complexType>
         </xs:element>
 
+        <!-- The armor element is a necessary part of the definition of an ArmorItem.
+             It must be accompanied by a behavior tag specifying a type of
+             'TrueCraft.Core.Logic.Items.ArmorItem' -->
         <xs:element name="armor">
           <xs:complexType>
             <xs:sequence>
               <xs:element name="kind" type="armorKindType" minOccurs="1" maxOccurs="1" />
               <xs:element name="material" type="armorMaterialType" minOccurs="1" maxOccurs="1" />
-              <xs:element name="durability" minOccurs="1" maxOccurs="1">
+              <xs:element name="durability" type="durabilityType" minOccurs="1" maxOccurs="1" />
+              <xs:element name="defencepoints">
                 <xs:simpleType>
-                  <xs:restriction base="xs:short">
-                    <xs:minInclusive value="1" />
+                  <xs:restriction base="xs:float">
+                    <xs:minInclusive value="0" />
                   </xs:restriction>
                 </xs:simpleType>
               </xs:element>
-              <xs:element name="defencepoints">
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+
+        <!-- The tool element is a necessary part of the definition of a ToolItem.
+             It must be accompanied by a behavior tag specifying a type of
+             'TrueCraft.Core.Logic.Items.ToolItem' -->
+        <xs:element name="tool">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="kind" type="toolKindType" minOccurs="1" maxOccurs="1" />
+              <xs:element name="material" type="toolMaterialType" minOccurs="1" maxOccurs="1" />
+              <xs:element name="durability" type="durabilityType" minOccurs="1" maxOccurs="1" />
+              <xs:element name="damage" minOccurs="1" maxOccurs="1" >
                 <xs:simpleType>
                   <xs:restriction base="xs:float">
                     <xs:minInclusive value="0" />

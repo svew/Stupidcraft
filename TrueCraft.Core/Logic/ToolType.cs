@@ -2,6 +2,15 @@
 
 namespace TrueCraft.Core
 {
+    /// <summary>
+    /// Specifies the type of the Tool.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Note; values in this enum must correspond to values in the
+    /// toolKindType in the TrueCraft.xsd file.
+    /// </para>
+    /// </remarks>
     [Flags]
     public enum ToolType
     {
