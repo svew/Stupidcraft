@@ -20,7 +20,7 @@ namespace TrueCraft.Core.Logic.Blocks
             return "Diamond Ore";
         }
 
-        public ItemStack SmeltingOutput { get { return new ItemStack(DiamondItem.ItemID); } }
+        public ItemStack SmeltingOutput { get { return new ItemStack((short)ItemIDs.Diamond); } }
 
         public override ToolMaterial EffectiveToolMaterials
         {
@@ -45,7 +45,7 @@ namespace TrueCraft.Core.Logic.Blocks
 
         protected override ItemStack[] GetDrop(BlockDescriptor descriptor, ItemStack item)
         {
-            return new[] { new ItemStack(DiamondItem.ItemID, 1, descriptor.Metadata) };
+            return new[] { new ItemStack((short)ItemIDs.Diamond, 1, descriptor.Metadata) };
         }
     }
 }

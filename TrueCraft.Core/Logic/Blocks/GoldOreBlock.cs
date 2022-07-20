@@ -20,7 +20,7 @@ namespace TrueCraft.Core.Logic.Blocks
             return "Gold Ore";
         }
 
-        public ItemStack SmeltingOutput { get { return new ItemStack(GoldIngotItem.ItemID); } }
+        public ItemStack SmeltingOutput { get { return new ItemStack((short)ItemIDs.GoldIngot); } }
 
         public override Tuple<int, int> GetTextureMap(byte metadata)
         {

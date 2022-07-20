@@ -41,6 +41,6 @@ namespace TrueCraft.Core.Logic.Blocks
             }
         }
 
-        public ItemStack SmeltingOutput { get { return new ItemStack(IronIngotItem.ItemID); } }
+        public ItemStack SmeltingOutput { get { return new ItemStack((short)ItemIDs.IronIngot); } }
     }
 }
