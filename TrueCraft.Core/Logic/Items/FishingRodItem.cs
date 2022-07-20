@@ -3,7 +3,7 @@ using System.Xml;
 
 namespace TrueCraft.Core.Logic.Items
 {
-    public class FishingRodItem : ToolItem
+    public class FishingRodItem : ItemProvider, IDurableItem
     {
         public static readonly short ItemID = 0x15A;
 
@@ -11,6 +11,10 @@ namespace TrueCraft.Core.Logic.Items
         {
         }
 
-        public override short Durability { get { return 65; } }
+        /// <inheritdoc />
+        public short Durability { get { return 65; } }
+
+        // TODO: requires server-side behavior
+        // TODO: requires client-side rendering support.
     }
 }

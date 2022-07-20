@@ -7,7 +7,7 @@ using TrueCraft.Core.World;
 
 namespace TrueCraft.Core.Logic.Items
 {
-    public class FlintAndSteelItem : ToolItem
+    public class FlintAndSteelItem : ItemProvider, IDurableItem
     {
         public static readonly short ItemID = 0x103;
 
@@ -15,7 +15,8 @@ namespace TrueCraft.Core.Logic.Items
         {
         }
 
-        public override short Durability { get { return 65; } }
+        /// <inheritdoc />
+        public short Durability { get { return 65; } }
 
         public override void ItemUsedOnBlock(GlobalVoxelCoordinates coordinates, ItemStack item, BlockFace face, IDimension dimension, IRemoteClient user)
         {
@@ -30,7 +31,7 @@ namespace TrueCraft.Core.Logic.Items
 
                 var slot = user.SelectedItem;
                 slot.Metadata += 1;
-                if (slot.Metadata >= Uses)
+                if (slot.Metadata >= Durability)
                     slot.Count = 0; // Destroy item
                 user.Hotbar[user.SelectedSlot].Item = slot;
             }
