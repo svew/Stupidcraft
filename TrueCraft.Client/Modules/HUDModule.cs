@@ -133,8 +133,12 @@ namespace TrueCraft.Client.Modules
                 ItemStack item = Game.Client.Hotbar[i].Item;
                 if (item.Empty)
                     continue;
-                IItemProvider provider = _itemRepository.GetItemProvider(item.ID)!;  // item is known to not be Empty
-                if (provider.GetIconTexture((byte)item.Metadata) == null)
+                IItemProvider? provider = _itemRepository.GetItemProvider(item.ID);
+                if (provider?.GetIconTexture((byte)item.Metadata) is null)
+                    // TODO: draw a default item texture -
+                    // Scenario: updating a mod leads to an issue where its ItemProvider does
+                    //           not get created.  However, such item is already stored in a saved
+                    //           Player's Hotbar.
                     continue;
                 var position = origin + new Point((int)Scale(i * 20), 0);
                 var rect = new Rectangle(position, scale);
