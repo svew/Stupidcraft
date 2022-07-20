@@ -28,7 +28,7 @@ namespace TrueCraft.Core.Logic.Items
 
         public override ToolMaterial Material { get { return ToolMaterial.Wood; } }
 
-        public override short BaseDurability { get { return 60; } }
+        public override short Durability { get { return 60; } }
     }
 
     public class StonePickaxeItem : PickaxeItem
@@ -41,7 +41,7 @@ namespace TrueCraft.Core.Logic.Items
 
         public override ToolMaterial Material { get { return ToolMaterial.Stone; } }
 
-        public override short BaseDurability { get { return 132; } }
+        public override short Durability { get { return 132; } }
     }
 
     public class IronPickaxeItem : PickaxeItem
@@ -54,7 +54,7 @@ namespace TrueCraft.Core.Logic.Items
 
         public override ToolMaterial Material { get { return ToolMaterial.Iron; } }
 
-        public override short BaseDurability { get { return 251; } }
+        public override short Durability { get { return 251; } }
     }
 
     public class GoldenPickaxeItem : PickaxeItem
@@ -67,7 +67,7 @@ namespace TrueCraft.Core.Logic.Items
 
         public override ToolMaterial Material { get { return ToolMaterial.Gold; } }
 
-        public override short BaseDurability { get { return 33; } }
+        public override short Durability { get { return 33; } }
     }
 
     public class DiamondPickaxeItem : PickaxeItem
@@ -80,6 +80,6 @@ namespace TrueCraft.Core.Logic.Items
 
         public override ToolMaterial Material { get { return ToolMaterial.Diamond; } }
 
-        public override short BaseDurability { get { return 1562; } }
+        public override short Durability { get { return 1562; } }
     }
 }

@@ -11,6 +11,6 @@ namespace TrueCraft.Core.Logic.Items
         {
         }
 
-        public override short BaseDurability { get { return 65; } }
+        public override short Durability { get { return 65; } }
     }
 }
