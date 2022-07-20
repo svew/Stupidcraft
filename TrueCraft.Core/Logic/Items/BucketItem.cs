@@ -7,7 +7,7 @@ using TrueCraft.Core.World;
 
 namespace TrueCraft.Core.Logic.Items
 {
-    public class BucketItem : ToolItem
+    public class BucketItem : ItemProvider
     {
         public static readonly short ItemID = 0x145;
 
