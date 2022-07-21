@@ -8,7 +8,7 @@ namespace TrueCraft.Core.Test.Logic.Items
 {
     public class TestToolItem
     {
-        [TestCase(ToolType.Pickaxe, ToolMaterial.Wood, 60, 0,
+        [TestCase(ToolType.Pickaxe, ToolMaterial.Wood, 60, 0f,
             @"    <item>
       <id>270</id>
       <maximumstack>1</maximumstack>
@@ -31,7 +31,7 @@ namespace TrueCraft.Core.Test.Logic.Items
       </tool>
     </item>
 ")]
-        [TestCase(ToolType.Axe, ToolMaterial.Stone, 132, 0,
+        [TestCase(ToolType.Axe, ToolMaterial.Stone, 132, 0f,
             @"    <item>
       <id>275</id>
       <maximumstack>1</maximumstack>
@@ -54,7 +54,7 @@ namespace TrueCraft.Core.Test.Logic.Items
       </tool>
     </item>
 ")]
-        [TestCase(ToolType.Shovel, ToolMaterial.Iron, 251, 0,
+        [TestCase(ToolType.Shovel, ToolMaterial.Iron, 251, 0f,
             @"    <item>
       <id>256</id>
       <maximumstack>1</maximumstack>
@@ -77,7 +77,7 @@ namespace TrueCraft.Core.Test.Logic.Items
       </tool>
     </item>
 ")]
-        [TestCase(ToolType.Hoe, ToolMaterial.Gold, 33, 0,
+        [TestCase(ToolType.Hoe, ToolMaterial.Gold, 33, 0f,
             @"    <item>
       <id>294</id>
       <maximumstack>1</maximumstack>
@@ -100,7 +100,7 @@ namespace TrueCraft.Core.Test.Logic.Items
       </tool>
     </item>
 ")]
-        [TestCase(ToolType.Sword, ToolMaterial.Diamond, 1562, 5.5,
+        [TestCase(ToolType.Sword, ToolMaterial.Diamond, 1562, 5.5f,
             @"    <item>
       <id>276</id>
       <maximumstack>1</maximumstack>

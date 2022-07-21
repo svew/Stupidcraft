@@ -36,14 +36,17 @@ namespace TrueCraft.Core.Logic.Items
             XmlNode? materialNode = kindNode.NextSibling;
             if (materialNode is null || materialNode.LocalName != MaterialNodeName)
                 throw new ArgumentException($"Missing <{MaterialNodeName}> node.");
+            _material = ParseMaterial(materialNode.InnerText);
 
             XmlNode? durabilityNode = materialNode.NextSibling;
             if (durabilityNode is null || durabilityNode.LocalName != DurabilityNodeName)
                 throw new ArgumentException($"Missing <{DurabilityNodeName}> node.");
+            _durability = short.Parse(durabilityNode.InnerText);
 
             XmlNode? damageNode = durabilityNode.NextSibling;
             if (damageNode is null || damageNode.LocalName != DamageNodeName)
                 throw new ArgumentException($"Missing <{DamageNodeName}> node.");
+            _damage = float.Parse(damageNode.InnerText);
         }
 
         protected virtual ToolType ParseKind(string kind)
