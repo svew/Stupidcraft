@@ -1,13 +1,10 @@
 using System;
-using Moq;
-using TrueCraft.Core.Logic;
 using NUnit.Framework;
 using System.Xml;
-using System.Text;
 using System.IO;
 using TrueCraft.Core.Logic.Items;
 
-namespace TrueCraft.Core.Test.Logic
+namespace TrueCraft.Core.Test.Logic.Items
 {
     [TestFixture]
     public class TestArmorItem
