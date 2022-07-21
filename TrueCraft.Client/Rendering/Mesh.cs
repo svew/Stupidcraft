@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using System.Linq;
+using TrueCraft.Client.Modelling;
 
 namespace TrueCraft.Client.Rendering
 {

@@ -4,14 +4,14 @@ using Microsoft.Xna.Framework;
 using TrueCraft.Core.Logic;
 using TrueCraft.Core.World;
 
-namespace TrueCraft.Client.Rendering
+namespace TrueCraft.Client.Modelling.Blocks
 {
-    public class BlockRenderer
+    public class BlockModeller
     {
-        private static BlockRenderer DefaultRenderer = new BlockRenderer();
-        private static BlockRenderer[] Renderers = new BlockRenderer[0x100];
+        private static BlockModeller DefaultRenderer = new BlockModeller();
+        private static BlockModeller[] Renderers = new BlockModeller[0x100];
 
-        public static void RegisterRenderer(byte id, BlockRenderer renderer)
+        public static void RegisterRenderer(byte id, BlockModeller renderer)
         {
             Renderers[id] = renderer;
         }
@@ -281,7 +281,7 @@ namespace TrueCraft.Client.Rendering
             new Vector3(0, -1, 0)
         };
 
-        static BlockRenderer()
+        static BlockModeller()
         {
             for (int i = 0; i < Renderers.Length; i++)
             {
@@ -291,7 +291,7 @@ namespace TrueCraft.Client.Rendering
             foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 foreach (var type in assembly.GetTypes().Where(t =>
-                    typeof(BlockRenderer).IsAssignableFrom(t) && !t.IsAbstract && t != typeof(BlockRenderer)))
+                    typeof(BlockModeller).IsAssignableFrom(t) && !t.IsAbstract && t != typeof(BlockModeller)))
                 {
                     Activator.CreateInstance(type); // This is just to call the static initializers
                 }

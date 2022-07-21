@@ -3,13 +3,13 @@ using Microsoft.Xna.Framework;
 using TrueCraft.Core.Logic;
 using TrueCraft.Core.Logic.Blocks;
 
-namespace TrueCraft.Client.Rendering.Blocks
+namespace TrueCraft.Client.Modelling.Blocks
 {
-    public class LogRenderer : BlockRenderer
+    public class LogModeller : BlockModeller
     {
-        static LogRenderer()
+        static LogModeller()
         {
-            BlockRenderer.RegisterRenderer(WoodBlock.BlockID, new LogRenderer());
+            RegisterRenderer(WoodBlock.BlockID, new LogModeller());
             for (int i = 0; i < BaseTexture.Length; i++)
             {
                 BaseTexture[i] *= new Vector2(16f / 256f);
@@ -141,7 +141,7 @@ namespace TrueCraft.Client.Rendering.Blocks
 
         public override VertexPositionNormalColorTexture[] Render(short metadata, Vector3 offset, Vector2[] texture, out int[] indices)
         {
-            switch((WoodBlock.WoodType)metadata)
+            switch ((WoodBlock.WoodType)metadata)
             {
                 case WoodBlock.WoodType.Spruce:
                     return base.Render(metadata, offset, SpruceTexture, out indices);

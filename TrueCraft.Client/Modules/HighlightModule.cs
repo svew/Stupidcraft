@@ -7,6 +7,8 @@ using XVector3 = Microsoft.Xna.Framework.Vector3;
 using TVector3 = TrueCraft.Core.Vector3;
 using TRay = TrueCraft.Core.Ray;
 using TrueCraft.Core.Logic;
+using TrueCraft.Client.Modelling;
+using TrueCraft.Client.Modelling.Blocks;
 
 namespace TrueCraft.Client.Modules
 {
@@ -85,7 +87,7 @@ namespace TrueCraft.Client.Modules
             };
             for (int i = 0; i < texture.Length; i++)
                 texture[i] *= new Vector2(16f / 256f);
-            VertexPositionNormalColorTexture[] vertices = BlockRenderer.CreateUniformCube(XVector3.Zero,
+            VertexPositionNormalColorTexture[] vertices = BlockModeller.CreateUniformCube(XVector3.Zero,
                 texture, VisibleFaces.All, 0, out indicies, Color.White);
             return new Mesh(_game, vertices, indicies);
         }

@@ -1,15 +1,16 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
+using TrueCraft.Client.Modelling.Blocks;
 using TrueCraft.Core.Logic;
 
-namespace TrueCraft.Client.Rendering
+namespace TrueCraft.Client.Modelling
 {
-    public abstract class FlatQuadRenderer : BlockRenderer
+    public abstract class FlatQuadModeller : BlockModeller
     {
         protected virtual Vector2 TextureMap { get { return Vector2.Zero; } }
         protected Vector2[] Texture;
 
-        protected FlatQuadRenderer()
+        protected FlatQuadModeller()
         {
             Texture = new[]
             {
@@ -50,7 +51,7 @@ namespace TrueCraft.Client.Rendering
         {
             indicies = new[] { 0, 1, 3, 1, 2, 3 };
             for (int i = 0; i < indicies.Length; i++)
-                indicies[i] += (face * 4) + indiciesOffset;
+                indicies[i] += face * 4 + indiciesOffset;
             var quad = new VertexPositionNormalColorTexture[4];
             var unit = QuadMesh[face];
             var normal = CubeNormals[face];
@@ -73,7 +74,7 @@ namespace TrueCraft.Client.Rendering
 
         protected static readonly Vector3[][] QuadMesh;
 
-        static FlatQuadRenderer()
+        static FlatQuadModeller()
         {
             QuadMesh = new Vector3[4][];
 

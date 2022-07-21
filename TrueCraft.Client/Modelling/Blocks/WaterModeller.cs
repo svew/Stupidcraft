@@ -3,14 +3,14 @@ using Microsoft.Xna.Framework;
 using TrueCraft.Core.Logic;
 using TrueCraft.Core.Logic.Blocks;
 
-namespace TrueCraft.Client.Rendering.Blocks
+namespace TrueCraft.Client.Modelling.Blocks
 {
-    public class WaterRenderer : BlockRenderer
+    public class WaterModeller : BlockModeller
     {
-        static WaterRenderer()
+        static WaterModeller()
         {
-            BlockRenderer.RegisterRenderer(WaterBlock.BlockID, new WaterRenderer());
-            BlockRenderer.RegisterRenderer(StationaryWaterBlock.BlockID, new WaterRenderer());
+            RegisterRenderer(WaterBlock.BlockID, new WaterModeller());
+            RegisterRenderer(StationaryWaterBlock.BlockID, new WaterModeller());
             for (int i = 0; i < Texture.Length; i++)
                 Texture[i] *= new Vector2(16f / 256f);
         }

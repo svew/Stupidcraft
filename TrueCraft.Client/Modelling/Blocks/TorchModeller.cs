@@ -3,13 +3,13 @@ using Microsoft.Xna.Framework;
 using TrueCraft.Core.Logic;
 using TrueCraft.Core.Logic.Blocks;
 
-namespace TrueCraft.Client.Rendering.Blocks
+namespace TrueCraft.Client.Modelling.Blocks
 {
-    public class TorchRenderer : BlockRenderer
+    public class TorchModeller : BlockModeller
     {
-        static TorchRenderer()
+        static TorchModeller()
         {
-            BlockRenderer.RegisterRenderer(TorchBlock.BlockID, new TorchRenderer());
+            RegisterRenderer(TorchBlock.BlockID, new TorchModeller());
             for (int i = 0; i < Texture.Length; i++)
                 Texture[i] /= 256f;
         }

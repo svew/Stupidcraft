@@ -2,14 +2,15 @@
 using System.Threading;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using TrueCraft.Client.Rendering;
 
-namespace TrueCraft.Client.Rendering
+namespace TrueCraft.Client.Modelling
 {
     /// <summary>
-    /// Abstract base class for renderers of meshes.
+    /// Abstract base class for creaters of meshes.
     /// </summary>
     /// <typeparam name="T">The object to render into a mesh.</typeparam>
-    public abstract class Renderer<T> : IDisposable
+    public abstract class Modeller<T> : IDisposable
     {
         // TODO: remove this object - it appears to only protect the ConcurrentQueue
         // instances, and certainly should not be locked in Dispose.
@@ -18,7 +19,7 @@ namespace TrueCraft.Client.Rendering
         /// <summary>
         /// 
         /// </summary>
-        public event EventHandler<RendererEventArgs<T>>? MeshCompleted;
+        public event EventHandler<ModellerEventArgs<T>>? MeshCompleted;
 
         private volatile bool _isRunning;
         private Thread[] _rendererThreads;
@@ -50,7 +51,7 @@ namespace TrueCraft.Client.Rendering
         /// <summary>
         /// 
         /// </summary>
-        protected Renderer()
+        protected Modeller()
         {
             lock (_syncLock)
             {
@@ -94,19 +95,19 @@ namespace TrueCraft.Client.Rendering
         {
             while (_isRunning)
             {
-                T? item = default(T);
+                T? item = default;
                 MeshBase? result = null;
 
                 lock (_syncLock)
                 {
                     if (_priorityItems.TryDequeue(out item) && _pending.Remove(item) && TryRender(item, out result))
                     {
-                        var args = new RendererEventArgs<T>(item, result, true);
+                        var args = new ModellerEventArgs<T>(item, result, true);
                         MeshCompleted?.Invoke(this, args);
                     }
                     else if (_items.TryDequeue(out item) && _pending.Remove(item) && TryRender(item, out result))
                     {
-                        var args = new RendererEventArgs<T>(item, result, false);
+                        var args = new ModellerEventArgs<T>(item, result, false);
                         MeshCompleted?.Invoke(this, args);
                     }
                 }
@@ -194,7 +195,7 @@ namespace TrueCraft.Client.Rendering
         /// <summary>
         /// Finalizes this renderer.
         /// </summary>
-        ~Renderer()
+        ~Modeller()
         {
             Dispose(false);
         }

@@ -3,13 +3,13 @@ using Microsoft.Xna.Framework;
 using TrueCraft.Core.Logic;
 using TrueCraft.Core.Logic.Blocks;
 
-namespace TrueCraft.Client.Rendering.Blocks
+namespace TrueCraft.Client.Modelling.Blocks
 {
-    public class SnowRenderer : BlockRenderer
+    public class SnowModeller : BlockModeller
     {
-        static SnowRenderer()
+        static SnowModeller()
         {
-            BlockRenderer.RegisterRenderer(SnowfallBlock.BlockID, new SnowRenderer());
+            RegisterRenderer(SnowfallBlock.BlockID, new SnowModeller());
             for (int i = 0; i < Texture.Length; i++)
                 Texture[i] *= new Vector2(16f / 256f);
         }
@@ -30,7 +30,7 @@ namespace TrueCraft.Client.Rendering.Blocks
 
             var cube = CreateUniformCube(Vector3.Zero, Texture, faces, indiciesOffset, out indicies,
                 Color.White, lighting);
-            var heightMultiplier = new Vector3(1, ((descriptor.Metadata + 1) / 16f), 1);
+            var heightMultiplier = new Vector3(1, (descriptor.Metadata + 1) / 16f, 1);
             for (int i = 0; i < cube.Length; i++)
             {
                 if (cube[i].Position.Y > 0)

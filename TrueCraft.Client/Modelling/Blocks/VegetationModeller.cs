@@ -3,19 +3,19 @@ using Microsoft.Xna.Framework;
 using TrueCraft.Core.Logic;
 using TrueCraft.Core.Logic.Blocks;
 
-namespace TrueCraft.Client.Rendering.Blocks
+namespace TrueCraft.Client.Modelling.Blocks
 {
-    public class VegitationRenderer : FlatQuadRenderer
+    public class VegetationModeller : FlatQuadModeller
     {
-        static VegitationRenderer()
+        static VegetationModeller()
         {
-            BlockRenderer.RegisterRenderer(DandelionBlock.BlockID, new VegitationRenderer());
-            BlockRenderer.RegisterRenderer(RoseBlock.BlockID, new VegitationRenderer());
-            BlockRenderer.RegisterRenderer(TallGrassBlock.BlockID, new VegitationRenderer());
-            BlockRenderer.RegisterRenderer(DeadBushBlock.BlockID, new VegitationRenderer());
-            BlockRenderer.RegisterRenderer(SaplingBlock.BlockID, new VegitationRenderer());
+            RegisterRenderer(DandelionBlock.BlockID, new VegetationModeller());
+            RegisterRenderer(RoseBlock.BlockID, new VegetationModeller());
+            RegisterRenderer(TallGrassBlock.BlockID, new VegetationModeller());
+            RegisterRenderer(DeadBushBlock.BlockID, new VegetationModeller());
+            RegisterRenderer(SaplingBlock.BlockID, new VegetationModeller());
         }
-            
+
         protected Vector2 DandelionTextureMap { get { return new Vector2(13, 0); } }
         protected Vector2 RoseTextureMap { get { return new Vector2(12, 0); } }
         protected Vector2 TallGrassTextureMap { get { return new Vector2(7, 2); } }
@@ -28,7 +28,7 @@ namespace TrueCraft.Client.Rendering.Blocks
         protected Vector2[] TallGrassTexture, DeadBushTexture, FernTexture;
         protected Vector2[] OakSaplingTexture, SpruceSaplingTexture, BirchSaplingTexture;
 
-        public VegitationRenderer()
+        public VegetationModeller()
         {
             DandelionTexture = new[]
                 {
@@ -126,10 +126,10 @@ namespace TrueCraft.Client.Rendering.Blocks
                     case TallGrassBlock.TallGrassType.DeadBush:
                         return RenderQuads(descriptor, offset, DeadBushTexture, indiciesOffset, out indicies, Color.White);
                     case TallGrassBlock.TallGrassType.Fern:
-                        return RenderQuads(descriptor, offset, FernTexture, indiciesOffset, out indicies, GrassRenderer.BiomeColor);
+                        return RenderQuads(descriptor, offset, FernTexture, indiciesOffset, out indicies, GrassModeller.BiomeColor);
                     case TallGrassBlock.TallGrassType.TallGrass:
                     default:
-                        return RenderQuads(descriptor, offset, TallGrassTexture, indiciesOffset, out indicies, GrassRenderer.BiomeColor);
+                        return RenderQuads(descriptor, offset, TallGrassTexture, indiciesOffset, out indicies, GrassModeller.BiomeColor);
                 }
             }
         }

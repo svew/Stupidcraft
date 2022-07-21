@@ -2,6 +2,8 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using TrueCraft.Core.Logic;
+using TrueCraft.Client.Modelling;
+using TrueCraft.Client.Modelling.Blocks;
 
 namespace TrueCraft.Client.Rendering
 {
@@ -25,7 +27,7 @@ namespace TrueCraft.Client.Rendering
                 int[] indices;
                 foreach (short metadata in provider.VisibleMetadata)
                 {
-                    VertexPositionNormalColorTexture[] vertices = BlockRenderer.RenderIcon(provider, metadata, out indices);
+                    VertexPositionNormalColorTexture[] vertices = BlockModeller.RenderIcon(provider, metadata, out indices);
                     Mesh mesh = new Mesh(game, vertices, indices);
                     CacheEntry<Mesh> meshCacheEntry = new CacheEntry<Mesh>(mesh, metadata);
                     if (_blockMeshes[provider.ID] == null)

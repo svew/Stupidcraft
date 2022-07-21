@@ -3,18 +3,18 @@ using Microsoft.Xna.Framework;
 using TrueCraft.Core.Logic;
 using TrueCraft.Core.Logic.Blocks;
 
-namespace TrueCraft.Client.Rendering.Blocks
+namespace TrueCraft.Client.Modelling.Blocks
 {
-    public class WheatRenderer : BlockRenderer
+    public class WheatModeller : BlockModeller
     {
-        static WheatRenderer()
+        static WheatModeller()
         {
-            BlockRenderer.RegisterRenderer(CropsBlock.BlockID, new WheatRenderer());
+            RegisterRenderer(CropsBlock.BlockID, new WheatModeller());
         }
 
         private Vector2[][] Textures;
 
-        public WheatRenderer()
+        public WheatModeller()
         {
             var textureMap = new Vector2(8, 5);
             Textures = new Vector2[8][];

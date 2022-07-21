@@ -3,13 +3,13 @@ using Microsoft.Xna.Framework;
 using TrueCraft.Core.Logic;
 using TrueCraft.Core.Logic.Blocks;
 
-namespace TrueCraft.Client.Rendering.Blocks
+namespace TrueCraft.Client.Modelling.Blocks
 {
-    public class CactusRenderer : BlockRenderer
+    public class CactusModeller : BlockModeller
     {
-        static CactusRenderer()
+        static CactusModeller()
         {
-            BlockRenderer.RegisterRenderer(CactusBlock.BlockID, new CactusRenderer());
+            RegisterRenderer(CactusBlock.BlockID, new CactusModeller());
             for (int j = 0; j < Texture.Length; j++)
                 Texture[j] *= new Vector2(16f / 256f);
             for (int j = 0; j < TopTexture.Length; j++)

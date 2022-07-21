@@ -5,6 +5,7 @@ using System.ComponentModel;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using TrueCraft.Client.Events;
+using TrueCraft.Client.Modelling;
 using TrueCraft.Client.Rendering;
 using TrueCraft.Core.Lighting;
 using TrueCraft.Core.World;
@@ -15,7 +16,7 @@ namespace TrueCraft.Client.Modules
     {
         private readonly IServiceLocator _serviceLocator;
         private readonly TrueCraftGame _game;
-        public ChunkRenderer ChunkRenderer { get; }
+        public ChunkModeller ChunkModeller { get; }
         public int ChunksRendered { get; set; }
 
         private readonly HashSet<GlobalChunkCoordinates> _activeMeshes;
@@ -32,13 +33,13 @@ namespace TrueCraft.Client.Modules
             _serviceLocator = serviceLocator;
             _game = game;
 
-            ChunkRenderer = new ChunkRenderer(_game, _game.Client.Dimension);
+            ChunkModeller = new ChunkModeller(_game, _game.Client.Dimension);
             _game.Client.ChunkLoaded += Game_Client_ChunkLoaded;
             _game.Client.ChunkUnloaded += (sender, e) => UnloadChunk(e.Chunk);
             _game.Client.ChunkModified += Game_Client_ChunkModified;
             _game.Client.BlockChanged += Game_Client_BlockChanged;
-            ChunkRenderer.MeshCompleted += MeshCompleted;
-            ChunkRenderer.Start();
+            ChunkModeller.MeshCompleted += MeshCompleted;
+            ChunkModeller.Start();
             WorldLighting = new Lighting(_game.Client.Dimension, _serviceLocator.BlockRepository);
 
             _opaqueEffect = new BasicEffect(_game.GraphicsDevice);
@@ -86,15 +87,15 @@ namespace TrueCraft.Client.Modules
 
         private void Game_Client_ChunkModified(object? sender, ChunkEventArgs e)
         {
-            ChunkRenderer.Enqueue(e.Chunk, true);
+            ChunkModeller.Enqueue(e.Chunk, true);
         }
 
         private void Game_Client_ChunkLoaded(object? sender, ChunkEventArgs e)
         {
-            ChunkRenderer.Enqueue(e.Chunk);
+            ChunkModeller.Enqueue(e.Chunk);
         }
 
-        private void MeshCompleted(object? sender, RendererEventArgs<IChunk> e)
+        private void MeshCompleted(object? sender, ModellerEventArgs<IChunk> e)
         {
             _incomingChunks.Add((ChunkMesh)e.Result);
         }

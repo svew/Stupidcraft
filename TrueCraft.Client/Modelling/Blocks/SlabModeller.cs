@@ -3,9 +3,9 @@ using Microsoft.Xna.Framework;
 using TrueCraft.Core.Logic;
 using TrueCraft.Core.Logic.Blocks;
 
-namespace TrueCraft.Client.Rendering.Blocks
+namespace TrueCraft.Client.Modelling.Blocks
 {
-    public class SlabRenderer : BlockRenderer
+    public class SlabModeller : BlockModeller
     {
         private static Vector2 StoneTopTexture = new Vector2(6, 0);
         private static Vector2 StoneSideTexture = new Vector2(5, 0);
@@ -156,10 +156,10 @@ namespace TrueCraft.Client.Rendering.Blocks
             CobbleBottomTexture + Vector2.UnitX,
         };
 
-        static SlabRenderer()
+        static SlabModeller()
         {
-            BlockRenderer.RegisterRenderer(SlabBlock.BlockID, new SlabRenderer());
-            BlockRenderer.RegisterRenderer(DoubleSlabBlock.BlockID, new SlabRenderer());
+            RegisterRenderer(SlabBlock.BlockID, new SlabModeller());
+            RegisterRenderer(DoubleSlabBlock.BlockID, new SlabModeller());
 
             for (int i = 0; i < StoneTextureMap.Length; i++)
             {
@@ -187,7 +187,7 @@ namespace TrueCraft.Client.Rendering.Blocks
             }
         }
 
-        public override VertexPositionNormalColorTexture[] Render(BlockDescriptor descriptor, Vector3 offset, 
+        public override VertexPositionNormalColorTexture[] Render(BlockDescriptor descriptor, Vector3 offset,
             VisibleFaces faces, Tuple<int, int> textureMap, int indiciesOffset, out int[] indicies)
         {
             if (descriptor.ID == SlabBlock.BlockID)
@@ -206,24 +206,24 @@ namespace TrueCraft.Client.Rendering.Blocks
             for (int i = 0; i < 6; i++)
             {
                 var face = (CubeFace)i;
-                switch(face)
+                switch (face)
                 {
                     case CubeFace.PositiveZ:
                     case CubeFace.NegativeZ:
                     case CubeFace.PositiveX:
                     case CubeFace.NegativeX:
                         for (int j = 0; j < 2; j++)
-                            result[(i * 4) + j].Texture.Y -= (1f / 32f);
+                            result[i * 4 + j].Texture.Y -= 1f / 32f;
                         for (int k = 2; k < 4; k++)
                         {
-                            result[(i * 4) + k].Position.Y -= 0.5f;
+                            result[i * 4 + k].Position.Y -= 0.5f;
                             // result[(i * 4) + k].Texture.Y -= (1f / 16f);
                         }
                         break;
 
                     case CubeFace.PositiveY:
                         for (int j = 0; j < 4; j++)
-                            result[(i * 4) + j].Position.Y -= 0.5f;
+                            result[i * 4 + j].Position.Y -= 0.5f;
                         break;
                 }
             }

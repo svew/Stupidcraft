@@ -4,13 +4,13 @@ using TrueCraft.Core.Logic;
 using TrueCraft.Core.Logic.Blocks;
 using TrueCraft.Core.World;
 
-namespace TrueCraft.Client.Rendering.Blocks
+namespace TrueCraft.Client.Modelling.Blocks
 {
-    public class GrassRenderer : BlockRenderer
+    public class GrassModeller : BlockModeller
     {
-        static GrassRenderer()
+        static GrassModeller()
         {
-            BlockRenderer.RegisterRenderer(GrassBlock.BlockID, new GrassRenderer());
+            RegisterRenderer(GrassBlock.BlockID, new GrassModeller());
             for (int i = 0; i < Texture.Length; i++)
                 Texture[i] *= new Vector2(16f / 256f);
             for (int i = 0; i < Texture.Length; i++)
@@ -90,7 +90,7 @@ namespace TrueCraft.Client.Rendering.Blocks
 
         public static readonly Color BiomeColor = new Color(105, 169, 63);
 
-        public override VertexPositionNormalColorTexture[] Render(BlockDescriptor descriptor, Microsoft.Xna.Framework.Vector3 offset,
+        public override VertexPositionNormalColorTexture[] Render(BlockDescriptor descriptor, Vector3 offset,
             VisibleFaces faces, Tuple<int, int> textureMap, int indiciesOffset, out int[] indicies)
         {
             var texture = Texture;
@@ -102,7 +102,7 @@ namespace TrueCraft.Client.Rendering.Blocks
 
             var cube = CreateUniformCube(offset, texture, faces, indiciesOffset, out indicies, Color.White, lighting);
             // Apply biome colors to top of cube
-            for (int i = (int)(CubeFace.PositiveY) * 4; i < (int)(CubeFace.PositiveY) * 4 + 4; i++)
+            for (int i = (int)CubeFace.PositiveY * 4; i < (int)CubeFace.PositiveY * 4 + 4; i++)
             {
                 cube[i].Color = new Color(cube[i].Color.ToVector3() * BiomeColor.ToVector3()); // TODO: Take this from biome
             }

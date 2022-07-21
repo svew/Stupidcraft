@@ -3,13 +3,13 @@ using Microsoft.Xna.Framework;
 using TrueCraft.Core.Logic;
 using TrueCraft.Core.Logic.Blocks;
 
-namespace TrueCraft.Client.Rendering.Blocks
+namespace TrueCraft.Client.Modelling.Blocks
 {
-    public class FarmlandRenderer : BlockRenderer
+    public class FarmlandModeller : BlockModeller
     {
-        static FarmlandRenderer()
+        static FarmlandModeller()
         {
-            BlockRenderer.RegisterRenderer(FarmlandBlock.BlockID, new FarmlandRenderer());
+            RegisterRenderer(FarmlandBlock.BlockID, new FarmlandModeller());
             for (int i = 0; i < DryTexture.Length; i++)
             {
                 DryTexture[i] *= new Vector2(16f / 256f);

@@ -4,14 +4,16 @@ using TrueCraft.Core.World;
 using TrueCraft.Core.Logic;
 
 using Vector3 = Microsoft.Xna.Framework.Vector3;
+using TrueCraft.Client.Rendering;
+using TrueCraft.Client.Modelling.Blocks;
 
-namespace TrueCraft.Client.Rendering
+namespace TrueCraft.Client.Modelling
 {
     /// <summary>
     /// A daemon of sorts that creates meshes from chunks.
     /// Passing meshes back is NOT thread-safe.
     /// </summary>
-    public class ChunkRenderer : Renderer<IChunk>
+    public class ChunkModeller : Modeller<IChunk>
     {
         public int PendingChunks
         {
@@ -24,7 +26,7 @@ namespace TrueCraft.Client.Rendering
         private IDimension _dimension;
         private TrueCraftGame _game;
 
-        public ChunkRenderer(TrueCraftGame game, IDimension dimension)
+        public ChunkModeller(TrueCraftGame game, IDimension dimension)
             : base()
         {
             _dimension = dimension;
@@ -59,12 +61,12 @@ namespace TrueCraft.Client.Rendering
             result = new ChunkMesh(_game, item, state.Verticies.ToArray(),
                 state.OpaqueIndicies.ToArray(), state.TransparentIndicies.ToArray());
 
-            return (result != null);
+            return result != null;
         }
 
         private class RenderState
         {
-            public readonly List<VertexPositionNormalColorTexture> Verticies 
+            public readonly List<VertexPositionNormalColorTexture> Verticies
                 = new List<VertexPositionNormalColorTexture>();
             public readonly List<int> OpaqueIndicies = new List<int>();
             public readonly List<int> TransparentIndicies = new List<int>();
@@ -246,7 +248,7 @@ namespace TrueCraft.Client.Rendering
                 }
             }
 
-            foreach(var coords in state.DrawableCoordinates)
+            foreach (var coords in state.DrawableCoordinates)
             {
                 LocalVoxelCoordinates c = coords.Key;
                 var descriptor = new BlockDescriptor
@@ -263,7 +265,7 @@ namespace TrueCraft.Client.Rendering
                 {
                     int[] i;
                     // TODO: fix adhoc inline coordinate conversion
-                    VertexPositionNormalColorTexture[] v = BlockRenderer.RenderBlock(provider, descriptor, coords.Value,
+                    VertexPositionNormalColorTexture[] v = BlockModeller.RenderBlock(provider, descriptor, coords.Value,
                         new Vector3(chunk.X * WorldConstants.ChunkWidth + c.X, c.Y, chunk.Z * WorldConstants.ChunkDepth + c.Z),
                         state.Verticies.Count, out i);
                     state.Verticies.AddRange(v);
@@ -273,7 +275,7 @@ namespace TrueCraft.Client.Rendering
                 {
                     int[] i;
                     // TODO: fix adhoc inline coordinate conversion
-                    VertexPositionNormalColorTexture[] v = BlockRenderer.RenderBlock(provider, descriptor, coords.Value,
+                    VertexPositionNormalColorTexture[] v = BlockModeller.RenderBlock(provider, descriptor, coords.Value,
                         new Vector3(chunk.X * WorldConstants.ChunkWidth + c.X, c.Y, chunk.Z * WorldConstants.ChunkDepth + c.Z),
                         state.Verticies.Count, out i);
                     state.Verticies.AddRange(v);
@@ -281,18 +283,5 @@ namespace TrueCraft.Client.Rendering
                 }
             }
         }
-    }
-
-    [Flags]
-    public enum VisibleFaces
-    {
-        None = 0,
-        North = 1,
-        South = 2,
-        East = 4,
-        West = 8,
-        Top = 16,
-        Bottom = 32,
-        All = North | South | East | West | Top | Bottom
     }
 }

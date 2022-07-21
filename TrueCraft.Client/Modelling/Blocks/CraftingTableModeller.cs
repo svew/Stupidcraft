@@ -3,13 +3,13 @@ using Microsoft.Xna.Framework;
 using TrueCraft.Core.Logic;
 using TrueCraft.Core.Logic.Blocks;
 
-namespace TrueCraft.Client.Rendering.Blocks
+namespace TrueCraft.Client.Modelling.Blocks
 {
-    public class CraftingTableRenderer : BlockRenderer
+    public class CraftingTableModeller : BlockModeller
     {
-        static CraftingTableRenderer()
+        static CraftingTableModeller()
         {
-            BlockRenderer.RegisterRenderer(CraftingTableBlock.BlockID, new CraftingTableRenderer());
+            RegisterRenderer(CraftingTableBlock.BlockID, new CraftingTableModeller());
             for (int i = 0; i < Texture.Length; i++)
                 Texture[i] *= new Vector2(16f / 256f);
         }

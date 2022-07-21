@@ -3,13 +3,13 @@ using Microsoft.Xna.Framework;
 using TrueCraft.Core.Logic;
 using TrueCraft.Core.Logic.Blocks;
 
-namespace TrueCraft.Client.Rendering.Blocks
+namespace TrueCraft.Client.Modelling.Blocks
 {
-    public class LeavesRenderer : BlockRenderer
+    public class LeavesModeller : BlockModeller
     {
-        static LeavesRenderer()
+        static LeavesModeller()
         {
-            BlockRenderer.RegisterRenderer(LeavesBlock.BlockID, new LeavesRenderer());
+            RegisterRenderer(LeavesBlock.BlockID, new LeavesModeller());
             for (int i = 0; i < BaseTextures.Length; i++)
             {
                 BaseTextures[i] *= new Vector2(16f / 256f);
@@ -43,14 +43,14 @@ namespace TrueCraft.Client.Rendering.Blocks
             {
                 case WoodBlock.WoodType.Spruce:
                     return CreateUniformCube(offset, SpruceTextures, VisibleFaces.All,
-                        indiciesOffset, out indicies, GrassRenderer.BiomeColor, lighting);
+                        indiciesOffset, out indicies, GrassModeller.BiomeColor, lighting);
                 case WoodBlock.WoodType.Birch:
                     return CreateUniformCube(offset, BaseTextures, VisibleFaces.All,
-                        indiciesOffset, out indicies, GrassRenderer.BiomeColor, lighting);
+                        indiciesOffset, out indicies, GrassModeller.BiomeColor, lighting);
                 case WoodBlock.WoodType.Oak:
                 default:
                     return CreateUniformCube(offset, BaseTextures, VisibleFaces.All,
-                        indiciesOffset, out indicies, GrassRenderer.BiomeColor, lighting);
+                        indiciesOffset, out indicies, GrassModeller.BiomeColor, lighting);
             }
         }
     }

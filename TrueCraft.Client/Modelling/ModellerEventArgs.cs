@@ -1,12 +1,13 @@
 ﻿using System;
+using TrueCraft.Client.Rendering;
 
-namespace TrueCraft.Client.Rendering
+namespace TrueCraft.Client.Modelling
 {
     /// <summary>
     /// 
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public sealed class RendererEventArgs<T> : EventArgs
+    public sealed class ModellerEventArgs<T> : EventArgs
     {
         /// <summary>
         /// 
@@ -29,7 +30,7 @@ namespace TrueCraft.Client.Rendering
         /// <param name="item"></param>
         /// <param name="result"></param>
         /// <param name="isPriority"></param>
-        public RendererEventArgs(T item, MeshBase result, bool isPriority)
+        public ModellerEventArgs(T item, MeshBase result, bool isPriority)
         {
             Item = item;
             Result = result;

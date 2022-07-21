@@ -3,13 +3,13 @@ using Microsoft.Xna.Framework;
 using TrueCraft.Core.Logic;
 using TrueCraft.Core.Logic.Blocks;
 
-namespace TrueCraft.Client.Rendering.Blocks
+namespace TrueCraft.Client.Modelling.Blocks
 {
-    public class LadderRenderer : BlockRenderer
+    public class LadderModeller : BlockModeller
     {
-        static LadderRenderer()
+        static LadderModeller()
         {
-            BlockRenderer.RegisterRenderer(LadderBlock.BlockID, new LadderRenderer());
+            RegisterRenderer(LadderBlock.BlockID, new LadderModeller());
             for (int i = 0; i < Texture.Length; i++)
                 Texture[i] *= new Vector2(16f / 256f);
         }

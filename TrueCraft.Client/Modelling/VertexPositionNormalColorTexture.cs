@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using System.Runtime.InteropServices;
 
-namespace TrueCraft.Client.Rendering
+namespace TrueCraft.Client.Modelling
 {
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct VertexPositionNormalColorTexture : IVertexType
