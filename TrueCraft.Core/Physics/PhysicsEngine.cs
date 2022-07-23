@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using TrueCraft.Core.World;
-using TrueCraft.Core.Entities;
 using TrueCraft.Core.Logic;
 using TrueCraft.Core.Logic.Blocks;
 
@@ -22,18 +21,19 @@ namespace TrueCraft.Core.Physics
 
         public void AddEntity(IPhysicsEntity entity)
         {
-            if (_entities.Contains(entity))
-                return;
             lock (_entityLock)
-                _entities.Add(entity);
+                if (!_entities.Contains(entity))
+                    _entities.Add(entity);
         }
 
         public void RemoveEntity(IPhysicsEntity entity)
         {
-            if (!_entities.Contains(entity))
-                return;
             lock (_entityLock)
-                _entities.Remove(entity);
+            {
+                int index = _entities.IndexOf(entity);
+                if (index >= 0)
+                    _entities.RemoveAt(index);
+            }
         }
 
         private void TruncateVelocity(IPhysicsEntity entity, double multiplier)
