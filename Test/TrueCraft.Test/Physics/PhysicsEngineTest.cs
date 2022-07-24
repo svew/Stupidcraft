@@ -204,7 +204,7 @@ namespace TrueCraft.Core.Test.Physics
             IDimension dimension = BuildDimension();
             IPhysicsEngine physics = new PhysicsEngine(dimension);
             TestEntity entity = new TestEntity();
-            entity.Position = new Vector3(0, 5, 0);
+            entity.Position = new Vector3(0, 4.5, 0);
             entity.AccelerationDueToGravity = 1;
             entity.Drag = 0;
             physics.AddEntity(entity);
@@ -226,7 +226,7 @@ namespace TrueCraft.Core.Test.Physics
             entity.Position = new Vector3(0, 5, 0);
             entity.AccelerationDueToGravity = 0;
             entity.Drag = 0;
-            entity.Velocity = new Vector3(1, 0, 0);
+            entity.Velocity = new Vector3(1.5, 0, 0);
             physics.AddEntity(entity);
             dimension.SetBlockID(new GlobalVoxelCoordinates(1, 5, 0), StoneBlock.BlockID);
 
@@ -246,7 +246,7 @@ namespace TrueCraft.Core.Test.Physics
             entity.Position = new Vector3(-1, 10, -1);
             entity.AccelerationDueToGravity = 0;
             entity.Drag = 0;
-            entity.Velocity = new Vector3(1, 0, 1);
+            entity.Velocity = new Vector3(1.5, 0, 1.5);
             physics.AddEntity(entity);
             dimension.SetBlockID(new GlobalVoxelCoordinates(0, 10, 0), StoneBlock.BlockID);
 
@@ -254,8 +254,10 @@ namespace TrueCraft.Core.Test.Physics
             physics.Update(TimeSpan.FromSeconds(1));
 
             Assert.AreEqual(-1, entity.Position.X);
+            Assert.AreEqual(10, entity.Position.Y);
             Assert.AreEqual(-1, entity.Position.Z);
             Assert.AreEqual(0, entity.Velocity.X);
+            Assert.AreEqual(0, entity.Velocity.Y);
             Assert.AreEqual(0, entity.Velocity.Z);
         }
     }
