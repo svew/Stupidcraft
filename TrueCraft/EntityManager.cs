@@ -84,6 +84,7 @@ namespace TrueCraft
             switch (property)
             {
                 case "Position":
+                    // TODO: ad hoc inline coordinate conversion
                     if ((int)(entity.Position.X) >> 4 != (int)(entity.OldPosition.X) >> 4 ||
                         (int)(entity.Position.Z) >> 4 != (int)(entity.OldPosition.Z) >> 4)
                     {
