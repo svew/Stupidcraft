@@ -14,12 +14,15 @@ using TrueCraft.Core.World;
 using TrueCraft.Core.Inventory;
 using TrueCraft.Client.Inventory;
 using TrueCraft.Client.World;
+using TrueCraft.Core.Entities;
 
 namespace TrueCraft.Client
 {
     public delegate void PacketHandler(IPacket packet, MultiplayerClient client);
 
-    public class MultiplayerClient : IAABBEntity, INotifyPropertyChanged, IDisposable // TODO: Make IMultiplayerClient and so on
+    // TODO: Single Responsibility Principle - This should be "Has a PlayerEntity"
+    //       NOT "Is an IEntity"
+    public class MultiplayerClient : IEntity, INotifyPropertyChanged, IDisposable // TODO: Make IMultiplayerClient and so on
     {
         public event EventHandler<ChatMessageEventArgs>? ChatMessage;
         public event EventHandler<ChunkEventArgs>? ChunkModified;
@@ -259,7 +262,7 @@ namespace TrueCraft.Client
             if (BlockChanged != null) BlockChanged(this, e);
         }
 
-        #region IAABBEntity implementation
+        #region IEntity implementation
 
         public const double Width = 0.6;
         public const double Height = 1.62;
@@ -283,10 +286,6 @@ namespace TrueCraft.Client
         {
             get { return new Size(Width, Height, Depth); }
         }
-
-        #endregion
-
-        #region IPhysicsEntity implementation
 
         public bool BeginUpdate()
         {
@@ -345,6 +344,23 @@ namespace TrueCraft.Client
             {
                 return 78.4f;
             }
+        }
+
+        public IPacket SpawnPacket => throw new NotImplementedException();
+
+        int IEntity.EntityID { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public bool Despawned { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public DateTime SpawnTime { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+        public MetadataDictionary Metadata => throw new NotImplementedException();
+
+        public Core.Server.IEntityManager EntityManager => throw new NotImplementedException();
+
+        public bool SendMetadataToClients => throw new NotImplementedException();
+
+        public void Update(Core.Server.IEntityManager entityManager)
+        {
+            throw new NotImplementedException();
         }
 
         #endregion

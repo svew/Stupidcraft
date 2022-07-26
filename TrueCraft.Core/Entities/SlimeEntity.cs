@@ -14,7 +14,9 @@ namespace TrueCraft.Core.Entities
         }
 
         public SlimeEntity(IDimension dimension, IEntityManager entityManager, byte size) :
-            base(dimension, entityManager)
+            base(dimension, entityManager,
+                (short)(Math.Pow(size, 2)),     // MaxHealth
+                new Size(0.6 * size))
         {
             SlimeSize = size;
         }
@@ -26,22 +28,6 @@ namespace TrueCraft.Core.Entities
                 var meta = base.Metadata;
                 meta[16] = new MetadataByte(SlimeSize);
                 return meta;
-            }
-        }
-
-        public override Size Size
-        {
-            get
-            {
-                return new Size(0.6 * SlimeSize);
-            }
-        }
-
-        public override short MaxHealth
-        {
-            get
-            {
-                return (short)(Math.Pow(SlimeSize, 2));
             }
         }
 

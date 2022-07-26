@@ -6,19 +6,35 @@ using TrueCraft.Core.World;
 
 namespace TrueCraft.Core.Entities
 {
+    // TODO: factor out interface IPlayerEntity
     public class PlayerEntity : LivingEntity
     {
-        private readonly string _username;
-
-        public PlayerEntity(IDimension dimension, IEntityManager entityManager, string username) :
-            base(dimension, entityManager)
-        {
-            _username = username;
-        }
-
         public const double Width = 0.6;
         public const double Height = 1.62;
         public const double Depth = 0.6;
+
+        private readonly string _username;
+
+        private Vector3 _oldPosition;
+        private short _selectedSlot;
+        private Vector3 _spawnPoint;
+
+        private bool _isSprinting;
+        private bool _isCrouching;
+
+        public PlayerEntity(IDimension dimension, IEntityManager entityManager,
+            string username) :
+            base(dimension, entityManager, 20,   // Max Health
+                new Size(Width, Height, Depth),
+                1.6f,                           // Acceleration Due To Gravity
+                0.4f,                           // Drag
+                78.4f)                          // Terminal Velocity
+        {
+            _username = username;
+            _isSprinting = false;
+            _isCrouching = false;
+        }
+
 
         public override IPacket SpawnPacket
         {
@@ -35,28 +51,46 @@ namespace TrueCraft.Core.Entities
 
         public override Size Size
         {
+            // TODO: This will change when Crouching.
             get { return new Size(Width, Height, Depth); }
         }
 
-        public override short MaxHealth
+        public bool IsSprinting
         {
-            get { return 20; }
+            get => _isSprinting;
+            set
+            {
+                if (_isSprinting == value)
+                    return;
+                _isSprinting = value;
+                OnPropertyChanged();
+            }
         }
 
-        public bool IsSprinting { get; set; }
-        public bool IsCrouching { get; set; }
-        public double PositiveDeltaY { get; set; }
+        public bool IsCrouching
+        {
+            get => _isCrouching;
+            set
+            {
+                if (_isCrouching == value)
+                    return;
+                _isCrouching = value;
+                OnPropertyChanged();
+            }
+        }
 
-        private Vector3 _OldPosition;
         public Vector3 OldPosition
         {
             get
             {
-                return _OldPosition;
+                return _oldPosition;
             }
             private set
             {
-                _OldPosition = value;
+                if (_oldPosition == value)
+                    return;
+                _oldPosition = value;
+                OnPropertyChanged();
             }
         }
 
@@ -64,40 +98,42 @@ namespace TrueCraft.Core.Entities
         {
             get
             {
-                return _Position;
+                return _position;
             }
             set
             {
-                _OldPosition = _Position;
-                _Position = value;
-                OnPropertyChanged("Position");
+                if (_position == value)
+                    return;
+                base.Position = value;
+                OldPosition = _position;
             }
         }
 
-        protected short _SelectedSlot;
         public short SelectedSlot
         {
-            get { return _SelectedSlot; }
+            get { return _selectedSlot; }
             set
             {
-                _SelectedSlot = value;
-                OnPropertyChanged("SelectedSlot");
+                if (_selectedSlot == value)
+                    return;
+                _selectedSlot = value;
+                OnPropertyChanged();
             }
         }
 
-        public ItemStack ItemInMouse { get; set; }
-
-        protected Vector3 _SpawnPoint;
         public Vector3 SpawnPoint
         {
-            get { return _SpawnPoint; }
+            get { return _spawnPoint; }
             set
             {
-                _SpawnPoint = value;
-                OnPropertyChanged("SpawnPoint");
+                if (_spawnPoint == value)
+                    return;
+                _spawnPoint = value;
+                OnPropertyChanged();
             }
         }
 
+        // TODO: Can zombies pick up Items?  Perhaps, this needs to be in the base class.
         public event EventHandler<EntityEventArgs>? PickUpItem;
         public void OnPickUpItem(ItemEntity item)
         {

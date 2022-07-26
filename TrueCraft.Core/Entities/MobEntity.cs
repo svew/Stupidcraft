@@ -8,12 +8,21 @@ using TrueCraft.Core.World;
 
 namespace TrueCraft.Core.Entities
 {
-    public abstract class MobEntity : LivingEntity, IAABBEntity, IMobEntity
+    public abstract class MobEntity : LivingEntity, IMobEntity
     {
-        protected MobEntity(IDimension dimension, IEntityManager entityManager) :
-            base(dimension, entityManager)
+        private PathResult? _currentPath = null;
+        private double _speed;
+        private IMobState? _mobState = null;
+
+        protected MobEntity(IDimension dimension, IEntityManager entityManager,
+            short maxHealth, Size size) :
+            base(dimension, entityManager, maxHealth,
+                size,
+                1.6f,               // Acceleration Due To Gravity
+                0.40f,              // Drag
+                78.4f)              // Terminal Velocity
         {
-            Speed = 4;
+            _speed = 4;
             CurrentState = new WanderState();
         }
 
@@ -33,67 +42,53 @@ namespace TrueCraft.Core.Entities
             }
         }
 
+        // TODO: Make an enum for this.
+        // TODO: Why isn't this in IMobEntity?
         public abstract sbyte MobType { get; }
 
+        // TODO: Does Beta 1.7.3 have Friendly/Neutral/Hostile?
+        // TODO: Why isn't this in IMobEntity?
         public virtual bool Friendly { get { return true; } }
 
-        public virtual void TerrainCollision(Vector3 collisionPoint, Vector3 collisionDirection)
+        public PathResult? CurrentPath
         {
-            // This space intentionally left blank
-        }
-
-        public BoundingBox BoundingBox
-        {
-            get
+            get => _currentPath;
+            set
             {
-                return new BoundingBox(Position, Position + Size);
+                if (_currentPath == value)
+                    return;
+                _currentPath = value;
+                OnPropertyChanged();
             }
         }
 
-        public virtual bool BeginUpdate()
-        {
-            EnablePropertyChange = false;
-            return true;
-        }
-
-        public virtual void EndUpdate(Vector3 newPosition)
-        {
-            EnablePropertyChange = true;
-            Position = newPosition;
-        }
-
-        public float AccelerationDueToGravity
-        {
-            get
-            {
-                return 1.6f;
-            }
-        }
-
-        public float Drag
-        {
-            get
-            {
-                return 0.40f;
-            }
-        }
-
-        public float TerminalVelocity
-        {
-            get
-            {
-                return 78.4f;
-            }
-        }
-
-        public PathResult? CurrentPath { get; set; }
-
+        // TODO: Why isn't this in IMobEntity?
         /// <summary>
         /// Mob's current speed in m/s.
         /// </summary>
-        public virtual double Speed { get; set; }
+        public virtual double Speed
+        {
+            get => _speed;
+            set
+            {
+                if (_speed == value)
+                    return;
+                _speed = value;
+                OnPropertyChanged();
+            }
+        }
 
-        public IMobState CurrentState { get; set; }
+        public IMobState? CurrentState
+        {
+            get => _mobState;
+            set
+            {
+                if (_mobState == value)
+                    return;
+                _mobState = value;
+                OnPropertyChanged();
+            }
+        }
 
         public void Face(Vector3 target)
         {
@@ -133,8 +128,8 @@ namespace TrueCraft.Core.Entities
 
         public override void Update(IEntityManager entityManager)
         {
-            if (CurrentState != null)
-                CurrentState.Update(this, entityManager);
+            if (_mobState is not null)
+                _mobState.Update(this, entityManager);
             else
                 AdvancePath(entityManager.TimeSinceLastUpdate);
             base.Update(entityManager);

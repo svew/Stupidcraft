@@ -4,43 +4,57 @@ using TrueCraft.Core.World;
 
 namespace TrueCraft.Core.Entities
 {
+    // TODO: factor out an ILivingEntity interface.
     public abstract class LivingEntity : Entity
     {
-        protected LivingEntity(IDimension dimension, IEntityManager entityManager) : base(dimension, entityManager)
+        private readonly short _maxHealth;
+        protected short _air;
+        protected short _health;
+        protected float _headYaw;
+
+        protected LivingEntity(IDimension dimension, IEntityManager entityManager,
+            short maxHealth, Size size, float accelerationDueToGravity,
+            float drag, float terminalVelocity) :
+            base(dimension, entityManager, size, accelerationDueToGravity, drag,
+                terminalVelocity)
         {
+            _maxHealth = maxHealth;
             Health = MaxHealth;
         }
 
-        protected short _Air;
         public short Air
         {
-            get { return _Air; }
+            get { return _air; }
             set
             {
-                _Air = value;
-                OnPropertyChanged("Air");
+                if (_air == value)
+                    return;
+                _air = value;
+                OnPropertyChanged();
             }
         }
 
-        protected short _Health;
         public short Health
         {
-            get { return _Health; }
+            get { return _health; }
             set
             {
-                _Health = value;
-                OnPropertyChanged("Health");
+                if (_health == value)
+                    return;
+                _health = value;
+                OnPropertyChanged();
             }
         }
 
-        protected float _HeadYaw;
         public float HeadYaw
         {
-            get { return _HeadYaw; }
+            get { return _headYaw; }
             set
             {
-                _HeadYaw = value;
-                OnPropertyChanged("HeadYaw");
+                if (_headYaw == value)
+                    return;
+                _headYaw = value;
+                OnPropertyChanged();
             }
         }
 
@@ -52,6 +66,6 @@ namespace TrueCraft.Core.Entities
             }
         }
 
-        public abstract short MaxHealth { get; }
+        public virtual short MaxHealth { get => _maxHealth; }
     }
 }

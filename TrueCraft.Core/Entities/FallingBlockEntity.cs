@@ -7,20 +7,13 @@ using TrueCraft.Core.Server;
 
 namespace TrueCraft.Core.Entities
 {
-    public abstract class FallingBlockEntity : ObjectEntity, IAABBEntity
+    public abstract class FallingBlockEntity : ObjectEntity
     {
         public FallingBlockEntity(IDimension dimension, IEntityManager entityManager,
-            Vector3 position) : base(dimension, entityManager)
+            Vector3 position) :
+            base(dimension, entityManager, new Size(0.98), 0.8f, 0.40f, 39.2f)
         {
-            _Position = position + new Vector3(0.5);
-        }
-
-        public override Size Size
-        {
-            get
-            {
-                return new Size(0.98);
-            }
+            _position = position + new Vector3(0.5);
         }
 
         public override IPacket SpawnPacket
@@ -34,51 +27,5 @@ namespace TrueCraft.Core.Entities
         }
 
         public override int Data { get { return 1; } }
-
-        public abstract void TerrainCollision(Vector3 collisionPoint, Vector3 collisionDirection);
-
-        public BoundingBox BoundingBox
-        {
-            get
-            {
-                return new BoundingBox(Position - (Size / 2), Position + (Size / 2));
-            }
-        }
-
-        public bool BeginUpdate()
-        {
-            EnablePropertyChange = false;
-            return true;
-        }
-
-        public void EndUpdate(Vector3 newPosition)
-        {
-            EnablePropertyChange = true;
-            Position = newPosition;
-        }
-
-        public float AccelerationDueToGravity
-        {
-            get
-            {
-                return 0.8f;
-            }
-        }
-
-        public float Drag
-        {
-            get
-            {
-                return 0.40f;
-            }
-        }
-
-        public float TerminalVelocity
-        {
-            get
-            {
-                return 39.2f;
-            }
-        }
     }
 }

@@ -7,24 +7,8 @@ namespace TrueCraft.Core.Entities
     public class GhastEntity : MobEntity
     {
         public GhastEntity(IDimension dimension, IEntityManager entityManager) :
-            base(dimension, entityManager)
+            base(dimension, entityManager, 10, new Size(4.0))
         {
-        }
-
-        public override Size Size
-        {
-            get
-            {
-                return new Size(4.0);
-            }
-        }
-
-        public override short MaxHealth
-        {
-            get
-            {
-                return 10;
-            }
         }
 
         public override sbyte MobType

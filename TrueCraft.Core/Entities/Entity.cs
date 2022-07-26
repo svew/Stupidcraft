@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using TrueCraft.Core.Networking;
 using TrueCraft.Core.Server;
 using TrueCraft.Core.World;
@@ -11,14 +12,35 @@ namespace TrueCraft.Core.Entities
         private readonly IDimension _dimension;
         private readonly IEntityManager _entityManager;
 
-        protected Entity(IDimension dimension, IEntityManager entityManager)
+        private bool _enablePropertyChange = true;
+
+        protected EntityFlags _entityFlags;
+
+        protected Vector3 _position;
+        protected Vector3 _velocity;
+        protected float _yaw;
+        protected float _pitch;
+
+        private bool _despawned = false;
+
+        private readonly Size _size;
+        private readonly float _accelerationDueToGravity;
+        private readonly float _drag;
+        private readonly float _terminalVelocity;
+
+        protected Entity(IDimension dimension, IEntityManager entityManager,
+            Size size, float accelerationDueToGravity, float drag, float terminalVelocity)
         {
             _dimension = dimension;
             _entityManager = entityManager;
 
-            EnablePropertyChange = true;
             EntityID = -1;
             SpawnTime = DateTime.UtcNow;
+
+            _size = size;
+            _accelerationDueToGravity = accelerationDueToGravity;
+            _drag = drag;
+            _terminalVelocity = terminalVelocity;
         }
 
         public DateTime SpawnTime { get; set; }
@@ -31,69 +53,96 @@ namespace TrueCraft.Core.Entities
         /// <inheritdoc />
         public IDimension Dimension { get => _dimension; }
 
-        protected Vector3 _Position;
         public virtual Vector3 Position
         {
-            get { return _Position; }
+            get { return _position; }
             set
             {
-                _Position = value;
-                OnPropertyChanged("Position");
+                if (_position == value)
+                    return;
+                _position = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(BoundingBox));
             }
         }
 
-        protected Vector3 _Velocity;
         public virtual Vector3 Velocity
         {
-            get { return _Velocity; }
+            get { return _velocity; }
             set
             {
-                _Velocity = value;
-                OnPropertyChanged("Velocity");
+                if (_velocity == value)
+                    return;
+                _velocity = value;
+                OnPropertyChanged();
             }
         }
 
-        protected float _Yaw;
         public float Yaw
         {
-            get { return _Yaw; }
+            get { return _yaw; }
             set
             {
-                _Yaw = value;
-                OnPropertyChanged("Yaw");
+                if (_yaw == value)
+                    return;
+                _yaw = value;
+                OnPropertyChanged();
             }
         }
 
-        protected float _Pitch;
+        /// <inheritdoc />
         public float Pitch
         {
-            get { return _Pitch; }
+            get { return _pitch; }
             set
             {
-                _Pitch = value;
-                OnPropertyChanged("Pitch");
+                if (_pitch == value)
+                    return;
+                _pitch = value;
+                OnPropertyChanged();
             }
         }
 
-        public bool Despawned { get; set; }
+        /// <inheritdoc />
+        public bool Despawned
+        {
+            get => _despawned;
+            set
+            {
+                if (_despawned && !value)
+                    throw new InvalidOperationException($"Cannot set Despawned back to true from false.");
+                if (_despawned == value)
+                    return;
+                _despawned = value;
+                OnPropertyChanged();
+            }
+        }
 
-        public abstract Size Size { get; }
+        /// <inheritdoc />
+        public virtual Size Size { get => _size; }
 
+        /// <inheritdoc />
+        public BoundingBox BoundingBox { get => new BoundingBox(Position - (Size / 2), Position + (Size / 2)); }
+
+        /// <inheritdoc />
         public abstract IPacket SpawnPacket { get; }
 
+        /// <inheritdoc />
         public virtual bool SendMetadataToClients { get { return false; } }
 
-        protected EntityFlags _EntityFlags;
         public virtual EntityFlags EntityFlags
         {
-            get { return _EntityFlags; }
+            get { return _entityFlags; }
             set
             {
-                _EntityFlags = value;
-                OnPropertyChanged("Metadata");
+                if (_entityFlags == value)
+                    return;
+                _entityFlags = value;
+                OnPropertyChanged();
             }
         }
 
+        /// <inheritdoc />
         public virtual MetadataDictionary Metadata
         {
             get
@@ -105,6 +154,7 @@ namespace TrueCraft.Core.Entities
             }
         }
 
+        /// <inheritdoc />
         public virtual void Update(IEntityManager entityManager)
         {
             // TODO: Losing health and all that jazz
@@ -112,9 +162,54 @@ namespace TrueCraft.Core.Entities
                 entityManager.DespawnEntity(this);
         }
 
-        protected bool EnablePropertyChange { get; set; }
+        /// <inheritdoc />
+        public virtual float AccelerationDueToGravity { get => _accelerationDueToGravity; }
+
+        /// <inheritdoc />
+        public virtual float Drag { get => _drag; }
+
+        /// <inheritdoc />
+        public virtual float TerminalVelocity { get => _terminalVelocity; }
+
+        /// <inheritdoc />
+        public virtual void TerrainCollision(Vector3 collisionPoint, Vector3 collisionDirection)
+        {
+            // By default, no special handling is needed.
+        }
+
+        /// <summary>
+        /// Enables or disables Property Change notifications.
+        /// </summary>
+        protected bool EnablePropertyChange
+        {
+            get => _enablePropertyChange;
+            set
+            {
+                if (value == _enablePropertyChange)
+                    return;
+
+                _enablePropertyChange = value;
+                OnPropertyChanged();
+            }
+        }
+
+        /// <inheritdoc />
+        public virtual bool BeginUpdate()
+        {
+            EnablePropertyChange = false;
+            return true;
+        }
+
+        /// <inheritdoc />
+        public virtual void EndUpdate(Vector3 newPosition)
+        {
+            EnablePropertyChange = true;
+            Position = newPosition;
+        }
+
+
         public event PropertyChangedEventHandler? PropertyChanged;
-        protected internal virtual void OnPropertyChanged(string property)
+        protected internal virtual void OnPropertyChanged([CallerMemberName]string property = "")
         {
             if (!EnablePropertyChange) return;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));

@@ -7,24 +7,9 @@ namespace TrueCraft.Core.Entities
     public class WolfEntity : MobEntity
     {
         public WolfEntity(IDimension dimension, IEntityManager entityManager) :
-            base(dimension, entityManager)
+            base(dimension, entityManager, 10,
+                new Size(0.6, 1.8, 0.6))      // TODO: Fix Size: A Wolf is not the same size as a Player
         {
-        }
-
-        public override Size Size
-        {
-            get
-            {
-                return new Size(0.6, 1.8, 0.6);
-            }
-        }
-
-        public override short MaxHealth
-        {
-            get
-            {
-                return 10;
-            }
         }
 
         public override sbyte MobType

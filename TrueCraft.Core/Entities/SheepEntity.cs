@@ -7,24 +7,8 @@ namespace TrueCraft.Core.Entities
     public class SheepEntity : MobEntity
     {
         public SheepEntity(IDimension dimension, IEntityManager entityManager) :
-            base(dimension, entityManager)
+            base(dimension, entityManager, 8, new Size(0.9, 1.3, 0.9))  // TODO: sheep is taller than long?
         {
-        }
-
-        public override Size Size
-        {
-            get
-            {
-                return new Size(0.9, 1.3, 0.9);
-            }
-        }
-
-        public override short MaxHealth
-        {
-            get
-            {
-                return 8;
-            }
         }
 
         public override sbyte MobType

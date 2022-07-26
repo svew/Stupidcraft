@@ -9,13 +9,16 @@ using TrueCraft.Core.World;
 
 namespace TrueCraft.Core.Entities
 {
-    public class ItemEntity : ObjectEntity, IAABBEntity
+    public class ItemEntity : ObjectEntity
     {
         public static float PickupRange = 2;
 
         public ItemEntity(IDimension dimension, IEntityManager entityManager,
             Vector3 position, ItemStack item) :
-            base(dimension, entityManager)
+            base(dimension, entityManager, new Size(0.25f),
+                1.98f,   // Acceleration Due To Gravity
+                0.4f,    // Drag
+                39.2f)   // Terminal Velocity
         {
             Position = position;
             Item = item;
@@ -24,7 +27,7 @@ namespace TrueCraft.Core.Entities
                 Despawned = true;
         }
 
-        public ItemStack Item { get; set; }
+        public ItemStack Item { get; }
 
         public override IPacket SpawnPacket
         {
@@ -38,25 +41,10 @@ namespace TrueCraft.Core.Entities
             }
         }
 
-        public override Size Size
-        {
-            get { return new Size(0.25, 0.25, 0.25); }
-        }
-
-        public virtual BoundingBox BoundingBox
-        {
-            get
-            {
-                return new BoundingBox(Position, Position + Size);
-            }
-        }
-
-        public void TerrainCollision(Vector3 collisionPoint, Vector3 collisionDirection)
+        public override void TerrainCollision(Vector3 collisionPoint, Vector3 collisionDirection)
         {
             if (collisionDirection == Vector3.Down)
-            {
                 Velocity = Vector3.Zero;
-            }
         }
 
         public override byte EntityType
@@ -87,18 +75,6 @@ namespace TrueCraft.Core.Entities
             }
         }
 
-        public bool BeginUpdate()
-        {
-            EnablePropertyChange = false;
-            return true;
-        }
-
-        public void EndUpdate(Vector3 newPosition)
-        {
-            EnablePropertyChange = true;
-            Position = newPosition;
-        }
-
         public override void Update(IEntityManager entityManager)
         {
             IList<IEntity> nearbyEntities = entityManager.EntitiesInRange(Position, PickupRange);
@@ -117,21 +93,6 @@ namespace TrueCraft.Core.Entities
             if ((DateTime.UtcNow - SpawnTime).TotalMinutes > 5)
                 entityManager.DespawnEntity(this);
             base.Update(entityManager);
-        }
-
-        public float AccelerationDueToGravity
-        {
-            get { return 1.98f; }
-        }
-
-        public float Drag
-        {
-            get { return 0.40f; }
-        }
-
-        public float TerminalVelocity
-        {
-            get { return 39.2f; }
         }
     }
 }

@@ -197,20 +197,19 @@ namespace TrueCraft
                 spawnedClient = (RemoteClient?)GetClientForEntity((PlayerEntity)entity);
             client.KnownEntities.Add(entity);
             client.QueuePacket(entity.SpawnPacket);
-            if (entity is IPhysicsEntity)
+
+            client.QueuePacket(new EntityVelocityPacket
             {
-                IPhysicsEntity pentity = (IPhysicsEntity)entity;
-                client.QueuePacket(new EntityVelocityPacket
-                    {
-                        EntityID = entity.EntityID,
-                        XVelocity = (short)(pentity.Velocity.X * 320),
-                        YVelocity = (short)(pentity.Velocity.Y * 320),
-                        ZVelocity = (short)(pentity.Velocity.Z * 320),
-                    });
-            }
+                EntityID = entity.EntityID,
+                XVelocity = (short)(entity.Velocity.X * 320),
+                YVelocity = (short)(entity.Velocity.Y * 320),
+                ZVelocity = (short)(entity.Velocity.Z * 320),
+            });
+
             if (entity.SendMetadataToClients)
                 client.QueuePacket(new EntityMetadataPacket(entity.EntityID, entity.Metadata));
-            if (spawnedClient != null)
+
+            if (spawnedClient is not null)
             {
                 // Send equipment when spawning player entities
                 client.QueuePacket(new EntityEquipmentPacket(entity.EntityID,
@@ -264,8 +263,8 @@ namespace TrueCraft
                         SendEntityToClient(client, entity);
                 }
             }
-            if (entity is IPhysicsEntity)
-                _physicsEngine!.AddEntity((IPhysicsEntity)entity);
+
+            _physicsEngine!.AddEntity(entity);
         }
 
         public void DespawnEntity(IEntity entity)
@@ -282,8 +281,7 @@ namespace TrueCraft
                 _pendingDespawns.TryTake(out entity);
                 if (entity is not null)
                 {
-                    if (entity is IPhysicsEntity)
-                        _physicsEngine!.RemoveEntity((IPhysicsEntity)entity);
+                    _physicsEngine!.RemoveEntity(entity);
 
                     // TODO: Why lock to iterate over clients here when we don't
                     //       elsewhere in this file?

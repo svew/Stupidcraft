@@ -177,21 +177,11 @@ namespace TrueCraft.Core.Logic
                 var entities = em.EntitiesInRange((Vector3)coordinates, 3);
                 var box = new BoundingBox(BoundingBox.Value.Min + (Vector3)coordinates,
                     BoundingBox.Value.Max + (Vector3)coordinates);
-                foreach (var entity in entities)
+                foreach (IEntity entity in entities)
                 {
-                    var aabb = entity as IAABBEntity;
-                    if (aabb != null && !(entity is ItemEntity))
-                    {
-                        if (aabb.BoundingBox.Intersects(box))
+                    if (entity is not null && !(typeof(ItemEntity).IsAssignableFrom(entity.GetType())))
+                        if (entity.BoundingBox.Intersects(box))
                             return;
-                    }
-                    var player = entity as PlayerEntity; // Players do not implement IAABBEntity
-                    if (player != null)
-                    {
-                        if (new BoundingBox(player.Position, player.Position + player.Size)
-                            .Intersects(box))
-                            return;
-                    }
                 }
             }
 

@@ -1,10 +1,12 @@
 ﻿using System;
+using System.ComponentModel;
 using Moq;
 using NUnit.Framework;
 using TrueCraft.Core.Entities;
 using TrueCraft.Core.Lighting;
 using TrueCraft.Core.Logic;
 using TrueCraft.Core.Logic.Blocks;
+using TrueCraft.Core.Networking;
 using TrueCraft.Core.Physics;
 using TrueCraft.Core.Server;
 using TrueCraft.Core.World;
@@ -56,8 +58,11 @@ namespace TrueCraft.Core.Test.Physics
             return rv;
         }
 
-        private class TestEntity : IAABBEntity
+        private class TestEntity : IEntity
         {
+
+            public event PropertyChangedEventHandler? PropertyChanged;
+
             public TestEntity()
             {
                 TerminalVelocity = 10;
@@ -98,6 +103,27 @@ namespace TrueCraft.Core.Test.Physics
             }
 
             public Size Size { get; set; }
+
+            public void Update(IEntityManager entityManager)
+            {
+                throw new NotImplementedException();
+            }
+
+            public IPacket SpawnPacket => throw new NotImplementedException();
+
+            public int EntityID { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+            public float Yaw { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+            public float Pitch { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+            public bool Despawned { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+            public DateTime SpawnTime { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+
+            public MetadataDictionary Metadata => throw new NotImplementedException();
+
+            public IEntityManager EntityManager => throw new NotImplementedException();
+
+            public IDimension Dimension => throw new NotImplementedException();
+
+            public bool SendMetadataToClients => throw new NotImplementedException();
         }
 
         [Test]

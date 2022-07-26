@@ -7,24 +7,8 @@ namespace TrueCraft.Core.Entities
     public class CowEntity : MobEntity
     {
         public CowEntity(IDimension dimension, IEntityManager entityManager) :
-            base(dimension, entityManager)
+            base(dimension, entityManager, 10, new Size(0.9, 1.3, 0.9))
         {
-        }
-
-        public override Size Size
-        {
-            get
-            {
-                return new Size(0.9, 1.3, 0.9);
-            }
-        }
-
-        public override short MaxHealth
-        {
-            get
-            {
-                return 10;
-            }
         }
 
         public override sbyte MobType

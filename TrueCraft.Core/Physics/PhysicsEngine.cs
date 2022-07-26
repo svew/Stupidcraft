@@ -1,32 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
-using TrueCraft.Core.World;
+using TrueCraft.Core.Entities;
 using TrueCraft.Core.Logic;
 using TrueCraft.Core.Logic.Blocks;
+using TrueCraft.Core.World;
 
 namespace TrueCraft.Core.Physics
 {
     public class PhysicsEngine : IPhysicsEngine
     {
         private readonly IDimension _dimension;
-        private readonly List<IPhysicsEntity> _entities;
+        private readonly List<IEntity> _entities;
         private readonly object _entityLock;
 
         public PhysicsEngine(IDimension dimension)
         {
             _dimension = dimension;
-            _entities = new List<IPhysicsEntity>();
+            _entities = new List<IEntity>();
             _entityLock = new object();
         }
 
-        public void AddEntity(IPhysicsEntity entity)
+        public void AddEntity(IEntity entity)
         {
             lock (_entityLock)
                 if (!_entities.Contains(entity))
                     _entities.Add(entity);
         }
 
-        public void RemoveEntity(IPhysicsEntity entity)
+        public void RemoveEntity(IEntity entity)
         {
             lock (_entityLock)
             {
@@ -36,8 +37,10 @@ namespace TrueCraft.Core.Physics
             }
         }
 
-        private void TruncateVelocity(IPhysicsEntity entity, double multiplier)
+        private void TruncateVelocity(IEntity entity, double multiplier)
         {
+            // TODO: Why is the minimum velocity a function of the time between
+            //       calls to Update?
             if (Math.Abs(entity.Velocity.X) < 0.1 * multiplier)
                 entity.Velocity = new Vector3(0, entity.Velocity.Y, entity.Velocity.Z);
             if (Math.Abs(entity.Velocity.Y) < 0.1 * multiplier)
@@ -56,7 +59,7 @@ namespace TrueCraft.Core.Physics
             {
                 for (int i = 0; i < _entities.Count; i++)
                 {
-                    var entity = _entities[i];
+                    IEntity entity = _entities[i];
                     if (entity.BeginUpdate())
                     {
                         entity.Velocity -= new Vector3(0, entity.AccelerationDueToGravity * multiplier, 0);
@@ -65,19 +68,16 @@ namespace TrueCraft.Core.Physics
 
                         Vector3 collision, before = entity.Velocity;
 
-                        var aabbEntity = entity as IAABBEntity;
-                        if (aabbEntity != null)
-                        {
-                            if (TestTerrainCollisionY(aabbEntity, out collision))
-                                aabbEntity.TerrainCollision(collision, before.Y < 0 ? Vector3.Down : Vector3.Up);
-                            if (TestTerrainCollisionX(aabbEntity, out collision))
-                                aabbEntity.TerrainCollision(collision, before.X < 0 ? Vector3.Left : Vector3.Right);
-                            if (TestTerrainCollisionZ(aabbEntity, out collision))
-                                aabbEntity.TerrainCollision(collision, before.Z < 0 ? Vector3.Backwards : Vector3.Forwards);
+                        if (TestTerrainCollisionY(entity, out collision))
+                            entity.TerrainCollision(collision, before.Y < 0 ? Vector3.Down : Vector3.Up);
+                        if (TestTerrainCollisionX(entity, out collision))
+                            entity.TerrainCollision(collision, before.X < 0 ? Vector3.Left : Vector3.Right);
+                        if (TestTerrainCollisionZ(entity, out collision))
+                            entity.TerrainCollision(collision, before.Z < 0 ? Vector3.Backwards : Vector3.Forwards);
 
-                            if (TestTerrainCollisionCylinder(aabbEntity, out collision))
-                                aabbEntity.TerrainCollision(collision, before);
-                        }
+                        if (TestTerrainCollisionCylinder(entity, out collision))
+                            entity.TerrainCollision(collision, before);
+
                         entity.EndUpdate(entity.Position + entity.Velocity);
                         TruncateVelocity(entity, multiplier);
                     }
@@ -85,7 +85,7 @@ namespace TrueCraft.Core.Physics
             }
         }
 
-        private BoundingBox GetAABBVelocityBox(IAABBEntity entity)
+        private BoundingBox GetAABBVelocityBox(IEntity entity)
         {
             var min = new Vector3(
                 Math.Min(entity.BoundingBox.Min.X, entity.BoundingBox.Min.X + entity.Velocity.X),
@@ -100,7 +100,7 @@ namespace TrueCraft.Core.Physics
             return new BoundingBox(min, max);
         }
 
-        private void AdjustVelocityForCollision(IAABBEntity entity, BoundingBox problem)
+        private void AdjustVelocityForCollision(IEntity entity, BoundingBox problem)
         {
             var velocity = entity.Velocity;
             if (entity.Velocity.X < 0)
@@ -127,10 +127,12 @@ namespace TrueCraft.Core.Physics
             return provider?.BoundingBox;
         }
 
-        private bool TestTerrainCollisionCylinder(IAABBEntity entity, out Vector3 collisionPoint)
+        private bool TestTerrainCollisionCylinder(IEntity entity, out Vector3 collisionPoint)
         {
             collisionPoint = Vector3.Zero;
             var testBox = GetAABBVelocityBox(entity);
+            // TODO: Q: why is the axis of the Bounding Cylinder independent of the direction of motion?
+            // TODO: Q: why use the diagonal size of the entity's Bounding Box as the radius instead of the diameter?
             var testCylinder = new BoundingCylinder(testBox.Min, testBox.Max,
                 entity.BoundingBox.Min.DistanceTo(entity.BoundingBox.Max));
 
@@ -168,7 +170,7 @@ namespace TrueCraft.Core.Physics
             return collision;
         }
 
-        private bool TestTerrainCollisionY(IAABBEntity entity, out Vector3 collisionPoint)
+        private bool TestTerrainCollisionY(IEntity entity, out Vector3 collisionPoint)
         {
             // Things we need to do:
             // 1 - expand bounding box to include the destination and everything within
@@ -255,7 +257,7 @@ namespace TrueCraft.Core.Physics
             return false;
         }
 
-        private bool TestTerrainCollisionX(IAABBEntity entity, out Vector3 collisionPoint)
+        private bool TestTerrainCollisionX(IEntity entity, out Vector3 collisionPoint)
         {
             // Things we need to do:
             // 1 - expand bounding box to include the destination and everything within
@@ -344,7 +346,7 @@ namespace TrueCraft.Core.Physics
             return false;
         }
 
-        private bool TestTerrainCollisionZ(IAABBEntity entity, out Vector3 collisionPoint)
+        private bool TestTerrainCollisionZ(IEntity entity, out Vector3 collisionPoint)
         {
             // Things we need to do:
             // 1 - expand bounding box to include the destination and everything within
