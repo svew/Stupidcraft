@@ -107,6 +107,7 @@ namespace TrueCraft.Core.Test.Physics
             IPhysicsEngine physics = new PhysicsEngine(dimension);
             TestEntity entity = new TestEntity();
             entity.Position = new Vector3(0, 100, 0);
+            entity.Velocity = Vector3.Zero;
             entity.AccelerationDueToGravity = 1;
             entity.Drag = 0;
             physics.AddEntity(entity);
@@ -114,11 +115,21 @@ namespace TrueCraft.Core.Test.Physics
             // Test
             physics.Update(TimeSpan.FromSeconds(1));
 
+            Assert.AreEqual(0, entity.Position.X);
             Assert.AreEqual(99, entity.Position.Y);
+            Assert.AreEqual(0, entity.Position.Z);
+            Assert.AreEqual(0, entity.Velocity.X);
+            Assert.AreEqual(-1, entity.Velocity.Y);
+            Assert.AreEqual(0, entity.Velocity.Z);
 
             physics.Update(TimeSpan.FromSeconds(1));
 
+            Assert.AreEqual(0, entity.Position.X);
             Assert.AreEqual(97, entity.Position.Y);
+            Assert.AreEqual(0, entity.Position.Z);
+            Assert.AreEqual(0, entity.Velocity.X);
+            Assert.AreEqual(-2, entity.Velocity.Y);
+            Assert.AreEqual(0, entity.Velocity.Z);
         }
 
         [Test]
@@ -136,9 +147,15 @@ namespace TrueCraft.Core.Test.Physics
             // Test
             physics.Update(TimeSpan.FromSeconds(1));
 
+            Assert.AreEqual(0, entity.Position.X);
             Assert.AreEqual(99, entity.Position.Y);
+            Assert.AreEqual(0, entity.Position.Z);
+            Assert.AreEqual(0, entity.Velocity.X);
+            Assert.AreEqual(-1, entity.Velocity.Y);
+            Assert.AreEqual(0, entity.Velocity.Z);
         }
 
+        // Tests that the Terrain supports the Entity
         [Test]
         public void TestTerrainCollision()
         {
@@ -146,18 +163,26 @@ namespace TrueCraft.Core.Test.Physics
             IPhysicsEngine physics = new PhysicsEngine(dimension);
             TestEntity entity = new TestEntity();
             entity.Size = new Size(0.6, 1.8, 0.6);
-            entity.Position = new Vector3(10.9, SurfaceHeight, 10.9);
+            double xPos = 10.9, zPos = 10.9;
+            entity.Position = new Vector3(xPos, SurfaceHeight, zPos);
+            entity.Velocity = Vector3.Zero;
             entity.AccelerationDueToGravity = 1;
             physics.AddEntity(entity);
 
             // Test
             physics.Update(TimeSpan.FromSeconds(1));
 
+            Assert.AreEqual(xPos, entity.Position.X);
             Assert.AreEqual(SurfaceHeight, entity.Position.Y);
+            Assert.AreEqual(zPos, entity.Position.Z);
+            Assert.AreEqual(Vector3.Zero, entity.Velocity);
 
             physics.Update(TimeSpan.FromSeconds(5));
 
+            Assert.AreEqual(xPos, entity.Position.X);
             Assert.AreEqual(SurfaceHeight, entity.Position.Y);
+            Assert.AreEqual(zPos, entity.Position.Z);
+            Assert.AreEqual(Vector3.Zero, entity.Velocity);
         }
 
         [Test]
@@ -167,13 +192,17 @@ namespace TrueCraft.Core.Test.Physics
             IPhysicsEngine physics = new PhysicsEngine(dimension);
             TestEntity entity = new TestEntity();
             entity.Position = new Vector3(0, SurfaceHeight + 5, 0);
+            entity.Velocity = Vector3.Zero;
             entity.AccelerationDueToGravity = 10;
             physics.AddEntity(entity);
 
             // Test
             physics.Update(TimeSpan.FromSeconds(1));
 
+            Assert.AreEqual(0, entity.Position.X);
             Assert.AreEqual(SurfaceHeight, entity.Position.Y);
+            Assert.AreEqual(0, entity.Position.Z);
+            Assert.AreEqual(Vector3.Zero, entity.Velocity);
         }
 
         [Test]
@@ -187,14 +216,16 @@ namespace TrueCraft.Core.Test.Physics
             entity.AccelerationDueToGravity = 1;
             physics.AddEntity(entity);
 
-            // Create a wall
+            // Create a pillar
             for (int y = 0; y < 12; y++)
                 dimension.SetBlockID(new GlobalVoxelCoordinates(1, y, 0), StoneBlockID);
 
             // Test
             physics.Update(TimeSpan.FromSeconds(1));
 
+            Assert.AreEqual(0, entity.Position.X);
             Assert.AreEqual(9, entity.Position.Y);
+            Assert.AreEqual(0, entity.Position.Z);
             Assert.IsFalse(entity.CollisionOccured);
         }
 
