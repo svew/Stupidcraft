@@ -33,6 +33,7 @@ namespace TrueCraft.Client
 
         private long connected;
         private int hotbarSelection;
+        private int _entityID = -1;
 
         public TrueCraftUser User { get; set; }
 
@@ -40,7 +41,7 @@ namespace TrueCraft.Client
 
         public PhysicsEngine Physics { get; set; }
         public bool LoggedIn { get; internal set; }
-        public int EntityID { get; internal set; }
+        public int EntityID { get => _entityID; internal set => _entityID = value; }
 
         public IInventoryWindow<ISlot> InventoryWindow { get; }
         public ISlots<ISlot> Inventory { get; private set; }
@@ -348,7 +349,7 @@ namespace TrueCraft.Client
 
         public IPacket SpawnPacket => throw new NotImplementedException();
 
-        int IEntity.EntityID { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        int IEntity.EntityID { get => _entityID; set => _entityID = value; }
         public bool Despawned { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
         public DateTime SpawnTime { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
