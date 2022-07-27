@@ -190,7 +190,8 @@ namespace TrueCraft.Core.Test.Physics
             TestEntity entity = new TestEntity();
             entity.Size = new Size(0.6, 1.8, 0.6);
             double xPos = 10.9, zPos = 10.9;
-            entity.Position = new Vector3(xPos, SurfaceHeight, zPos);
+            double yPos = SurfaceHeight + entity.Size.Height / 2;
+            entity.Position = new Vector3(xPos, yPos, zPos);
             entity.Velocity = Vector3.Zero;
             entity.AccelerationDueToGravity = 1;
             physics.AddEntity(entity);
@@ -199,14 +200,14 @@ namespace TrueCraft.Core.Test.Physics
             physics.Update(TimeSpan.FromSeconds(1));
 
             Assert.AreEqual(xPos, entity.Position.X);
-            Assert.AreEqual(SurfaceHeight, entity.Position.Y);
+            Assert.AreEqual(yPos, entity.Position.Y);
             Assert.AreEqual(zPos, entity.Position.Z);
             Assert.AreEqual(Vector3.Zero, entity.Velocity);
 
             physics.Update(TimeSpan.FromSeconds(5));
 
             Assert.AreEqual(xPos, entity.Position.X);
-            Assert.AreEqual(SurfaceHeight, entity.Position.Y);
+            Assert.AreEqual(yPos, entity.Position.Y);
             Assert.AreEqual(zPos, entity.Position.Z);
             Assert.AreEqual(Vector3.Zero, entity.Velocity);
         }
@@ -217,8 +218,9 @@ namespace TrueCraft.Core.Test.Physics
             IDimension dimension = BuildDimension();
             IPhysicsEngine physics = new PhysicsEngine(dimension);
             TestEntity entity = new TestEntity();
+            double halfHeight = entity.Size.Height / 2;
             double origHeightAboveSurface = 5;
-            entity.Position = new Vector3(0, SurfaceHeight + origHeightAboveSurface, 0);
+            entity.Position = new Vector3(0, SurfaceHeight + origHeightAboveSurface + halfHeight, 0);
             entity.Velocity = Vector3.Zero;
             entity.AccelerationDueToGravity = 10;
             physics.AddEntity(entity);
@@ -227,7 +229,7 @@ namespace TrueCraft.Core.Test.Physics
             physics.Update(TimeSpan.FromSeconds(1));
 
             Assert.AreEqual(0, entity.Position.X);
-            Assert.AreEqual(SurfaceHeight, entity.Position.Y);
+            Assert.AreEqual(SurfaceHeight + halfHeight, entity.Position.Y);
             Assert.AreEqual(0, entity.Position.Z);
 
             // The entity's velocity is the velocity required to go from its
@@ -266,7 +268,7 @@ namespace TrueCraft.Core.Test.Physics
             IDimension dimension = BuildDimension();
             IPhysicsEngine physics = new PhysicsEngine(dimension);
             TestEntity entity = new TestEntity();
-            entity.Position = new Vector3(0, 4.5, 0);
+            entity.Position = new Vector3(0, 4.5 + entity.Size.Height / 2, 0);
             entity.AccelerationDueToGravity = 1;
             entity.Drag = 0;
             physics.AddEntity(entity);
@@ -295,32 +297,69 @@ namespace TrueCraft.Core.Test.Physics
             // Test
             physics.Update(TimeSpan.FromSeconds(1));
 
-            Assert.AreEqual(0, entity.Position.X);
-            Assert.AreEqual(0, entity.Velocity.X);
+            //
+            // Assertions
+            //
+
+            // The centre of the entity should be half the entity's width from
+            // the near edge of the block at x==1.
+            Assert.AreEqual(1 - entity.Size.Width / 2, entity.Position.X);
+
+            // The Entity's y and z positions should remain unchanged
+            Assert.AreEqual(5, entity.Position.Y);
+            Assert.AreEqual(0, entity.Position.Z);
+
+            // The Entity's x velocity should be that which was required to move
+            // from it's centre at x == 0 to being in contact with the block at x == 1.
+            Assert.AreEqual(1 - entity.Size.Width / 2, entity.Velocity.X);
+
+            // The Entity's y and z velocity components should remain unchanged.
+            Assert.AreEqual(0, entity.Velocity.Y);
+            Assert.AreEqual(0, entity.Velocity.Z);
         }
 
+        // Start an Entity away from a block.
+        // Move it diagonally towards the block such that the corner of the
+        // Entity's AABB contacts the corner of the Block's AABB.
         [Test]
         public void TestCornerCollision()
         {
             IDimension dimension = BuildDimension();
             IPhysicsEngine physics = new PhysicsEngine(dimension);
             TestEntity entity = new TestEntity();
-            entity.Position = new Vector3(-1, 10, -1);
+            double xPos = -1, yPos = 10, zPos = -1;
+            entity.Position = new Vector3(xPos, yPos, zPos);
             entity.AccelerationDueToGravity = 0;
             entity.Drag = 0;
-            entity.Velocity = new Vector3(1.5, 0, 1.5);
+            double xVel = 1.5, yVel = 0, zVel = 1.5;
+            entity.Velocity = new Vector3(xVel, yVel, zVel);
             physics.AddEntity(entity);
-            dimension.SetBlockID(new GlobalVoxelCoordinates(0, 10, 0), StoneBlock.BlockID);
+            int xBlock = 0, yBlock = (int)yPos, zBlock = 0;
+            dimension.SetBlockID(new GlobalVoxelCoordinates(xBlock, yBlock, zBlock), StoneBlock.BlockID);
 
             // Test
             physics.Update(TimeSpan.FromSeconds(1));
 
-            Assert.AreEqual(-1, entity.Position.X);
-            Assert.AreEqual(10, entity.Position.Y);
-            Assert.AreEqual(-1, entity.Position.Z);
-            Assert.AreEqual(0, entity.Velocity.X);
-            Assert.AreEqual(0, entity.Velocity.Y);
-            Assert.AreEqual(0, entity.Velocity.Z);
+            //
+            // Asssertions
+            //
+            // In the x-direction, the entity should be stopped half its width
+            // before the block.
+            Assert.AreEqual(xBlock - entity.Size.Width / 2, entity.Position.X);
+            // The y location should be unchanged.
+            Assert.AreEqual(yPos, entity.Position.Y);
+            // In the z-direction, the entity should be stopped half its depth
+            // before the block.
+            Assert.AreEqual(zBlock - entity.Size.Depth / 2, entity.Position.Z);
+
+            // The x-velocity should be that which was required to move from
+            // the initial position to the final position in one unit of time.
+            Assert.AreEqual(xBlock - xPos - entity.Size.Width / 2, entity.Velocity.X);
+            // The y-velocity should remain unchanged.
+            Assert.AreEqual(yVel, entity.Velocity.Y);
+            // The z-velocity should be that which was required to move from
+            // the initial position to the final position in one unit of time.
+            Assert.AreEqual(zBlock - zPos - entity.Size.Depth / 2, entity.Velocity.Z);
         }
 
         /// <summary>
@@ -362,9 +401,14 @@ namespace TrueCraft.Core.Test.Physics
             dimension.SetBlockID(new GlobalVoxelCoordinates(-5, 63, 192), StoneBlockID);
 
             Size entitySize = new Size(0.6, 1.8, 0.6);   // same size as Player Entity
-            double entityY = 63 + entitySize.Height / 2;
-            Vector3 entityStartPos = new Vector3(-4.34298322997483, entityY, 192.92777590726);
-            Vector3 entityStartVel = new Vector3(0.0502763610985, 0,  -0.0520632516009488);
+            double xPos = -4.34298322997483;
+            double yPos = 63 + entitySize.Height / 2;
+            double zPos = 192.92777590726;
+            Vector3 entityStartPos = new Vector3(xPos, yPos, zPos);
+            double xVel = 0.0502763610985;
+            double yVel = 0;
+            double zVel = -0.0520632516009488;
+            Vector3 entityStartVel = new Vector3(xVel, yVel,  zVel);
 
             TestEntity entity = new TestEntity();
             entity.Position = entityStartPos;
@@ -381,13 +425,49 @@ namespace TrueCraft.Core.Test.Physics
             Console.Error.WriteLine($"Before: {entity.Position}");
             physics.Update(TimeSpan.FromSeconds(1));
             Console.Error.WriteLine($"After: {entity.Position}");
-            Assert.AreEqual(0, entity.Velocity.Y);
-            Assert.AreEqual(entityY, entity.Position.Y);
+
+            //
+            // Assertions
+            //
+            // x Position should put the entity in contact with the block
+            Assert.AreEqual(-4 - entity.Size.Width / 2, entity.Position.X);
+            // y position should be unchanged.
+            Assert.AreEqual(yPos, entity.Position.Y);
+            // z position should be advanced by one time unit's velocity
+            Assert.AreEqual(zPos + zVel, entity.Position.Z);
+
+            // x-velocity should be what was required to make contact in one unit
+            // of time
+            Assert.AreEqual(-4 - xPos + entity.Size.Width / 2, entity.Velocity.X);
+            // y-velocity should be unchanged.
+            Assert.AreEqual(yVel, entity.Velocity.Y);
+            // z-velocity should be unchanged.
+            Assert.AreEqual(zVel, entity.Velocity.Z);
+
+            // A collision should have been recordd.
             Assert.True(entity.CollisionOccured);
 
+            //
+            // Act again.
+            //
             physics.Update(TimeSpan.FromSeconds(1));
-            Assert.AreEqual(entityY, entity.Position.Y);
-            Assert.AreEqual(0, entity.Velocity.Y);
+
+            //
+            // More assertions
+            //
+            // x position should still be in contact with the block
+            Assert.AreEqual(-4 + entity.Size.Width / 2, entity.Position.X);
+            // y position should remain unchanged.
+            Assert.AreEqual(yPos, entity.Position.Y);
+            // z Position should have advanced by 2 units of time
+            Assert.AreEqual(zPos + 2 * zVel, entity.Position.Z);
+
+            // X velocity should now be zero
+            Assert.AreEqual(0, entity.Velocity.X);
+            // Y velocity should remain unchanged
+            Assert.AreEqual(yVel, entity.Velocity.Y);
+            // Z velocity should remain unchanged.
+            Assert.AreEqual(zVel, entity.Velocity.Z);
         }
     }
 }
