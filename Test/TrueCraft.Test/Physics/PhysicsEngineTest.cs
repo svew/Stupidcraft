@@ -217,7 +217,8 @@ namespace TrueCraft.Core.Test.Physics
             IDimension dimension = BuildDimension();
             IPhysicsEngine physics = new PhysicsEngine(dimension);
             TestEntity entity = new TestEntity();
-            entity.Position = new Vector3(0, SurfaceHeight + 5, 0);
+            double origHeightAboveSurface = 5;
+            entity.Position = new Vector3(0, SurfaceHeight + origHeightAboveSurface, 0);
             entity.Velocity = Vector3.Zero;
             entity.AccelerationDueToGravity = 10;
             physics.AddEntity(entity);
@@ -228,7 +229,11 @@ namespace TrueCraft.Core.Test.Physics
             Assert.AreEqual(0, entity.Position.X);
             Assert.AreEqual(SurfaceHeight, entity.Position.Y);
             Assert.AreEqual(0, entity.Position.Z);
-            Assert.AreEqual(Vector3.Zero, entity.Velocity);
+
+            // The entity's velocity is the velocity required to go from its
+            // previous position to its current position.  Not the original velocity,
+            // but not yet zero either.
+            Assert.AreEqual(new Vector3(0, -origHeightAboveSurface, 0), entity.Velocity);
         }
 
         [Test]
