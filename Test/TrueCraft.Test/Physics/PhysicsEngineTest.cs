@@ -469,5 +469,42 @@ namespace TrueCraft.Core.Test.Physics
             // Z velocity should remain unchanged.
             Assert.AreEqual(zVel, entity.Velocity.Z);
         }
+
+        // Testing that when PhysicsEngine.Update is called with
+        // different amounts of time, different distances are travelled.
+        [TestCase(0.05)]
+        [TestCase(0.10)]
+        [TestCase(1.00)]
+        public void TestVelocity(double seconds)
+        {
+            double xPos = 8, yPos = 64, zPos = 8;
+            double xVel = 1, yVel = 2, zVel = 3;
+
+            TestEntity entity = new();
+            entity.Position = new Vector3(xPos, yPos, zPos);
+            entity.Velocity = new Vector3(xVel, yVel, zVel);
+            entity.AccelerationDueToGravity = 0;
+            entity.Drag = 0;
+
+            IDimension dimension = BuildDimension();
+            IPhysicsEngine physics = new PhysicsEngine(dimension);
+
+            physics.AddEntity(entity);
+
+            //
+            // Act
+            //
+            physics.Update(TimeSpan.FromSeconds(seconds));
+
+            //
+            // Assertions
+            //
+            // Velocity should be unchanged.
+            Assert.AreEqual(new Vector3(xVel, yVel, zVel), entity.Velocity);
+            // Position should be updated per units of time given
+            Vector3 expectedPosition = new Vector3(xPos + seconds * xVel,
+                yPos + seconds * yVel, zPos + seconds * zVel);
+            Assert.AreEqual(expectedPosition, entity.Position);
+        }
     }
 }
