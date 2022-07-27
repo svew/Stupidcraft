@@ -111,7 +111,7 @@ namespace TrueCraft.Core.Test.Physics
 
             public IPacket SpawnPacket => throw new NotImplementedException();
 
-            public int EntityID { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+            public int EntityID { get => 1; set => throw new NotImplementedException(); }
             public float Yaw { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
             public float Pitch { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
             public bool Despawned { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
@@ -316,6 +316,73 @@ namespace TrueCraft.Core.Test.Physics
             Assert.AreEqual(0, entity.Velocity.X);
             Assert.AreEqual(0, entity.Velocity.Y);
             Assert.AreEqual(0, entity.Velocity.Z);
+        }
+
+        /// <summary>
+        /// Tests a very odd condition involving a surprise launch into the air.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// In my test world, I found a particular block that when I walk into the
+        /// side of it, I get launched up into the air.  This test reproduces
+        /// that with actual numbers and locations taken from the actual
+        /// observed bug.
+        /// </para>
+        /// </remarks>
+        [Test]
+        public void CrazyJump()
+        {
+            //
+            // Set up
+            //
+            IDimensionServer dimension = (IDimensionServer)BuildDimension();
+            IPhysicsEngine physics = new PhysicsEngine(dimension);
+
+            // Generate chunks at chunk coordinates (-1, 12) and (-1, 13)
+            IChunk chunk12 = dimension.GetChunk(new GlobalChunkCoordinates(-1, 12), LoadEffort.Generate)!;
+            IChunk chunk13 = dimension.GetChunk(new GlobalChunkCoordinates(-1, 13), LoadEffort.Generate)!;
+
+            // Create a layer of dirt at y == 62.
+            // This will place the entity's feet at y == 63.
+            for (int x = 0; x < 16; x ++)
+                for (int z = 0; z < 16; z ++)
+                {
+                    LocalVoxelCoordinates localCoords = new(x, 62, z);
+                    chunk12.SetBlockID(localCoords, StoneBlockID);
+                    chunk13.SetBlockID(localCoords, StoneBlockID);
+                }
+
+            // Place blocks at z == 192, x == -5 && x == -3
+            dimension.SetBlockID(new GlobalVoxelCoordinates(-3, 63, 192), StoneBlockID);
+            dimension.SetBlockID(new GlobalVoxelCoordinates(-5, 63, 192), StoneBlockID);
+
+            Size entitySize = new Size(0.6, 1.8, 0.6);   // same size as Player Entity
+            double entityY = 63 + entitySize.Height / 2;
+            Vector3 entityStartPos = new Vector3(-4.34298322997483, entityY, 192.92777590726);
+            Vector3 entityStartVel = new Vector3(0.0502763610985, 0,  -0.0520632516009488);
+
+            TestEntity entity = new TestEntity();
+            entity.Position = entityStartPos;
+            entity.Velocity = entityStartVel;
+            entity.Size = entitySize;
+            entity.AccelerationDueToGravity = 1.6f;
+            entity.Drag = 0.40f;
+            entity.TerminalVelocity = 78.4f;
+            physics.AddEntity(entity);
+
+            //
+            // Act
+            //
+            Console.Error.WriteLine($"Before: {entity.Position}");
+            physics.Update(TimeSpan.FromSeconds(1));
+            Console.Error.WriteLine($"After: {entity.Position}");
+            Assert.AreEqual(0, entity.Velocity.Y);
+            Assert.AreEqual(entityY, entity.Position.Y);
+            Assert.True(entity.CollisionOccured);
+
+            physics.Update(TimeSpan.FromSeconds(1));
+            Assert.AreEqual(entityY, entity.Position.Y);
+            Assert.AreEqual(0, entity.Velocity.Y);
         }
     }
 }
