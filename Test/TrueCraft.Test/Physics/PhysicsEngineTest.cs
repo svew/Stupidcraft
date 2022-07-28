@@ -430,7 +430,7 @@ namespace TrueCraft.Core.Test.Physics
             entity.Velocity = entityStartVel;
             entity.Size = entitySize;
             entity.AccelerationDueToGravity = 1.6f;
-            entity.Drag = 0.40f;
+            entity.Drag = 0.0f;  // In the scenario being modelled, the W was held down, so Drag could not slow the Player.
             entity.TerminalVelocity = 78.4f;
             physics.AddEntity(entity);
 

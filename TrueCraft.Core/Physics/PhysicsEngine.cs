@@ -73,7 +73,8 @@ namespace TrueCraft.Core.Physics
                     if (entity.BeginUpdate())
                     {
                         Vector3 velocity = entity.Velocity;
-                        velocity -= new Vector3(0, entity.AccelerationDueToGravity * seconds, 0);
+                        if (!IsGrounded(entity))
+                            velocity -= new Vector3(0, entity.AccelerationDueToGravity * seconds, 0);
                         velocity *= 1 - entity.Drag * seconds;
                         velocity = TruncateVelocity(entity.TerminalVelocity, velocity);
                         Ray move = new Ray(entity.Position, velocity);
@@ -122,6 +123,40 @@ namespace TrueCraft.Core.Physics
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Determines whether or not the Entity is vertically in contact with terrain.
+        /// </summary>
+        /// <param name="entity">The entity to check</param>
+        /// <returns>True if the Entity is vertically in contact with terrain; false otherwise.</returns>
+        private bool IsGrounded(IEntity entity)
+        {
+            BoundingBox bb = entity.BoundingBox;
+            int xmin = (int)Math.Floor(bb.Min.X);
+            int xmax = (int)Math.Floor(bb.Max.X);
+            int zmin = (int)Math.Floor(bb.Min.Z);
+            int zmax = (int)Math.Floor(bb.Max.Z);
+            double y = bb.Min.Y;
+            int ySupport = (int)Math.Floor(y) - 1;
+
+            for (int x = xmin; x <= xmax; x ++)
+                for (int z = zmin; z <= zmax; z ++)
+                {
+                    GlobalVoxelCoordinates coords = new(x, ySupport, z);
+                    BoundingBox? support = GetBoundingBox(_dimension, coords);
+                    if (!support.HasValue)
+                        continue;
+
+                    double supportTop = support.Value.Max.Y + ySupport;
+                    double supportBottom = support.Value.Min.Y + ySupport;
+                    // If the Entity's "feet" are inside the block or close enough
+                    // to top to be considered in contact, then it is grounded.
+                    if ((y <= supportTop && y > supportBottom) || y - supportTop < GameConstants.Epsilon)
+                        return true;
+                }
+
+            return false;
         }
 
         /// <summary>
