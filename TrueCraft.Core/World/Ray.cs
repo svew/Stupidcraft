@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace TrueCraft.Core
+namespace TrueCraft.Core.World
 {
     /// <summary>
     /// Represents a ray; a line with a start and direction, but no end.

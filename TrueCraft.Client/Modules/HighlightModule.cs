@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework;
 using Matrix = Microsoft.Xna.Framework.Matrix;
 using XVector3 = Microsoft.Xna.Framework.Vector3;
 using TVector3 = TrueCraft.Core.Vector3;
-using TRay = TrueCraft.Core.Ray;
+using TRay = TrueCraft.Core.World.Ray;
 using TrueCraft.Core.Logic;
 using TrueCraft.Client.Modelling;
 using TrueCraft.Client.Modelling.Blocks;
