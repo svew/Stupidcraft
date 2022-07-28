@@ -412,8 +412,8 @@ namespace TrueCraft.Core.Test.Physics
                 }
 
             // Place blocks at z == 192, x == -5 && x == -3
-            dimension.SetBlockID(new GlobalVoxelCoordinates(-3, 63, 192), StoneBlockID);
-            dimension.SetBlockID(new GlobalVoxelCoordinates(-5, 63, 192), StoneBlockID);
+            dimension.SetBlockID(new GlobalVoxelCoordinates(-4, 63, 192), StoneBlockID);
+            dimension.SetBlockID(new GlobalVoxelCoordinates(-6, 63, 192), StoneBlockID);
 
             Size entitySize = new Size(0.6, 1.8, 0.6);   // same size as Player Entity
             double xPos = -4.34298322997483;
@@ -444,6 +444,11 @@ namespace TrueCraft.Core.Test.Physics
             //
             // Assertions
             //
+            // Collision occurred
+            Assert.True(entity.CollisionOccured);
+            // Collided with the block at -3, 63, 192
+            Assert.AreEqual(new Vector3(-4, 63, 192), entity.CollisionPoint);
+
             // x Position should put the entity in contact with the block
             Assert.AreEqual(-4 - entity.Size.Width / 2, entity.Position.X);
             // y position should be unchanged.
@@ -453,7 +458,7 @@ namespace TrueCraft.Core.Test.Physics
 
             // x-velocity should be what was required to make contact in one unit
             // of time
-            Assert.AreEqual(-4 - xPos + entity.Size.Width / 2, entity.Velocity.X);
+            Assert.AreEqual(-4 - xPos - entity.Size.Width / 2, entity.Velocity.X);
             // y-velocity should be unchanged.
             Assert.AreEqual(yVel, entity.Velocity.Y);
             // z-velocity should be unchanged.
@@ -471,7 +476,7 @@ namespace TrueCraft.Core.Test.Physics
             // More assertions
             //
             // x position should still be in contact with the block
-            Assert.AreEqual(-4 + entity.Size.Width / 2, entity.Position.X);
+            Assert.AreEqual(-4 - entity.Size.Width / 2, entity.Position.X);
             // y position should remain unchanged.
             Assert.AreEqual(yPos, entity.Position.Y);
             // z Position should have advanced by 2 units of time
