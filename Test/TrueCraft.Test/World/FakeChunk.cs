@@ -67,12 +67,18 @@ namespace TrueCraft.Test.World
 
         public byte GetBlockID(LocalVoxelCoordinates coordinates)
         {
-            return _blocks[CoordinatesToIndex(coordinates)];
+            int index = CoordinatesToIndex(coordinates);
+            if (index < 0 || index >= _blocks.Length)
+                return AirBlock.BlockID;
+            return _blocks[index];
         }
 
         public byte GetBlockLight(LocalVoxelCoordinates coordinates)
         {
-            return _blockLight[CoordinatesToIndex(coordinates)];
+            int index = CoordinatesToIndex(coordinates);
+            if (index < 0 || index >= _blocks.Length)
+                return 0;
+            return _blockLight[index];
         }
 
         public int GetHeight(int x, int z)
@@ -82,12 +88,18 @@ namespace TrueCraft.Test.World
 
         public byte GetMetadata(LocalVoxelCoordinates coordinates)
         {
-            return _metadata[CoordinatesToIndex(coordinates)];
+            int index = CoordinatesToIndex(coordinates);
+            if (index < 0 || index >= _blocks.Length)
+                return 0;
+            return _metadata[index];
         }
 
         public byte GetSkyLight(LocalVoxelCoordinates coordinates)
         {
-            return _skyLight[CoordinatesToIndex(coordinates)];
+            int index = CoordinatesToIndex(coordinates);
+            if (index < 0 || index >= _blocks.Length)
+                return 15;
+            return _skyLight[index];
         }
 
         public NbtCompound GetTileEntity(LocalVoxelCoordinates coordinates)
