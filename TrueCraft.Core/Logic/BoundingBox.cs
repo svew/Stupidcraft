@@ -81,6 +81,29 @@ namespace TrueCraft.Core
         #region Public Methods
 
         /// <summary>
+        /// Returns a new Bounding Box expanded by the given Size.
+        /// </summary>
+        /// <param name="size">The Size by which the Bounding Box will be increased.</param>
+        /// <returns></returns>
+        /// <remarks>
+        /// <para>
+        /// Half of the Size in each direction is added to each side of the
+        /// Bounding Box.
+        /// </para>
+        /// </remarks>
+        public BoundingBox Expand(Size size)
+        {
+            double w2 = size.Width * 0.5;
+            double d2 = size.Depth * 0.5;
+            double h2 = size.Height * 0.5;
+
+            Vector3 newMin = new Vector3(this.Min.X - w2, this.Min.Y - h2, this.Min.Z - d2);
+            Vector3 newMax = new Vector3(this.Max.X + w2, this.Max.Y + h2, this.Max.Z + d2);
+
+            return new BoundingBox(newMin, newMax);
+        }
+
+        /// <summary>
         /// Determines the type of containment between this and another bounding box.
         /// </summary>
         /// <param name="box">The other bounding box.</param>

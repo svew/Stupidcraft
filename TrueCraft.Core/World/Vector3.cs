@@ -140,6 +140,17 @@ namespace TrueCraft.Core
         }
 
         /// <summary>
+        /// Returns a unit vector in the same direction as this Vector.
+        /// </summary>
+        /// <returns></returns>
+        public Vector3 Unit()
+        {
+            double len = Math.Sqrt(Square(this.X) + Square(this.Y) + Square(this.Z));
+            double invLen = 1.0 / len;
+            return new Vector3(this.X * invLen, this.Y * invLen, this.Z * invLen);
+        }
+
+        /// <summary>
         /// Returns the component-wise minumum of two vectors.
         /// </summary>
         /// <param name="value1">The first vector.</param>

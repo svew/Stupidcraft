@@ -19,6 +19,12 @@ namespace TrueCraft.Core.Test.Physics
     [TestFixture]
     public class PhysicsEngineTest
     {
+        /// <summary>
+        /// A constant to check if two doubles are "close enough" to equal
+        /// </summary>
+        /// <remarks>This is much larger than double.Epsilon.</remarks>
+        private const double Epsilon = 1e-8;
+
         private const byte StoneBlockID = 1;
 
         private const int SurfaceHeight = 1;
@@ -98,7 +104,12 @@ namespace TrueCraft.Core.Test.Physics
             {
                 get
                 {
-                    return new BoundingBox(Position, Position + Size);
+                    double hw = Size.Width * 0.5;
+                    double hh = Size.Height * 0.5;
+                    double hd = Size.Depth * 0.5;
+                    Vector3 min = new Vector3(Position.X - hw, Position.Y - hh, Position.Z - hd);
+                    Vector3 max = new Vector3(Position.X + hw, Position.Y + hh, Position.Z + hd);
+                    return new BoundingBox(min, max);
                 }
             }
 
@@ -202,14 +213,18 @@ namespace TrueCraft.Core.Test.Physics
             Assert.AreEqual(xPos, entity.Position.X);
             Assert.AreEqual(yPos, entity.Position.Y);
             Assert.AreEqual(zPos, entity.Position.Z);
-            Assert.AreEqual(Vector3.Zero, entity.Velocity);
+            Assert.True(Math.Abs(entity.Velocity.X) < Epsilon);
+            Assert.True(Math.Abs(entity.Velocity.Y) < Epsilon);
+            Assert.True(Math.Abs(entity.Velocity.Z) < Epsilon);
 
             physics.Update(TimeSpan.FromSeconds(5));
 
             Assert.AreEqual(xPos, entity.Position.X);
             Assert.AreEqual(yPos, entity.Position.Y);
             Assert.AreEqual(zPos, entity.Position.Z);
-            Assert.AreEqual(Vector3.Zero, entity.Velocity);
+            Assert.True(Math.Abs(entity.Velocity.X) < Epsilon);
+            Assert.True(Math.Abs(entity.Velocity.Y) < Epsilon);
+            Assert.True(Math.Abs(entity.Velocity.Z) < Epsilon);
         }
 
         [Test]

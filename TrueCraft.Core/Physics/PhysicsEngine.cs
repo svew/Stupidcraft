@@ -13,6 +13,12 @@ namespace TrueCraft.Core.Physics
         private readonly List<IEntity> _entities;
         private readonly object _entityLock;
 
+        /// <summary>
+        /// Any velocity vector components below this amount
+        /// will be truncated to zero.
+        /// </summary>
+        private const double MinimumVelocity = 0.005;
+
         public PhysicsEngine(IDimension dimension)
         {
             _dimension = dimension;
@@ -37,85 +43,150 @@ namespace TrueCraft.Core.Physics
             }
         }
 
-        private void TruncateVelocity(IEntity entity, double multiplier)
+        private Vector3 TruncateVelocity(double terminalVelocity, Vector3 velocity)
         {
-            // TODO: Why is the minimum velocity a function of the time between
-            //       calls to Update?
-            if (Math.Abs(entity.Velocity.X) < 0.1 * multiplier)
-                entity.Velocity = new Vector3(0, entity.Velocity.Y, entity.Velocity.Z);
-            if (Math.Abs(entity.Velocity.Y) < 0.1 * multiplier)
-                entity.Velocity = new Vector3(entity.Velocity.X, 0, entity.Velocity.Z);
-            if (Math.Abs(entity.Velocity.Z) < 0.1 * multiplier)
-                entity.Velocity = new Vector3(entity.Velocity.X, entity.Velocity.Y, 0);
-            entity.Velocity.Clamp(entity.TerminalVelocity);
+            if (Math.Abs(velocity.X) < MinimumVelocity)
+                velocity.X = 0;
+            if (Math.Abs(velocity.Y) < MinimumVelocity)
+                velocity.Y = 0;
+            if (Math.Abs(velocity.Z) < MinimumVelocity)
+                velocity.Z = 0;
+
+            velocity.Clamp(terminalVelocity);
+            return velocity;
         }
 
+        /// <summary>
+        /// Updates all the Entities managed by this Physics Engine.
+        /// </summary>
+        /// <param name="time">The amount of time since the last call to this Update.</param>
         public void Update(TimeSpan time)
         {
-            double multiplier = time.TotalSeconds;
-            if (multiplier == 0 || multiplier > 1)
+            double seconds = time.TotalSeconds;
+            if (seconds == 0)
                 return;
-            lock (_entityLock)
+
+            lock(_entityLock)
             {
-                for (int i = 0; i < _entities.Count; i++)
+                foreach (IEntity entity in _entities)
                 {
-                    IEntity entity = _entities[i];
                     if (entity.BeginUpdate())
                     {
-                        entity.Velocity -= new Vector3(0, entity.AccelerationDueToGravity * multiplier, 0);
-                        entity.Velocity *= 1 - entity.Drag * multiplier;
-                        TruncateVelocity(entity, multiplier);
+                        Vector3 velocity = entity.Velocity;
+                        velocity -= new Vector3(0, entity.AccelerationDueToGravity * seconds, 0);
+                        velocity *= 1 - entity.Drag * seconds;
+                        velocity = TruncateVelocity(entity.TerminalVelocity, velocity);
+                        Ray move = new Ray(entity.Position, velocity);
+                        double nearestCollision = double.MaxValue;
+                        GlobalVoxelCoordinates? collisionBlock = null;
+                        BlockFace collisionFace = BlockFace.NegativeX;
+                        BoundingBox? collisionTarget = null;
 
-                        Vector3 collision, before = entity.Velocity;
+                        BoundingBox testBox = GetAABBVelocityBox(entity.BoundingBox, velocity);
+                        int xmin = (int)(Math.Floor(testBox.Min.X));
+                        int xmax = (int)(Math.Ceiling(testBox.Max.X));
+                        int ymin = (int)(Math.Floor(testBox.Min.Y));
+                        int ymax = (int)(Math.Ceiling(testBox.Max.Y));
+                        int zmin = (int)(Math.Floor(testBox.Min.Z));
+                        int zmax = (int)(Math.Ceiling(testBox.Max.Z));
+                        for (int x = xmin; x <= xmax; x ++)
+                            for (int z = zmin; z <= zmax; z ++)
+                                for (int y = ymin; y <= ymax; y ++)
+                                {
+                                    GlobalVoxelCoordinates coords = new(x, y, z);
+                                    BoundingBox? target = GetBoundingBox(_dimension, coords);
+                                    if (!target.HasValue)
+                                        continue;
 
-                        if (TestTerrainCollisionY(entity, out collision))
-                            entity.TerrainCollision(collision, before.Y < 0 ? Vector3.Down : Vector3.Up);
-                        if (TestTerrainCollisionX(entity, out collision))
-                            entity.TerrainCollision(collision, before.X < 0 ? Vector3.Left : Vector3.Right);
-                        if (TestTerrainCollisionZ(entity, out collision))
-                            entity.TerrainCollision(collision, before.Z < 0 ? Vector3.Backwards : Vector3.Forwards);
+                                    target = target.Value.OffsetBy((Vector3)coords);
+                                    target = target.Value.Expand(entity.Size);
 
-                        if (TestTerrainCollisionCylinder(entity, out collision))
-                            entity.TerrainCollision(collision, before);
+                                    double? collision = move.Intersects(target.Value, out collisionFace);
+                                    if (collision.HasValue && collision.Value < nearestCollision)
+                                    {
+                                        nearestCollision = collision.Value;
+                                        collisionBlock = coords;
+                                        collisionTarget = GetBoundingBox(_dimension, coords)!;
+                                    }
+                                }
 
-                        entity.EndUpdate(entity.Position + entity.Velocity);
-                        TruncateVelocity(entity, multiplier);
+                        if (collisionBlock is not null)
+                        {
+                            entity.TerrainCollision((Vector3)collisionBlock, move.Direction.Unit());
+                            move = HandleCollision(entity.Size, move, seconds,
+                                collisionBlock, collisionFace, collisionTarget!.Value);
+                        }
+
+                        entity.Velocity = move.Direction;
+                        entity.EndUpdate(entity.Position + move.Direction * seconds);
                     }
                 }
             }
         }
 
-        private BoundingBox GetAABBVelocityBox(IEntity entity)
+        /// <summary>
+        /// Creates a new move Ray based upon the old one and the details of the collision.
+        /// </summary>
+        /// <param name="entitySize">The size of the Entity colliding with something</param>
+        /// <param name="move">The original (unimpeded) version of the Entity's move.</param>
+        /// <param name="seconds">The number of seconds of the update.</param>
+        /// <param name="collisionBlock">The coordinates of the Block with which the Entity collided.</param>
+        /// <param name="collisionFace">The face of the Block into which the Entity collided.</param>
+        /// <param name="collisionTarget"></param>
+        /// <returns>An updated Move as modified by the collision.</returns>
+        private Ray HandleCollision(Size entitySize, Ray move, double seconds,
+            GlobalVoxelCoordinates collisionBlock, BlockFace collisionFace,
+            BoundingBox collisionTarget)
         {
-            var min = new Vector3(
-                Math.Min(entity.BoundingBox.Min.X, entity.BoundingBox.Min.X + entity.Velocity.X),
-                Math.Min(entity.BoundingBox.Min.Y, entity.BoundingBox.Min.Y + entity.Velocity.Y),
-                Math.Min(entity.BoundingBox.Min.Z, entity.BoundingBox.Min.Z + entity.Velocity.Z)
-            );
-            var max = new Vector3(
-                Math.Max(entity.BoundingBox.Max.X, entity.BoundingBox.Max.X + entity.Velocity.X),
-                Math.Max(entity.BoundingBox.Max.Y, entity.BoundingBox.Max.Y + entity.Velocity.Y),
-                Math.Max(entity.BoundingBox.Max.Z, entity.BoundingBox.Max.Z + entity.Velocity.Z)
-            );
-            return new BoundingBox(min, max);
+            Vector3 velocity = move.Direction;
+
+            switch(collisionFace)
+            {
+                case BlockFace.NegativeX:
+                    velocity.X = (collisionBlock.X + collisionTarget.Min.X) - move.Position.X - entitySize.Width / 2;
+                    break;
+
+                case BlockFace.PositiveX:
+                    velocity.X = (collisionBlock.X + collisionTarget.Max.X) - move.Position.X + entitySize.Width / 2;
+                    break;
+
+                case BlockFace.NegativeY:
+                    velocity.Y = (collisionBlock.Y + collisionTarget.Min.Y) - move.Position.Y - entitySize.Height / 2;
+                    break;
+
+                case BlockFace.PositiveY:
+                    velocity.Y = (collisionBlock.Y + collisionTarget.Max.Y) - move.Position.Y + entitySize.Height / 2;
+                    break;
+
+                case BlockFace.NegativeZ:
+                    velocity.Z = (collisionBlock.Z + collisionTarget.Min.Z) - move.Position.Z - entitySize.Depth / 2;
+                    break;
+
+                case BlockFace.PositiveZ:
+                    velocity.Z = (collisionBlock.Z + collisionTarget.Max.Z) - move.Position.Z + entitySize.Depth / 2;
+                    break;
+            }
+
+            velocity /= seconds;
+            return new Ray(move.Position, velocity);
         }
 
-        private void AdjustVelocityForCollision(IEntity entity, BoundingBox problem)
+        private BoundingBox GetAABBVelocityBox(BoundingBox bb, Vector3 velocity)
         {
-            var velocity = entity.Velocity;
-            if (entity.Velocity.X < 0)
-                velocity.X = entity.BoundingBox.Min.X - problem.Max.X;
-            if (entity.Velocity.X > 0)
-                velocity.X = entity.BoundingBox.Max.X - problem.Min.X;
-            if (entity.Velocity.Y < 0)
-                velocity.Y = entity.BoundingBox.Min.Y - problem.Max.Y;
-            if (entity.Velocity.Y > 0)
-                velocity.Y = entity.BoundingBox.Max.Y - problem.Min.Y;
-            if (entity.Velocity.Z < 0)
-                velocity.Z = entity.BoundingBox.Min.Z - problem.Max.Z;
-            if (entity.Velocity.Z > 0)
-                velocity.Z = entity.BoundingBox.Max.Z - problem.Min.Z;
-            entity.Velocity = velocity;
+            Vector3 curMin = bb.Min;
+            Vector3 curMax = bb.Max;
+
+            Vector3 min = new Vector3(
+                Math.Min(curMin.X, curMin.X + velocity.X),
+                Math.Min(curMin.Y, curMin.Y + velocity.Y),
+                Math.Min(curMin.Z, curMin.Z + velocity.Z)
+            );
+            Vector3 max = new Vector3(
+                Math.Max(curMax.X, curMax.X + velocity.X),
+                Math.Max(curMax.Y, curMax.Y + velocity.Y),
+                Math.Max(curMax.Z, curMax.Z + velocity.Z)
+            );
+            return new BoundingBox(min, max);
         }
 
         private BoundingBox? GetBoundingBox(IDimension dimension, GlobalVoxelCoordinates coordinates)
@@ -125,314 +196,6 @@ namespace TrueCraft.Core.Physics
 
             IBlockProvider? provider = dimension.BlockRepository.GetBlockProvider(id);
             return provider?.BoundingBox;
-        }
-
-        private bool TestTerrainCollisionCylinder(IEntity entity, out Vector3 collisionPoint)
-        {
-            collisionPoint = Vector3.Zero;
-            var testBox = GetAABBVelocityBox(entity);
-            // TODO: Q: why is the axis of the Bounding Cylinder independent of the direction of motion?
-            // TODO: Q: why use the diagonal size of the entity's Bounding Box as the radius instead of the diameter?
-            var testCylinder = new BoundingCylinder(testBox.Min, testBox.Max,
-                entity.BoundingBox.Min.DistanceTo(entity.BoundingBox.Max));
-
-            bool collision = false;
-            for (int x = (int)(Math.Floor(testBox.Min.X)); x <= (int)(Math.Ceiling(testBox.Max.X)); x++)
-            {
-                for (int z = (int)(Math.Floor(testBox.Min.Z)); z <= (int)(Math.Ceiling(testBox.Max.Z)); z++)
-                {
-                    for (int y = (int)(Math.Floor(testBox.Min.Y)); y <= (int)(Math.Ceiling(testBox.Max.Y)); y++)
-                    {
-                        var coords = new GlobalVoxelCoordinates(x, y, z);
-                        if (!_dimension.IsValidPosition(coords))
-                            continue;
-
-                        BoundingBox? _box = GetBoundingBox(_dimension, coords);
-                        if (_box is null)
-                            continue;
-
-                        var box = _box.Value.OffsetBy((Vector3)coords);
-                        if (testCylinder.Intersects(box))
-                        {
-                            if (testBox.Intersects(box))
-                            {
-                                collision = true;
-                                AdjustVelocityForCollision(entity, box);
-                                testBox = GetAABBVelocityBox(entity);
-                                testCylinder = new BoundingCylinder(testBox.Min, testBox.Max,
-                                    entity.BoundingBox.Min.DistanceTo(entity.BoundingBox.Max));
-                                collisionPoint = (Vector3)coords;
-                            }
-                        }
-                    }
-                }
-            }
-            return collision;
-        }
-
-        private bool TestTerrainCollisionY(IEntity entity, out Vector3 collisionPoint)
-        {
-            // Things we need to do:
-            // 1 - expand bounding box to include the destination and everything within
-            // 2 - collect all blocks within that area
-            // 3 - test bounding boxes in direction of motion
-
-            collisionPoint = Vector3.Zero;
-
-            if (entity.Velocity.Y == 0)
-                return false;
-
-            bool negative;
-
-            BoundingBox testBox;
-            if (entity.Velocity.Y < 0)
-            {
-                testBox = new BoundingBox(
-                    new Vector3(entity.BoundingBox.Min.X,
-                        entity.BoundingBox.Min.Y + entity.Velocity.Y,
-                        entity.BoundingBox.Min.Z),
-                    entity.BoundingBox.Max);
-                negative = true;
-            }
-            else
-            {
-                testBox = new BoundingBox(
-                    entity.BoundingBox.Min,
-                    new Vector3(entity.BoundingBox.Max.X,
-                        entity.BoundingBox.Max.Y + entity.Velocity.Y,
-                        entity.BoundingBox.Max.Z));
-                negative = false;
-            }
-
-            double? collisionExtent = null;
-            for (int x = (int)(Math.Floor(testBox.Min.X)); x <= (int)(Math.Ceiling(testBox.Max.X)); x++)
-            {
-                for (int z = (int)(Math.Floor(testBox.Min.Z)); z <= (int)(Math.Ceiling(testBox.Max.Z)); z++)
-                {
-                    for (int y = (int)(Math.Floor(testBox.Min.Y)); y <= (int)(Math.Ceiling(testBox.Max.Y)); y++)
-                    {
-                        var coords = new GlobalVoxelCoordinates(x, y, z);
-                        if (!_dimension.IsValidPosition(coords))
-                            continue;
-
-                        BoundingBox? _box = GetBoundingBox(_dimension, coords);
-                        if (_box is null)
-                            continue;
-
-                        var box = _box.Value.OffsetBy((Vector3)coords);
-                        if (testBox.Intersects(box))
-                        {
-                            if (negative)
-                            {
-                                if (collisionExtent == null || collisionExtent.Value < box.Max.Y)
-                                {
-                                    collisionExtent = box.Max.Y;
-                                    collisionPoint = (Vector3)coords;
-                                }
-                            }
-                            else
-                            {
-                                if (collisionExtent == null || collisionExtent.Value > box.Min.Y)
-                                {
-                                    collisionExtent = box.Min.Y;
-                                    collisionPoint = (Vector3)coords;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (collisionExtent != null) // Collision detected, adjust accordingly
-            {
-                var extent = collisionExtent.Value;
-                double diff;
-                if (negative)
-                    diff = -(entity.BoundingBox.Min.Y - extent);
-                else
-                    diff = extent - entity.BoundingBox.Max.Y;
-                entity.Velocity = new Vector3(entity.Velocity.X, diff, entity.Velocity.Z);
-                return true;
-            }
-            return false;
-        }
-
-        private bool TestTerrainCollisionX(IEntity entity, out Vector3 collisionPoint)
-        {
-            // Things we need to do:
-            // 1 - expand bounding box to include the destination and everything within
-            // 2 - collect all blocks within that area
-            // 3 - test bounding boxes in direction of motion
-
-            collisionPoint = Vector3.Zero;
-
-            if (entity.Velocity.X == 0)
-                return false;
-
-            bool negative;
-
-            BoundingBox testBox;
-            if (entity.Velocity.X < 0)
-            {
-                testBox = new BoundingBox(
-                    new Vector3(
-                        entity.BoundingBox.Min.X + entity.Velocity.X,
-                        entity.BoundingBox.Min.Y,
-                        entity.BoundingBox.Min.Z),
-                    entity.BoundingBox.Max);
-                negative = true;
-            }
-            else
-            {
-                testBox = new BoundingBox(
-                    entity.BoundingBox.Min,
-                    new Vector3(
-                        entity.BoundingBox.Max.X + entity.Velocity.X,
-                        entity.BoundingBox.Max.Y,
-                        entity.BoundingBox.Max.Z));
-                negative = false;
-            }
-
-            double? collisionExtent = null;
-            for (int x = (int)(Math.Floor(testBox.Min.X)); x <= (int)(Math.Ceiling(testBox.Max.X)); x++)
-            {
-                for (int z = (int)(Math.Floor(testBox.Min.Z)); z <= (int)(Math.Ceiling(testBox.Max.Z)); z++)
-                {
-                    for (int y = (int)(Math.Floor(testBox.Min.Y)); y <= (int)(Math.Ceiling(testBox.Max.Y)); y++)
-                    {
-                        var coords = new GlobalVoxelCoordinates(x, y, z);
-                        if (!_dimension.IsValidPosition(coords))
-                            continue;
-
-                        BoundingBox? _box = GetBoundingBox(_dimension, coords);
-                        if (_box is null)
-                            continue;
-
-                        var box = _box.Value.OffsetBy((Vector3)coords);
-                        if (testBox.Intersects(box))
-                        {
-                            if (negative)
-                            {
-                                if (collisionExtent == null || collisionExtent.Value < box.Max.X)
-                                {
-                                    collisionExtent = box.Max.X;
-                                    collisionPoint = (Vector3)coords;
-                                }
-                            }
-                            else
-                            {
-                                if (collisionExtent == null || collisionExtent.Value > box.Min.X)
-                                {
-                                    collisionExtent = box.Min.X;
-                                    collisionPoint = (Vector3)coords;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (collisionExtent != null) // Collision detected, adjust accordingly
-            {
-                var extent = collisionExtent.Value;
-                double diff;
-                if (negative)
-                    diff = -(entity.BoundingBox.Min.X - extent);
-                else
-                    diff = extent - entity.BoundingBox.Max.X;
-                entity.Velocity = new Vector3(diff, entity.Velocity.Y, entity.Velocity.Z);
-                return true;
-            }
-            return false;
-        }
-
-        private bool TestTerrainCollisionZ(IEntity entity, out Vector3 collisionPoint)
-        {
-            // Things we need to do:
-            // 1 - expand bounding box to include the destination and everything within
-            // 2 - collect all blocks within that area
-            // 3 - test bounding boxes in direction of motion
-
-            collisionPoint = Vector3.Zero;
-
-            if (entity.Velocity.Z == 0)
-                return false;
-
-            bool negative;
-
-            BoundingBox testBox;
-            if (entity.Velocity.Z < 0)
-            {
-                testBox = new BoundingBox(
-                    new Vector3(
-                        entity.BoundingBox.Min.X,
-                        entity.BoundingBox.Min.Y,
-                        entity.BoundingBox.Min.Z + entity.Velocity.Z),
-                    entity.BoundingBox.Max);
-                negative = true;
-            }
-            else
-            {
-                testBox = new BoundingBox(
-                    entity.BoundingBox.Min,
-                    new Vector3(
-                        entity.BoundingBox.Max.X,
-                        entity.BoundingBox.Max.Y,
-                        entity.BoundingBox.Max.Z + entity.Velocity.Z));
-                negative = false;
-            }
-
-            double? collisionExtent = null;
-            for (int x = (int)(Math.Floor(testBox.Min.X)); x <= (int)(Math.Ceiling(testBox.Max.X)); x++)
-            {
-                for (int z = (int)(Math.Floor(testBox.Min.Z)); z <= (int)(Math.Ceiling(testBox.Max.Z)); z++)
-                {
-                    for (int y = (int)(Math.Floor(testBox.Min.Y)); y <= (int)(Math.Ceiling(testBox.Max.Y)); y++)
-                    {
-                        var coords = new GlobalVoxelCoordinates(x, y, z);
-                        if (!_dimension.IsValidPosition(coords))
-                            continue;
-
-                        BoundingBox? _box = GetBoundingBox(_dimension, coords);
-                        if (_box is null)
-                            continue;
-
-                        var box = _box.Value.OffsetBy((Vector3)coords);
-                        if (testBox.Intersects(box))
-                        {
-                            if (negative)
-                            {
-                                if (collisionExtent == null || collisionExtent.Value < box.Max.Z)
-                                {
-                                    collisionExtent = box.Max.Z;
-                                    collisionPoint = (Vector3)coords;
-                                }
-                            }
-                            else
-                            {
-                                if (collisionExtent == null || collisionExtent.Value > box.Min.Z)
-                                {
-                                    collisionExtent = box.Min.Z;
-                                    collisionPoint = (Vector3)coords;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (collisionExtent != null) // Collision detected, adjust accordingly
-            {
-                var extent = collisionExtent.Value;
-                double diff;
-                if (negative)
-                    diff = -(entity.BoundingBox.Min.Z - extent);
-                else
-                    diff = extent - entity.BoundingBox.Max.Z;
-                entity.Velocity = new Vector3(entity.Velocity.X, entity.Velocity.Y, diff);
-                return true;
-            }
-            return false;
         }
     }
 }
