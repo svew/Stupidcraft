@@ -1,0 +1,3 @@
+A. An Efficient and Robust Ray-Box Intersection Algorithm, Amy Williams, et al, University of Utah
+   https://web.archive.org/web/20130420103121/http://www.cs.utah.edu/~awilliam/box/
+
