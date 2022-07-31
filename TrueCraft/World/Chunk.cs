@@ -104,27 +104,45 @@ namespace TrueCraft.World
 
         public bool TerrainPopulated { get; set; }
 
+        /// <summary>
+        /// Converts Local Voxel Coordinates into an index into the internal arrays.
+        /// </summary>
+        /// <param name="coordinates">The Coordinates to convert</param>
+        /// <returns>The index into the internal arrays.</returns>
+        private int CoordinatesToIndex(LocalVoxelCoordinates coordinates)
+        {
+            return (coordinates.X * WorldConstants.ChunkWidth + coordinates.Z) * WorldConstants.Height + coordinates.Y;
+        }
+
         public byte GetBlockID(LocalVoxelCoordinates coordinates)
         {
-            int index = coordinates.Y + (coordinates.Z * Height) + (coordinates.X * Height * Width);
+            if (coordinates.Y < 0 || coordinates.Y >= WorldConstants.Height)
+                return AirBlock.BlockID;
+            int index = CoordinatesToIndex(coordinates);
             return Data[index];
         }
 
         public byte GetMetadata(LocalVoxelCoordinates coordinates)
         {
-            int index = coordinates.Y + (coordinates.Z * Height) + (coordinates.X * Height * Width);
+            if (coordinates.Y < 0 || coordinates.Y >= WorldConstants.Height)
+                return 0;
+            int index = CoordinatesToIndex(coordinates);
             return Metadata[index];
         }
 
         public byte GetSkyLight(LocalVoxelCoordinates coordinates)
         {
-            int index = coordinates.Y + (coordinates.Z * Height) + (coordinates.X * Height * Width);
+            if (coordinates.Y < 0 || coordinates.Y >= WorldConstants.Height)
+                return 15;
+            int index = CoordinatesToIndex(coordinates);
             return SkyLight[index];
         }
 
         public byte GetBlockLight(LocalVoxelCoordinates coordinates)
         {
-            int index = coordinates.Y + (coordinates.Z * Height) + (coordinates.X * Height * Width);
+            if (coordinates.Y < 0 || coordinates.Y >= WorldConstants.Height)
+                return 0;
+            int index = CoordinatesToIndex(coordinates);
             return BlockLight[index];
         }
 
@@ -134,8 +152,10 @@ namespace TrueCraft.World
         /// </summary>
         public void SetBlockID(LocalVoxelCoordinates coordinates, byte value)
         {
+            if (coordinates.Y < 0 || coordinates.Y >= WorldConstants.Height)
+                return;
             IsModified = true;
-            int index = coordinates.Y + (coordinates.Z * Height) + (coordinates.X * Height * Width);
+            int index = CoordinatesToIndex(coordinates);
             Data[index] = value;
             if (value == AirBlock.BlockID)
                 Metadata[index] = 0x0;
@@ -171,8 +191,10 @@ namespace TrueCraft.World
         /// </summary>
         public void SetMetadata(LocalVoxelCoordinates coordinates, byte value)
         {
+            if (coordinates.Y < 0 || coordinates.Y >= WorldConstants.Height)
+                return;
             IsModified = true;
-            int index = coordinates.Y + (coordinates.Z * Height) + (coordinates.X * Height * Width);
+            int index = CoordinatesToIndex(coordinates);
             Metadata[index] = value;
         }
 
@@ -182,8 +204,10 @@ namespace TrueCraft.World
         /// </summary>
         public void SetSkyLight(LocalVoxelCoordinates coordinates, byte value)
         {
+            if (coordinates.Y < 0 || coordinates.Y >= WorldConstants.Height)
+                return;
             IsModified = true;
-            int index = coordinates.Y + (coordinates.Z * Height) + (coordinates.X * Height * Width);
+            int index = CoordinatesToIndex(coordinates);
             SkyLight[index] = value;
         }
 
@@ -193,8 +217,10 @@ namespace TrueCraft.World
         /// </summary>
         public void SetBlockLight(LocalVoxelCoordinates coordinates, byte value)
         {
+            if (coordinates.Y < 0 || coordinates.Y >= WorldConstants.Height)
+                return;
             IsModified = true;
-            int index = coordinates.Y + (coordinates.Z * Height) + (coordinates.X * Height * Width);
+            int index = CoordinatesToIndex(coordinates);
             BlockLight[index] = value;
         }
         
@@ -213,6 +239,8 @@ namespace TrueCraft.World
         /// </summary>
         public void SetTileEntity(LocalVoxelCoordinates coordinates, NbtCompound? value)
         {
+            if (coordinates.Y < 0 || coordinates.Y >= WorldConstants.Height)
+                return;
             if (value is null && _tileEntities.ContainsKey(coordinates))
             {
                 _tileEntities.Remove(coordinates);

@@ -90,30 +90,40 @@ namespace TrueCraft.Client.World
         /// <inheritdoc />
         public byte GetBlockID(LocalVoxelCoordinates coordinates)
         {
+            if (coordinates.Y < 0 || coordinates.Y >= WorldConstants.Height)
+                return Core.Logic.Blocks.AirBlock.BlockID;
             return _blockIDs[CoordinatesToIndex(coordinates)];
         }
 
         /// <inheritdoc />
         public void SetBlockID(LocalVoxelCoordinates coordinates, byte value)
         {
+            if (coordinates.Y < 0 || coordinates.Y >= WorldConstants.Height)
+                return;
             _blockIDs[CoordinatesToIndex(coordinates)] = value;
         }
 
         /// <inheritdoc />
         public byte GetMetadata(LocalVoxelCoordinates coordinates)
         {
+            if (coordinates.Y < 0 || coordinates.Y >= WorldConstants.Height)
+                return 0;
             return _metaData[CoordinatesToIndex(coordinates)];
         }
 
         /// <inheritdoc />
         public void SetMetadata(LocalVoxelCoordinates coordinates, byte value)
         {
+            if (coordinates.Y < 0 || coordinates.Y >= WorldConstants.Height)
+                return;
             _metaData[CoordinatesToIndex(coordinates)] = value;
         }
 
         /// <inheritdoc />
         public byte GetBlockLight(LocalVoxelCoordinates coordinates)
         {
+            if (coordinates.Y < 0 || coordinates.Y >= WorldConstants.Height)
+                return 0;
             // TODO: fix return of light values
             //return _blockLight[CoordinatesToIndex(coordinates)];
             return 15;
@@ -122,12 +132,16 @@ namespace TrueCraft.Client.World
         /// <inheritdoc />
         public void SetBlockLight(LocalVoxelCoordinates coordinates, byte value)
         {
+            if (coordinates.Y < 0 || coordinates.Y >= WorldConstants.Height)
+                return;
             _blockLight[CoordinatesToIndex(coordinates)] = value;
         }
 
         /// <inheritdoc />
         public byte GetSkyLight(LocalVoxelCoordinates coordinates)
         {
+            if (coordinates.Y < 0 || coordinates.Y >= WorldConstants.Height)
+                return 15;
             // TODO: fix return of light values
             //return _skyLight[CoordinatesToIndex(coordinates)];
             return 15;
@@ -136,6 +150,8 @@ namespace TrueCraft.Client.World
         /// <inheritdoc />
         public void SetSkyLight(LocalVoxelCoordinates coordinates, byte value)
         {
+            if (coordinates.Y < 0 || coordinates.Y >= WorldConstants.Height)
+                return;
             _skyLight[CoordinatesToIndex(coordinates)] = value;
         }
 
