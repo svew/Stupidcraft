@@ -102,10 +102,10 @@ namespace TrueCraft.Core.Physics
                                     target = target.Value.OffsetBy((Vector3)coords);
                                     target = target.Value.Expand(entity.Size);
 
-                                    double? collision = move.Intersects(target.Value, out collisionFace);
-                                    if (collision.HasValue && collision.Value < nearestCollision)
+                                    double collision = double.MaxValue;
+                                    if (move.Intersects(target.Value, ref collision, ref collisionFace) && collision < nearestCollision)
                                     {
-                                        nearestCollision = collision.Value;
+                                        nearestCollision = collision;
                                         collisionBlock = coords;
                                         collisionTarget = GetBoundingBox(_dimension, coords)!;
                                     }

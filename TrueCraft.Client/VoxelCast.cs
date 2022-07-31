@@ -18,6 +18,7 @@ namespace TrueCraft.Client
         {
             // TODO: There are more efficient ways of doing this, fwiw
 
+            BlockFace _face = BlockFace.PositiveY;
             double min = negmax * 2;
             GlobalVoxelCoordinates? pick = null;
             var face = BlockFace.PositiveY;
@@ -37,11 +38,10 @@ namespace TrueCraft.Client
                             var box = provider.InteractiveBoundingBox;
                             if (box != null)
                             {
-                                BlockFace _face;
-                                var distance = ray.Intersects(box.Value.OffsetBy((Vector3)coords), out _face);
-                                if (distance != null && distance.Value < min)
+                                double distance = double.MaxValue;
+                                if (ray.Intersects(box.Value.OffsetBy((Vector3)coords), ref distance, ref _face) && distance < min)
                                 {
-                                    min = distance.Value;
+                                    min = distance;
                                     pick = coords;
                                     face = _face;
                                 }

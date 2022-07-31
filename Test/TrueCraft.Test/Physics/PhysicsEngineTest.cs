@@ -480,10 +480,11 @@ namespace TrueCraft.Core.Test.Physics
             // y position should remain unchanged.
             Assert.AreEqual(yPos, entity.Position.Y);
             // z Position should have advanced by 2 units of time
-            Assert.AreEqual(zPos + 2 * zVel, entity.Position.Z);
+            Assert.True(Math.Abs(zPos + 2 * zVel - entity.Position.Z) < GameConstants.Epsilon,
+                "Expected: {0};  Actual: {0}", zPos + 2 * zVel, entity.Position.Z);
 
             // X velocity should now be zero
-            Assert.AreEqual(0, entity.Velocity.X);
+            Assert.True(Math.Abs(entity.Velocity.X) < GameConstants.Epsilon, "Expected 0; Actual: {0}", entity.Velocity.X  );
             // Y velocity should remain unchanged
             Assert.AreEqual(yVel, entity.Velocity.Y);
             // Z velocity should remain unchanged.

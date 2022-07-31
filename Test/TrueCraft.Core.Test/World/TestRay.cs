@@ -256,26 +256,6 @@ namespace TrueCraft.Core.Test.World
         }
 
         [TestCaseSource(nameof(IntersectsTestData))]
-        public void Intersects(bool expectedToIntersect, double expectedDistance, BlockFace expectedBlockFace,
-            Ray ray, BoundingBox box)
-        {
-            BlockFace actualBlockFace;
-            double? actualDistance = ray.Intersects(box, out actualBlockFace);
-
-            if (expectedToIntersect)
-            {
-                Assert.True(actualDistance.HasValue);
-                Assert.True(Math.Abs(expectedDistance - actualDistance!.Value) < GameConstants.Epsilon,
-                    "Expected Distance: {0}\nActual Distance: {1}", expectedDistance, actualDistance!.Value);
-                Assert.AreEqual(expectedBlockFace, actualBlockFace);
-            }
-            else
-            {
-                Assert.False(actualDistance.HasValue);
-            }
-        }
-
-        [TestCaseSource(nameof(IntersectsTestData))]
         public void IntersectsNew(bool expectedToIntersect, double expectedDistance, BlockFace expectedBlockFace,
             Ray ray, BoundingBox box)
         {
