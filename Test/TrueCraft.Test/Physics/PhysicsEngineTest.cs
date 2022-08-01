@@ -227,6 +227,41 @@ namespace TrueCraft.Core.Test.Physics
             Assert.True(Math.Abs(entity.Velocity.Z) < Epsilon);
         }
 
+        // If the player's feet are somehow inside a block, the player
+        // is still supported.
+        [Test]
+        public void TestInTerrainSupport()
+        {
+            IDimension dimension = BuildDimension();
+            IPhysicsEngine physics = new PhysicsEngine(dimension);
+            double feetHeight = 11.9;
+            for (int x = 0; x < WorldConstants.ChunkWidth; x ++)
+                for (int z = 0; z < WorldConstants.ChunkDepth; z ++)
+                {
+                    GlobalVoxelCoordinates coords = new(x, (int)Math.Floor(feetHeight), z);
+                    dimension.SetBlockID(coords, StoneBlockID);
+                }
+
+            TestEntity entity = new TestEntity();
+            entity.Size = new Size(0.6, 1.8, 0.6);
+            double xPos = 10.9, zPos = 10.9;
+            double yPos = feetHeight + entity.Size.Height / 2;
+            entity.Position = new Vector3(xPos, yPos, zPos);
+            entity.Velocity = Vector3.Zero;
+            entity.AccelerationDueToGravity = 1;
+            physics.AddEntity(entity);
+
+            // Test
+            physics.Update(TimeSpan.FromSeconds(1));
+
+            Assert.AreEqual(xPos, entity.Position.X);
+            Assert.AreEqual(yPos, entity.Position.Y);
+            Assert.AreEqual(zPos, entity.Position.Z);
+            Assert.True(Math.Abs(entity.Velocity.X) < Epsilon);
+            Assert.True(Math.Abs(entity.Velocity.Y) < Epsilon);
+            Assert.True(Math.Abs(entity.Velocity.Z) < Epsilon);
+        }
+
         [Test]
         public void TestExtremeTerrainCollision()
         {
