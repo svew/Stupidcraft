@@ -368,50 +368,6 @@ namespace TrueCraft.Core.Test.Physics
             Assert.AreEqual(0, entity.Velocity.Z);
         }
 
-        // Start an Entity away from a block.
-        // Move it diagonally towards the block such that the corner of the
-        // Entity's AABB contacts the corner of the Block's AABB.
-        [Test]
-        public void TestCornerCollision()
-        {
-            IDimension dimension = BuildDimension();
-            IPhysicsEngine physics = new PhysicsEngine(dimension);
-            TestEntity entity = new TestEntity();
-            double xPos = -1, yPos = 10, zPos = -1;
-            entity.Position = new Vector3(xPos, yPos, zPos);
-            entity.AccelerationDueToGravity = 0;
-            entity.Drag = 0;
-            double xVel = 1.5, yVel = 0, zVel = 1.5;
-            entity.Velocity = new Vector3(xVel, yVel, zVel);
-            physics.AddEntity(entity);
-            int xBlock = 0, yBlock = (int)yPos, zBlock = 0;
-            dimension.SetBlockID(new GlobalVoxelCoordinates(xBlock, yBlock, zBlock), StoneBlock.BlockID);
-
-            // Test
-            physics.Update(TimeSpan.FromSeconds(1));
-
-            //
-            // Asssertions
-            //
-            // In the x-direction, the entity should be stopped half its width
-            // before the block.
-            Assert.AreEqual(xBlock - entity.Size.Width / 2, entity.Position.X);
-            // The y location should be unchanged.
-            Assert.AreEqual(yPos, entity.Position.Y);
-            // In the z-direction, the entity should be stopped half its depth
-            // before the block.
-            Assert.AreEqual(zBlock - entity.Size.Depth / 2, entity.Position.Z);
-
-            // The x-velocity should be that which was required to move from
-            // the initial position to the final position in one unit of time.
-            Assert.AreEqual(xBlock - xPos - entity.Size.Width / 2, entity.Velocity.X);
-            // The y-velocity should remain unchanged.
-            Assert.AreEqual(yVel, entity.Velocity.Y);
-            // The z-velocity should be that which was required to move from
-            // the initial position to the final position in one unit of time.
-            Assert.AreEqual(zBlock - zPos - entity.Size.Depth / 2, entity.Velocity.Z);
-        }
-
         /// <summary>
         /// Tests a very odd condition involving a surprise launch into the air.
         /// </summary>
