@@ -100,14 +100,14 @@ namespace TrueCraft.Core.Physics
                                         continue;
 
                                     target = target.Value.OffsetBy((Vector3)coords);
-                                    target = target.Value.Expand(entity.Size);
+                                    BoundingBox expandedTarget = target.Value.Expand(entity.Size);
 
                                     double collision = double.MaxValue;
-                                    if (move.Intersects(target.Value, ref collision, ref collisionFace) && collision < nearestCollision)
+                                    if (move.Intersects(expandedTarget, ref collision, ref collisionFace) && collision < nearestCollision)
                                     {
                                         nearestCollision = collision;
                                         collisionBlock = coords;
-                                        collisionTarget = GetBoundingBox(_dimension, coords)!;
+                                        collisionTarget = target.Value;
                                     }
                                 }
 
@@ -167,7 +167,7 @@ namespace TrueCraft.Core.Physics
         /// <param name="seconds">The number of seconds of the update.</param>
         /// <param name="collisionBlock">The coordinates of the Block with which the Entity collided.</param>
         /// <param name="collisionFace">The face of the Block into which the Entity collided.</param>
-        /// <param name="collisionTarget"></param>
+        /// <param name="collisionTarget">The Bounding Box of the Block with which the Entity collided.</param>
         /// <returns>An updated Move as modified by the collision.</returns>
         private Ray HandleCollision(Size entitySize, Ray move, double seconds,
             GlobalVoxelCoordinates collisionBlock, BlockFace collisionFace,
@@ -178,27 +178,27 @@ namespace TrueCraft.Core.Physics
             switch(collisionFace)
             {
                 case BlockFace.NegativeX:
-                    velocity.X = (collisionBlock.X + collisionTarget.Min.X) - move.Position.X - entitySize.Width / 2;
+                    velocity.X = collisionTarget.Min.X - move.Position.X - entitySize.Width / 2;
                     break;
 
                 case BlockFace.PositiveX:
-                    velocity.X = (collisionBlock.X + collisionTarget.Max.X) - move.Position.X + entitySize.Width / 2;
+                    velocity.X = collisionTarget.Max.X - move.Position.X + entitySize.Width / 2;
                     break;
 
                 case BlockFace.NegativeY:
-                    velocity.Y = (collisionBlock.Y + collisionTarget.Min.Y) - move.Position.Y - entitySize.Height / 2;
+                    velocity.Y = collisionTarget.Min.Y - move.Position.Y - entitySize.Height / 2;
                     break;
 
                 case BlockFace.PositiveY:
-                    velocity.Y = (collisionBlock.Y + collisionTarget.Max.Y) - move.Position.Y + entitySize.Height / 2;
+                    velocity.Y = collisionTarget.Max.Y - move.Position.Y + entitySize.Height / 2;
                     break;
 
                 case BlockFace.NegativeZ:
-                    velocity.Z = (collisionBlock.Z + collisionTarget.Min.Z) - move.Position.Z - entitySize.Depth / 2;
+                    velocity.Z = collisionTarget.Min.Z - move.Position.Z - entitySize.Depth / 2;
                     break;
 
                 case BlockFace.PositiveZ:
-                    velocity.Z = (collisionBlock.Z + collisionTarget.Max.Z) - move.Position.Z + entitySize.Depth / 2;
+                    velocity.Z = collisionTarget.Max.Z - move.Position.Z + entitySize.Depth / 2;
                     break;
             }
 
