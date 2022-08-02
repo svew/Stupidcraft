@@ -30,7 +30,7 @@ namespace TrueCraft.Core.Entities
         /// </summary>
         /// <remarks>
         /// <para>
-        /// The Position specifies the centre of the Entity's Bounding Box.
+        /// The Position specifies the centre of the Floor of the Entity's Bounding Box.
         /// </para>
         /// </remarks>
         Vector3 Position { get; set; }

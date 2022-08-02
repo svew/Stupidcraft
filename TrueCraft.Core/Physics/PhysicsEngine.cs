@@ -186,11 +186,11 @@ namespace TrueCraft.Core.Physics
                     break;
 
                 case BlockFace.NegativeY:
-                    velocity.Y = collisionTarget.Min.Y - move.Position.Y - entitySize.Height / 2;
+                    velocity.Y = collisionTarget.Min.Y - move.Position.Y - entitySize.Height;
                     break;
 
                 case BlockFace.PositiveY:
-                    velocity.Y = collisionTarget.Max.Y - move.Position.Y + entitySize.Height / 2;
+                    velocity.Y = collisionTarget.Max.Y - move.Position.Y;
                     break;
 
                 case BlockFace.NegativeZ:

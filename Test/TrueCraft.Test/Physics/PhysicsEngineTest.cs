@@ -105,10 +105,9 @@ namespace TrueCraft.Core.Test.Physics
                 get
                 {
                     double hw = Size.Width * 0.5;
-                    double hh = Size.Height * 0.5;
                     double hd = Size.Depth * 0.5;
-                    Vector3 min = new Vector3(Position.X - hw, Position.Y - hh, Position.Z - hd);
-                    Vector3 max = new Vector3(Position.X + hw, Position.Y + hh, Position.Z + hd);
+                    Vector3 min = new Vector3(Position.X - hw, Position.Y, Position.Z - hd);
+                    Vector3 max = new Vector3(Position.X + hw, Position.Y + Size.Height, Position.Z + hd);
                     return new BoundingBox(min, max);
                 }
             }
@@ -201,7 +200,7 @@ namespace TrueCraft.Core.Test.Physics
             TestEntity entity = new TestEntity();
             entity.Size = new Size(0.6, 1.8, 0.6);
             double xPos = 10.9, zPos = 10.9;
-            double yPos = SurfaceHeight + entity.Size.Height / 2;
+            double yPos = SurfaceHeight;
             entity.Position = new Vector3(xPos, yPos, zPos);
             entity.Velocity = Vector3.Zero;
             entity.AccelerationDueToGravity = 1;
@@ -245,7 +244,7 @@ namespace TrueCraft.Core.Test.Physics
             TestEntity entity = new TestEntity();
             entity.Size = new Size(0.6, 1.8, 0.6);
             double xPos = 10.9, zPos = 10.9;
-            double yPos = feetHeight + entity.Size.Height / 2;
+            double yPos = feetHeight;
             entity.Position = new Vector3(xPos, yPos, zPos);
             entity.Velocity = Vector3.Zero;
             entity.AccelerationDueToGravity = 1;
@@ -268,9 +267,8 @@ namespace TrueCraft.Core.Test.Physics
             IDimension dimension = BuildDimension();
             IPhysicsEngine physics = new PhysicsEngine(dimension);
             TestEntity entity = new TestEntity();
-            double halfHeight = entity.Size.Height / 2;
             double origHeightAboveSurface = 5;
-            entity.Position = new Vector3(0, SurfaceHeight + origHeightAboveSurface + halfHeight, 0);
+            entity.Position = new Vector3(0, SurfaceHeight + origHeightAboveSurface, 0);
             entity.Velocity = Vector3.Zero;
             entity.AccelerationDueToGravity = 10;
             physics.AddEntity(entity);
@@ -279,7 +277,7 @@ namespace TrueCraft.Core.Test.Physics
             physics.Update(TimeSpan.FromSeconds(1));
 
             Assert.AreEqual(0, entity.Position.X);
-            Assert.AreEqual(SurfaceHeight + halfHeight, entity.Position.Y);
+            Assert.AreEqual(SurfaceHeight, entity.Position.Y);
             Assert.AreEqual(0, entity.Position.Z);
 
             // The entity's velocity is the velocity required to go from its
@@ -319,7 +317,7 @@ namespace TrueCraft.Core.Test.Physics
             IPhysicsEngine physics = new PhysicsEngine(dimension);
             TestEntity entity = new TestEntity();
             int yBlock = 4;
-            entity.Position = new Vector3(0, yBlock + 1.5 + entity.Size.Height / 2, 0);
+            entity.Position = new Vector3(0, yBlock + 1.5, 0);
             entity.AccelerationDueToGravity = 1;
             entity.Drag = 0;
             physics.AddEntity(entity);
@@ -410,7 +408,7 @@ namespace TrueCraft.Core.Test.Physics
 
             Size entitySize = new Size(0.6, 1.8, 0.6);   // same size as Player Entity
             double xPos = -4.34298322997483;
-            double yPos = 63 + entitySize.Height / 2;
+            double yPos = 63;
             double zPos = 192.92777590726;
             Vector3 entityStartPos = new Vector3(xPos, yPos, zPos);
             double xVel = 0.0502763610985;

@@ -122,7 +122,17 @@ namespace TrueCraft.Core.Entities
         public virtual Size Size { get => _size; }
 
         /// <inheritdoc />
-        public BoundingBox BoundingBox { get => new BoundingBox(Position - (Size / 2), Position + (Size / 2)); }
+        public BoundingBox BoundingBox
+        {
+            get
+            {
+                double hw = _size.Width * 0.5;
+                double hd = _size.Depth * 0.5;
+                Vector3 min = new Vector3(_position.X - hw, _position.Y, _position.Z - hd);
+                Vector3 max = new Vector3(_position.X + hw, _position.Y + _size.Height, _position.Z + hd);
+                return new BoundingBox(min, max);
+            }
+        }
 
         /// <inheritdoc />
         public abstract IPacket SpawnPacket { get; }
