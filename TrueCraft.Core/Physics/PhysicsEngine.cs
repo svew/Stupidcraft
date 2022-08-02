@@ -138,7 +138,7 @@ namespace TrueCraft.Core.Physics
             int zmin = (int)Math.Floor(bb.Min.Z);
             int zmax = (int)Math.Floor(bb.Max.Z);
             double y = bb.Min.Y;
-            int ySupport = (int)Math.Floor(y);
+            int ySupport = (int)(y == (int)Math.Floor(y) ? y - 1: Math.Floor(y));
 
             for (int x = xmin; x <= xmax; x ++)
                 for (int z = zmin; z <= zmax; z ++)

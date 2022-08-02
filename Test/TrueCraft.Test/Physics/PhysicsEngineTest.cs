@@ -439,7 +439,7 @@ namespace TrueCraft.Core.Test.Physics
             //
             // Collision occurred
             Assert.True(entity.CollisionOccured);
-            // Collided with the block at -3, 63, 192
+            // Collided with the block at -4, 63, 192
             Assert.AreEqual(new Vector3(-4, 63, 192), entity.CollisionPoint);
 
             // x Position should put the entity in contact with the block
