@@ -318,17 +318,19 @@ namespace TrueCraft.Core.Test.Physics
             IDimension dimension = BuildDimension();
             IPhysicsEngine physics = new PhysicsEngine(dimension);
             TestEntity entity = new TestEntity();
-            entity.Position = new Vector3(0, 4.5 + entity.Size.Height / 2, 0);
+            int yBlock = 4;
+            entity.Position = new Vector3(0, yBlock + 1.5 + entity.Size.Height / 2, 0);
             entity.AccelerationDueToGravity = 1;
             entity.Drag = 0;
             physics.AddEntity(entity);
 
-            dimension.SetBlockID(new GlobalVoxelCoordinates(0, 4, 0), StoneBlock.BlockID);
+            dimension.SetBlockID(new GlobalVoxelCoordinates(0, yBlock, 0), StoneBlock.BlockID);
 
             // Test
             physics.Update(TimeSpan.FromSeconds(1));
 
-            Assert.AreEqual(new Vector3(0, 4, 0), entity.CollisionPoint);
+            Assert.True(entity.CollisionOccured);
+            Assert.AreEqual(new Vector3(0, yBlock, 0), entity.CollisionPoint);
         }
 
         [Test]
