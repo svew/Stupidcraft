@@ -202,7 +202,6 @@ namespace TrueCraft.Core.Physics
                     break;
             }
 
-            velocity /= seconds;
             return new Ray(move.Position, velocity);
         }
 
