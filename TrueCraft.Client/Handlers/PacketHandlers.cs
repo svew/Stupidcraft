@@ -58,8 +58,11 @@ namespace TrueCraft.Client.Handlers
         public static void HandlePositionAndLook(IPacket _packet, MultiplayerClient client)
         {
             var packet = (SetPlayerPositionPacket)_packet;
-            client._Position = new Vector3(packet.X, packet.Y, packet.Z);
-            client.QueuePacket(packet);
+            // Note: This packet is received once from the server on initial login.
+            //     It seems to serve as an acknowledgement of that login.
+            //     Setting the client Position will send a PositionAndLook packet
+            //     back to the Server, which is required.
+            client.Position = new Vector3(packet.X, packet.Y, packet.Z);
             client.LoggedIn = true;
             // TODO: Pitch and yaw
         }

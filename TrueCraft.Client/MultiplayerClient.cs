@@ -301,23 +301,23 @@ namespace TrueCraft.Client
         public float Yaw { get; set; }
         public float Pitch { get; set; }
 
-        internal Vector3 _Position;
+        private Vector3 _position;
         public Vector3 Position
         {
             get
             {
-                return _Position;
+                return _position;
             }
             set
             {
-                if (_Position != value)
+                if (_position != value)
                 {
                     QueuePacket(new PlayerPositionAndLookPacket(value.X, value.Y, value.Y + Height,
                         value.Z, Yaw, Pitch, false));
                     if (PropertyChanged != null)
                         PropertyChanged(this, new PropertyChangedEventArgs("Position"));
                 }
-                _Position = value;
+                _position = value;
             }
         }
 
