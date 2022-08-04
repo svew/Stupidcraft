@@ -376,16 +376,17 @@ namespace TrueCraft.Client.Modules
 
             if (delta != XVector3.Zero)
             {
-                var lookAt = XVector3.Transform(-delta,
+                XVector3 newVelocity = XVector3.Transform(-delta,
                                  Matrix.CreateRotationY(XMathHelper.ToRadians(-(_game.Client.Yaw - 180) + 180)));
 
-                lookAt.X *= (float)(gameTime.ElapsedGameTime.TotalSeconds * 4.3717);
-                lookAt.Z *= (float)(gameTime.ElapsedGameTime.TotalSeconds * 4.3717);
+                newVelocity.X *= 4.3717f;
+                newVelocity.Z *= 4.3717f;
 
-                var bobbing = _game.Bobbing;
-                _game.Bobbing += Math.Max(Math.Abs(lookAt.X), Math.Abs(lookAt.Z));
+                double seconds = gameTime.ElapsedGameTime.TotalSeconds;
+                double bobbing = _game.Bobbing;
+                _game.Bobbing += seconds * Math.Max(Math.Abs(newVelocity.X), Math.Abs(newVelocity.Z));
 
-                _game.Client.Velocity = new TVector3(lookAt.X, _game.Client.Velocity.Y, lookAt.Z);
+                _game.Client.Velocity = new TVector3(newVelocity.X, _game.Client.Velocity.Y, newVelocity.Z);
 
                 if ((int)bobbing % 2 == 0 && (int)_game.Bobbing % 2 != 0)
                     PlayFootstep();

@@ -178,27 +178,27 @@ namespace TrueCraft.Core.Physics
             switch(collisionFace)
             {
                 case BlockFace.NegativeX:
-                    velocity.X = collisionTarget.Min.X - move.Position.X - entitySize.Width / 2;
+                    velocity.X = (collisionTarget.Min.X - move.Position.X - entitySize.Width * 0.5) / seconds;
                     break;
 
                 case BlockFace.PositiveX:
-                    velocity.X = collisionTarget.Max.X - move.Position.X + entitySize.Width / 2;
+                    velocity.X = (collisionTarget.Max.X - move.Position.X + entitySize.Width * 0.5) / seconds;
                     break;
 
                 case BlockFace.NegativeY:
-                    velocity.Y = collisionTarget.Min.Y - move.Position.Y - entitySize.Height;
+                    velocity.Y = (collisionTarget.Min.Y - move.Position.Y - entitySize.Height) / seconds;
                     break;
 
                 case BlockFace.PositiveY:
-                    velocity.Y = collisionTarget.Max.Y - move.Position.Y;
+                    velocity.Y = (collisionTarget.Max.Y - move.Position.Y) / seconds;
                     break;
 
                 case BlockFace.NegativeZ:
-                    velocity.Z = collisionTarget.Min.Z - move.Position.Z - entitySize.Depth / 2;
+                    velocity.Z = (collisionTarget.Min.Z - move.Position.Z - entitySize.Depth * 0.5) / seconds;
                     break;
 
                 case BlockFace.PositiveZ:
-                    velocity.Z = collisionTarget.Max.Z - move.Position.Z + entitySize.Depth / 2;
+                    velocity.Z = (collisionTarget.Max.Z - move.Position.Z + entitySize.Depth * 0.5) / seconds;
                     break;
             }
 
