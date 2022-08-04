@@ -379,8 +379,8 @@ namespace TrueCraft.Client.Modules
                 XVector3 newVelocity = XVector3.Transform(-delta,
                                  Matrix.CreateRotationY(XMathHelper.ToRadians(-(_game.Client.Yaw - 180) + 180)));
 
-                newVelocity.X *= 4.3717f;
-                newVelocity.Z *= 4.3717f;
+                newVelocity.X *= (float)GameConstants.WalkingSpeed;
+                newVelocity.Z *= (float)GameConstants.WalkingSpeed;
 
                 double seconds = gameTime.ElapsedGameTime.TotalSeconds;
                 double bobbing = _game.Bobbing;
