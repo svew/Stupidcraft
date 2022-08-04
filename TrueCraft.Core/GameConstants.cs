@@ -14,6 +14,22 @@ namespace TrueCraft.Core
         public static readonly double WalkingSpeed = 4.3717;
 
         /// <summary>
+        /// Acceleration Due To Gravity in metres per second squared (m/s^2)
+        /// </summary>
+        /// <remarks>
+        /// Per: https://www.youtube.com/watch?v=RCeMKNeosJs
+        /// </remarks>
+        public static readonly double AccelerationDueToGravity = 32.656;
+
+        /// <summary>
+        /// Terminal Velocity in metres per second (m/s).
+        /// </summary>
+        /// <remarks>
+        /// Per: https://www.youtube.com/watch?v=RCeMKNeosJs
+        /// </remarks>
+        public static readonly double TerminalVelocity = 10_000 / 319;
+
+        /// <summary>
         /// A threshold difference - doubles with differences less than this
         /// may be treated as equal.
         /// </summary>

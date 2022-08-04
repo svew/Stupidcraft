@@ -326,7 +326,7 @@ namespace TrueCraft.Client
         {
             get
             {
-                return 1.6f;
+                return (float)GameConstants.AccelerationDueToGravity;
             }
         }
 
@@ -342,7 +342,7 @@ namespace TrueCraft.Client
         {
             get
             {
-                return 78.4f;
+                return (float)GameConstants.TerminalVelocity;
             }
         }
 
