@@ -77,13 +77,16 @@ namespace TrueCraft.Core.Physics
                             velocity -= new Vector3(0, entity.AccelerationDueToGravity * seconds, 0);
                         velocity *= 1 - entity.Drag * seconds;
                         velocity = TruncateVelocity(entity.TerminalVelocity, velocity);
-                        Ray move = new Ray(entity.Position, velocity);
+
+                        // This Ray specifies the Entity's move during this update.
+                        Ray move = new Ray(entity.Position, velocity * seconds);
+
                         double nearestCollision = double.MaxValue;
                         GlobalVoxelCoordinates? collisionBlock = null;
                         BlockFace collisionFace = BlockFace.NegativeX;
                         BoundingBox? collisionTarget = null;
 
-                        BoundingBox testBox = GetAABBVelocityBox(entity.BoundingBox, velocity);
+                        BoundingBox testBox = GetAABMoveBox(entity.BoundingBox, move.Direction);
                         int xmin = (int)(Math.Floor(testBox.Min.X));
                         int xmax = (int)(Math.Ceiling(testBox.Max.X));
                         int ymin = (int)(Math.Floor(testBox.Min.Y));
@@ -114,12 +117,12 @@ namespace TrueCraft.Core.Physics
                         if (collisionBlock is not null)
                         {
                             entity.TerrainCollision((Vector3)collisionBlock, move.Direction.Unit());
-                            move = HandleCollision(entity.Size, move, seconds,
-                                collisionBlock, collisionFace, collisionTarget!.Value);
+                            move = HandleCollision(entity.Size, move,
+                                collisionFace, collisionTarget!.Value);
                         }
 
-                        entity.Velocity = move.Direction;
-                        entity.EndUpdate(entity.Position + move.Direction * seconds);
+                        entity.Velocity = move.Direction / seconds;
+                        entity.EndUpdate(entity.Position + move.Direction);
                     }
                 }
             }
@@ -164,61 +167,67 @@ namespace TrueCraft.Core.Physics
         /// </summary>
         /// <param name="entitySize">The size of the Entity colliding with something</param>
         /// <param name="move">The original (unimpeded) version of the Entity's move.</param>
-        /// <param name="seconds">The number of seconds of the update.</param>
-        /// <param name="collisionBlock">The coordinates of the Block with which the Entity collided.</param>
         /// <param name="collisionFace">The face of the Block into which the Entity collided.</param>
         /// <param name="collisionTarget">The Bounding Box of the Block with which the Entity collided.</param>
         /// <returns>An updated Move as modified by the collision.</returns>
-        private Ray HandleCollision(Size entitySize, Ray move, double seconds,
-            GlobalVoxelCoordinates collisionBlock, BlockFace collisionFace,
+        private Ray HandleCollision(Size entitySize, Ray move, BlockFace collisionFace,
             BoundingBox collisionTarget)
         {
-            Vector3 velocity = move.Direction;
+            Vector3 distance = move.Direction;
 
             switch(collisionFace)
             {
                 case BlockFace.NegativeX:
-                    velocity.X = (collisionTarget.Min.X - move.Position.X - entitySize.Width * 0.5) / seconds;
+                    distance.X = collisionTarget.Min.X - move.Position.X - entitySize.Width * 0.5;
                     break;
 
                 case BlockFace.PositiveX:
-                    velocity.X = (collisionTarget.Max.X - move.Position.X + entitySize.Width * 0.5) / seconds;
+                    distance.X = collisionTarget.Max.X - move.Position.X + entitySize.Width * 0.5;
                     break;
 
                 case BlockFace.NegativeY:
-                    velocity.Y = (collisionTarget.Min.Y - move.Position.Y - entitySize.Height) / seconds;
+                    distance.Y = collisionTarget.Min.Y - move.Position.Y - entitySize.Height;
                     break;
 
                 case BlockFace.PositiveY:
-                    velocity.Y = (collisionTarget.Max.Y - move.Position.Y) / seconds;
+                    distance.Y = collisionTarget.Max.Y - move.Position.Y;
                     break;
 
                 case BlockFace.NegativeZ:
-                    velocity.Z = (collisionTarget.Min.Z - move.Position.Z - entitySize.Depth * 0.5) / seconds;
+                    distance.Z = collisionTarget.Min.Z - move.Position.Z - entitySize.Depth * 0.5;
                     break;
 
                 case BlockFace.PositiveZ:
-                    velocity.Z = (collisionTarget.Max.Z - move.Position.Z + entitySize.Depth * 0.5) / seconds;
+                    distance.Z = collisionTarget.Max.Z - move.Position.Z + entitySize.Depth * 0.5;
                     break;
             }
 
-            return new Ray(move.Position, velocity);
+            return new Ray(move.Position, distance);
         }
 
-        private BoundingBox GetAABBVelocityBox(BoundingBox bb, Vector3 velocity)
+        /// <summary>
+        /// Calculates a Bounding Box encompassing the original Bounding Box and the
+        /// Bounding Box at the end of the given move.
+        /// </summary>
+        /// <param name="bb">The Bounding Box at the start of the Move.</param>
+        /// <param name="move">A Vector3 specifying the direction and the
+        /// distance (in metres) of the Move.</param>
+        /// <returns>A Bounding Box encompassing the original Bounding Box and the
+        /// Bounding Box at the end of the given move.</returns>
+        private BoundingBox GetAABMoveBox(BoundingBox bb, Vector3 move)
         {
             Vector3 curMin = bb.Min;
             Vector3 curMax = bb.Max;
 
             Vector3 min = new Vector3(
-                Math.Min(curMin.X, curMin.X + velocity.X),
-                Math.Min(curMin.Y, curMin.Y + velocity.Y),
-                Math.Min(curMin.Z, curMin.Z + velocity.Z)
+                Math.Min(curMin.X, curMin.X + move.X),
+                Math.Min(curMin.Y, curMin.Y + move.Y),
+                Math.Min(curMin.Z, curMin.Z + move.Z)
             );
             Vector3 max = new Vector3(
-                Math.Max(curMax.X, curMax.X + velocity.X),
-                Math.Max(curMax.Y, curMax.Y + velocity.Y),
-                Math.Max(curMax.Z, curMax.Z + velocity.Z)
+                Math.Max(curMax.X, curMax.X + move.X),
+                Math.Max(curMax.Y, curMax.Y + move.Y),
+                Math.Max(curMax.Z, curMax.Z + move.Z)
             );
             return new BoundingBox(min, max);
         }
