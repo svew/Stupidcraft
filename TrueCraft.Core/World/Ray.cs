@@ -79,7 +79,8 @@ namespace TrueCraft.Core.World
         /// </summary>
         /// <param name="box">The Bounding Box to check for intersection.</param>
         /// <param name="distance">Returns the fraction of the Ray's length at which the
-        /// intersection occurs.  If this method returns false, this is undefined.</param>
+        /// intersection occurs.  If the Ray starts inside the box, this value will
+        /// be clamped to zero.  If this method returns false, this is undefined.</param>
         /// <param name="face">Returns the BlockFace on which the Ray intersects the
         /// Bounding Box.  If this method returns false, this is undefined.</param>
         /// <returns>True if this Ray intersects the given Bounding Box; false otherwise.</returns>
@@ -92,15 +93,15 @@ namespace TrueCraft.Core.World
         /// </remarks>
         public bool Intersects(BoundingBox box, ref double distance, ref BlockFace face)
         {
-            double tmin, tmax, txmin, txmax, tymin, tymax, tzmin, tzmax;
+            double txmin, txmax, tymin, tymax, tzmin, tzmax;
 
+            double tmin = double.MaxValue;
+            double tmax = double.MinValue;
+
+            // t0 represents the start position of the Ray.
             double t0 = 0.0;
+            // t1 represents the tip of the Ray.
             double t1 = Math.Sqrt(Direction.X * Direction.X + Direction.Y * Direction.Y + Direction.Z * Direction.Z);
-
-            // if tmin were less than zero, it would be before the start of the Ray
-            tmin = t0;
-            // If tmax were greater than t1, it would be beyond the end of the Ray.
-            tmax = t1;
 
             Vector3 normalizedDirection = Direction / t1;
             double invdx = 1.0 / normalizedDirection.X;
@@ -109,15 +110,15 @@ namespace TrueCraft.Core.World
 
             if (invdx >= 0)
             {
-                txmin = (box.Min.X - Position.X) * invdx;
-                txmax = (box.Max.X - Position.X) * invdx;
+                tmin = txmin = (box.Min.X - Position.X) * invdx;
+                tmax = txmax = (box.Max.X - Position.X) * invdx;
             }
             else
             {
-                txmin = (box.Max.X - Position.X) * invdx;
-                txmax = (box.Min.X - Position.X) * invdx;
+                tmin = txmin = (box.Max.X - Position.X) * invdx;
+                tmax = txmax = (box.Min.X - Position.X) * invdx;
             }
-            if (txmin > tmax || txmax < tmin)
+            if (txmin > t1 || txmax < t0)
                 return false;
             if (txmin > tmin) tmin = txmin;
             if (txmax < tmax) tmax = txmax;
@@ -132,7 +133,7 @@ namespace TrueCraft.Core.World
                 tymin = (box.Max.Y - Position.Y) * invdy;
                 tymax = (box.Min.Y - Position.Y) * invdy;
             }
-            if (txmin > tmax || tymin > tmax)
+            if (tymin > tmax || tymax < tmin)
                 return false;
             if (tymin > tmin) tmin = tymin;
             if (tymax < tmax) tmax = tymax;
@@ -157,40 +158,24 @@ namespace TrueCraft.Core.World
             if (tmin > t1 || tmax < t0)
                 return false;
 
-            // Determine the BlockFace of the first intersection.
-            if (Math.Abs(tmin) < GameConstants.Epsilon)
-            {   // tmin is effectively zero.  Therefore, the Ray starts at the
-                // surface of the Box.  It may be directed inwards or outwards.
-                if (tmin == tmax)
-                {   // The Ray is directed outwards from the surface of the Box.
-                    if (tmin == txmax)
-                        face = invdx >= 0 ? BlockFace.PositiveX : BlockFace.NegativeX;
-                    else if (tmin == tymax)
-                        face = invdy >= 0 ? BlockFace.PositiveY : BlockFace.NegativeY;
-                    else
-                        face = invdz >= 0 ? BlockFace.PositiveZ : BlockFace.NegativeZ;
-                }
-                else
-                {   // The Ray is directed inwards from the surface of the Box.
-                    if (tmin == txmin)
-                        face = invdx >= 0 ? BlockFace.NegativeX : BlockFace.PositiveX;
-                    else if (tmin == tymin)
-                        face = invdy >= 0 ? BlockFace.NegativeY : BlockFace.PositiveY;
-                    else
-                        face = invdz >= 0 ? BlockFace.NegativeZ : BlockFace.PositiveZ;
-                }
-            }
-            else if (tmin < 0)
-            {   // The Ray starts within the Box.
-                if (tmin == txmin)
+            // If tmax == t0, either the Ray starts on the surface of the Box,
+            // the Ray is very short, or the Box is very small.  (The case of
+            // the Box being very small can be ignored.)
+            // If tmax < t1, the Ray started on the Surface of the Box and terminated
+            // outside the box.
+            if (Math.Abs(tmax - t0) < GameConstants.Epsilon && tmax < t1)
+            {   // T
+                if (tmax == txmax)
                     face = invdx >= 0 ? BlockFace.PositiveX : BlockFace.NegativeX;
-                else if (tmin == tymin)
+                else if (tmax == tymax)
                     face = invdy >= 0 ? BlockFace.PositiveY : BlockFace.NegativeY;
                 else
                     face = invdz >= 0 ? BlockFace.PositiveZ : BlockFace.NegativeZ;
             }
-            else  // tmin > 0
-            {   // The ray starts prior to entering the Box.
+            else
+            {
+                // As tmin was assigned from one of txmin, tymin or tzmin,
+                // we can safely use exact equality checks.
                 if (tmin == txmin)
                     face = invdx >= 0 ? BlockFace.NegativeX : BlockFace.PositiveX;
                 else if (tmin == tymin)
@@ -200,7 +185,7 @@ namespace TrueCraft.Core.World
             }
 
             // Determine distance as fraction of the Ray's Length:
-            distance = tmin / t1;
+            distance = Math.Max(0, tmin / t1);
 
             return true;
         }
