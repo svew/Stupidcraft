@@ -253,10 +253,19 @@ namespace TrueCraft.Core.Test.World
                 new Ray(new Vector3(217.4, 63.75, -354), new Vector3(0.02, -.3, 3)),
                 new BoundingBox(new Vector3(217, 63, -354), new Vector3(281, 64, -354))
             };
+
+            // The Ray is entirely inside the Box.  Therefore, it intersects the box.
+            // However, strictly speaking, it does not intersect the surface of the box.
+            yield return new object[]
+            {
+                true, 0.0, BlockFace.PositiveY,
+                new Ray(new Vector3(-6, 63.782, 194), new Vector3(0, -0.787, 0)),
+                new BoundingBox(new Vector3(-7.3, 61.19, 192.7), new Vector3(-5.7, 63.81, 194.3))
+            };
         }
 
         [TestCaseSource(nameof(IntersectsTestData))]
-        public void IntersectsNew(bool expectedToIntersect, double expectedDistance, BlockFace expectedBlockFace,
+        public void Intersects(bool expectedToIntersect, double expectedDistance, BlockFace expectedBlockFace,
             Ray ray, BoundingBox box)
         {
             BlockFace actualBlockFace = BlockFace.PositiveY;
