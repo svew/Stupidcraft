@@ -75,6 +75,8 @@ namespace TrueCraft.Core.Physics
                         Vector3 velocity = entity.Velocity;
                         if (!IsGrounded(entity))
                             velocity -= new Vector3(0, entity.AccelerationDueToGravity * seconds, 0);
+                        else
+                            velocity.Y = Math.Max(0, velocity.Y);
                         velocity *= 1 - entity.Drag * seconds;
                         velocity = TruncateVelocity(entity.TerminalVelocity, velocity);
 
