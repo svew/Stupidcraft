@@ -310,14 +310,13 @@ namespace TrueCraft.Client
             }
             set
             {
-                if (_position != value)
-                {
-                    QueuePacket(new PlayerPositionAndLookPacket(value.X, value.Y, value.Y + Height,
-                        value.Z, Yaw, Pitch, false));
-                    if (PropertyChanged != null)
-                        PropertyChanged(this, new PropertyChangedEventArgs("Position"));
-                }
+                if (_position == value)
+                    return;
+
                 _position = value;
+                QueuePacket(new PlayerPositionAndLookPacket(value.X, value.Y, value.Y + Height,
+                    value.Z, Yaw, Pitch, false));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Position)));
             }
         }
 
