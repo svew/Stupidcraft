@@ -83,10 +83,13 @@ namespace TrueCraft.Core.Physics
                         // This Ray specifies the Entity's move during this update.
                         Ray move = new Ray(entity.Position, velocity * seconds);
 
-                        double nearestCollision = double.MaxValue;
-                        GlobalVoxelCoordinates? collisionBlock = null;
+                        double nearestCollision;
+                        GlobalVoxelCoordinates? collisionBlock;
                         BlockFace collisionFace = BlockFace.NegativeX;
+                        BlockFace nearestCollisionFace = collisionFace;
                         BoundingBox? collisionTarget = null;
+                        int collisionCount = 0;
+                        bool hadCollision = true;
 
                         BoundingBox testBox = GetAABMoveBox(entity.BoundingBox, move.Direction);
                         int xmin = (int)(Math.Floor(testBox.Min.X));
@@ -95,32 +98,82 @@ namespace TrueCraft.Core.Physics
                         int ymax = (int)(Math.Ceiling(testBox.Max.Y));
                         int zmin = (int)(Math.Floor(testBox.Min.Z));
                         int zmax = (int)(Math.Ceiling(testBox.Max.Z));
-                        for (int x = xmin; x <= xmax; x ++)
-                            for (int z = zmin; z <= zmax; z ++)
-                                for (int y = ymin; y <= ymax; y ++)
-                                {
-                                    GlobalVoxelCoordinates coords = new(x, y, z);
-                                    BoundingBox? target = GetBoundingBox(_dimension, coords);
-                                    if (!target.HasValue)
-                                        continue;
 
-                                    target = target.Value.OffsetBy((Vector3)coords);
-                                    BoundingBox expandedTarget = target.Value.Expand(entity.Size);
-
-                                    double collision = double.MaxValue;
-                                    if (move.Intersects(expandedTarget, ref collision, ref collisionFace) && collision < nearestCollision)
-                                    {
-                                        nearestCollision = collision;
-                                        collisionBlock = coords;
-                                        collisionTarget = target.Value;
-                                    }
-                                }
-
-                        if (collisionBlock is not null)
+                        // An entity moving diagonally could conceivably collide
+                        // with an x-, y-, and z-face all within a single tick.
+                        // Thus, we must check for up to three collisions.
+                        while (collisionCount < 3 && hadCollision)
                         {
-                            entity.TerrainCollision((Vector3)collisionBlock, move.Direction.Unit());
-                            move = HandleCollision(entity.Size, move,
-                                collisionFace, collisionTarget!.Value);
+                            nearestCollision = double.MaxValue;
+                            collisionBlock = null;
+                            hadCollision = false;
+
+                            for (int x = xmin; x <= xmax; x++)
+                                for (int z = zmin; z <= zmax; z++)
+                                    for (int y = ymin; y <= ymax; y++)
+                                    {
+                                        GlobalVoxelCoordinates coords = new(x, y, z);
+                                        BoundingBox? target = GetBoundingBox(_dimension, coords);
+                                        if (!target.HasValue)
+                                            continue;
+
+                                        target = target.Value.OffsetBy((Vector3)coords);
+                                        BoundingBox expandedTarget = target.Value.Expand(entity.Size);
+
+                                        double collisionDistance = double.MaxValue;
+                                        if (move.Intersects(expandedTarget, ref collisionDistance, ref collisionFace) && collisionDistance < nearestCollision)
+                                        {
+                                            hadCollision = true;
+                                            nearestCollision = collisionDistance;
+                                            nearestCollisionFace = collisionFace;
+                                            collisionBlock = coords;
+                                            collisionTarget = target.Value;
+                                        }
+                                    }
+
+                            if (collisionBlock is not null)
+                            {
+                                collisionCount++;
+
+                                entity.TerrainCollision((Vector3)collisionBlock, move.Direction.Unit());
+
+                                // Adjust the move direction per the collision.
+                                // Tighten up the box in which we need to search for additional collissions.
+                                Vector3 distance = move.Direction;
+                                switch (nearestCollisionFace)
+                                {
+                                    case BlockFace.NegativeX:
+                                        distance.X = collisionTarget!.Value.Min.X - move.Position.X - entity.Size.Width * 0.5;
+                                        xmax = collisionBlock.X - 1;
+                                        break;
+
+                                    case BlockFace.PositiveX:
+                                        distance.X = collisionTarget!.Value.Max.X - move.Position.X + entity.Size.Width * 0.5;
+                                        xmin = collisionBlock.X + 2;
+                                        break;
+
+                                    case BlockFace.NegativeY:
+                                        distance.Y = collisionTarget!.Value.Min.Y - move.Position.Y - entity.Size.Height;
+                                        ymax = collisionBlock.Y - 1;
+                                        break;
+
+                                    case BlockFace.PositiveY:
+                                        distance.Y = collisionTarget!.Value.Max.Y - move.Position.Y;
+                                        ymin = collisionBlock.Y + 2;
+                                        break;
+
+                                    case BlockFace.NegativeZ:
+                                        distance.Z = collisionTarget!.Value.Min.Z - move.Position.Z - entity.Size.Depth * 0.5;
+                                        zmax = collisionBlock.Z - 1;
+                                        break;
+
+                                    case BlockFace.PositiveZ:
+                                        distance.Z = collisionTarget!.Value.Max.Z - move.Position.Z + entity.Size.Depth * 0.5;
+                                        zmin = collisionBlock.Z + 2;
+                                        break;
+                                }
+                                move = new Ray(move.Position, distance);
+                            }
                         }
 
                         entity.Velocity = move.Direction / seconds;
@@ -162,49 +215,6 @@ namespace TrueCraft.Core.Physics
                 }
 
             return false;
-        }
-
-        /// <summary>
-        /// Creates a new move Ray based upon the old one and the details of the collision.
-        /// </summary>
-        /// <param name="entitySize">The size of the Entity colliding with something</param>
-        /// <param name="move">The original (unimpeded) version of the Entity's move.</param>
-        /// <param name="collisionFace">The face of the Block into which the Entity collided.</param>
-        /// <param name="collisionTarget">The Bounding Box of the Block with which the Entity collided.</param>
-        /// <returns>An updated Move as modified by the collision.</returns>
-        private Ray HandleCollision(Size entitySize, Ray move, BlockFace collisionFace,
-            BoundingBox collisionTarget)
-        {
-            Vector3 distance = move.Direction;
-
-            switch(collisionFace)
-            {
-                case BlockFace.NegativeX:
-                    distance.X = collisionTarget.Min.X - move.Position.X - entitySize.Width * 0.5;
-                    break;
-
-                case BlockFace.PositiveX:
-                    distance.X = collisionTarget.Max.X - move.Position.X + entitySize.Width * 0.5;
-                    break;
-
-                case BlockFace.NegativeY:
-                    distance.Y = collisionTarget.Min.Y - move.Position.Y - entitySize.Height;
-                    break;
-
-                case BlockFace.PositiveY:
-                    distance.Y = collisionTarget.Max.Y - move.Position.Y;
-                    break;
-
-                case BlockFace.NegativeZ:
-                    distance.Z = collisionTarget.Min.Z - move.Position.Z - entitySize.Depth * 0.5;
-                    break;
-
-                case BlockFace.PositiveZ:
-                    distance.Z = collisionTarget.Max.Z - move.Position.Z + entitySize.Depth * 0.5;
-                    break;
-            }
-
-            return new Ray(move.Position, distance);
         }
 
         /// <summary>

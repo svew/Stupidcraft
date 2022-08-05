@@ -513,7 +513,9 @@ namespace TrueCraft.Core.Test.Physics
             // Assertions
             //
             // Velocity should be unchanged.
-            Assert.AreEqual(new Vector3(xVel, yVel, zVel), entity.Velocity);
+            Assert.True(Math.Abs(xVel - entity.Velocity.X) < GameConstants.Epsilon);
+            Assert.True(Math.Abs(yVel - entity.Velocity.Y) < GameConstants.Epsilon);
+            Assert.True(Math.Abs(zVel - entity.Velocity.Z) < GameConstants.Epsilon);
             // Position should be updated per units of time given
             Vector3 expectedPosition = new Vector3(xPos + seconds * xVel,
                 yPos + seconds * yVel, zPos + seconds * zVel);
@@ -533,10 +535,10 @@ namespace TrueCraft.Core.Test.Physics
             // CollisionBlock: < -7,63,200 >; Face: NegativeZ; Position: < -7.3,63,200.67823697928787 >
             // Before: direction: < 0.04405987998940461,0,0.05741969386000391 >
             // After: direction: < 0.04405987998940461,0,-0.978236979287874 >
-            expectedDir = new Vector3(0, 0, 0.05741969386000391);
             startPos = new Vector3(-7.3, 63, 200.67823697928787);
             startDir = new Vector3(0.04405987998940461, 0, 0.05741969386000391);
             expectedPos = new Vector3(startPos.X, startPos.Y, 200.7);
+            expectedDir = new Vector3(0, 0, expectedPos.Z - startPos.Z);
 
             yield return new object[] { expectedPos, expectedDir, startPos, startDir };
         }
