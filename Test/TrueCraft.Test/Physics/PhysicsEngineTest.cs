@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using Moq;
 using NUnit.Framework;
@@ -517,6 +518,97 @@ namespace TrueCraft.Core.Test.Physics
             Vector3 expectedPosition = new Vector3(xPos + seconds * xVel,
                 yPos + seconds * yVel, zPos + seconds * zVel);
             Assert.AreEqual(expectedPosition, entity.Position);
+        }
+
+        public static IEnumerable<object[]> WalkIntoCornerTestData()
+        {
+            Vector3 expectedPos, expectedDir;
+            Vector3 startPos, startDir;
+
+            // In this scenario, the player is trying to move diagonally, is
+            // sliding along the block at (-7,63,200), and is about to contact
+            // the block at (-8,63,201).  The player should be stopped at the
+            // corner.
+            // Recorded values:
+            // CollisionBlock: < -7,63,200 >; Face: NegativeZ; Position: < -7.3,63,200.67823697928787 >
+            // Before: direction: < 0.04405987998940461,0,0.05741969386000391 >
+            // After: direction: < 0.04405987998940461,0,-0.978236979287874 >
+            expectedDir = new Vector3(0, 0, 0.05741969386000391);
+            startPos = new Vector3(-7.3, 63, 200.67823697928787);
+            startDir = new Vector3(0.04405987998940461, 0, 0.05741969386000391);
+            expectedPos = new Vector3(startPos.X, startPos.Y, 200.7);
+
+            yield return new object[] { expectedPos, expectedDir, startPos, startDir };
+        }
+
+        // Testing where the movement vector intersects more than one block in a
+        // single Tick.
+        [TestCaseSource(nameof(WalkIntoCornerTestData))]
+        public void WalkIntoCorner(Vector3 expectedPosition, Vector3 expectedDirection,
+            Vector3 startPosition, Vector3 startDirection)
+        {
+            //
+            // Set up
+            //
+            IDimensionServer dimension = (IDimensionServer)BuildDimension();
+            IPhysicsEngine physics = new PhysicsEngine(dimension);
+
+            // Generate chunks at chunk coordinates (-1, 12) and (-1, 13)
+            IChunk chunk12 = dimension.GetChunk(new GlobalChunkCoordinates(-1, 12), LoadEffort.Generate)!;
+
+            // Create a layer of stone at y == 62.
+            // This will place the entity's feet at y == 63.
+            for (int x = 0; x < 16; x++)
+                for (int z = 0; z < 16; z++)
+                {
+                    LocalVoxelCoordinates localCoords = new(x, 62, z);
+                    chunk12.SetBlockID(localCoords, StoneBlockID);
+                }
+
+            // Create the corner that we will walk into
+            for (int z = 201 % 16; z <= 207 % 16; z ++)
+                for (int x = 0; x < 16; x ++)
+                {
+                    LocalVoxelCoordinates localCoords = new(x, 63, z);
+                    chunk12.SetBlockID(localCoords, StoneBlockID);
+                }
+            for(int x = 16-7; x <= 16-1; x ++)
+            {
+                LocalVoxelCoordinates localCoords = new(x, 63, 200 % 16);
+                chunk12.SetBlockID(localCoords, StoneBlockID);
+            }
+
+            // Create the Player Entity
+            Size entitySize = new Size(0.6, 1.8, 0.6);   // same size as Player Entity
+            TestEntity entity = new TestEntity();
+            entity.Position = startPosition;
+            entity.Velocity = startDirection;
+            entity.Size = entitySize;
+            entity.AccelerationDueToGravity = (float)GameConstants.AccelerationDueToGravity;
+            entity.Drag = 0.0f;  // In the scenario being modelled, the W was held down, so Drag could not slow the Player.
+            entity.TerminalVelocity = (float)GameConstants.TerminalVelocity;
+            physics.AddEntity(entity);
+
+            //
+            // Act
+            //
+            physics.Update(TimeSpan.FromSeconds(1));
+
+            //
+            // Assertions
+            //
+            Assert.True(Math.Abs(expectedPosition.X - entity.Position.X) < GameConstants.Epsilon,
+                $"X Position: Expected: {expectedPosition.X}; Actual: {entity.Position.X}");
+            Assert.True(Math.Abs(expectedPosition.Y - entity.Position.Y) < GameConstants.Epsilon,
+                $"Y Position: Expected: {expectedPosition.Y}; Actual: {entity.Position.Y}");
+            Assert.True(Math.Abs(expectedPosition.Z - entity.Position.Z) < GameConstants.Epsilon,
+                $"Z Position: Expected: {expectedPosition.Z}; Actual: {entity.Position.Z}");
+            Assert.True(Math.Abs(expectedDirection.X - entity.Velocity.X) < GameConstants.Epsilon,
+                $"X Direction: Expected: {expectedDirection.X}; Actual: {entity.Velocity.X}");
+            Assert.True(Math.Abs(expectedDirection.Y - entity.Velocity.Y) < GameConstants.Epsilon,
+                $"Y Direction: Expected: {expectedDirection.Y}; Actual: {entity.Velocity.Y}");
+            Assert.True(Math.Abs(expectedDirection.Z - entity.Velocity.Z) < GameConstants.Epsilon,
+                $"Z Direction: Expected: {expectedDirection.Z}; Actual: {entity.Velocity.Z}");
         }
     }
 }
