@@ -612,5 +612,138 @@ namespace TrueCraft.Core.Test.Physics
             Assert.True(Math.Abs(expectedDirection.Z - entity.Velocity.Z) < GameConstants.Epsilon,
                 $"Z Direction: Expected: {expectedDirection.Z}; Actual: {entity.Velocity.Z}");
         }
+
+        #region Testing IsGrounded
+        public static IEnumerable<object[]> IsGroundedTestData()
+        {
+            // Entity is in contact with the ground
+            yield return new object[]
+            {
+                1, true, 8, 1.0, 9
+            };
+
+            // Entity is above the ground
+            yield return new object[]
+            {
+                2, false, 7, 1.1, 12
+            };
+
+            // Entity is way above the ground
+            yield return new object[]
+            {
+                3, false, 7, 110, 12
+            };
+
+            // The Entity's feet are in the ground.
+            yield return new object[]
+            {
+                4, true, 6, 0.97, 4
+            };
+        }
+
+        [TestCaseSource(nameof(IsGroundedTestData))]
+        public void IsGrounded(int serial, bool expected, double x, double y, double z)
+        {
+            IDimension dimension = BuildDimension();
+            IPhysicsEngine physics = new PhysicsEngine(dimension);
+
+            TestEntity entity = new();
+            entity.Size = new Size(0.6, 1.6, 0.6);
+            entity.Position = new Vector3(x, y, z);
+            physics.AddEntity(entity);
+
+            bool actual = physics.IsGrounded(entity);
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        // A test where the Entity's bounding box just overlaps (or not) the block below.
+        [Test]
+        public void IsGrounded_Edge()
+        {
+            IDimension dimension = BuildDimension();
+            IPhysicsEngine physics = new PhysicsEngine(dimension);
+            GlobalVoxelCoordinates bc = new GlobalVoxelCoordinates(5, 64, 7);
+
+            dimension.SetBlockID(bc, StoneBlockID);
+
+            TestEntity entity = new();
+            entity.Size = new Size(0.6, 1.6, 0.6);
+            physics.AddEntity(entity);
+
+            //
+            // Test negative-X edge of block
+            //
+
+            // The Entity will be standing on the Block, just hanging on in the x-direction,
+            // but centred in the z-direction.
+            entity.Position = new Vector3(bc.X - entity.Size.Width * 0.5 + GameConstants.Epsilon, bc.Y + 1, bc.Z + 0.5);
+            Assert.True(physics.IsGrounded(entity));
+
+            // Move the Entity to just past the edge.
+            entity.Position = new Vector3(bc.X - entity.Size.Width * 0.5 - GameConstants.Epsilon, bc.Y, bc.Z + 0.5);
+            Assert.False(physics.IsGrounded(entity));
+
+            // Put the entity just within the positive-X edge of the block
+            entity.Position = new Vector3(bc.X + 1 + entity.Size.Width * 0.5 - GameConstants.Epsilon, bc.Y, bc.Z + 0.5);
+            Assert.True(physics.IsGrounded(entity));
+
+            // Move the Entity just past the edge
+            entity.Position = new Vector3(bc.X + 1 + entity.Size.Width * 0.5 + GameConstants.Epsilon, bc.Y, bc.Z + 0.5);
+            Assert.False(physics.IsGrounded(entity));
+
+            // Place the Entity just on the negative-Z edge
+            entity.Position = new Vector3(bc.X + 0.5, bc.Y, bc.Z - entity.Size.Depth * 0.5 + GameConstants.Epsilon);
+            Assert.True(physics.IsGrounded(entity));
+
+            // Move the Entity just off the negative-Z edge
+            entity.Position = new Vector3(bc.X + 0.5, bc.Y, bc.Z - entity.Size.Depth * 0.5 - GameConstants.Epsilon);
+            Assert.False(physics.IsGrounded(entity));
+
+            // Place the Entity just on the positive-Z edge
+            entity.Position = new Vector3(bc.X + 0.5, bc.Y, bc.Z + 1 + entity.Size.Depth * 0.5 - GameConstants.Epsilon);
+            Assert.True(physics.IsGrounded(entity));
+
+            // Move the Entity just off the negative-Z edge
+            entity.Position = new Vector3(bc.X + 0.5, bc.Y, bc.Z + 1 + entity.Size.Depth * 0.5 + GameConstants.Epsilon);
+            Assert.False(physics.IsGrounded(entity));
+        }
+
+        /// <summary>
+        /// Testing the boundary condition where the entity bounding box edge is
+        /// equal to the edge of the block.  This should NOT be grounded.
+        /// </summary>
+        [Test]
+        public void IsGrounded_Edge2()
+        {
+            IDimension dimension = BuildDimension();
+            IPhysicsEngine physics = new PhysicsEngine(dimension);
+            GlobalVoxelCoordinates bc = new GlobalVoxelCoordinates(5, 64, 7);
+
+            dimension.SetBlockID(bc, StoneBlockID);
+
+            TestEntity entity = new();
+            entity.Size = new Size(0.6, 1.6, 0.6);
+            physics.AddEntity(entity);
+
+
+            // Test North edge of block
+            entity.Position = new Vector3(bc.X + 0.5, SurfaceHeight + 0.9, bc.Z - entity.Size.Depth * 0.5);
+            Assert.False(physics.IsGrounded(entity));
+
+            // Test East edge of block
+            entity.Position = new Vector3(bc.X + 1 + entity.Size.Width * 0.5, SurfaceHeight + 0.9, bc.Z + 0.5);
+            Assert.False(physics.IsGrounded(entity));
+
+            // Test South edge of block
+            entity.Position = new Vector3(bc.X + 0.5, SurfaceHeight + 0.9, bc.Z + 1 + entity.Size.Depth * 0.5);
+            Assert.False(physics.IsGrounded(entity));
+
+            // Test West edge of block
+            entity.Position = new Vector3(bc.X - entity.Size.Width * 0.5, SurfaceHeight + 0.9, bc.Z + 0.5);
+            Assert.False(physics.IsGrounded(entity));
+        }
+
+        #endregion
     }
 }

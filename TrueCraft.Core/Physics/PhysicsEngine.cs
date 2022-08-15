@@ -188,7 +188,7 @@ namespace TrueCraft.Core.Physics
         /// </summary>
         /// <param name="entity">The entity to check</param>
         /// <returns>True if the Entity is vertically in contact with terrain; false otherwise.</returns>
-        private bool IsGrounded(IEntity entity)
+        public bool IsGrounded(IEntity entity)
         {
             BoundingBox bb = entity.BoundingBox;
             int xmin = (int)Math.Floor(bb.Min.X);
