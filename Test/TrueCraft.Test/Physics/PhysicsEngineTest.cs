@@ -312,6 +312,36 @@ namespace TrueCraft.Core.Test.Physics
         }
 
         [Test]
+        public void TestCornerFall()
+        {
+            // Tests that an entity that falls when in a corder
+            IDimension dimension = BuildDimension();
+            IPhysicsEngine physics = new PhysicsEngine(dimension);
+            TestEntity entity = new TestEntity();
+            entity.AccelerationDueToGravity = 1;
+            physics.AddEntity(entity);
+
+            GlobalVoxelCoordinates bc1 = new GlobalVoxelCoordinates(5, SurfaceHeight, 5);
+            GlobalVoxelCoordinates bc2 = new GlobalVoxelCoordinates(6, SurfaceHeight, 6);
+
+            dimension.SetBlockID(bc1, StoneBlockID);
+            dimension.SetBlockID(bc2, StoneBlockID);
+
+            Vector3 positionBefore = new Vector3(bc1.X + 1 + entity.Size.Width * 0.5, SurfaceHeight + 0.9, bc2.Z - entity.Size.Depth * 0.5);
+            entity.Position = positionBefore;
+
+            // Test
+            physics.Update(TimeSpan.FromSeconds(1));
+
+            //
+            // Assert that the entity has moved vertically.
+            //
+            Assert.AreEqual(positionBefore.X, entity.Position.X);
+            Assert.AreEqual(positionBefore.Z, entity.Position.Z);
+            Assert.True(entity.Position.Y < positionBefore.Y);
+        }
+
+        [Test]
         public void TestCollisionPoint()
         {
             IDimension dimension = BuildDimension();
