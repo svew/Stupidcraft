@@ -192,9 +192,9 @@ namespace TrueCraft.Core.Physics
         {
             BoundingBox bb = entity.BoundingBox;
             int xmin = (int)Math.Floor(bb.Min.X);
-            int xmax = (int)Math.Floor(bb.Max.X);
+            int xmax = (int)Math.Ceiling(bb.Max.X - 1);
             int zmin = (int)Math.Floor(bb.Min.Z);
-            int zmax = (int)Math.Floor(bb.Max.Z);
+            int zmax = (int)Math.Ceiling(bb.Max.Z - 1);
             double y = bb.Min.Y;
             int ySupport = (int)(y == (int)Math.Floor(y) ? y - 1: Math.Floor(y));
 
@@ -206,13 +206,13 @@ namespace TrueCraft.Core.Physics
                     if (!support.HasValue)
                         continue;
 
-                    double supportTop = support.Value.Max.Y + ySupport;
-                    double supportBottom = support.Value.Min.Y + ySupport;
-                    // If the Entity's "feet" are inside the block or close enough
-                    // to top to be considered in contact, then it is grounded.
-                    if ((y <= supportTop && y > supportBottom) || Math.Abs(y - supportTop) < GameConstants.Epsilon)
-                        return true;
-                }
+                        double supportTop = support.Value.Max.Y + ySupport;
+                        double supportBottom = support.Value.Min.Y + ySupport;
+                        // If the Entity's "feet" are inside the block or close enough
+                        // to top to be considered in contact, then it is grounded.
+                        if ((y <= supportTop && y > supportBottom) || Math.Abs(y - supportTop) < GameConstants.Epsilon)
+                            return true;
+                    }
 
             return false;
         }
