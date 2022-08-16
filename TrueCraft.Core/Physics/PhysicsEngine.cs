@@ -93,11 +93,11 @@ namespace TrueCraft.Core.Physics
 
                         BoundingBox testBox = GetAABMoveBox(entity.BoundingBox, move.Direction);
                         int xmin = (int)(Math.Floor(testBox.Min.X));
-                        int xmax = (int)(Math.Ceiling(testBox.Max.X));
+                        int xmax = (int)(Math.Ceiling(testBox.Max.X - 1));
                         int ymin = (int)(Math.Floor(testBox.Min.Y));
-                        int ymax = (int)(Math.Ceiling(testBox.Max.Y));
+                        int ymax = (int)(Math.Ceiling(testBox.Max.Y - 1));
                         int zmin = (int)(Math.Floor(testBox.Min.Z));
-                        int zmax = (int)(Math.Ceiling(testBox.Max.Z));
+                        int zmax = (int)(Math.Ceiling(testBox.Max.Z - 1));
 
                         // An entity moving diagonally could conceivably collide
                         // with an x-, y-, and z-face all within a single tick.
