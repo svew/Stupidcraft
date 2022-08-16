@@ -711,31 +711,31 @@ namespace TrueCraft.Core.Test.Physics
             Assert.True(physics.IsGrounded(entity));
 
             // Move the Entity to just past the edge.
-            entity.Position = new Vector3(bc.X - entity.Size.Width * 0.5 - GameConstants.Epsilon, bc.Y, bc.Z + 0.5);
+            entity.Position = new Vector3(bc.X - entity.Size.Width * 0.5 - GameConstants.Epsilon, bc.Y + 1, bc.Z + 0.5);
             Assert.False(physics.IsGrounded(entity));
 
             // Put the entity just within the positive-X edge of the block
-            entity.Position = new Vector3(bc.X + 1 + entity.Size.Width * 0.5 - GameConstants.Epsilon, bc.Y, bc.Z + 0.5);
+            entity.Position = new Vector3(bc.X + 1 + entity.Size.Width * 0.5 - GameConstants.Epsilon, bc.Y + 1, bc.Z + 0.5);
             Assert.True(physics.IsGrounded(entity));
 
             // Move the Entity just past the edge
-            entity.Position = new Vector3(bc.X + 1 + entity.Size.Width * 0.5 + GameConstants.Epsilon, bc.Y, bc.Z + 0.5);
+            entity.Position = new Vector3(bc.X + 1 + entity.Size.Width * 0.5 + GameConstants.Epsilon, bc.Y + 1, bc.Z + 0.5);
             Assert.False(physics.IsGrounded(entity));
 
             // Place the Entity just on the negative-Z edge
-            entity.Position = new Vector3(bc.X + 0.5, bc.Y, bc.Z - entity.Size.Depth * 0.5 + GameConstants.Epsilon);
+            entity.Position = new Vector3(bc.X + 0.5, bc.Y + 1, bc.Z - entity.Size.Depth * 0.5 + GameConstants.Epsilon);
             Assert.True(physics.IsGrounded(entity));
 
             // Move the Entity just off the negative-Z edge
-            entity.Position = new Vector3(bc.X + 0.5, bc.Y, bc.Z - entity.Size.Depth * 0.5 - GameConstants.Epsilon);
+            entity.Position = new Vector3(bc.X + 0.5, bc.Y + 1, bc.Z - entity.Size.Depth * 0.5 - GameConstants.Epsilon);
             Assert.False(physics.IsGrounded(entity));
 
             // Place the Entity just on the positive-Z edge
-            entity.Position = new Vector3(bc.X + 0.5, bc.Y, bc.Z + 1 + entity.Size.Depth * 0.5 - GameConstants.Epsilon);
+            entity.Position = new Vector3(bc.X + 0.5, bc.Y + 1, bc.Z + 1 + entity.Size.Depth * 0.5 - GameConstants.Epsilon);
             Assert.True(physics.IsGrounded(entity));
 
             // Move the Entity just off the negative-Z edge
-            entity.Position = new Vector3(bc.X + 0.5, bc.Y, bc.Z + 1 + entity.Size.Depth * 0.5 + GameConstants.Epsilon);
+            entity.Position = new Vector3(bc.X + 0.5, bc.Y + 1, bc.Z + 1 + entity.Size.Depth * 0.5 + GameConstants.Epsilon);
             Assert.False(physics.IsGrounded(entity));
         }
 
@@ -758,19 +758,55 @@ namespace TrueCraft.Core.Test.Physics
 
 
             // Test North edge of block
-            entity.Position = new Vector3(bc.X + 0.5, SurfaceHeight + 0.9, bc.Z - entity.Size.Depth * 0.5);
+            entity.Position = new Vector3(bc.X + 0.5, bc.Y + 0.9, bc.Z - entity.Size.Depth * 0.5);
             Assert.False(physics.IsGrounded(entity));
 
             // Test East edge of block
-            entity.Position = new Vector3(bc.X + 1 + entity.Size.Width * 0.5, SurfaceHeight + 0.9, bc.Z + 0.5);
+            entity.Position = new Vector3(bc.X + 1 + entity.Size.Width * 0.5, bc.Y + 0.9, bc.Z + 0.5);
             Assert.False(physics.IsGrounded(entity));
 
             // Test South edge of block
-            entity.Position = new Vector3(bc.X + 0.5, SurfaceHeight + 0.9, bc.Z + 1 + entity.Size.Depth * 0.5);
+            entity.Position = new Vector3(bc.X + 0.5, bc.Y + 0.9, bc.Z + 1 + entity.Size.Depth * 0.5);
             Assert.False(physics.IsGrounded(entity));
 
             // Test West edge of block
-            entity.Position = new Vector3(bc.X - entity.Size.Width * 0.5, SurfaceHeight + 0.9, bc.Z + 0.5);
+            entity.Position = new Vector3(bc.X - entity.Size.Width * 0.5, bc.Y + 0.9, bc.Z + 0.5);
+            Assert.False(physics.IsGrounded(entity));
+        }
+
+        [Test]
+        public void IsGrounded_Corner()
+        {
+            IDimension dimension = BuildDimension();
+            IPhysicsEngine physics = new PhysicsEngine(dimension);
+            GlobalVoxelCoordinates bc = new(5, SurfaceHeight + 1, 5);
+
+            for (int x = bc.X - 1; x <= bc.X + 1; x++)
+                dimension.SetBlockID(new GlobalVoxelCoordinates(x, bc.Y, bc.Z), StoneBlockID);
+
+            for (int z = bc.Z - 1; z <= bc.Z + 1; z ++)
+                dimension.SetBlockID(new GlobalVoxelCoordinates(bc.X, bc.Y, z), StoneBlockID);
+
+            TestEntity entity = new();
+            entity.Size = new Size(0.6, 1.6, 0.6);
+            double hw = entity.Size.Width * 0.5;
+            double hd = entity.Size.Depth * 0.5;
+            physics.AddEntity(entity);
+
+            // Test corner is to the south-west of the entity
+            entity.Position = new Vector3(bc.X + 1 + hw, bc.Y + 1, bc.Z - hd);
+            Assert.False(physics.IsGrounded(entity));
+
+            // Test corner is to the north-west of the entity
+            entity.Position = new Vector3(bc.X + 1 + hw, bc.Y + 1, bc.Z + 1 + hd);
+            Assert.False(physics.IsGrounded(entity));
+
+            // Test corner is to the north-east of the entity
+            entity.Position = new Vector3(bc.X - hw, bc.Y + 1, bc.Z + 1 + hd);
+            Assert.False(physics.IsGrounded(entity));
+
+            // Test corner is to the south-east of the entity
+            entity.Position = new Vector3(bc.X - hw, bc.Y + 1, bc.Z - hd);
             Assert.False(physics.IsGrounded(entity));
         }
 
