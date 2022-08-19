@@ -87,18 +87,19 @@ namespace TrueCraft.Core
         /// <returns></returns>
         /// <remarks>
         /// <para>
-        /// Half of the Size in each direction is added to each side of the
-        /// Bounding Box.
+        /// Half of the Size in each horizontal direction is added to each side of the
+        /// Bounding Box.  The full height is added to the bottom of the Bounding Box.
+        /// This is because the Position of an Entity specifies the center of the bottom
+        /// of the Entity's Bounding Box, not the centre of its Bounding Box.
         /// </para>
         /// </remarks>
         public BoundingBox Expand(Size size)
         {
             double w2 = size.Width * 0.5;
             double d2 = size.Depth * 0.5;
-            double h2 = size.Height * 0.5;
 
-            Vector3 newMin = new Vector3(this.Min.X - w2, this.Min.Y - h2, this.Min.Z - d2);
-            Vector3 newMax = new Vector3(this.Max.X + w2, this.Max.Y + h2, this.Max.Z + d2);
+            Vector3 newMin = new Vector3(this.Min.X - w2, this.Min.Y - size.Height, this.Min.Z - d2);
+            Vector3 newMax = new Vector3(this.Max.X + w2, this.Max.Y, this.Max.Z + d2);
 
             return new BoundingBox(newMin, newMax);
         }
