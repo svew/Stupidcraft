@@ -176,8 +176,7 @@ namespace TrueCraft.Core.Physics
                             }
                         }
 
-                        entity.Velocity = move.Direction / seconds;
-                        entity.EndUpdate(entity.Position + move.Direction);
+                        entity.EndUpdate(entity.Position + move.Direction, move.Direction / seconds);
                     }
                 }
             }

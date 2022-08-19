@@ -82,9 +82,11 @@ namespace TrueCraft.Core.Test.Physics
                 return true;
             }
 
-            public void EndUpdate(Vector3 newPosition)
+            /// <inheritdoc />
+            public void EndUpdate(Vector3 newPosition, Vector3 newVelocity)
             {
                 Position = newPosition;
+                Velocity = newVelocity;
             }
 
             public Vector3 Position { get; set; }

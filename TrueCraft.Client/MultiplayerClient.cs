@@ -288,14 +288,27 @@ namespace TrueCraft.Client
             get { return new Size(Width, Height, Depth); }
         }
 
+        /// <inheritdoc />
         public bool BeginUpdate()
         {
             return true;
         }
 
-        public void EndUpdate(Vector3 newPosition)
+        /// <inheritdoc />
+        public void EndUpdate(Vector3 newPosition, Vector3 newVelocity)
         {
-            Position = newPosition;
+            bool positionChanged = (newPosition != _position);
+            bool velocityChanged = (newVelocity != _velocity);
+
+            if (positionChanged)
+                _position = newPosition;
+            if (velocityChanged)
+                _velocity = newVelocity;
+
+            if (positionChanged)
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Position)));
+            if (velocityChanged)
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Velocity)));
         }
 
         public float Yaw { get; set; }

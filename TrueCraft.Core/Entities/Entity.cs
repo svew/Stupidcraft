@@ -211,10 +211,22 @@ namespace TrueCraft.Core.Entities
         }
 
         /// <inheritdoc />
-        public virtual void EndUpdate(Vector3 newPosition)
+        public virtual void EndUpdate(Vector3 newPosition, Vector3 newVelocity)
         {
+            bool positionChanged = (newPosition != _position);
+            bool velocityChanged = (newVelocity != _velocity);
+
+            if (positionChanged)
+                _position = newPosition;
+            if (velocityChanged)
+                _velocity = newVelocity;
+
             EnablePropertyChange = true;
-            Position = newPosition;
+
+            if (positionChanged)
+               OnPropertyChanged(nameof(Position));
+            if (velocityChanged)
+                OnPropertyChanged(nameof(Velocity));
         }
 
 

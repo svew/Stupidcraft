@@ -129,14 +129,18 @@ namespace TrueCraft.Core.Entities
         /// </summary>
         float TerminalVelocity { get; }
 
+        /// <summary>
+        /// Called to begin a Physics Update of the Entity.
+        /// </summary>
+        /// <returns></returns>
         bool BeginUpdate();
 
-        // TODO: Add Velocity parameter.
         /// <summary>
-        /// 
+        /// Called to end the Physics Update of the Entity.
         /// </summary>
-        /// <param name="newPosition"></param>
-        void EndUpdate(Vector3 newPosition);
+        /// <param name="newPosition">The Entity's updated Position.</param>
+        /// <param name="newVelocity">The Entity's updated Velocity.</param>
+        void EndUpdate(Vector3 newPosition, Vector3 newVelocity);
 
         // TODO: collision point needs definition - colliding two AABBs results in a SURFACE of contact NOT a Point.
         /// <summary>
