@@ -811,5 +811,54 @@ namespace TrueCraft.Core.Test.Physics
         }
 
         #endregion
+
+        [Test]
+        public void JumpUpOneBlock()
+        {
+            IDimensionServer dimension = (IDimensionServer)BuildDimension();
+            IPhysicsEngine physics = new PhysicsEngine(dimension);
+
+            GlobalChunkCoordinates chunkCoordinates = new(-1, 12);
+            IChunk chunk = dimension.GetChunk(chunkCoordinates, LoadEffort.Generate)!;
+
+            int yLower = 62;
+            int yUpper = yLower + 1;
+            for (int x = 0; x < WorldConstants.ChunkWidth; x++)
+                for (int z = 0; z < WorldConstants.ChunkDepth; z++)
+                    chunk.SetBlockID(new LocalVoxelCoordinates(x, yLower, z), StoneBlockID);
+
+            for (int x = 0; x < WorldConstants.ChunkWidth; x ++)
+                for (int z = 9; z < WorldConstants.ChunkDepth; z ++)  // 9 == 201 mod 16
+                    chunk.SetBlockID(new LocalVoxelCoordinates(x, yUpper, z), StoneBlockID);
+
+            // Note that the y-component indicates the Entity's feet are above the upper level of
+            //   blocks and the Z-component indicates the feet are past the edge of the upper level
+            //   of blocks.  Thus, the jump up should ALEADY be successful.  However, we're observing
+            //   that the Player is knocked back to being in contact with z == 201, and y == 64 (the top
+            //   of the lower level of blocks).
+            Vector3 initialPosition = new Vector3(-8.401511844263727, 64.05635210306419, 201.06527613705063);
+
+            TestEntity entity = new();
+            entity.Size = new Size(0.6, 1.6, 0.6);
+            entity.Position = initialPosition;
+            entity.Velocity = new Vector3(0.15257002413272858, -2.1800181849375067, 4.369036674499512);
+            entity.AccelerationDueToGravity = (float)GameConstants.AccelerationDueToGravity;
+            entity.Drag = 0.4f;
+            entity.TerminalVelocity = (float)GameConstants.TerminalVelocity;
+
+            double hw = entity.Size.Width * 0.5;
+            double hd = entity.Size.Depth * 0.5;
+            physics.AddEntity(entity);
+
+            //
+            // Act
+            //
+            physics.Update(TimeSpan.FromMilliseconds(50));
+
+            //
+            // Asssert
+            //
+            Assert.True(entity.Position.Z > initialPosition.Z);
+        }
     }
 }
