@@ -118,6 +118,9 @@ namespace TrueCraft.Core.Physics
                                             continue;
 
                                         target = target.Value.OffsetBy((Vector3)coords);
+                                        if (target.Value.Contains(entity.Position))
+                                            continue;
+
                                         BoundingBox expandedTarget = target.Value.Expand(entity.Size);
 
                                         double collisionDistance = double.MaxValue;

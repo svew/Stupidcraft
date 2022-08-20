@@ -98,8 +98,7 @@ namespace TrueCraft.Client.Modules
                     return true;
 
                 case Keys.Space:
-                    // TODO: So you can't jump on a bottom half slab???
-                    if (Math.Floor(_game.Client.Position.Y) == _game.Client.Position.Y)
+                    if (_game.Client.Physics.IsGrounded(_game.Client))
                         _game.Client.Velocity += TrueCraft.Core.Vector3.Up * GameConstants.JumpVelocity;
                     return true;
 
