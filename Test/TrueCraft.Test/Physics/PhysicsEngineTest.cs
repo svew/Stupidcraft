@@ -862,5 +862,44 @@ namespace TrueCraft.Core.Test.Physics
             //
             Assert.True(entity.Position.Z > initialPosition.Z);
         }
+
+        [Test]
+        public void EmbeddedJump()
+        {
+            IDimensionServer dimension = (IDimensionServer)BuildDimension();
+            IPhysicsEngine physics = new PhysicsEngine(dimension);
+            IChunk chunk = dimension.GetChunk(new GlobalChunkCoordinates(0, 0), LoadEffort.Generate)!;
+
+            // Create a one-block hole into which we can place an entity
+            for (int x = 0; x < WorldConstants.ChunkWidth; x ++)
+                for (int z = 0; z < WorldConstants.ChunkDepth; z ++)
+                    chunk.SetBlockID(new LocalVoxelCoordinates(x, 1, z), StoneBlockID);
+            LocalVoxelCoordinates bc = new LocalVoxelCoordinates(5, 1, 5);
+            chunk.SetBlockID(bc, AirBlock.BlockID);
+
+            TestEntity entity = new();
+            entity.Size = new Size(0.6, 1.6, 0.6);
+            double hw = entity.Size.Width * 0.5;
+            double hd = entity.Size.Depth * 0.5;
+            // The initial position is slightly embedded in one side of the hole, and
+            // partway up the side.
+            Vector3 initialPosition = new(bc.X + hw, bc.Y + 0.9, bc.Z - hd + 0.001);
+            entity.Position = initialPosition;
+            entity.Velocity = new Vector3(0, GameConstants.JumpVelocity, 0);
+            entity.AccelerationDueToGravity = (float)GameConstants.AccelerationDueToGravity;
+            entity.Drag = 0.4f;
+            entity.TerminalVelocity = (float)GameConstants.TerminalVelocity;
+            physics.AddEntity(entity);
+
+            //
+            // Act
+            //
+            physics.Update(TimeSpan.FromMilliseconds(50));
+
+            //
+            // Assert
+            //
+            Assert.True(entity.Position.Y > initialPosition.Y);
+        }
     }
 }
