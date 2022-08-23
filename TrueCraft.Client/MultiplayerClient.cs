@@ -15,6 +15,7 @@ using TrueCraft.Core.Inventory;
 using TrueCraft.Client.Inventory;
 using TrueCraft.Client.World;
 using TrueCraft.Core.Entities;
+using System.Collections.Generic;
 
 namespace TrueCraft.Client
 {
@@ -35,11 +36,13 @@ namespace TrueCraft.Client
         private int hotbarSelection;
         private int _entityID = -1;
 
-        public TrueCraftUser User { get; set; }
+        public TrueCraftUser User { get; }
 
         public IDimension Dimension { get; set; }
 
-        public PhysicsEngine Physics { get; set; }
+        private IPhysicsEngine _physics;
+        public IPhysicsEngine Physics { get => _physics; }
+
         public bool LoggedIn { get; internal set; }
         public int EntityID { get => _entityID; internal set => _entityID = value; }
 
@@ -71,9 +74,9 @@ namespace TrueCraft.Client
             }
         }
 
-        private TcpClient Client { get; set; }
+        private TcpClient _client;
 
-        private PacketReader PacketReader { get; set; }
+        private PacketReader _packetReader;
 
         private readonly PacketHandler[] PacketHandlers;
 
@@ -82,15 +85,15 @@ namespace TrueCraft.Client
         public MultiplayerClient(IServiceLocator serviceLocator, TrueCraftUser user)
         {
             User = user;
-            Client = new TcpClient();
-            PacketReader = new PacketReader();
-            PacketReader.RegisterCorePackets();
+            _client = new TcpClient();
+            _packetReader = new PacketReader();
+            _packetReader.RegisterCorePackets();
             PacketHandlers = new PacketHandler[0x100];
             Handlers.PacketHandlers.RegisterHandlers(this);
 
             Dimension = new Dimension(serviceLocator.BlockRepository, serviceLocator.ItemRepository);
+            _physics = new PhysicsEngine(Dimension);
 
-            Physics = new PhysicsEngine(Dimension);
             _socketPool = new SocketAsyncEventArgsPool(100, 200, 65536);
             connected = 0;
             Health = 20;
@@ -116,7 +119,7 @@ namespace TrueCraft.Client
             args.Completed += Connection_Completed;
             args.RemoteEndPoint = endPoint;
 
-            if (!Client.Client.ConnectAsync(args))
+            if (!_client.Client.ConnectAsync(args))
                 Connection_Completed(this, args);
         }
 
@@ -163,7 +166,7 @@ namespace TrueCraft.Client
 
         public void QueuePacket(IPacket packet)
         {
-            if (!Connected || (Client != null && !Client.Connected))
+            if (!Connected || (_client != null && !_client.Connected))
                 return;
 
             using (MemoryStream writeStream = new MemoryStream())
@@ -181,7 +184,7 @@ namespace TrueCraft.Client
                 args.Completed += OperationCompleted;
                 args.SetBuffer(buffer, 0, buffer.Length);
 
-                if (Client != null && !Client.Client.SendAsync(args))
+                if (_client != null && !_client.Client.SendAsync(args))
                     OperationCompleted(this, args);
             }
         }
@@ -191,7 +194,7 @@ namespace TrueCraft.Client
             SocketAsyncEventArgs args = _socketPool.Get();
             args.Completed += OperationCompleted;
 
-            if (!Client.Client.ReceiveAsync(args))
+            if (!_client.Client.ReceiveAsync(args))
                 OperationCompleted(this, args);
         }
 
@@ -209,8 +212,8 @@ namespace TrueCraft.Client
                 case SocketAsyncOperation.Send:
                     if (e.UserToken is DisconnectPacket)
                     {
-                        Client.Client.Shutdown(SocketShutdown.Send);
-                        Client.Close();
+                        _client.Client.Shutdown(SocketShutdown.Send);
+                        _client.Close();
                     }
 
                     e.SetBuffer(null, 0, 0);
@@ -228,7 +231,7 @@ namespace TrueCraft.Client
 
             if (e.Buffer is not null)
             {
-                var packets = PacketReader.ReadPackets(this, e.Buffer, e.Offset, e.BytesTransferred, false);
+                IEnumerable<IPacket> packets = _packetReader.ReadPackets(this, e.Buffer, e.Offset, e.BytesTransferred, false);
 
                 foreach (IPacket packet in packets)
                     if (PacketHandlers[packet.ID] != null)
