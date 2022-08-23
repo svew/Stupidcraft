@@ -14,6 +14,7 @@ using TrueCraft.Core.World;
 using TrueCraft.TerrainGen;
 using TrueCraft.Test.World;
 using TrueCraft.World;
+using static TrueCraft.Core.Logic.Blocks.StairsBlock;
 
 namespace TrueCraft.Core.Test.Physics
 {
@@ -643,6 +644,54 @@ namespace TrueCraft.Core.Test.Physics
                 $"Y Direction: Expected: {expectedDirection.Y}; Actual: {entity.Velocity.Y}");
             Assert.True(Math.Abs(expectedDirection.Z - entity.Velocity.Z) < GameConstants.Epsilon,
                 $"Z Direction: Expected: {expectedDirection.Z}; Actual: {entity.Velocity.Z}");
+        }
+
+        [Test]
+        public void WalkIntoCorner2()
+        {
+            //
+            // Set up
+            //
+            IDimensionServer dimension = (IDimensionServer)BuildDimension();
+            IPhysicsEngine physics = new PhysicsEngine(dimension);
+
+            // Build cliff
+            IChunk chunk = dimension.GetChunk(new GlobalChunkCoordinates(0, 0), LoadEffort.Generate)!;
+            for (int x = 7; x < WorldConstants.ChunkWidth; x++)
+                for (int z = 0; z < WorldConstants.ChunkDepth; z++)
+                    for (int y = 1; y < 7; y++)
+                        chunk.SetBlockID(new LocalVoxelCoordinates(x, y, z), StoneBlockID);
+
+            // Dig stairway into cliff
+            int zs = 7;
+            for (int x = 7; x < 10; x++)
+                for (int y = 1; y < 4; y++)
+                    chunk.SetBlockID(new LocalVoxelCoordinates(x, y + x - 7, zs), AirBlock.BlockID);
+
+            // Create the Player Entity
+            Size entitySize = new Size(0.6, 1.8, 0.6);   // same size as Player Entity
+            TestEntity entity = new TestEntity();
+            Vector3 startPosition = new Vector3(9.658, 3, 7.3);
+            Vector3 startDirection = new Vector3(3.064, 0, -3.118);
+            entity.Position = startPosition;
+            entity.Velocity = startDirection;
+            entity.Size = entitySize;
+            entity.AccelerationDueToGravity = (float)GameConstants.AccelerationDueToGravity;
+            entity.Drag = 0.0f;  // In the scenario being modelled, the W was held down, so Drag could not slow the Player.
+            entity.TerminalVelocity = (float)GameConstants.TerminalVelocity;
+            physics.AddEntity(entity);
+
+            //
+            // Act
+            //
+            physics.Update(TimeSpan.FromMilliseconds(50));
+
+            //
+            // Assert
+            //
+            Assert.AreEqual(9.7, entity.Position.X);
+            Assert.AreEqual(startPosition.Y, entity.Position.Y);
+            Assert.AreEqual(startPosition.Z, entity.Position.Z);
         }
 
         #region Testing IsGrounded
