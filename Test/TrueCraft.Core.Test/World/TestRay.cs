@@ -90,6 +90,7 @@ namespace TrueCraft.Core.Test.World
             // cannot intersect it.
             yield return new object[]
             {
+                0,
                 false, 0, BlockFace.PositiveY,
                 new Ray(new Vector3(-5, -5, -5), new Vector3(10, 10, 10)),
                 new BoundingBox(new Vector3(300, 30, 250), new Vector3(304, 34, 254))
@@ -104,6 +105,7 @@ namespace TrueCraft.Core.Test.World
             // It would intersects the box at t = 2; (x,y,z) = (0.3, 0.05, 1)
             yield return new object[]
             {
+                1,
                 false, double.MinValue, BlockFace.NegativeX,
                 new Ray(new Vector3(-3, 13.2, -0.8), new Vector3(4, -1, 2)),
                 new BoundingBox(new Vector3(5, 11, 3), new Vector3(6, 12, 4))
@@ -118,6 +120,7 @@ namespace TrueCraft.Core.Test.World
             // It would intersects the box at t = -0.7; (x,y,z) = (1, 0.3, 0.05)
             yield return new object[]
             {
+                2,
                 false, double.MinValue, BlockFace.PositiveX,
                 new Ray(new Vector3(4.5, -2.5, -2.05), new Vector3(5, -4, -3)),
                 new BoundingBox(new Vector3(0, 0, 0), new Vector3(1, 1, 1))
@@ -132,6 +135,7 @@ namespace TrueCraft.Core.Test.World
             // It intersects the box at t = 0.5, (x,y,z) = (0, 1, 1)
             yield return new object[]
             {
+                3,
                 true, 0.5, BlockFace.NegativeX,
                 new Ray(new Vector3(-5, 6, -4), new Vector3(10, -9, 11)),
                 new BoundingBox(new Vector3(0, 0, 0), new Vector3(3, 3, 3))
@@ -146,6 +150,7 @@ namespace TrueCraft.Core.Test.World
             // It intersects the box at t = 0.7; (x,y,z) = (1, 0.3, 0.05)
             yield return new object[]
             {
+                4,
                 true, 0.7, BlockFace.PositiveX,
                 new Ray(new Vector3(4.5, -2.5, -2.05), new Vector3(-5, 4, 3)),
                 new BoundingBox(new Vector3(0, 0, 0), new Vector3(1, 1, 1))
@@ -159,6 +164,7 @@ namespace TrueCraft.Core.Test.World
             // It intersects the box at t = 0.5, (x,y,z) = (6.5, 0, 1.5)
             yield return new object[]
             {
+                5,
                 true, 0.5, BlockFace.NegativeY,
                 new Ray(new Vector3(11, -5, -4), new Vector3(-9, 10, 11)),
                 new BoundingBox(new Vector3(5, 0, 0), new Vector3(8, 3, 3))
@@ -173,6 +179,7 @@ namespace TrueCraft.Core.Test.World
             // It intersects the box at t = 0.7; (x,y,z) = (0.3, 1, 0.05)
             yield return new object[]
             {
+                6,
                 true, 0.7, BlockFace.PositiveY,
                 new Ray(new Vector3(-2.5, 4.5, -2.05), new Vector3(4, -5, 3)),
                 new BoundingBox(new Vector3(0, 0, 0), new Vector3(1, 1, 1))
@@ -186,6 +193,7 @@ namespace TrueCraft.Core.Test.World
             // It intersects the box at t = 0.5, (x,y,z) = (6.5, 1.5, 0)
             yield return new object[]
             {
+                7,
                 true, 0.5, BlockFace.NegativeZ,
                 new Ray(new Vector3(11, -4, -5), new Vector3(-9, 11, 10)),
                 new BoundingBox(new Vector3(5, 0, 0), new Vector3(8, 3, 3))
@@ -200,6 +208,7 @@ namespace TrueCraft.Core.Test.World
             // It intersects the box at t = 0.7; (x,y,z) = (0.3, 0.05, 1)
             yield return new object[]
             {
+                8,
                 true, 0.7, BlockFace.PositiveZ,
                 new Ray(new Vector3(-2.5, -2.05, 4.5), new Vector3(4, 3, -5)),
                 new BoundingBox(new Vector3(0, 0, 0), new Vector3(1, 1, 1))
@@ -209,6 +218,7 @@ namespace TrueCraft.Core.Test.World
             //
             yield return new object[]
             {
+                9,
                 true, 0.0, BlockFace.PositiveX,
                 new Ray(new Vector3(5, 7.5, 11.5), new Vector3(7, 6, 7)),
                 new BoundingBox(new Vector3(4, 7, 11), new Vector3(5, 8, 12))
@@ -217,6 +227,7 @@ namespace TrueCraft.Core.Test.World
             // This Ray starts on the Negative-X surface and points away.
             yield return new object[]
             {
+                10,
                 true, 0.0, BlockFace.NegativeX,
                 new Ray(new Vector3(5, 11.2, 3.2), new Vector3(-4, 1, -2)),
                 new BoundingBox(new Vector3(5, 11, 3), new Vector3(6, 12, 4))
@@ -225,6 +236,7 @@ namespace TrueCraft.Core.Test.World
             // This Ray starts on the Positive-Y surface and points away.
             yield return new object[]
             {
+                11,
                 true, 0.0, BlockFace.PositiveY,
                 new Ray(new Vector3(-42.1, 63, -200.75), new Vector3(3, 4, -7)),
                 new BoundingBox(new Vector3(-43, 62, -201), new Vector3(-42, 63, -200))
@@ -233,6 +245,7 @@ namespace TrueCraft.Core.Test.World
             // This Ray starts on the Negative-Y surface and points away.
             yield return new object[]
             {
+                12,
                 true, 0.0, BlockFace.NegativeY,
                 new Ray(new Vector3(-256.3, 100, 1032.7), new Vector3(5, -3, 0)),
                 new BoundingBox(new Vector3(-257, 100, 1032), new Vector3(-256, 101, 1033))
@@ -241,6 +254,7 @@ namespace TrueCraft.Core.Test.World
             // This Ray starts on the Negative-Z surface and points away.
             yield return new object[]
             {
+                13,
                 true, 0.0, BlockFace.NegativeZ,
                 new Ray(new Vector3(3217.6, 64.5, 497), new Vector3(0, 0, -5)),
                 new BoundingBox(new Vector3(3217, 64, 497), new Vector3(3218, 65, 497))
@@ -249,6 +263,7 @@ namespace TrueCraft.Core.Test.World
             // This Ray starts on the Positive-Z surface and points away.
             yield return new object[]
             {
+                14,
                 true, 0.0, BlockFace.PositiveZ,
                 new Ray(new Vector3(217.4, 63.75, -354), new Vector3(0.02, -.3, 3)),
                 new BoundingBox(new Vector3(217, 63, -354), new Vector3(281, 64, -354))
@@ -258,14 +273,26 @@ namespace TrueCraft.Core.Test.World
             // However, strictly speaking, it does not intersect the surface of the box.
             yield return new object[]
             {
+                15,
                 true, 0.0, BlockFace.PositiveY,
                 new Ray(new Vector3(-6, 63.782, 194), new Vector3(0, -0.787, 0)),
                 new BoundingBox(new Vector3(-7.3, 61.19, 192.7), new Vector3(-5.7, 63.81, 194.3))
             };
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="serial">A unique number used to identify the test by its
+        /// parameters when viewed in the GUI.  This is ignored within the test.</param>
+        /// <param name="expectedToIntersect"></param>
+        /// <param name="expectedDistance"></param>
+        /// <param name="expectedBlockFace"></param>
+        /// <param name="ray"></param>
+        /// <param name="box"></param>
         [TestCaseSource(nameof(IntersectsTestData))]
-        public void Intersects(bool expectedToIntersect, double expectedDistance, BlockFace expectedBlockFace,
+        public void Intersects(int serial,
+            bool expectedToIntersect, double expectedDistance, BlockFace expectedBlockFace,
             Ray ray, BoundingBox box)
         {
             BlockFace actualBlockFace = BlockFace.PositiveY;
