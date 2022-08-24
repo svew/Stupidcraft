@@ -219,7 +219,7 @@ namespace TrueCraft.Core.Test.World
             yield return new object[]
             {
                 9,
-                true, 0.0, BlockFace.PositiveX,
+                false, 0.0, BlockFace.PositiveX,
                 new Ray(new Vector3(5, 7.5, 11.5), new Vector3(7, 6, 7)),
                 new BoundingBox(new Vector3(4, 7, 11), new Vector3(5, 8, 12))
             };
@@ -228,7 +228,7 @@ namespace TrueCraft.Core.Test.World
             yield return new object[]
             {
                 10,
-                true, 0.0, BlockFace.NegativeX,
+                false, 0.0, BlockFace.NegativeX,
                 new Ray(new Vector3(5, 11.2, 3.2), new Vector3(-4, 1, -2)),
                 new BoundingBox(new Vector3(5, 11, 3), new Vector3(6, 12, 4))
             };
@@ -237,7 +237,7 @@ namespace TrueCraft.Core.Test.World
             yield return new object[]
             {
                 11,
-                true, 0.0, BlockFace.PositiveY,
+                false, 0.0, BlockFace.PositiveY,
                 new Ray(new Vector3(-42.1, 63, -200.75), new Vector3(3, 4, -7)),
                 new BoundingBox(new Vector3(-43, 62, -201), new Vector3(-42, 63, -200))
             };
@@ -246,7 +246,7 @@ namespace TrueCraft.Core.Test.World
             yield return new object[]
             {
                 12,
-                true, 0.0, BlockFace.NegativeY,
+                false, 0.0, BlockFace.NegativeY,
                 new Ray(new Vector3(-256.3, 100, 1032.7), new Vector3(5, -3, 0)),
                 new BoundingBox(new Vector3(-257, 100, 1032), new Vector3(-256, 101, 1033))
             };
@@ -255,7 +255,7 @@ namespace TrueCraft.Core.Test.World
             yield return new object[]
             {
                 13,
-                true, 0.0, BlockFace.NegativeZ,
+                false, 0.0, BlockFace.NegativeZ,
                 new Ray(new Vector3(3217.6, 64.5, 497), new Vector3(0, 0, -5)),
                 new BoundingBox(new Vector3(3217, 64, 497), new Vector3(3218, 65, 497))
             };
@@ -264,7 +264,7 @@ namespace TrueCraft.Core.Test.World
             yield return new object[]
             {
                 14,
-                true, 0.0, BlockFace.PositiveZ,
+                false, 0.0, BlockFace.PositiveZ,
                 new Ray(new Vector3(217.4, 63.75, -354), new Vector3(0.02, -.3, 3)),
                 new BoundingBox(new Vector3(217, 63, -354), new Vector3(281, 64, -354))
             };
@@ -277,6 +277,114 @@ namespace TrueCraft.Core.Test.World
                 true, 0.0, BlockFace.PositiveY,
                 new Ray(new Vector3(-6, 63.782, 194), new Vector3(0, -0.787, 0)),
                 new BoundingBox(new Vector3(-7.3, 61.19, 192.7), new Vector3(-5.7, 63.81, 194.3))
+            };
+
+            // The Ray is contained in the plane of the positive-X surface
+            yield return new object[]
+            {
+                16,
+                false, 0.0, BlockFace.PositiveX,
+                new Ray(new Vector3(32, 17.6, 19.4), new Vector3(0, 1, -1)),
+                new BoundingBox(new Vector3(32, 17, 19), new Vector3(33, 18, 20))
+            };
+
+            // The Ray is contained in the plane of the negative-X surface
+            yield return new object[]
+            {
+                17,
+                false, 0.0, BlockFace.NegativeX,
+                new Ray(new Vector3(49, 63.8, 256.8), new Vector3(0, -.1, -.1)),
+                new BoundingBox(new Vector3(49, 63, 256), new Vector3(50, 64, 257))
+            };
+
+            // The Ray is contained in the plane of the positive-Y surface
+            yield return new object[]
+            {
+                18,
+                false, 0.0, BlockFace.PositiveY,
+                new Ray(new Vector3(23.4, 65.5, 49.2), new Vector3(2, 0, -3)),
+                new BoundingBox(new Vector3(23, 64, 49), new Vector3(24, 65.5, 50))
+            };
+
+            // The Ray is contained in the plane of the negative-y surface
+            yield return new object[]
+            {
+                19,
+                false, 0.0, BlockFace.NegativeY,
+                new Ray(new Vector3(257.4, 62, 19.4), new Vector3(3, 0, -3)),
+                new BoundingBox(new Vector3(257, 62, 19), new Vector3(258, 63, 20))
+            };
+
+            // The Ray is contained in the plane of the positive-Z surface
+            yield return new object[]
+            {
+                20,
+                false, 0.0, BlockFace.PositiveZ,
+                new Ray(new Vector3(44.8, 63.2, 33), new Vector3(1, 1, 0)),
+                new BoundingBox(new Vector3(44, 63, 32), new Vector3(45, 64, 33))
+            };
+
+            // The Ray is contained in the plane of the negative-Z surface
+            yield return new object[]
+            {
+                21,
+                false, 0.0, BlockFace.NegativeZ,
+                new Ray(new Vector3(-15.8, 63.6, 17), new Vector3(-1, 2, 0)),
+                new BoundingBox(new Vector3(-16, 63, 17), new Vector3(-15, 64, 18))
+            };
+
+            // The Ray begins on the Positive-X surface and points inward
+            yield return new object[]
+            {
+                22,
+                true, 0.0, BlockFace.PositiveX,
+                new Ray(new Vector3(-11, 127.5, 145.5), new Vector3(-1, 0, 0)),
+                new BoundingBox(new Vector3(-12, 127, 145), new Vector3(-11, 128, 146))
+            };
+
+            // The Ray begins on the Negative-X surface and points inward
+            yield return new object[]
+            {
+                23,
+                true, 0.0, BlockFace.NegativeX,
+                new Ray(new Vector3(79, 90.5, -47.5), new Vector3(1, 0, 0)),
+                new BoundingBox(new Vector3(79, 90, -48), new Vector3(80, 91, -47))
+            };
+
+            // The Ray begins on the Positive-Y surface and points inward
+            yield return new object[]
+            {
+                24,
+                true, 0.0, BlockFace.PositiveY,
+                new Ray(new Vector3(28.5, 112, -75.5), new Vector3(0, -1, 0)),
+                new BoundingBox(new Vector3(28, 111, -76), new Vector3(29, 112, -75))
+            };
+
+            // The Ray begins on the Negative-Y surface and points inward
+            yield return new object[]
+            {
+                25,
+                true, 0.0, BlockFace.NegativeY,
+                new Ray(new Vector3(74.5, 11, -1.5), new Vector3(0, 1, 0)),
+                new BoundingBox(new Vector3(74, 11, -2), new Vector3(75, 12, -1))
+            };
+
+            // The Ray begins on the Positive-Z surface and points inward
+            yield return new object[]
+            {
+                26,
+                true, 0.0, BlockFace.PositiveZ,
+                new Ray(new Vector3(40.5, 19.5, -32), new Vector3(0, 0, -1)),
+                new BoundingBox(new Vector3(40, 19, -33), new Vector3(41, 20, -32))
+            };
+
+            // The Ray begins on the Negative-Z surface and points inward
+            yield return new object[]
+            {
+                27,
+                true, 0.0, BlockFace.NegativeZ,
+                new Ray(new Vector3(-94.5, 122.5, 45), new Vector3(0, 0, 1)),
+                new BoundingBox(new Vector3(-95, 122, 45), new Vector3(-94, 123, 46))
             };
         }
 
