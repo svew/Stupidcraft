@@ -95,6 +95,12 @@ namespace TrueCraft.Core.World
         {
             double txmin, txmax, tymin, tymax, tzmin, tzmax;
 
+            // Check if the Ray is co-planar with any face of the Box.
+            if ((Math.Abs(Position.X - box.Min.X) < GameConstants.Epsilon || Math.Abs(Position.X - box.Max.X) < GameConstants.Epsilon) && Math.Abs(Direction.X) < GameConstants.Epsilon ||
+                (Math.Abs(Position.Z - box.Min.Z) < GameConstants.Epsilon || Math.Abs(Position.Z - box.Max.Z) < GameConstants.Epsilon) && Math.Abs(Direction.Z) < GameConstants.Epsilon ||
+                (Math.Abs(Position.Y - box.Min.Y) < GameConstants.Epsilon || Math.Abs(Position.Y - box.Max.Y) < GameConstants.Epsilon) && Math.Abs(Direction.Y) < GameConstants.Epsilon)
+                return false;
+
             double tmin = double.MaxValue;
             double tmax = double.MinValue;
 
@@ -153,8 +159,8 @@ namespace TrueCraft.Core.World
             if (tzmin > tmin) tmin = tzmin;
             if (tzmax < tmax) tmax = tzmax;
 
-            // If tmin > t1, the Ray starts past the Box.
-            // If tmax < t0, the Ray ends prior to entering the Box.
+            // If tmin > t1, the Ray ends prior to entering the Box.
+            // If tmax < t0, the Ray starts past the Box.
             if (tmin > t1 || tmax < t0)
                 return false;
 
@@ -164,13 +170,8 @@ namespace TrueCraft.Core.World
             // If tmax < t1, the Ray started on the Surface of the Box and terminated
             // outside the box.
             if (Math.Abs(tmax - t0) < GameConstants.Epsilon && tmax < t1)
-            {   // T
-                if (tmax == txmax)
-                    face = invdx >= 0 ? BlockFace.PositiveX : BlockFace.NegativeX;
-                else if (tmax == tymax)
-                    face = invdy >= 0 ? BlockFace.PositiveY : BlockFace.NegativeY;
-                else
-                    face = invdz >= 0 ? BlockFace.PositiveZ : BlockFace.NegativeZ;
+            {
+                return false;
             }
             else
             {
