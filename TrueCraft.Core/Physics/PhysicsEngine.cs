@@ -147,32 +147,32 @@ namespace TrueCraft.Core.Physics
                                 {
                                     case BlockFace.NegativeX:
                                         distance.X = collisionTarget!.Value.Min.X - move.Position.X - entity.Size.Width * 0.5;
-                                        xmax = collisionBlock.X - 1;
+                                        xmax = collisionBlock.X;
                                         break;
 
                                     case BlockFace.PositiveX:
                                         distance.X = collisionTarget!.Value.Max.X - move.Position.X + entity.Size.Width * 0.5;
-                                        xmin = collisionBlock.X + 2;
+                                        xmin = collisionBlock.X;
                                         break;
 
                                     case BlockFace.NegativeY:
                                         distance.Y = collisionTarget!.Value.Min.Y - move.Position.Y - entity.Size.Height;
-                                        ymax = collisionBlock.Y - 1;
+                                        ymax = collisionBlock.Y;
                                         break;
 
                                     case BlockFace.PositiveY:
                                         distance.Y = collisionTarget!.Value.Max.Y - move.Position.Y;
-                                        ymin = collisionBlock.Y + 2;
+                                        ymin = collisionBlock.Y;
                                         break;
 
                                     case BlockFace.NegativeZ:
                                         distance.Z = collisionTarget!.Value.Min.Z - move.Position.Z - entity.Size.Depth * 0.5;
-                                        zmax = collisionBlock.Z - 1;
+                                        zmax = collisionBlock.Z;
                                         break;
 
                                     case BlockFace.PositiveZ:
                                         distance.Z = collisionTarget!.Value.Max.Z - move.Position.Z + entity.Size.Depth * 0.5;
-                                        zmin = collisionBlock.Z + 2;
+                                        zmin = collisionBlock.Z;
                                         break;
                                 }
                                 move = new Ray(move.Position, distance);
