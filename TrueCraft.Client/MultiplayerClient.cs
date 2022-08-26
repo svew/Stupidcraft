@@ -336,7 +336,18 @@ namespace TrueCraft.Client
             }
         }
 
-        public Vector3 Velocity { get; set; }
+        private Vector3 _velocity;
+        public Vector3 Velocity
+        {
+            get => _velocity;
+            set
+            {
+                if (value == _velocity)
+                    return;
+                _velocity = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Velocity)));
+            }
+        }
 
         public float AccelerationDueToGravity
         {
