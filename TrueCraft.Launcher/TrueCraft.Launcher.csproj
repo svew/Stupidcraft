@@ -43,7 +43,6 @@
     <EmbeddedResource Include="Content\default-server-icon.png" />
     <None Include="Content\truecraft_logo.svg" />
     <None Include="truecraft" CopyToOutputDirectory="PreserveNewest" />
-    <None Include="packages.config" />
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -27,7 +27,9 @@ namespace TrueCraft.Launcher.Singleplayer
         public Worlds(string baseDirectory)
         {
             if (!Directory.Exists(baseDirectory))
-                throw new DirectoryNotFoundException(baseDirectory);
+            {
+                Directory.CreateDirectory(baseDirectory);
+            }
 
             _baseDirectory = baseDirectory;
 

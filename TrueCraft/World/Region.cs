@@ -32,10 +32,10 @@ namespace TrueCraft.World
         /// </summary>
         public RegionCoordinates Position { get; }
 
-        private HashSet<LocalChunkCoordinates> DirtyChunks { get; } = new HashSet<LocalChunkCoordinates>(Width * Depth);
+        private HashSet<LocalChunkCoordinates> DirtyChunks { get; } = new(Width * Depth);
 
-        private Stream _regionFile;
-        private object _streamLock = new object();
+        private Stream _regionFileStream;
+        private object _streamLock = new();
 
         public event EventHandler<ChunkLoadedEventArgs>? ChunkLoaded;
 
@@ -51,16 +51,20 @@ namespace TrueCraft.World
         {
             Position = position;
 
-            string filename = Path.Combine(baseDirectory, "region", GetRegionFileName(position));
-
-            if (File.Exists(filename))
+            string regionFolder = Path.Combine(baseDirectory, "region");
+            if (!Directory.Exists(regionFolder))
             {
-                _regionFile = File.Open(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
-                _regionFile.Read(HeaderCache, 0, 8192);
+                Directory.CreateDirectory(regionFolder);
+            }
+            string regionFile = Path.Combine(regionFolder, GetRegionFileName(position));
+            if (File.Exists(regionFile))
+            {
+                _regionFileStream = File.Open(regionFile, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
+                _regionFileStream.Read(HeaderCache, 0, 8192);
             }
             else
             {
-                _regionFile = File.Open(filename, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
+                _regionFileStream = File.Open(regionFile, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
                 CreateRegionHeader();
             }
         }
@@ -113,18 +117,18 @@ namespace TrueCraft.World
                 return null;
 
             int chunkDataOffset = tableEntry.Item1;
-            NbtFile nbt = new NbtFile();
+            var nbt = new NbtFile();
             lock (_streamLock)
             {
                 // Add 4 to the chunkDataOffset to skip reading the length.
-                _regionFile.Seek(chunkDataOffset + 4, SeekOrigin.Begin);
-                int compressionMode = _regionFile.ReadByte();
+                _regionFileStream.Seek(chunkDataOffset + 4, SeekOrigin.Begin);
+                int compressionMode = _regionFileStream.ReadByte();
                 switch (compressionMode)
                 {
                     case 1: // gzip
                         throw new NotImplementedException("gzipped chunks are not implemented");
                     case 2: // zlib
-                        nbt.LoadFromStream(_regionFile, NbtCompression.ZLib, null);
+                        nbt.LoadFromStream(_regionFileStream, NbtCompression.ZLib, null);
                         break;
                     default:
                         throw new InvalidDataException("Invalid compression scheme provided by region file.");
@@ -179,16 +183,16 @@ namespace TrueCraft.World
                                 header = AllocateNewChunks(coords, raw.Length);
 
                             // Write the Chunk
-                            _regionFile.Seek(header.Item1, SeekOrigin.Begin);
+                            _regionFileStream.Seek(header.Item1, SeekOrigin.Begin);
                             byte[] rawLength = BitConverter.GetBytes(raw.Length);
                             if (BitConverter.IsLittleEndian)
                                 rawLength.Reverse();
-                            _regionFile.Write(rawLength, 0, rawLength.Length);
-                            _regionFile.WriteByte(2); // Compressed with zlib
-                            _regionFile.Write(raw, 0, raw.Length);
+                            _regionFileStream.Write(rawLength, 0, rawLength.Length);
+                            _regionFileStream.WriteByte(2); // Compressed with zlib
+                            _regionFileStream.Write(raw, 0, raw.Length);
                         }
                     }
-                _regionFile.Flush();
+                _regionFileStream.Flush();
             }
         }
 
@@ -234,8 +238,8 @@ namespace TrueCraft.World
         private void CreateRegionHeader()
         {
             HeaderCache = new byte[8192];
-            _regionFile.Write(HeaderCache, 0, 8192);
-            _regionFile.Flush();
+            _regionFileStream.Write(HeaderCache, 0, 8192);
+            _regionFileStream.Flush();
         }
 
         private Tuple<int, int> AllocateNewChunks(LocalChunkCoordinates position, int length)
@@ -243,21 +247,21 @@ namespace TrueCraft.World
             lock(_streamLock)
             {
                 // Expand region file
-                _regionFile.Seek(0, SeekOrigin.End);
-                int dataOffset = (int)_regionFile.Position;
+                _regionFileStream.Seek(0, SeekOrigin.End);
+                int dataOffset = (int)_regionFileStream.Position;
 
                 length /= ChunkSizeMultiplier;
                 length++;
-                _regionFile.Write(new byte[length * ChunkSizeMultiplier], 0, length * ChunkSizeMultiplier);
+                _regionFileStream.Write(new byte[length * ChunkSizeMultiplier], 0, length * ChunkSizeMultiplier);
 
                 // Write table entry
                 int tableOffset = GetTableOffset(position);
-                _regionFile.Seek(tableOffset, SeekOrigin.Begin);
+                _regionFileStream.Seek(tableOffset, SeekOrigin.Begin);
 
                 byte[] entry = BitConverter.GetBytes(dataOffset >> 4);
                 entry[0] = (byte)length;
                 Array.Reverse(entry);
-                _regionFile.Write(entry, 0, entry.Length);
+                _regionFileStream.Write(entry, 0, entry.Length);
                 Buffer.BlockCopy(entry, 0, HeaderCache, tableOffset, 4);
 
                 return new Tuple<int, int>(dataOffset, length * ChunkSizeMultiplier);
@@ -298,15 +302,15 @@ namespace TrueCraft.World
 
         public void Dispose()
         {
-            if (_regionFile is null)
+            if (_regionFileStream is null)
                 return;
 
-            _regionFile.Flush();
-            _regionFile.Close();
+            _regionFileStream.Flush();
+            _regionFileStream.Close();
 
             // It's illegal to use a disposed object, so we can set
             // these to null safely.
-            _regionFile = null!;
+            _regionFileStream = null!;
             _streamLock = null!;
         }
     }

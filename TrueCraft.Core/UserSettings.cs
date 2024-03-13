@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Newtonsoft.Json;
 using System.IO;
 
@@ -30,7 +30,7 @@ namespace TrueCraft.Core
             Password = "";
             LastIP = "";
             SelectedTexturePack = TexturePack.Default.Name;
-            FavoriteServers = new FavoriteServer[0];
+            FavoriteServers = Array.Empty<FavoriteServer>();
             IsFullscreen = false;
             InvertedMouse = false;
             // TODO: Why is the default resolution not contained in the static Defaults?
@@ -40,7 +40,9 @@ namespace TrueCraft.Core
         public void Load()
         {
             if (File.Exists(Paths.Settings))
+            {
                 JsonConvert.PopulateObject(File.ReadAllText(Paths.Settings), this);
+            }
         }
 
         public void Save()
@@ -64,20 +66,18 @@ namespace TrueCraft.Core
 
     public class WindowResolution
     {
-        public static readonly WindowResolution[] Defaults =
-            new WindowResolution[]
-            {
-                                                  // (from Wikipedia/other)
-                new WindowResolution(800, 600),   // SVGA
-                new WindowResolution(960, 640),   // DVGA
-                new WindowResolution(1024, 600),  // WSVGA
-                new WindowResolution(1024, 768),  // XGA
-                new WindowResolution(1280, 1024), // SXGA
-                new WindowResolution(1600, 1200), // UXGA
-                new WindowResolution(1920, 1080), // big
-                new WindowResolution(1920, 1200), // really big
-                new WindowResolution(4096, 2160), // huge
-            };
+        public static readonly WindowResolution[] Defaults = new WindowResolution[]
+        {                    // (from Wikipedia/other)
+            new(800, 600),   // SVGA
+            new(960, 640),   // DVGA
+            new(1024, 600),  // WSVGA
+            new(1024, 768),  // XGA
+            new(1280, 1024), // SXGA
+            new(1600, 1200), // UXGA
+            new(1920, 1080), // big
+            new(1920, 1200), // really big
+            new(4096, 2160), // huge
+        };
 
         public static WindowResolution FromString(string str)
         {

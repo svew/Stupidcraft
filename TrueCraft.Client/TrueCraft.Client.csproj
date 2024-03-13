@@ -29,7 +29,9 @@
     <Content Include="Content/**/*.ogg" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="Content/**/*.wav" CopyToOutputDirectory="PreserveNewest" />
     <None Include="Content/Fonts/*.fnt" CopyToOutputDirectory="PreserveNewest" />
-    <None Include="packages.config" />
+    <Compile Remove="Windows\**" />
+    <EmbeddedResource Remove="Windows\**" />
+    <None Remove="Windows\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -45,9 +47,5 @@
 
   <ItemGroup Condition="'$(IsMacOS)' == 'true'">
     <None Include="..\lib\osx-x64\*" CopyToOutputDirectory="PreserveNewest" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Windows\" />
   </ItemGroup>
 </Project>

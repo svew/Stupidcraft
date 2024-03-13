@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -140,9 +140,7 @@ namespace TrueCraft.Launcher.Views
             {
                 _window.Window.Cursor = new Cursor(CursorType.Watch);
 
-                TreeIter iter;
-                ITreeModel model;
-                _worldListView.Selection.GetSelected(out model, out iter);
+                _worldListView.Selection.GetSelected(out ITreeModel model, out TreeIter iter);
 
                 string worldName = (string)model.GetValue(iter, 0);
                 WorldInfo worldInfo = (WorldInfo)model.GetValue(iter, 1);
@@ -166,15 +164,14 @@ namespace TrueCraft.Launcher.Views
         {
             try
             {
-                TreeIter iter;
-                _worldListView.Selection.GetSelected(out iter);
+                _worldListView.Selection.GetSelected(out TreeIter iter);
                 //string worldName = (string)_worldListStore.GetValue(iter, 0);
                 WorldInfo worldInfo = (WorldInfo)_worldListStore.GetValue(iter, 1);
 
                 IServiceLocator coreServiceLocator = Discover.DoDiscovery(new Discover());
-                MultiplayerServer _server = new MultiplayerServer(coreServiceLocator);
+                var _server = new MultiplayerServer(coreServiceLocator);
                 TrueCraft.Program.ServiceLocator = new ServerServiceLocator(_server, coreServiceLocator);
-                TrueCraft.World.IWorld world = TrueCraft.World.World.LoadWorld(TrueCraft.Program.ServiceLocator, worldInfo.Directory);
+                IWorld world = World.World.LoadWorld(TrueCraft.Program.ServiceLocator, worldInfo.Directory);
                 _server.World = world;
                 TrueCraft.Program.ServerConfiguration = new ServerConfiguration()
                 {
@@ -188,8 +185,8 @@ namespace TrueCraft.Launcher.Views
                 Task.Factory.StartNew(() =>
                 {
                     // TODO: What if the player exitted the game from another dimension?
-                    IDimensionServer overWorld = (IDimensionServer)world[Core.World.DimensionID.Overworld];
-                    GlobalChunkCoordinates spawnChunk = new GlobalChunkCoordinates(0, 0);
+                    IDimensionServer overWorld = (IDimensionServer)world[DimensionID.Overworld];
+                    var spawnChunk = new GlobalChunkCoordinates(0, 0);
                     overWorld.Initialize(spawnChunk, _server, (value, stage) =>
                         Application.Invoke((sender, e) =>
                         {
@@ -206,11 +203,12 @@ namespace TrueCraft.Launcher.Views
                         clientLocation = System.IO.Path.GetDirectoryName(clientLocation)!;
                         clientLocation = System.IO.Path.Combine(clientLocation, "TrueCraft.Client.dll");
 
-                        string launchParams = string.Format("{0} {1} {2} {3}", clientLocation, _server.EndPoint, _window.User.Username, _window.User.SessionId);
+                        string launchParams = $"{clientLocation} {_server.EndPoint} {_window.User.Username} {_window.User.SessionId}";
 
-                        process.StartInfo = new ProcessStartInfo($"dotnet",
-                                 launchParams);
-                        process.StartInfo.UseShellExecute = false;
+                        process.StartInfo = new ProcessStartInfo("dotnet", launchParams)
+                        {
+                            UseShellExecute = false
+                        };
                         process.EnableRaisingEvents = true;
                         process.Exited += (s, a) => Application.Invoke((s, a) =>
                         {
@@ -249,10 +247,9 @@ namespace TrueCraft.Launcher.Views
             {
                 Console.Error.WriteLine(ex.Message);
                 Console.Error.WriteLine(ex.StackTrace);
-                using (MessageDialog msg = new MessageDialog(_window, DialogFlags.DestroyWithParent | DialogFlags.DestroyWithParent,
-                        MessageType.Error, ButtonsType.Close,
-                        ex.Message + "\n" + ex.StackTrace, Array.Empty<object>()))
-                    msg.Run();
+                using var msg = new MessageDialog(_window, DialogFlags.DestroyWithParent, MessageType.Error, ButtonsType.Close,
+                        ex.Message + "\n" + ex.StackTrace, Array.Empty<object>());
+                msg.Run();
             }
         }
 

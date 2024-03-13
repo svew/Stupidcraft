@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using TrueCraft.Core.World;
 using TrueCraft.Core.Networking;
@@ -17,12 +17,11 @@ namespace TrueCraft.Core.Logic
     /// </summary>
     public abstract class BlockProvider : IItemProvider, IBlockProvider
     {
-        private static List<short> _metadata;
+        private static readonly List<short> _metadata;
 
         static BlockProvider()
         {
-            _metadata = new List<short>(1);
-            _metadata.Add(0);
+            _metadata = new List<short>(1) { 0 };
         }
 
         public virtual void BlockLeftClicked(IServiceLocator serviceLocator,
@@ -311,21 +310,9 @@ namespace TrueCraft.Core.Logic
             return null;
         }
 
-        public virtual BoundingBox? BoundingBox
-        {
-            get
-            {
-                return new BoundingBox(Vector3.Zero, Vector3.One);
-            }
-        }
+        public virtual BoundingBox? BoundingBox => new BoundingBox(Vector3.Zero, Vector3.One);
 
-        public virtual BoundingBox? InteractiveBoundingBox
-        {
-            get
-            {
-                return BoundingBox;
-            }
-        }
+        public virtual BoundingBox? InteractiveBoundingBox => BoundingBox;
 
         /// <summary>
         /// Gets the time required to mine the given block with the given item.

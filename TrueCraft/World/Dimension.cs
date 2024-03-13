@@ -119,7 +119,9 @@ namespace TrueCraft.World
             for (int x = -chunkRadius; x < chunkRadius; x++)
             {
                 for (int z = -chunkRadius; z < chunkRadius; z++)
+                {
                     GetChunk(new GlobalChunkCoordinates(spawnChunk.X + x, spawnChunk.Z + z), LoadEffort.Generate);
+                }
                 int progress = (int)(((x + chunkRadius) / (2.0 * chunkRadius)) * 100);
                 progressNotification?.Invoke(progress / 100.0, "Generating world...");
                 if (progress / 10 > lastLoggedProgress / 10)

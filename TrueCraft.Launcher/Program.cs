@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Net;
 using Gtk;
@@ -14,26 +14,24 @@ namespace TrueCraft.Launcher
         public static void Main(string[] args)
         {
             UserSettings.Local.Load();
-
             Application.Init();
-            using (Application app = new Application("TrueCraft.Launcher", GLib.ApplicationFlags.None))
-            {
-                app.Register(GLib.Cancellable.Current);
 
-                _window = new LauncherWindow(app);
-                app.AddWindow(_window);
-                _window.DeleteEvent += (sender, e) => Application.Quit();
-                _window.Show();
+            using var app = new Application("TrueCraft.Launcher", GLib.ApplicationFlags.None);
+            app.Register(GLib.Cancellable.Current);
 
-                // TODO: restore Keep Session Alive for multiplayer.
-                //Thread thread = new Thread(KeepSessionAlive);
-                //thread.IsBackground = true;
-                //thread.Priority = ThreadPriority.Lowest;
-                //thread.Start();
+            _window = new LauncherWindow(app);
+            app.AddWindow(_window);
+            _window.DeleteEvent += (sender, e) => Application.Quit();
+            _window.Show();
 
-                Application.Run();
-                _window.Dispose();
-            }
+            // TODO: restore Keep Session Alive for multiplayer.
+            //Thread thread = new Thread(KeepSessionAlive);
+            //thread.IsBackground = true;
+            //thread.Priority = ThreadPriority.Lowest;
+            //thread.Start();
+
+            Application.Run();
+            _window.Dispose();
         }
 
         private static void KeepSessionAlive()
